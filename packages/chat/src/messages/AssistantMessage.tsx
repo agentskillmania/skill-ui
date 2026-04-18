@@ -16,7 +16,7 @@ export function AssistantMessage({ message }: MessageProps) {
         padding: ${theme.spacing[3]} ${theme.spacing[4]};
         background: ${theme.color.bgContainer};
         border: 1px solid ${theme.color.border};
-        border-radius: ${theme.radius.lg} ${theme.radius.lg} ${theme.radius.lg} ${theme.radius.xs};
+        border-radius: ${theme.radius.xs} ${theme.radius.lg} ${theme.radius.lg} ${theme.radius.lg};
       `}
     >
       {message.blocks && message.blocks.length > 0 && (

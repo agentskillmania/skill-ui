@@ -14,7 +14,7 @@ export function UserMessage({ message }: MessageProps) {
         padding: ${theme.spacing[3]} ${theme.spacing[4]};
         background: ${theme.color.primary};
         color: ${theme.color.textInverse};
-        border-radius: ${theme.radius.lg} ${theme.radius.lg} ${theme.radius.xs} ${theme.radius.lg};
+        border-radius: ${theme.radius.lg} ${theme.radius.xs} ${theme.radius.lg} ${theme.radius.lg};
         font-size: ${theme.font.size.base};
         line-height: ${theme.font.lineHeight};
         white-space: pre-wrap;
