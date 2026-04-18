@@ -1,0 +1,99 @@
+/**
+ * 统一执行块卡片壳
+ */
+import { css } from '@emotion/react';
+import type { ReactNode } from 'react';
+import { useChatContext } from '../context.js';
+
+export interface BlockCardProps {
+  /** 左侧图标 */
+  icon?: ReactNode;
+  /** 标题 */
+  title: string;
+  /** 左侧色条颜色 */
+  accentColor?: string;
+  /** 标签文本（标题右侧） */
+  tag?: string;
+  /** 标签背景色 */
+  tagColor?: string;
+  /** 内容 */
+  children?: ReactNode;
+}
+
+export function BlockCard({ icon, title, accentColor, tag, tagColor, children }: BlockCardProps) {
+  const { theme } = useChatContext();
+  const accent = accentColor ?? theme.color.primary;
+
+  return (
+    <div
+      css={css`
+        border-left: 3px solid ${accent};
+        border-top: 1px solid ${theme.color.borderSecondary};
+        border-right: 1px solid ${theme.color.borderSecondary};
+        border-bottom: 1px solid ${theme.color.borderSecondary};
+        border-radius: ${theme.radius.md};
+        background: ${theme.color.bgContainer};
+        overflow: hidden;
+      `}
+    >
+      <div
+        css={css`
+          display: flex;
+          align-items: center;
+          gap: ${theme.spacing[2]};
+          padding: ${theme.spacing[2]} ${theme.spacing[3]};
+          font-size: ${theme.font.size.sm};
+          font-weight: ${theme.font.weight.medium};
+          color: ${theme.color.textSecondary};
+        `}
+      >
+        {icon && (
+          <span
+            css={css`
+              display: flex;
+              align-items: center;
+              color: ${accent};
+              flex-shrink: 0;
+            `}
+          >
+            {icon}
+          </span>
+        )}
+        <span
+          css={css`
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          `}
+        >
+          {title}
+        </span>
+        {tag && (
+          <span
+            css={css`
+              font-size: ${theme.font.size.xs};
+              padding: ${theme.spacing['0.5']} ${theme.spacing[2]};
+              border-radius: ${theme.radius.full};
+              background: ${tagColor ?? accent}20;
+              color: ${accent};
+              flex-shrink: 0;
+            `}
+          >
+            {tag}
+          </span>
+        )}
+      </div>
+      {children && (
+        <div
+          css={css`
+            padding: ${theme.spacing[2]} ${theme.spacing[3]} ${theme.spacing[3]};
+          `}
+        >
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
