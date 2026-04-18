@@ -1,0 +1,72 @@
+{
+  "name": "@agentskillmania/skill-ui-chat",
+  "version": "0.1.0",
+  "description": "Chat UI components for @agentskillmania — message list, input, execution blocks.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:unit": "vitest run test/unit",
+    "test:intg": "vitest run test/integration",
+    "test:coverage": "vitest run test/unit --coverage",
+    "test:watch": "vitest watch test/unit",
+    "prepublishOnly": "pnpm test:unit && pnpm build",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
+  },
+  "author": {
+    "name": "yusangeng",
+    "email": "yusangeng@outlook.com"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agentskillmania/skill-ui.git",
+    "directory": "packages/chat"
+  },
+  "dependencies": {
+    "@agentskillmania/skill-ui-theme": "workspace:*",
+    "@emotion/react": "^11.14.0"
+  },
+  "peerDependencies": {
+    "@ant-design/x": "^2.0.0",
+    "antd": "^6.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@ant-design/x": "^2.4.0",
+    "@chromatic-com/storybook": "^5.0.2",
+    "@storybook/addon-a11y": "^10.3.3",
+    "@storybook/addon-docs": "^10.3.3",
+    "@storybook/react-vite": "^10.3.3",
+    "@testing-library/jest-dom": "^6.6.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.7.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "antd": "^6.3.3",
+    "jsdom": "^29.0.1",
+    "lucide-react": "^0.460.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "storybook": "^10.3.3",
+    "typescript": "^5.0.0",
+    "vite": "^5.4.21",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
