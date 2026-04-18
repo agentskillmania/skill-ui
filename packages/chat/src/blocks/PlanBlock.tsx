@@ -4,7 +4,7 @@
 import { css } from '@emotion/react';
 import { FileText } from 'lucide-react';
 import type { BlockProps, PlanMetadata, PlanStep } from '../types.js';
-import { useChatContext } from '../context.js';
+import { useTheme, type Theme } from '@agentskillmania/skill-ui-theme';
 import { BlockCard } from './BlockCard.js';
 
 function getStepIcon(step: PlanStep, index: number): string {
@@ -22,7 +22,7 @@ function getStepIcon(step: PlanStep, index: number): string {
   }
 }
 
-function getStepColor(step: PlanStep, theme: { color: Record<string, string> }): string {
+function getStepColor(step: PlanStep, theme: Theme): string {
   switch (step.status) {
     case 'completed':
       return theme.color.success;
@@ -38,7 +38,7 @@ function getStepColor(step: PlanStep, theme: { color: Record<string, string> }):
 }
 
 export function PlanBlock({ block }: BlockProps) {
-  const { theme } = useChatContext();
+  const theme = useTheme();
   const meta = block.metadata as PlanMetadata | undefined;
   const steps = meta?.steps ?? [];
 
@@ -48,7 +48,6 @@ export function PlanBlock({ block }: BlockProps) {
       title="执行计划"
       accentColor={theme.blockColor.plan.text}
       tag={`${steps.filter((s) => s.status === 'completed').length}/${steps.length}`}
-      tagColor={theme.blockColor.plan.text}
     >
       <div
         css={css`

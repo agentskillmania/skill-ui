@@ -3,6 +3,8 @@
  */
 import type { Block } from '../types.js';
 import type { BlockProps } from '../types.js';
+import { css } from '@emotion/react';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useChatContext } from '../context.js';
 import { ThinkingBlock } from './ThinkingBlock.js';
 import { ToolCallBlock } from './ToolCallBlock.js';
@@ -24,15 +26,16 @@ const builtinBlockRenderers: Record<string, React.ComponentType<BlockProps>> = {
 };
 
 export function BlocksRenderer({ blocks }: BlocksRendererProps) {
-  const { theme, renderers, onConfirmHumanRequest } = useChatContext();
+  const theme = useTheme();
+  const { renderers, onConfirmHumanRequest } = useChatContext();
 
   return (
     <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: theme.spacing[2],
-      }}
+      css={css`
+        display: flex;
+        flex-direction: column;
+        gap: ${theme.spacing[2]};
+      `}
     >
       {blocks.map((block) => {
         // 自定义渲染器优先

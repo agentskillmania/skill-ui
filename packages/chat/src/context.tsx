@@ -3,12 +3,9 @@
  */
 import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
-import type { Theme } from '@agentskillmania/skill-ui-theme';
 import type { ChatRenderers, Message } from './types.js';
 
 export interface ChatContextValue {
-  /** 主题 token */
-  theme: Theme;
   /** 自定义渲染器注册表 */
   renderers: ChatRenderers;
   /** 人机交互确认回调 */

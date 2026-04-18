@@ -3,12 +3,12 @@
  */
 import { css } from '@emotion/react';
 import type { MessageProps } from '../types.js';
-import { useChatContext } from '../context.js';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { MarkdownRenderer } from '../content/MarkdownRenderer.js';
 import { BlocksRenderer } from '../blocks/BlocksRenderer.js';
 
 export function AssistantMessage({ message }: MessageProps) {
-  const { theme } = useChatContext();
+  const theme = useTheme();
 
   return (
     <div

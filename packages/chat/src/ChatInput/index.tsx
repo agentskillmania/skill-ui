@@ -6,7 +6,7 @@ import { Sender } from '@ant-design/x';
 import { Button } from 'antd';
 import { Square } from 'lucide-react';
 import type { ReactNode } from 'react';
-import { useChatContext } from '../context.js';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 
 export interface ChatInputProps {
   value?: string;
@@ -31,7 +31,7 @@ export function ChatInput({
   prefix,
   suffix,
 }: ChatInputProps) {
-  const { theme } = useChatContext();
+  const theme = useTheme();
 
   const handleSubmit = (val: string) => {
     const trimmed = val.trim();

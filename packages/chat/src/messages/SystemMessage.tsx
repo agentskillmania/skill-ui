@@ -3,10 +3,10 @@
  */
 import { css } from '@emotion/react';
 import type { MessageProps } from '../types.js';
-import { useChatContext } from '../context.js';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 
 export function SystemMessage({ message }: MessageProps) {
-  const { theme } = useChatContext();
+  const theme = useTheme();
 
   return (
     <div

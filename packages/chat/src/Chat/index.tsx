@@ -2,8 +2,7 @@
  * Chat 顶层组件
  */
 import { css } from '@emotion/react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { flexColumn } from '@agentskillmania/skill-ui-theme';
+import { useTheme, flexColumn } from '@agentskillmania/skill-ui-theme';
 import type { ChatProps } from '../types.js';
 import { ChatContext } from '../context.js';
 import { MessageList } from '../MessageList/index.js';
@@ -30,7 +29,6 @@ export function Chat({
   const theme = useTheme();
 
   const contextValue = {
-    theme,
     renderers,
     onConfirmHumanRequest,
     messageDecorator,

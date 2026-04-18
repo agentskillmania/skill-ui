@@ -2,7 +2,7 @@
  * 消息列表组件
  */
 import { css } from '@emotion/react';
-import { useChatContext } from '../context.js';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useAutoScroll } from '../utils/autoScroll.js';
 import { MessageItem } from '../messages/MessageItem.js';
 import type { Message } from '../types.js';
@@ -12,7 +12,7 @@ export interface MessageListProps {
 }
 
 export function MessageList({ messages }: MessageListProps) {
-  const { theme } = useChatContext();
+  const theme = useTheme();
   const { ref, handleScroll } = useAutoScroll<HTMLDivElement>([messages]);
 
   return (

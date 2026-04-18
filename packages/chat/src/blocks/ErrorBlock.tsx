@@ -4,11 +4,11 @@
 import { css } from '@emotion/react';
 import { AlertTriangle } from 'lucide-react';
 import type { BlockProps, ErrorMetadata } from '../types.js';
-import { useChatContext } from '../context.js';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { BlockCard } from './BlockCard.js';
 
 export function ErrorBlock({ block }: BlockProps) {
-  const { theme } = useChatContext();
+  const theme = useTheme();
   const meta = block.metadata as ErrorMetadata | undefined;
 
   return (
@@ -17,7 +17,6 @@ export function ErrorBlock({ block }: BlockProps) {
       title="执行错误"
       accentColor={theme.color.error}
       tag={meta?.errorCode}
-      tagColor={theme.color.error}
     >
       <div
         css={css`

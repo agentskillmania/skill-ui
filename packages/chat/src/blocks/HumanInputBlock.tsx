@@ -6,11 +6,11 @@ import { css } from '@emotion/react';
 import { SendHorizontal } from 'lucide-react';
 import { Button, Input, Radio, Checkbox, Form } from 'antd';
 import type { BlockProps, HumanInputMetadata } from '../types.js';
-import { useChatContext } from '../context.js';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { BlockCard } from './BlockCard.js';
 
 export function HumanInputBlock({ block, onConfirm }: BlockProps) {
-  const { theme } = useChatContext();
+  const theme = useTheme();
   const meta = block.metadata as HumanInputMetadata | undefined;
   const [inputValue, setInputValue] = useState(meta?.defaultValue ?? '');
   const [selectedValues, setSelectedValues] = useState<string[]>(
@@ -31,7 +31,6 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
       title={meta?.title ?? '需要确认'}
       accentColor={theme.blockColor.humanInput.text}
       tag={isPending ? '等待中' : '已回复'}
-      tagColor={theme.blockColor.humanInput.text}
     >
       {meta?.message && (
         <div

@@ -4,11 +4,11 @@
 import { css } from '@emotion/react';
 import { Brain } from 'lucide-react';
 import type { BlockProps } from '../types.js';
-import { useChatContext } from '../context.js';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { BlockCard } from './BlockCard.js';
 
 export function ThinkingBlock({ block }: BlockProps) {
-  const { theme } = useChatContext();
+  const theme = useTheme();
 
   return (
     <BlockCard
@@ -16,7 +16,6 @@ export function ThinkingBlock({ block }: BlockProps) {
       title={block.status === 'streaming' ? '思考中...' : '思考过程'}
       accentColor={theme.blockColor.thinking.text}
       tag={block.status === 'streaming' ? '进行中' : undefined}
-      tagColor={theme.blockColor.thinking.text}
     >
       <div
         css={css`

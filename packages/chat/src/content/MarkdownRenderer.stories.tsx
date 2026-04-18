@@ -2,12 +2,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MarkdownRenderer } from './MarkdownRenderer.js';
 import { ChatContext } from '../context.js';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
 
 function Wrapper({ children }: { children: React.ReactNode }) {
-  const theme = useTheme();
   return (
-    <ChatContext.Provider value={{ theme, renderers: {} }}>
+    <ChatContext.Provider value={{ renderers: {} }}>
       <div style={{ maxWidth: 600 }}>{children}</div>
     </ChatContext.Provider>
   );

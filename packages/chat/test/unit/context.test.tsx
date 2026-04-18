@@ -12,7 +12,7 @@ describe('ChatContext', () => {
         <ChatContext.Provider value={mockCtx}>{children}</ChatContext.Provider>
       ),
     });
-    expect(result.current.theme).toBeDefined();
+    expect(result.current.renderers).toBeDefined();
     expect(result.current.renderers).toEqual({});
   });
 

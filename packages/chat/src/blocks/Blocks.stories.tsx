@@ -1,7 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ChatContext } from '../context.js';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { BlockCard } from './BlockCard.js';
 import { ThinkingBlock } from './ThinkingBlock.js';
 import { ToolCallBlock } from './ToolCallBlock.js';
@@ -12,9 +11,8 @@ import { BlocksRenderer } from './BlocksRenderer.js';
 import type { Block } from '../types.js';
 
 function Wrapper({ children }: { children: React.ReactNode }) {
-  const theme = useTheme();
   return (
-    <ChatContext.Provider value={{ theme, renderers: {} }}>
+    <ChatContext.Provider value={{ renderers: {} }}>
       <div style={{ maxWidth: 600, display: 'flex', flexDirection: 'column', gap: 16 }}>
         {children}
       </div>
@@ -46,7 +44,6 @@ export const BlockCardWithIcon: Story = {
     title: '带图标的卡片',
     accentColor: '#6366f1',
     tag: 'MCP',
-    tagColor: '#6366f1',
     children: '这是一个带图标、色条和标签的卡片。',
   },
 };

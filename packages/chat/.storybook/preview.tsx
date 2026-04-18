@@ -8,6 +8,7 @@ import {
   lightAntdXTokens,
   GlobalStyles,
 } from '@agentskillmania/skill-ui-theme';
+import { ChatContext } from '../src/context.js';
 
 const preview: Preview = {
   parameters: {
@@ -29,8 +30,10 @@ const preview: Preview = {
     (Story) => (
       <ConfigProvider theme={lightAntdConfig}>
         <ThemeProvider theme={lightTheme}>
-          <GlobalStyles />
-          <Story />
+          <ChatContext.Provider value={{ renderers: {} }}>
+            <GlobalStyles />
+            <Story />
+          </ChatContext.Provider>
         </ThemeProvider>
       </ConfigProvider>
     ),

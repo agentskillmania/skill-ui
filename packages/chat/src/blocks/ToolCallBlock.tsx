@@ -4,7 +4,7 @@
 import { css } from '@emotion/react';
 import { Wrench } from 'lucide-react';
 import type { BlockProps, ToolCallMetadata } from '../types.js';
-import { useChatContext } from '../context.js';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { BlockCard } from './BlockCard.js';
 
 /** 根据 toolType 获取对应的 blockColor key */
@@ -22,7 +22,7 @@ function getToolColorKey(toolType?: string): string {
 }
 
 export function ToolCallBlock({ block }: BlockProps) {
-  const { theme } = useChatContext();
+  const theme = useTheme();
   const meta = block.metadata as ToolCallMetadata | undefined;
   const toolName = meta?.toolName ?? '未知工具';
   const toolType = meta?.toolType;
@@ -37,7 +37,6 @@ export function ToolCallBlock({ block }: BlockProps) {
       title={toolName}
       accentColor={accentColor}
       tag={toolType?.toUpperCase()}
-      tagColor={accentColor}
     >
       {args && (
         <div

@@ -22,33 +22,16 @@ const builtinMessageRenderers: Record<string, React.ComponentType<{ message: Mes
 export function MessageItem({ message }: MessageItemProps) {
   const { renderers, messageDecorator } = useChatContext();
 
-  // 查找渲染器：自定义优先，然后内置
+  // 查找渲染器：自定义优先，然后内置，最后兜底 SystemMessage
   const customRenderer = renderers.messages?.[message.role];
   const BuiltinRenderer = builtinMessageRenderers[message.role];
+  const Renderer = customRenderer ?? BuiltinRenderer ?? SystemMessage;
 
-  let element: React.ReactNode;
-
-  if (customRenderer) {
-    const CustomRenderer = customRenderer;
-    element = (
-      <MessageWrapper message={message}>
-        <CustomRenderer message={message} />
-      </MessageWrapper>
-    );
-  } else if (BuiltinRenderer) {
-    element = (
-      <MessageWrapper message={message}>
-        <BuiltinRenderer message={message} />
-      </MessageWrapper>
-    );
-  } else {
-    // 未识别的 role，默认用 system 样式
-    element = (
-      <MessageWrapper message={message}>
-        <SystemMessage message={message} />
-      </MessageWrapper>
-    );
-  }
+  const element = (
+    <MessageWrapper message={message}>
+      <Renderer message={message} />
+    </MessageWrapper>
+  );
 
   // 应用消息装饰器
   if (messageDecorator) {

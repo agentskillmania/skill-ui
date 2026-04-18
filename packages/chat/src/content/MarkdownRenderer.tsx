@@ -5,7 +5,7 @@
  * 消费方可通过 ChatProps.renderers 注入自定义 markdown 渲染器。
  */
 import { css } from '@emotion/react';
-import { useChatContext } from '../context.js';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 
 export interface MarkdownRendererProps {
   children: string;
@@ -14,7 +14,7 @@ export interface MarkdownRendererProps {
 }
 
 export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps) {
-  const { theme } = useChatContext();
+  const theme = useTheme();
 
   return (
     <div

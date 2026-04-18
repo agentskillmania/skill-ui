@@ -74,7 +74,7 @@ describe('BlockCard', () => {
   it('渲染 tag', () => {
     render(
       <ChatWrapper>
-        <BlockCard title="卡片" tag="MCP" tagColor="#ff0000" />
+        <BlockCard title="卡片" tag="MCP" />
       </ChatWrapper>
     );
     expect(screen.getByText('MCP')).toBeInTheDocument();
@@ -112,7 +112,7 @@ describe('BlockCard', () => {
     expect(screen.getByText('空卡片')).toBeInTheDocument();
   });
 
-  it('有 tag 但无 tagColor 时使用 accent 颜色', () => {
+  it('有 tag 时正常渲染', () => {
     render(
       <ChatWrapper>
         <BlockCard title="卡片" tag="TAG" />

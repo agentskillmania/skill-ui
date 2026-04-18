@@ -4,7 +4,7 @@
 import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import type { Message } from '../types.js';
-import { useChatContext } from '../context.js';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 
 export interface MessageWrapperProps {
   message: Message;
@@ -12,7 +12,7 @@ export interface MessageWrapperProps {
 }
 
 export function MessageWrapper({ message, children }: MessageWrapperProps) {
-  const { theme } = useChatContext();
+  const theme = useTheme();
   const isUser = message.role === 'user';
 
   return (

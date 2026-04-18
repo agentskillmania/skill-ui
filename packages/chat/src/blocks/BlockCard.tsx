@@ -3,7 +3,7 @@
  */
 import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
-import { useChatContext } from '../context.js';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 
 export interface BlockCardProps {
   /** 左侧图标 */
@@ -14,14 +14,12 @@ export interface BlockCardProps {
   accentColor?: string;
   /** 标签文本（标题右侧） */
   tag?: string;
-  /** 标签背景色 */
-  tagColor?: string;
   /** 内容 */
   children?: ReactNode;
 }
 
-export function BlockCard({ icon, title, accentColor, tag, tagColor, children }: BlockCardProps) {
-  const { theme } = useChatContext();
+export function BlockCard({ icon, title, accentColor, tag, children }: BlockCardProps) {
+  const theme = useTheme();
   const accent = accentColor ?? theme.color.primary;
 
   return (
@@ -76,7 +74,7 @@ export function BlockCard({ icon, title, accentColor, tag, tagColor, children }:
               font-size: ${theme.font.size.xs};
               padding: ${theme.spacing['0.5']} ${theme.spacing[2]};
               border-radius: ${theme.radius.full};
-              background: ${tagColor ?? accent}20;
+              background: ${theme.color.fillSubtle};
               color: ${accent};
               flex-shrink: 0;
             `}

@@ -3,13 +3,11 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import React from 'react';
 import { ChatInput } from './index.js';
 import { ChatContext } from '../context.js';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
 
-// 在 ChatContext 中包裹，提供 theme
+// 在 ChatContext 中包裹，提供 renderers
 function ChatInputWrapper(props: React.ComponentProps<typeof ChatInput>) {
-  const theme = useTheme();
   return (
-    <ChatContext.Provider value={{ theme, renderers: {} }}>
+    <ChatContext.Provider value={{ renderers: {} }}>
       <div style={{ maxWidth: 600 }}>
         <ChatInput {...props} />
       </div>

@@ -3,14 +3,12 @@
  */
 import type { ReactNode } from 'react';
 import { ThemeProvider, lightTheme } from '@agentskillmania/skill-ui-theme';
-import type { Theme } from '@agentskillmania/skill-ui-theme';
 import { ChatContext } from '../../src/context.js';
 import type { ChatContextValue } from '../../src/context.js';
 
 /** 默认 Chat 上下文值 */
 export function createMockContext(overrides?: Partial<ChatContextValue>): ChatContextValue {
   return {
-    theme: lightTheme,
     renderers: {},
     onConfirmHumanRequest: undefined,
     messageDecorator: undefined,
