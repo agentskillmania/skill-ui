@@ -80,12 +80,12 @@ export const lightColor: Theme['color'] = {
 };
 
 export const lightBlockColor: Theme['blockColor'] = {
-  thinking: { text: '#b4a7d6', bg: 'rgba(180, 167, 214, 0.15)' },
-  humanInput: { text: '#ff9a9e', bg: 'rgba(255, 154, 158, 0.15)' },
-  toolMcp: { text: '#e0c3fc', bg: 'rgba(224, 195, 252, 0.15)' },
-  toolScript: { text: '#fda085', bg: 'rgba(253, 160, 133, 0.15)' },
-  toolBuiltin: { text: '#8ec5fc', bg: 'rgba(142, 197, 252, 0.15)' },
-  plan: { text: '#fcb69f', bg: 'rgba(252, 182, 159, 0.15)' },
+  thinking: { text: '#7c3aed', bg: 'rgba(124, 58, 237, 0.10)' },
+  plan: { text: '#2563eb', bg: 'rgba(37, 99, 235, 0.10)' },
+  toolMcp: { text: '#0891b2', bg: 'rgba(8, 145, 178, 0.10)' },
+  toolScript: { text: '#d97706', bg: 'rgba(217, 119, 6, 0.10)' },
+  toolBuiltin: { text: '#059669', bg: 'rgba(5, 150, 105, 0.10)' },
+  humanInput: { text: '#ea580c', bg: 'rgba(234, 88, 12, 0.10)' },
 };
 
 export const lightTheme: Theme = {
