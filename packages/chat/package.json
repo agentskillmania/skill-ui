@@ -40,12 +40,14 @@
   },
   "peerDependencies": {
     "@ant-design/x": "^2.0.0",
+    "@ant-design/x-markdown": "^2.0.0",
     "antd": "^6.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@ant-design/x": "^2.4.0",
+    "@ant-design/x-markdown": "^2.4.0",
     "@chromatic-com/storybook": "^5.0.2",
     "@storybook/addon-a11y": "^10.3.3",
     "@storybook/addon-docs": "^10.3.3",

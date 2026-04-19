@@ -2,11 +2,16 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@agentskillmania/skill-ui-theme';
 import { Chat } from '../../src/Chat/index.js';
-import type { Message } from '../../src/types.js';
+import type { Message, ChatCommand } from '../../src/types.js';
 
 const mockMessages: Message[] = [
   { id: '1', role: 'user', content: '你好', status: 'completed' },
   { id: '2', role: 'assistant', content: '你好！', status: 'completed' },
+];
+
+const mockCommands: ChatCommand[] = [
+  { id: '1', label: '搜索', command: 'search' },
+  { id: '2', label: '帮助', command: 'help' },
 ];
 
 function Wrapper({ children }: { children: React.ReactNode }) {
@@ -59,5 +64,19 @@ describe('Chat', () => {
   it('使用自定义 maxWidth', () => {
     render(<Chat messages={[]} maxWidth="600px" />, { wrapper: Wrapper });
     expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument();
+  });
+
+  it('传入 commands 和 onCommand 时渲染快捷指令标签', () => {
+    const onCommand = vi.fn();
+    render(<Chat messages={[]} commands={mockCommands} onCommand={onCommand} />, {
+      wrapper: Wrapper,
+    });
+    expect(screen.getByText('搜索')).toBeInTheDocument();
+    expect(screen.getByText('帮助')).toBeInTheDocument();
+  });
+
+  it('无 onCommand 时不渲染快捷指令', () => {
+    render(<Chat messages={[]} commands={mockCommands} />, { wrapper: Wrapper });
+    expect(screen.queryByText('搜索')).not.toBeInTheDocument();
   });
 });

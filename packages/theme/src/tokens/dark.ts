@@ -86,6 +86,7 @@ export const darkBlockColor: Theme['blockColor'] = {
   toolScript: { text: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)' },
   toolBuiltin: { text: '#34d399', bg: 'rgba(52, 211, 153, 0.15)' },
   humanInput: { text: '#fb923c', bg: 'rgba(251, 146, 60, 0.15)' },
+  skill: { text: '#a78bfa', bg: 'rgba(167, 139, 250, 0.15)' },
 };
 
 export const darkTheme: Theme = {

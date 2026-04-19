@@ -11,6 +11,7 @@ import { ToolCallBlock } from './ToolCallBlock.js';
 import { PlanBlock } from './PlanBlock.js';
 import { ErrorBlock } from './ErrorBlock.js';
 import { HumanInputBlock } from './HumanInputBlock.js';
+import { SkillBlock } from './SkillBlock.js';
 
 export interface BlocksRendererProps {
   blocks: Block[];
@@ -23,6 +24,7 @@ const builtinBlockRenderers: Record<string, React.ComponentType<BlockProps>> = {
   plan: PlanBlock,
   error: ErrorBlock,
   human_input: HumanInputBlock,
+  skill: SkillBlock,
 };
 
 export function BlocksRenderer({ blocks }: BlocksRendererProps) {

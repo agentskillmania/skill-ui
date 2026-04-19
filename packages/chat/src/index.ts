@@ -18,7 +18,10 @@ export { ToolCallBlock } from './blocks/ToolCallBlock.js';
 export { PlanBlock } from './blocks/PlanBlock.js';
 export { ErrorBlock } from './blocks/ErrorBlock.js';
 export { HumanInputBlock } from './blocks/HumanInputBlock.js';
+export { SkillBlock } from './blocks/SkillBlock.js';
 export { MarkdownRenderer } from './content/MarkdownRenderer.js';
+export { QuickCommands } from './commands/QuickCommands.js';
+export { CommandAutocomplete } from './commands/CommandAutocomplete.js';
 
 // 类型
 export type {
@@ -28,6 +31,7 @@ export type {
   MessageRole,
   BlockStatus,
   HumanInputType,
+  ChatCommand,
   ChatProps,
   ChatRenderers,
   MessageProps,
@@ -37,6 +41,7 @@ export type {
   PlanMetadata,
   HumanInputMetadata,
   ErrorMetadata,
+  SkillBlockMetadata,
 } from './types.js';
 
 // 组件 Props 类型
@@ -47,3 +52,8 @@ export type { MessageWrapperProps } from './messages/MessageWrapper.js';
 export type { BlockCardProps } from './blocks/BlockCard.js';
 export type { BlocksRendererProps } from './blocks/BlocksRenderer.js';
 export type { MarkdownRendererProps } from './content/MarkdownRenderer.js';
+export type { QuickCommandsProps } from './commands/QuickCommands.js';
+export type { CommandAutocompleteProps } from './commands/CommandAutocomplete.js';
+
+// 工具函数
+export { extractSearchTerm, filterCommands, groupCommands } from './commands/commandUtils.js';

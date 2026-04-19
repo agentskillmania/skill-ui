@@ -7,6 +7,7 @@ import type { ChatProps } from '../types.js';
 import { ChatContext } from '../context.js';
 import { MessageList } from '../MessageList/index.js';
 import { ChatInput } from '../ChatInput/index.js';
+import { QuickCommands } from '../commands/QuickCommands.js';
 
 export function Chat({
   messages,
@@ -25,6 +26,10 @@ export function Chat({
   placeholder = '输入消息...',
   className,
   style,
+  commands,
+  onCommand,
+  maxQuickCommands = 5,
+  commandTrigger = '/',
 }: ChatProps) {
   const theme = useTheme();
 
@@ -77,8 +82,19 @@ export function Chat({
             css={css`
               width: 100%;
               max-width: ${maxWidth};
+              display: flex;
+              flex-direction: column;
+              gap: ${theme.spacing[2]};
             `}
           >
+            {commands && commands.length > 0 && onCommand && (
+              <QuickCommands
+                commands={commands}
+                onCommand={onCommand}
+                maxCommands={maxQuickCommands}
+                disabled={disabled}
+              />
+            )}
             <ChatInput
               value={inputValue}
               onChange={onInputChange}
@@ -89,6 +105,9 @@ export function Chat({
               placeholder={placeholder}
               prefix={inputPrefix}
               suffix={inputSuffix}
+              commands={commands}
+              onCommand={onCommand}
+              commandTrigger={commandTrigger}
             />
           </div>
         </div>

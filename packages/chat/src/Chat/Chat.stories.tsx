@@ -2,7 +2,38 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React from 'react';
 import { Chat } from './index.js';
-import type { Message } from '../types.js';
+import type { Message, ChatCommand } from '../types.js';
+
+const commands: ChatCommand[] = [
+  {
+    id: '1',
+    label: '搜索',
+    command: 'search',
+    description: '搜索知识库',
+    group: '工具',
+    keywords: ['查询', 'find'],
+  },
+  {
+    id: '2',
+    label: '分析',
+    command: 'analyze',
+    description: '分析代码或数据',
+    group: '工具',
+    keywords: ['数据'],
+  },
+  {
+    id: '3',
+    label: '新建文件',
+    command: 'new',
+    description: '创建新文件',
+    group: '文件',
+    keywords: ['创建'],
+  },
+  { id: '4', label: '打开文件', command: 'open', description: '打开已有文件', group: '文件' },
+  { id: '5', label: '导出', command: 'export', description: '导出对话记录', group: '文件' },
+  { id: '6', label: '帮助', command: 'help', description: '查看帮助信息' },
+  { id: '7', label: '清除', command: 'clear', description: '清除当前对话', keywords: ['清空'] },
+];
 
 const meta: Meta<typeof Chat> = {
   title: 'Chat/Chat',
@@ -154,4 +185,86 @@ const WithBlocksComponent = () => {
 
 export const WithBlocks: Story = {
   render: () => <WithBlocksComponent />,
+};
+
+/** 快捷指令 + 斜杠自动补全 */
+const WithCommandsComponent = () => {
+  const [messages, setMessages] = React.useState<Message[]>([]);
+  const [inputValue, setInputValue] = React.useState('');
+  const [status, setStatus] = React.useState<'idle' | 'streaming' | 'error'>('idle');
+
+  const handleCommand = (cmd: ChatCommand) => {
+    const userMsg: Message = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content: `/${cmd.command}`,
+      status: 'completed',
+      createdAt: Date.now(),
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setInputValue('');
+    setStatus('streaming');
+
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `ai-${Date.now()}`,
+          role: 'assistant',
+          content: `已执行指令「${cmd.label}」(${cmd.command})`,
+          status: 'completed',
+          createdAt: Date.now(),
+        },
+      ]);
+      setStatus('idle');
+    }, 800);
+  };
+
+  const handleSendMessage = (content: string) => {
+    const userMsg: Message = {
+      id: `user-${Date.now()}`,
+      role: 'user',
+      content,
+      status: 'completed',
+      createdAt: Date.now(),
+    };
+    setMessages((prev) => [...prev, userMsg]);
+    setInputValue('');
+    setStatus('streaming');
+
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `ai-${Date.now()}`,
+          role: 'assistant',
+          content: `收到: "${content}"`,
+          status: 'completed',
+          createdAt: Date.now(),
+        },
+      ]);
+      setStatus('idle');
+    }, 1000);
+  };
+
+  return (
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Chat
+        messages={messages}
+        status={status}
+        inputValue={inputValue}
+        onInputChange={setInputValue}
+        onSendMessage={handleSendMessage}
+        onStop={() => setStatus('idle')}
+        commands={commands}
+        onCommand={handleCommand}
+        maxQuickCommands={5}
+        placeholder="输入消息，或输入 / 触发指令..."
+      />
+    </div>
+  );
+};
+
+export const WithCommands: Story = {
+  render: () => <WithCommandsComponent />,
 };

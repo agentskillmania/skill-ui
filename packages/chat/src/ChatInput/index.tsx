@@ -3,10 +3,10 @@
  */
 import { css } from '@emotion/react';
 import { Sender } from '@ant-design/x';
-import { Button } from 'antd';
-import { Square } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import type { ChatCommand } from '../types.js';
+import { CommandAutocomplete } from '../commands/CommandAutocomplete.js';
 
 export interface ChatInputProps {
   value?: string;
@@ -18,6 +18,12 @@ export interface ChatInputProps {
   placeholder?: string;
   prefix?: ReactNode;
   suffix?: ReactNode;
+  /** 指令列表（启用斜杠自动补全） */
+  commands?: ChatCommand[];
+  /** 选择指令回调 */
+  onCommand?: (command: ChatCommand) => void;
+  /** 斜杠触发字符（默认 "/"） */
+  commandTrigger?: string;
 }
 
 export function ChatInput({
@@ -30,6 +36,9 @@ export function ChatInput({
   placeholder = '输入消息...',
   prefix,
   suffix,
+  commands,
+  onCommand,
+  commandTrigger = '/',
 }: ChatInputProps) {
   const theme = useTheme();
 
@@ -40,7 +49,13 @@ export function ChatInput({
     }
   };
 
-  return (
+  const handleCommandSelect = (command: ChatCommand) => {
+    onCommand?.(command);
+    // 清空输入框
+    onChange?.('');
+  };
+
+  const senderElement = (
     <div
       css={css`
         display: flex;
@@ -68,8 +83,10 @@ export function ChatInput({
           value={value}
           onChange={onChange}
           onSubmit={handleSubmit}
+          onCancel={onCancel}
           placeholder={placeholder}
           disabled={disabled}
+          loading={loading}
           autoSize={{ minRows: 1, maxRows: 4 }}
           style={{
             border: 'none',
@@ -78,20 +95,23 @@ export function ChatInput({
           footer={null}
         />
       </div>
-      {loading ? (
-        <Button
-          type="primary"
-          shape="circle"
-          size="small"
-          icon={<Square size={14} />}
-          onClick={onCancel}
-          css={css`
-            flex-shrink: 0;
-          `}
-        />
-      ) : (
-        suffix
-      )}
+      {suffix}
     </div>
   );
+
+  // 启用指令自动补全时，用 CommandAutocomplete 包裹
+  if (commands && commands.length > 0 && onCommand) {
+    return (
+      <CommandAutocomplete
+        commands={commands}
+        onCommand={handleCommandSelect}
+        inputValue={value ?? ''}
+        trigger={commandTrigger}
+      >
+        {senderElement}
+      </CommandAutocomplete>
+    );
+  }
+
+  return senderElement;
 }

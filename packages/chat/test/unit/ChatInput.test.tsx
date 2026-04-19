@@ -2,6 +2,12 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ChatWrapper } from './testUtils.js';
 import { ChatInput } from '../../src/ChatInput/index.js';
+import type { ChatCommand } from '../../src/types.js';
+
+const mockCommands: ChatCommand[] = [
+  { id: '1', label: '搜索', command: 'search' },
+  { id: '2', label: '帮助', command: 'help' },
+];
 
 describe('ChatInput', () => {
   it('渲染输入框', () => {
@@ -68,8 +74,6 @@ describe('ChatInput', () => {
         <ChatInput value="" onSubmit={onSubmit} />
       </ChatWrapper>
     );
-    // Sender 的 submitDisabled 会在 value 为空时禁用提交
-    // 所以即使触发 Enter 也不会调用 onSubmit
     const textarea = screen.getByPlaceholderText('输入消息...');
     fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
     expect(onSubmit).not.toHaveBeenCalled();
@@ -78,9 +82,6 @@ describe('ChatInput', () => {
   it('提交纯空格文本时不触发 onSubmit', () => {
     const onSubmit = vi.fn();
     const onChange = vi.fn();
-    // Sender 内部 submitDisabled 基于 !innerValue
-    // value="   " 不是空字符串，所以 Sender 会触发 onSubmit，
-    // 但 ChatInput 的 handleSubmit 中 trimmed 为空，不会调用 onSubmit
     render(
       <ChatWrapper>
         <ChatInput value="   " onSubmit={onSubmit} onChange={onChange} />
@@ -88,7 +89,6 @@ describe('ChatInput', () => {
     );
     const textarea = screen.getByPlaceholderText('输入消息...');
     fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
-    // ChatInput.handleSubmit 检查 trimmed，纯空格 trimmed 为空，不调用 onSubmit
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
@@ -102,8 +102,35 @@ describe('ChatInput', () => {
     );
     const textarea = screen.getByPlaceholderText('输入消息...');
     fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
-    // Sender 会将 value 传给 ChatInput 的 handleSubmit
-    // handleSubmit 中 trimmed = "hello"，然后调用 onSubmit("hello")
     expect(onSubmit).toHaveBeenCalledWith('hello');
+  });
+
+  it('传入 commands 和 onCommand 时渲染自动补全包裹', () => {
+    const onCommand = vi.fn();
+    render(
+      <ChatWrapper>
+        <ChatInput value="/" onChange={() => {}} commands={mockCommands} onCommand={onCommand} />
+      </ChatWrapper>
+    );
+    // 输入框应该被 CommandAutocomplete 包裹
+    expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument();
+  });
+
+  it('无 commands 时直接渲染 senderElement', () => {
+    render(
+      <ChatWrapper>
+        <ChatInput value="/" onChange={() => {}} />
+      </ChatWrapper>
+    );
+    expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument();
+  });
+
+  it('空 commands 列表直接渲染 senderElement', () => {
+    render(
+      <ChatWrapper>
+        <ChatInput value="/" onChange={() => {}} commands={[]} onCommand={() => {}} />
+      </ChatWrapper>
+    );
+    expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument();
   });
 });
