@@ -60,7 +60,7 @@ export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps)
           font-size: ${theme.font.size.lg};
         }
         h3 {
-          font-size: ${theme.font.size.md};
+          font-size: ${theme.font.size.lg};
         }
         h4 {
           font-size: ${theme.font.size.sm};
