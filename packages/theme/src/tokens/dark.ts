@@ -39,6 +39,7 @@ export const darkColor: Theme['color'] = {
 
   // 背景
   bgBase: '#0f172a',
+  bgLayout: '#0f172a',
   bgContainer: '#1e293b',
   bgElevated: '#334155',
   bgSpotlight: '#1e293b',

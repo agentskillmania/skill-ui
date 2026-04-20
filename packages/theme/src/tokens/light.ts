@@ -39,6 +39,7 @@ export const lightColor: Theme['color'] = {
 
   // 背景
   bgBase: '#f8fafc',
+  bgLayout: '#f8fafc',
   bgContainer: '#ffffff',
   bgElevated: '#fafafa',
   bgSpotlight: '#f1f5f9',
