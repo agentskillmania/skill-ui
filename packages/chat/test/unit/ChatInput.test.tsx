@@ -133,4 +133,16 @@ describe('ChatInput', () => {
     );
     expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument();
   });
+
+  it('Shift+Enter 不触发 onSubmit', () => {
+    const onSubmit = vi.fn();
+    render(
+      <ChatWrapper>
+        <ChatInput value="hello" onSubmit={onSubmit} onChange={() => {}} />
+      </ChatWrapper>
+    );
+    const textarea = screen.getByPlaceholderText('输入消息...');
+    fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter', shiftKey: true });
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
 });

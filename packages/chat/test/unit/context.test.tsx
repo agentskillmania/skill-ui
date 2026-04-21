@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { renderHook } from '@testing-library/react';
+import { useState } from 'react';
 import { ChatContext, useChatContext } from '../../src/context.js';
 import { createMockContext } from './testUtils.js';
 import type { ChatContextValue } from '../../src/context.js';
@@ -50,5 +51,26 @@ describe('ChatContext', () => {
       ),
     });
     expect(result.current.renderers.messages?.custom).toBe(MyRenderer);
+  });
+
+  it('上下文值更新后 hook 返回新值', () => {
+    const fn1 = () => {};
+    const fn2 = () => {};
+    const mockCtx1 = createMockContext({ onConfirmHumanRequest: fn1 });
+    const mockCtx2 = createMockContext({ onConfirmHumanRequest: fn2 });
+
+    let ctxValue: ChatContextValue = mockCtx1;
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <ChatContext.Provider value={ctxValue}>{children}</ChatContext.Provider>
+    );
+
+    const { result, rerender } = renderHook(() => useChatContext(), { wrapper });
+    expect(result.current.onConfirmHumanRequest).toBe(fn1);
+
+    // 更新外部变量后触发重渲染
+    ctxValue = mockCtx2;
+    rerender(undefined);
+
+    expect(result.current.onConfirmHumanRequest).toBe(fn2);
   });
 });

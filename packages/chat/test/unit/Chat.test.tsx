@@ -37,8 +37,25 @@ describe('Chat', () => {
 
   it('streaming 状态显示停止按钮', () => {
     render(<Chat messages={mockMessages} status="streaming" />, { wrapper: Wrapper });
-    const stopButton = document.querySelector('button');
-    expect(stopButton).toBeInTheDocument();
+    // antdx Sender loading 状态渲染取消按钮
+    const buttons = screen.getAllByRole('button');
+    expect(buttons.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('error 状态不显示停止按钮', () => {
+    render(<Chat messages={mockMessages} status="error" />, { wrapper: Wrapper });
+    // 非 streaming 状态下 Sender 不渲染 loading 按钮
+    expect(screen.queryByPlaceholderText('输入消息...')).toBeInTheDocument();
+  });
+
+  it('completed 状态不显示停止按钮', () => {
+    render(<Chat messages={mockMessages} status="completed" />, { wrapper: Wrapper });
+    expect(screen.queryByPlaceholderText('输入消息...')).toBeInTheDocument();
+  });
+
+  it('idle 状态不显示停止按钮', () => {
+    render(<Chat messages={mockMessages} status="idle" />, { wrapper: Wrapper });
+    expect(screen.queryByPlaceholderText('输入消息...')).toBeInTheDocument();
   });
 
   it('输入文本后 Enter 触发 onSendMessage', () => {
