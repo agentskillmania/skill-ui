@@ -1,7 +1,8 @@
 /** @jsxImportSource @emotion/react */
 import type { Preview } from '@storybook/react-vite';
 import { ThemeProvider } from '@emotion/react';
-import { lightTheme, GlobalStyles } from '@agentskillmania/skill-ui-theme';
+import { ConfigProvider } from 'antd';
+import { lightTheme, lightAntdConfig, GlobalStyles } from '@agentskillmania/skill-ui-theme';
 
 const preview: Preview = {
   parameters: {
@@ -21,10 +22,12 @@ const preview: Preview = {
   },
   decorators: [
     (Story) => (
-      <ThemeProvider theme={lightTheme}>
-        <GlobalStyles />
-        <Story />
-      </ThemeProvider>
+      <ConfigProvider theme={lightAntdConfig}>
+        <ThemeProvider theme={lightTheme}>
+          <GlobalStyles />
+          <Story />
+        </ThemeProvider>
+      </ConfigProvider>
     ),
   ],
 };
