@@ -59,6 +59,11 @@ export function SkillEditor({
     });
   }, [activeFilePath]);
 
+  // 文件切换时同步 isDirty 状态
+  useEffect(() => {
+    setIsDirty(activeFilePath ? dirtyFiles.current.has(activeFilePath) : false);
+  }, [activeFilePath]);
+
   const activeFile = useMemo(() => {
     if (!activeFilePath) return null;
     return findFile(files, activeFilePath);
@@ -94,24 +99,26 @@ export function SkillEditor({
 
   const handleTabClose = useCallback(
     (path: string) => {
-      const tab = openTabs.find((t) => t.path === path);
       const doClose = () => {
-        setOpenTabs((prev) => prev.filter((t) => t.path !== path));
-        dirtyFiles.current.delete(path);
-        if (activeFilePath === path) {
-          const remaining = openTabs.filter((t) => t.path !== path);
-          if (remaining.length > 0) {
-            onActiveFileChange(remaining[remaining.length - 1].path);
-          } else {
-            onActiveFileChange(null);
+        setOpenTabs((prev) => {
+          const remaining = prev.filter((t) => t.path !== path);
+          dirtyFiles.current.delete(path);
+          // 当前活动文件被关闭
+          if (activeFilePath === path) {
+            if (remaining.length > 0) {
+              onActiveFileChange(remaining[remaining.length - 1].path);
+            } else {
+              onActiveFileChange(null);
+            }
           }
-        }
+          return remaining;
+        });
       };
 
-      if (tab?.modified) {
+      if (dirtyFiles.current.has(path)) {
         Modal.confirm({
           title: '关闭确认',
-          content: `"${tab.label}" 有未保存的修改，确定要关闭吗？`,
+          content: `"${getFileLabel(path)}" 有未保存的修改，确定要关闭吗？`,
           okText: '关闭',
           cancelText: '取消',
           onOk: doClose,
@@ -120,7 +127,7 @@ export function SkillEditor({
         doClose();
       }
     },
-    [activeFilePath, openTabs, onActiveFileChange]
+    [activeFilePath, onActiveFileChange]
   );
 
   const contextValue = useMemo(
