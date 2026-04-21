@@ -15,7 +15,7 @@ import type { EditorAreaProps } from '../../types.js';
 /** listenerCtx 的 ListenerManager 类型（简化版） */
 interface ListenerManager {
   markdownUpdated: (
-    callback: (ctx: unknown, markdown: string, prevMarkdown: string) => void,
+    callback: (ctx: unknown, markdown: string, prevMarkdown: string) => void
   ) => ListenerManager;
 }
 
@@ -97,9 +97,11 @@ export function VisualEditor({
     if (currentMd !== content) {
       isInternalChange.current = true;
       // @ts-ignore — replaceAll 存在于运行时但类型定义解析有问题
-      import('@milkdown/utils').then((utils: { replaceAll: (md: string) => (ctx: unknown) => void }) => {
-        editor.action(utils.replaceAll(content));
-      });
+      import('@milkdown/utils').then(
+        (utils: any) => {
+          editor.action(utils.replaceAll(content));
+        }
+      );
     }
   }, [content]);
 

@@ -36,8 +36,12 @@ const mockCrepeInstance = {
   }),
   getMarkdown: vi.fn(() => '# 初始内容'),
   setReadonly: vi.fn(),
-  get editor() { return mockEditor; },
-  get readonly() { return false; },
+  get editor() {
+    return mockEditor;
+  },
+  get readonly() {
+    return false;
+  },
 };
 
 vi.mock('@milkdown/crepe', () => ({
@@ -117,9 +121,7 @@ describe('VisualEditor (Crepe 实现)', () => {
     const onChange = vi.fn();
     mockCrepeInstance.getMarkdown.mockReturnValue('# 旧内容');
 
-    const { rerender } = renderWithTheme(
-      <VisualEditor {...defaultProps} onChange={onChange} />
-    );
+    const { rerender } = renderWithTheme(<VisualEditor {...defaultProps} onChange={onChange} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
