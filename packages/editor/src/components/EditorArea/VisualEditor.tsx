@@ -7,7 +7,7 @@
 import '@milkdown/crepe/theme/frame.css';
 import { css } from '@emotion/react';
 import { useEffect, useRef } from 'react';
-// @ts-ignore — @milkdown/crepe 的 package.json exports 未正确声明类型
+// @ts-expect-error — @milkdown/crepe 的 package.json exports 未正确声明类型
 import { Crepe } from '@milkdown/crepe';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { EditorAreaProps } from '../../types.js';
@@ -21,12 +21,12 @@ interface ListenerManager {
 
 export function VisualEditor({
   content,
-  filePath,
-  mode,
+  filePath: _filePath,
+  mode: _mode,
   readOnly = false,
   onChange,
-  onSave,
-  onCursorChange,
+  onSave: _onSave,
+  onCursorChange: _onCursorChange,
 }: EditorAreaProps) {
   const theme = useTheme();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -82,7 +82,6 @@ export function VisualEditor({
       crepeRef.current = null;
     };
     // 仅挂载时执行
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // content prop 变化 → 同步到 Crepe（文件切换场景）
@@ -96,7 +95,7 @@ export function VisualEditor({
     const currentMd = crepe.getMarkdown();
     if (currentMd !== content) {
       isInternalChange.current = true;
-      // @ts-ignore — replaceAll 存在于运行时但类型定义解析有问题
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       import('@milkdown/utils').then((utils: any) => {
         editor.action(utils.replaceAll(content));
       });

@@ -46,6 +46,9 @@ vi.mock('@milkdown/utils', () => ({
   replaceAll: vi.fn((md: string) => (_ctx: unknown) => md),
 }));
 
+// 模拟 Monaco editor 的 addCommand 方法
+const mockAddCommand = vi.fn();
+
 // Mock Monaco Editor 以避免完整渲染
 const mockOnMount = vi.fn();
 vi.mock('@monaco-editor/react', () => ({
@@ -54,8 +57,12 @@ vi.mock('@monaco-editor/react', () => ({
     // 触发 onMount 回调以测试 handleMount 分支
     React.useEffect(() => {
       if (onMount) {
-        onMount({ mockEditor: true }, { monaco: true });
-        mockOnMount({ mockEditor: true });
+        // 模拟真实的 Monaco editor 实例，包含 addCommand 方法
+        const mockEditor = {
+          addCommand: mockAddCommand,
+        };
+        onMount(mockEditor, { monaco: true });
+        mockOnMount(mockEditor);
       }
     }, [onMount]);
     return (
@@ -113,5 +120,25 @@ describe('EditorArea', () => {
 
     // onChange 应该被调用，即使 Monaco 传递 undefined
     expect(onChange).toHaveBeenCalled();
+  });
+
+  it('CodeEditor 在 onMount 时注册 Ctrl+S 保存命令', () => {
+    const onSave = vi.fn();
+
+    // 清除之前的调用记录
+    mockAddCommand.mockClear();
+
+    renderWithTheme(
+      <EditorArea
+        content="test content"
+        filePath="SKILL.md"
+        mode="code"
+        onChange={vi.fn()}
+        onSave={onSave}
+      />
+    );
+
+    // 验证 addCommand 被调用，参数为 Ctrl+S 的键码 (2097 = CtrlCmd | KeyS)
+    expect(mockAddCommand).toHaveBeenCalledWith(2097, expect.any(Function));
   });
 });

@@ -115,8 +115,6 @@ export interface SkillEditorProps {
   editMode: EditMode;
   /** 当前展开的 Sidebar 面板 */
   activePanel: SidebarPanel;
-  /** Sidebar 宽度（含图标栏） */
-  sidebarWidth?: number;
 
   // 回调
   onFileChange: (path: string, content: string) => void;
