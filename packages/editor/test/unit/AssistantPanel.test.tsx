@@ -1,14 +1,9 @@
 /** @jsxImportSource @emotion/react */
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ThemeProvider } from '@emotion/react';
-import { lightTheme } from '@agentskillmania/skill-ui-theme';
+import { screen, fireEvent } from '@testing-library/react';
+import { renderWithProviders } from './testUtils.js';
 import { AssistantPanel } from '../../src/components/AssistantPanel/AssistantPanel.js';
 import type { ChatCommand } from '@agentskillmania/skill-ui-chat';
-
-function renderWithTheme(ui: React.ReactElement) {
-  return render(<ThemeProvider theme={lightTheme}>{ui}</ThemeProvider>);
-}
 
 // Mock chat 组件以避免完整渲染依赖
 vi.mock('@agentskillmania/skill-ui-chat', () => ({
@@ -36,7 +31,7 @@ const sampleCommands: ChatCommand[] = [
 
 describe('AssistantPanel', () => {
   it('空消息时显示快捷命令提示', () => {
-    renderWithTheme(<AssistantPanel commands={sampleCommands} />);
+    renderWithProviders(<AssistantPanel commands={sampleCommands} />);
     expect(screen.getByText('向 AI 助手提问，或使用快捷命令')).toBeTruthy();
     expect(screen.getByText('生成技能')).toBeTruthy();
     expect(screen.getByText('查找类似')).toBeTruthy();
@@ -44,32 +39,32 @@ describe('AssistantPanel', () => {
 
   it('点击快捷命令触发 onSend', () => {
     const onSend = vi.fn();
-    renderWithTheme(<AssistantPanel commands={sampleCommands} onSend={onSend} />);
+    renderWithProviders(<AssistantPanel commands={sampleCommands} onSend={onSend} />);
     fireEvent.click(screen.getByText('生成技能'));
     expect(onSend).toHaveBeenCalledWith('帮我生成一个');
   });
 
   it('有消息时显示 MessageList', () => {
-    renderWithTheme(
+    renderWithProviders(
       <AssistantPanel messages={[{ id: '1', role: 'user', content: '你好' } as any]} />
     );
     expect(screen.getByTestId('message-list')).toBeTruthy();
   });
 
   it('渲染输入框', () => {
-    renderWithTheme(<AssistantPanel />);
+    renderWithProviders(<AssistantPanel />);
     expect(screen.getByText('向助手提问...')).toBeTruthy();
   });
 
   it('点击发送按钮触发 onSend', () => {
     const onSend = vi.fn();
-    renderWithTheme(<AssistantPanel onSend={onSend} />);
+    renderWithProviders(<AssistantPanel onSend={onSend} />);
     fireEvent.click(screen.getByText('发送'));
     expect(onSend).toHaveBeenCalledWith('test message');
   });
 
   it('无快捷命令时不显示命令按钮', () => {
-    renderWithTheme(<AssistantPanel />);
+    renderWithProviders(<AssistantPanel />);
     expect(screen.queryByText('生成技能')).toBeNull();
   });
 });

@@ -1,17 +1,12 @@
 /** @jsxImportSource @emotion/react */
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ThemeProvider } from '@emotion/react';
-import { lightTheme } from '@agentskillmania/skill-ui-theme';
+import { screen, fireEvent } from '@testing-library/react';
+import { renderWithProviders } from './testUtils.js';
 import { StatusBar } from '../../src/components/StatusBar/StatusBar.js';
-
-function renderWithTheme(ui: React.ReactElement) {
-  return render(<ThemeProvider theme={lightTheme}>{ui}</ThemeProvider>);
-}
 
 describe('StatusBar', () => {
   it('显示文件路径', () => {
-    renderWithTheme(
+    renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
         editMode="code"
@@ -23,14 +18,14 @@ describe('StatusBar', () => {
   });
 
   it('无文件路径时不显示', () => {
-    renderWithTheme(
+    renderWithProviders(
       <StatusBar filePath={null} editMode="code" cursorPosition={null} onEditModeChange={vi.fn()} />
     );
     expect(screen.queryByText('src/index.ts')).toBeNull();
   });
 
   it('显示未保存标记', () => {
-    renderWithTheme(
+    renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
         editMode="code"
@@ -43,7 +38,7 @@ describe('StatusBar', () => {
   });
 
   it('显示光标位置', () => {
-    renderWithTheme(
+    renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
         editMode="code"
@@ -56,7 +51,7 @@ describe('StatusBar', () => {
   });
 
   it('code 模式显示"预览"按钮', () => {
-    renderWithTheme(
+    renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
         editMode="code"
@@ -68,7 +63,7 @@ describe('StatusBar', () => {
   });
 
   it('wysiwyg 模式显示"代码"按钮', () => {
-    renderWithTheme(
+    renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
         editMode="wysiwyg"
@@ -81,7 +76,7 @@ describe('StatusBar', () => {
 
   it('点击模式切换按钮触发回调', () => {
     const onChange = vi.fn();
-    renderWithTheme(
+    renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
         editMode="code"
@@ -95,7 +90,7 @@ describe('StatusBar', () => {
 
   it('wysiwyg 模式点击按钮切换到 code', () => {
     const onChange = vi.fn();
-    renderWithTheme(
+    renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
         editMode="wysiwyg"
@@ -108,7 +103,7 @@ describe('StatusBar', () => {
   });
 
   it('光标位置为 null 时不显示', () => {
-    renderWithTheme(
+    renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
         editMode="code"
@@ -121,7 +116,7 @@ describe('StatusBar', () => {
   });
 
   it('isDirty 为 false 时不显示未保存标记', () => {
-    renderWithTheme(
+    renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
         editMode="code"

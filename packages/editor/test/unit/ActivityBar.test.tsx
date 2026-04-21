@@ -1,24 +1,19 @@
 /** @jsxImportSource @emotion/react */
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ThemeProvider } from '@emotion/react';
-import { lightTheme } from '@agentskillmania/skill-ui-theme';
+import { screen, fireEvent } from '@testing-library/react';
+import { renderWithProviders } from './testUtils.js';
 import { ActivityBar } from '../../src/components/ActivityBar/ActivityBar.js';
 import type { SidebarPanel } from '../../src/types.js';
 
-function renderWithTheme(ui: React.ReactElement) {
-  return render(<ThemeProvider theme={lightTheme}>{ui}</ThemeProvider>);
-}
-
 describe('ActivityBar', () => {
   it('渲染 4 个图标按钮', () => {
-    renderWithTheme(<ActivityBar activePanel={null} onPanelChange={vi.fn()} />);
+    renderWithProviders(<ActivityBar activePanel={null} onPanelChange={vi.fn()} />);
     const buttons = screen.getAllByRole('button');
     expect(buttons).toHaveLength(4);
   });
 
   it('高亮当前激活面板', () => {
-    renderWithTheme(<ActivityBar activePanel="files" onPanelChange={vi.fn()} />);
+    renderWithProviders(<ActivityBar activePanel="files" onPanelChange={vi.fn()} />);
     // 找到 title="文件" 的按钮
     const fileBtn = screen.getByTitle('文件');
     expect(fileBtn).toBeTruthy();
@@ -28,21 +23,21 @@ describe('ActivityBar', () => {
 
   it('点击未激活图标触发打开', () => {
     const onChange = vi.fn();
-    renderWithTheme(<ActivityBar activePanel={null} onPanelChange={onChange} />);
+    renderWithProviders(<ActivityBar activePanel={null} onPanelChange={onChange} />);
     fireEvent.click(screen.getByTitle('文件'));
     expect(onChange).toHaveBeenCalledWith('files');
   });
 
   it('点击已激活图标触发关闭', () => {
     const onChange = vi.fn();
-    renderWithTheme(<ActivityBar activePanel="assistant" onPanelChange={onChange} />);
+    renderWithProviders(<ActivityBar activePanel="assistant" onPanelChange={onChange} />);
     fireEvent.click(screen.getByTitle('助手'));
     expect(onChange).toHaveBeenCalledWith(null);
   });
 
   it('点击不同面板图标切换', () => {
     const onChange = vi.fn();
-    renderWithTheme(<ActivityBar activePanel="files" onPanelChange={onChange} />);
+    renderWithProviders(<ActivityBar activePanel="files" onPanelChange={onChange} />);
     fireEvent.click(screen.getByTitle('审核'));
     expect(onChange).toHaveBeenCalledWith('review');
   });

@@ -1,8 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, waitFor } from '@testing-library/react';
-import { ThemeProvider } from '@emotion/react';
-import { lightTheme } from '@agentskillmania/skill-ui-theme';
+import { waitFor } from '@testing-library/react';
+import { renderWithProviders } from './testUtils.js';
 
 // ── Mock @milkdown/utils（replaceAll） ──────────────────
 const mockReplaceAll = vi.fn((markdown: string) => (_ctx: unknown) => markdown);
@@ -52,10 +51,6 @@ vi.mock('@milkdown/crepe/theme/frame.css', () => ({}));
 
 import { VisualEditor } from '../../src/components/EditorArea/VisualEditor.js';
 
-function renderWithTheme(ui: React.ReactElement) {
-  return render(<ThemeProvider theme={lightTheme}>{ui}</ThemeProvider>);
-}
-
 const defaultProps = {
   content: '# 初始标题\n\n初始段落',
   filePath: 'SKILL.md',
@@ -72,7 +67,7 @@ describe('VisualEditor (Crepe 实现)', () => {
   });
 
   it('初始化时创建 Crepe 实例并传入 content 作为 defaultValue', async () => {
-    renderWithTheme(<VisualEditor {...defaultProps} />);
+    renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
@@ -83,7 +78,7 @@ describe('VisualEditor (Crepe 实现)', () => {
   });
 
   it('配置 Placeholder feature', async () => {
-    renderWithTheme(<VisualEditor {...defaultProps} />);
+    renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
@@ -95,7 +90,7 @@ describe('VisualEditor (Crepe 实现)', () => {
   });
 
   it('渲染 Crepe 挂载点容器', async () => {
-    const { container } = renderWithTheme(<VisualEditor {...defaultProps} />);
+    const { container } = renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
@@ -106,7 +101,7 @@ describe('VisualEditor (Crepe 实现)', () => {
     // getMarkdown 返回值与初始 content 一致，避免初始化时触发 content sync
     mockCrepeInstance.getMarkdown.mockReturnValue('# 初始标题\n\n初始段落');
 
-    renderWithTheme(<VisualEditor {...defaultProps} />);
+    renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.on).toHaveBeenCalled());
 
@@ -121,16 +116,14 @@ describe('VisualEditor (Crepe 实现)', () => {
     const onChange = vi.fn();
     mockCrepeInstance.getMarkdown.mockReturnValue('# 旧内容');
 
-    const { rerender } = renderWithTheme(<VisualEditor {...defaultProps} onChange={onChange} />);
+    const { rerender } = renderWithProviders(
+      <VisualEditor {...defaultProps} onChange={onChange} />
+    );
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
     // 模拟 content prop 变化触发 replaceAll（内部变更）
-    rerender(
-      <ThemeProvider theme={lightTheme}>
-        <VisualEditor {...defaultProps} content="# 新内容" onChange={onChange} />
-      </ThemeProvider>
-    );
+    rerender(<VisualEditor {...defaultProps} content="# 新内容" onChange={onChange} />);
 
     // 此时 isInternalChange 应为 true，markdownUpdatedCallback 不应调用 onChange
     if (markdownUpdatedCallback) {
@@ -144,16 +137,12 @@ describe('VisualEditor (Crepe 实现)', () => {
   it('content prop 变化时调用 replaceAll 同步内容（文件切换）', async () => {
     mockCrepeInstance.getMarkdown.mockReturnValue('# 旧内容');
 
-    const { rerender } = renderWithTheme(<VisualEditor {...defaultProps} />);
+    const { rerender } = renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
     // 模拟文件切换
-    rerender(
-      <ThemeProvider theme={lightTheme}>
-        <VisualEditor {...defaultProps} content="# 切换后的内容" />
-      </ThemeProvider>
-    );
+    rerender(<VisualEditor {...defaultProps} content="# 切换后的内容" />);
 
     // 动态 import 是异步的，需要 waitFor
     await waitFor(() => {
@@ -163,7 +152,7 @@ describe('VisualEditor (Crepe 实现)', () => {
   });
 
   it('readOnly=true 时调用 setReadonly(true)', async () => {
-    renderWithTheme(<VisualEditor {...defaultProps} readOnly={true} />);
+    renderWithProviders(<VisualEditor {...defaultProps} readOnly={true} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
@@ -171,24 +160,20 @@ describe('VisualEditor (Crepe 实现)', () => {
   });
 
   it('readOnly 变化时更新 setReadonly', async () => {
-    const { rerender } = renderWithTheme(<VisualEditor {...defaultProps} readOnly={false} />);
+    const { rerender } = renderWithProviders(<VisualEditor {...defaultProps} readOnly={false} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
     mockCrepeInstance.setReadonly.mockClear();
 
     // 切换为只读
-    rerender(
-      <ThemeProvider theme={lightTheme}>
-        <VisualEditor {...defaultProps} readOnly={true} />
-      </ThemeProvider>
-    );
+    rerender(<VisualEditor {...defaultProps} readOnly={true} />);
 
     expect(mockCrepeInstance.setReadonly).toHaveBeenCalledWith(true);
   });
 
   it('卸载时调用 crepe.destroy()', async () => {
-    const { unmount } = renderWithTheme(<VisualEditor {...defaultProps} />);
+    const { unmount } = renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
@@ -201,7 +186,7 @@ describe('VisualEditor (Crepe 实现)', () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockCrepeInstance.destroy.mockRejectedValue(new Error('destroy failed'));
 
-    const { unmount } = renderWithTheme(<VisualEditor {...defaultProps} />);
+    const { unmount } = renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
@@ -216,7 +201,7 @@ describe('VisualEditor (Crepe 实现)', () => {
   });
 
   it('空内容正常初始化', async () => {
-    renderWithTheme(<VisualEditor {...defaultProps} content="" />);
+    renderWithProviders(<VisualEditor {...defaultProps} content="" />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
@@ -230,7 +215,7 @@ describe('VisualEditor (Crepe 实现)', () => {
     const originalCreate = mockCrepeInstance.create;
     mockCrepeInstance.create = vi.fn().mockResolvedValue(null);
 
-    renderWithTheme(<VisualEditor {...defaultProps} />);
+    renderWithProviders(<VisualEditor {...defaultProps} />);
 
     // 由于 rootRef 是通过 ref 获取的，我们需要测试 null 分支
     // 这个分支在实际渲染中很难触发，因为 ref 总会被设置
@@ -248,16 +233,12 @@ describe('VisualEditor (Crepe 实现)', () => {
 
     mockCrepeInstance.getMarkdown.mockReturnValue('# 旧内容');
 
-    const { rerender } = renderWithTheme(<VisualEditor {...defaultProps} />);
+    const { rerender } = renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
     // 触发 content 变化
-    rerender(
-      <ThemeProvider theme={lightTheme}>
-        <VisualEditor {...defaultProps} content="# 新内容" />
-      </ThemeProvider>
-    );
+    rerender(<VisualEditor {...defaultProps} content="# 新内容" />);
 
     // 不应该调用 replaceAll，因为 editor.status !== 'Created'
     await waitFor(() => {
@@ -273,7 +254,7 @@ describe('VisualEditor (Crepe 实现)', () => {
 
   it('crepeRef.current 为 null 时不执行 setReadonly', async () => {
     // 测试 crepe 为 null 的分支
-    const { unmount } = renderWithTheme(<VisualEditor {...defaultProps} />);
+    const { unmount } = renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 

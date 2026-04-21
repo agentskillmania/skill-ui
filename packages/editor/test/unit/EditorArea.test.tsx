@@ -1,14 +1,9 @@
 /** @jsxImportSource @emotion/react */
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ThemeProvider } from '@emotion/react';
-import { lightTheme } from '@agentskillmania/skill-ui-theme';
+import { screen, fireEvent } from '@testing-library/react';
+import { renderWithProviders } from './testUtils.js';
 import React from 'react';
 import { EditorArea } from '../../src/components/EditorArea/EditorArea.js';
-
-function renderWithTheme(ui: React.ReactElement) {
-  return render(<ThemeProvider theme={lightTheme}>{ui}</ThemeProvider>);
-}
 
 // Mock Crepe 以避免完整渲染
 vi.mock('@milkdown/crepe', () => ({
@@ -83,17 +78,17 @@ describe('EditorArea', () => {
   };
 
   it('code 模式渲染 Monaco', () => {
-    renderWithTheme(<EditorArea {...defaultProps} />);
+    renderWithProviders(<EditorArea {...defaultProps} />);
     expect(screen.getByTestId('monaco-editor')).toBeTruthy();
   });
 
   it('code 模式渲染 Monaco', () => {
-    renderWithTheme(<EditorArea {...defaultProps} />);
+    renderWithProviders(<EditorArea {...defaultProps} />);
     expect(screen.getByTestId('monaco-editor')).toBeTruthy();
   });
 
   it('wysiwyg 模式渲染 VisualEditor（Crepe 容器）', () => {
-    const { container } = renderWithTheme(
+    const { container } = renderWithProviders(
       <EditorArea {...defaultProps} mode="wysiwyg" content="# 标题\n\n段落" />
     );
     expect(screen.queryByTestId('monaco-editor')).toBeNull();
@@ -101,19 +96,19 @@ describe('EditorArea', () => {
   });
 
   it('传递 content 到子编辑器', () => {
-    renderWithTheme(<EditorArea {...defaultProps} />);
+    renderWithProviders(<EditorArea {...defaultProps} />);
     expect(screen.getByTestId('monaco-value').textContent).toBe('console.log("hello")');
   });
 
   it('Monaco onMount 回调被正确触发', () => {
-    renderWithTheme(<EditorArea {...defaultProps} />);
+    renderWithProviders(<EditorArea {...defaultProps} />);
     // 等待 onMount 被调用
     expect(mockOnMount).toHaveBeenCalledWith(expect.any(Object));
   });
 
   it('Monaco onChange 处理 undefined 值', () => {
     const onChange = vi.fn();
-    renderWithTheme(<EditorArea {...defaultProps} onChange={onChange} />);
+    renderWithProviders(<EditorArea {...defaultProps} onChange={onChange} />);
 
     const editButton = screen.getByText('mock-edit');
     fireEvent.click(editButton);
@@ -128,7 +123,7 @@ describe('EditorArea', () => {
     // 清除之前的调用记录
     mockAddCommand.mockClear();
 
-    renderWithTheme(
+    renderWithProviders(
       <EditorArea
         content="test content"
         filePath="SKILL.md"

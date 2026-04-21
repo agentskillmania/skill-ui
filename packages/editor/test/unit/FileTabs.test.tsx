@@ -1,14 +1,9 @@
 /** @jsxImportSource @emotion/react */
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ThemeProvider } from '@emotion/react';
-import { lightTheme } from '@agentskillmania/skill-ui-theme';
+import { screen, fireEvent } from '@testing-library/react';
+import { renderWithProviders } from './testUtils.js';
 import { FileTabs } from '../../src/components/FileTabs/FileTabs.js';
 import type { FileTab } from '../../src/types.js';
-
-function renderWithTheme(ui: React.ReactElement) {
-  return render(<ThemeProvider theme={lightTheme}>{ui}</ThemeProvider>);
-}
 
 const sampleTabs: FileTab[] = [
   { path: 'SKILL.md', label: 'SKILL.md' },
@@ -18,7 +13,7 @@ const sampleTabs: FileTab[] = [
 
 describe('FileTabs', () => {
   it('渲染所有标签', () => {
-    renderWithTheme(
+    renderWithProviders(
       <FileTabs
         tabs={sampleTabs}
         activePath="SKILL.md"
@@ -32,7 +27,7 @@ describe('FileTabs', () => {
   });
 
   it('显示未保存标记', () => {
-    renderWithTheme(
+    renderWithProviders(
       <FileTabs
         tabs={sampleTabs}
         activePath="SKILL.md"
@@ -47,7 +42,7 @@ describe('FileTabs', () => {
 
   it('点击标签触发切换', () => {
     const onChange = vi.fn();
-    renderWithTheme(
+    renderWithProviders(
       <FileTabs
         tabs={sampleTabs}
         activePath="SKILL.md"
@@ -62,7 +57,7 @@ describe('FileTabs', () => {
   it('点击关闭按钮触发关闭（不触发切换）', () => {
     const onClose = vi.fn();
     const onChange = vi.fn();
-    renderWithTheme(
+    renderWithProviders(
       <FileTabs
         tabs={sampleTabs}
         activePath="SKILL.md"
@@ -79,7 +74,7 @@ describe('FileTabs', () => {
   });
 
   it('空标签列表正常渲染', () => {
-    renderWithTheme(
+    renderWithProviders(
       <FileTabs tabs={[]} activePath={null} onTabChange={vi.fn()} onTabClose={vi.fn()} />
     );
     // 不应有任何标签文本

@@ -1,30 +1,16 @@
 /** @jsxImportSource @emotion/react */
-import { beforeAll, vi } from 'vitest';
+import { vi } from 'vitest';
 import { describe, it, expect } from 'vitest';
-
-// jsdom 没有 ResizeObserver
-beforeAll(() => {
-  global.ResizeObserver = class ResizeObserver {
-    observe() {}
-    unobserve() {}
-    disconnect() {}
-  };
-});
 
 // Mock chat 组件
 vi.mock('@agentskillmania/skill-ui-chat', () => ({
   MessageList: () => <div data-testid="message-list" />,
   ChatInput: ({ placeholder }: { placeholder: string }) => <span>{placeholder}</span>,
 }));
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ThemeProvider } from '@emotion/react';
-import { lightTheme } from '@agentskillmania/skill-ui-theme';
+import { screen, fireEvent } from '@testing-library/react';
+import { renderWithProviders } from './testUtils.js';
 import { Sidebar } from '../../src/components/Sidebar/Sidebar.js';
 import type { SkillFile, ReviewResult } from '../../src/types.js';
-
-function renderWithTheme(ui: React.ReactElement) {
-  return render(<ThemeProvider theme={lightTheme}>{ui}</ThemeProvider>);
-}
 
 const sampleFiles: SkillFile[] = [
   { path: 'SKILL.md', content: '# Skill' },
@@ -38,7 +24,7 @@ const sampleReview: ReviewResult = {
 
 describe('Sidebar', () => {
   it('面板收起时只显示 ActivityBar', () => {
-    renderWithTheme(
+    renderWithProviders(
       <Sidebar
         activePanel={null}
         files={sampleFiles}
@@ -53,7 +39,7 @@ describe('Sidebar', () => {
   });
 
   it('展开文件面板显示 FileTree', () => {
-    renderWithTheme(
+    renderWithProviders(
       <Sidebar
         activePanel="files"
         files={sampleFiles}
@@ -65,7 +51,7 @@ describe('Sidebar', () => {
   });
 
   it('展开审核面板显示 ReviewPanel', () => {
-    renderWithTheme(
+    renderWithProviders(
       <Sidebar
         activePanel="review"
         files={sampleFiles}
@@ -79,7 +65,7 @@ describe('Sidebar', () => {
   });
 
   it('展开测试面板显示 TestCase', () => {
-    renderWithTheme(
+    renderWithProviders(
       <Sidebar
         activePanel="test"
         files={sampleFiles}
@@ -93,7 +79,7 @@ describe('Sidebar', () => {
 
   it('点击 ActivityBar 图标触发面板切换', () => {
     const onPanel = vi.fn();
-    renderWithTheme(
+    renderWithProviders(
       <Sidebar
         activePanel={null}
         files={sampleFiles}
@@ -106,7 +92,7 @@ describe('Sidebar', () => {
   });
 
   it('展开助手面板显示 AssistantPanel', () => {
-    renderWithTheme(
+    renderWithProviders(
       <Sidebar
         activePanel="assistant"
         files={sampleFiles}
