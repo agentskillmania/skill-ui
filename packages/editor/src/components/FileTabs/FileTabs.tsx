@@ -145,6 +145,7 @@ function TabItem({
           }
         `}
         type="button"
+        aria-label={`关闭 ${tab.label}`}
       >
         <X size={12} />
       </button>
