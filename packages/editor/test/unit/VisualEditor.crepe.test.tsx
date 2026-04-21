@@ -1,46 +1,50 @@
 /** @jsxImportSource @emotion/react */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { ThemeProvider } from '@emotion/react';
 import { lightTheme } from '@agentskillmania/skill-ui-theme';
 
-// Mock Crepe class BEFORE importing the component
+// ── Mock @milkdown/utils（replaceAll） ──────────────────
+const mockReplaceAll = vi.fn((markdown: string) => (_ctx: unknown) => markdown);
+vi.mock('@milkdown/utils', () => ({
+  replaceAll: (...args: unknown[]) => mockReplaceAll(...args),
+  __esModule: true,
+}));
+
+// ── Mock @milkdown/crepe ──────────────────────────
+let markdownUpdatedCallback: ((ctx: unknown, markdown: string, prev: string) => void) | null = null;
+
+const mockEditor = {
+  status: 'Created',
+  action: vi.fn(),
+  view: { setProps: vi.fn() },
+  ctx: { get: vi.fn() },
+};
+
 const mockCrepeInstance = {
-  create: vi.fn(),
-  destroy: vi.fn(() => Promise.resolve(mockCrepeInstance.editor)),
-  on: vi.fn(function(this: typeof mockCrepeInstance, fn: (api: unknown) => void) {
-    // Simulate calling the listener function with a mock ListenerManager
-    const mockListenerManager = {
-      markdownUpdated: vi.fn((callback: (ctx: unknown, markdown: string, prevMarkdown: string) => void) => {
-        // 保存回调以便测试使用
-        (mockCrepeInstance as unknown as { markdownUpdatedCallback: typeof callback }).markdownUpdatedCallback = callback;
-      }),
+  create: vi.fn().mockResolvedValue(mockEditor),
+  destroy: vi.fn().mockResolvedValue(mockEditor),
+  on: vi.fn((_fn: (api: unknown) => void) => {
+    const mockListener = {
+      markdownUpdated: (cb: (ctx: unknown, md: string, prev: string) => void) => {
+        markdownUpdatedCallback = cb;
+        return mockListener;
+      },
     };
-    fn(mockListenerManager);
-    return this;
+    _fn(mockListener);
+    return mockCrepeInstance;
   }),
-  getMarkdown: vi.fn(() => '# initial content'),
-  setReadonly: vi.fn(function(this: typeof mockCrepeInstance, value: boolean) {
-    this.readonly = value;
-    return this;
-  }),
-  readonly: false,
-  editor: {
-    view: {
-      setProps: vi.fn(),
-    },
-    ctx: {
-      get: vi.fn(),
-    },
-  },
+  getMarkdown: vi.fn(() => '# 初始内容'),
+  setReadonly: vi.fn(),
+  get editor() { return mockEditor; },
+  get readonly() { return false; },
 };
 
 vi.mock('@milkdown/crepe', () => ({
-  Crepe: vi.fn(function() {
-    return mockCrepeInstance;
-  }),
-  __esModule: true,
+  Crepe: vi.fn().mockImplementation(() => mockCrepeInstance),
 }));
+
+vi.mock('@milkdown/crepe/theme/frame.css', () => ({}));
 
 import { VisualEditor } from '../../src/components/EditorArea/VisualEditor.js';
 
@@ -50,7 +54,7 @@ function renderWithTheme(ui: React.ReactElement) {
 
 const defaultProps = {
   content: '# 初始标题\n\n初始段落',
-  filePath: 'test.md',
+  filePath: 'SKILL.md',
   mode: 'wysiwyg' as const,
   onChange: vi.fn(),
 };
@@ -58,124 +62,146 @@ const defaultProps = {
 describe('VisualEditor (Crepe 实现)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Reset mock instance state
-    mockCrepeInstance.readonly = false;
-    mockCrepeInstance.create.mockResolvedValue(mockCrepeInstance.editor);
-    mockCrepeInstance.getMarkdown.mockReturnValue('# initial content');
+    markdownUpdatedCallback = null;
+    mockCrepeInstance.getMarkdown.mockReturnValue('# 初始内容');
+    mockEditor.action.mockReset();
   });
 
   it('初始化时创建 Crepe 实例并传入 content 作为 defaultValue', async () => {
     renderWithTheme(<VisualEditor {...defaultProps} />);
 
-    await waitFor(() => {
-      expect(mockCrepeInstance.create).toHaveBeenCalled();
-    });
+    await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
-    // 验证 Crepe 构造函数被调用（通过 mock 的直接验证）
-    // 不需要 require，直接验证 mock 调用
     const { Crepe } = vi.mocked(await import('@milkdown/crepe'));
-    expect(Crepe).toHaveBeenCalled();
-    const crepeCall = Crepe.mock.calls[0] as [Record<string, unknown>];
-    expect(crepeCall[0].root).toBeTruthy();
-    expect(crepeCall[0].defaultValue).toBe(defaultProps.content);
+    const call = Crepe.mock.calls[0] as [Record<string, unknown>];
+    expect(call[0].root).toBeTruthy();
+    expect(call[0].defaultValue).toBe('# 初始标题\n\n初始段落');
   });
 
-  it('启用正确的 featureConfigs（Placeholder）', async () => {
+  it('配置 Placeholder feature', async () => {
     renderWithTheme(<VisualEditor {...defaultProps} />);
 
-    await waitFor(() => {
-      expect(mockCrepeInstance.create).toHaveBeenCalled();
-    });
+    await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
     const { Crepe } = vi.mocked(await import('@milkdown/crepe'));
-    const crepeCall = Crepe.mock.calls[0] as [Record<string, unknown>];
-    expect(crepeCall[0].featureConfigs).toBeDefined();
-    expect(crepeCall[0].featureConfigs.placeholder).toEqual({
-      text: '输入 / 唤起菜单，或直接开始写作...',
+    const call = Crepe.mock.calls[0] as [Record<string, unknown>];
+    expect(call[0].featureConfigs).toEqual({
+      placeholder: { text: '输入 / 唤起菜单，或直接开始写作...' },
     });
   });
 
   it('渲染 Crepe 挂载点容器', async () => {
     const { container } = renderWithTheme(<VisualEditor {...defaultProps} />);
 
-    await waitFor(() => {
-      expect(mockCrepeInstance.create).toHaveBeenCalled();
-    });
+    await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
-    // 验证容器元素存在（data-crepe-root 属性或 ref）
-    const rootElement = container.querySelector('[data-crepe-root]');
-    expect(rootElement).toBeTruthy();
+    expect(container.querySelector('[data-crepe-root]')).toBeTruthy();
   });
 
-  it('readOnly=true 时编辑器不可编辑', async () => {
+  it('用户编辑触发 onChange 回调', async () => {
+    // getMarkdown 返回值与初始 content 一致，避免初始化时触发 content sync
+    mockCrepeInstance.getMarkdown.mockReturnValue('# 初始标题\n\n初始段落');
+
+    renderWithTheme(<VisualEditor {...defaultProps} />);
+
+    await waitFor(() => expect(mockCrepeInstance.on).toHaveBeenCalled());
+
+    // 模拟用户编辑
+    expect(markdownUpdatedCallback).toBeTruthy();
+    markdownUpdatedCallback!({}, '# 新内容', '# 初始标题\n\n初始段落');
+
+    expect(defaultProps.onChange).toHaveBeenCalledWith('# 新内容');
+  });
+
+  it('内部变更时不触发 onChange（防循环）', async () => {
+    const onChange = vi.fn();
+    mockCrepeInstance.getMarkdown.mockReturnValue('# 旧内容');
+
+    const { rerender } = renderWithTheme(
+      <VisualEditor {...defaultProps} onChange={onChange} />
+    );
+
+    await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
+
+    // 模拟 content prop 变化触发 replaceAll（内部变更）
+    rerender(
+      <ThemeProvider theme={lightTheme}>
+        <VisualEditor {...defaultProps} content="# 新内容" onChange={onChange} />
+      </ThemeProvider>
+    );
+
+    // 此时 isInternalChange 应为 true，markdownUpdatedCallback 不应调用 onChange
+    if (markdownUpdatedCallback) {
+      markdownUpdatedCallback({}, '# 新内容', '# 旧内容');
+    }
+
+    // 不应调用，因为 isInternalChange 标记生效
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('content prop 变化时调用 replaceAll 同步内容（文件切换）', async () => {
+    mockCrepeInstance.getMarkdown.mockReturnValue('# 旧内容');
+
+    const { rerender } = renderWithTheme(<VisualEditor {...defaultProps} />);
+
+    await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
+
+    // 模拟文件切换
+    rerender(
+      <ThemeProvider theme={lightTheme}>
+        <VisualEditor {...defaultProps} content="# 切换后的内容" />
+      </ThemeProvider>
+    );
+
+    // 动态 import 是异步的，需要 waitFor
+    await waitFor(() => {
+      expect(mockReplaceAll).toHaveBeenCalledWith('# 切换后的内容');
+      expect(mockEditor.action).toHaveBeenCalled();
+    });
+  });
+
+  it('readOnly=true 时调用 setReadonly(true)', async () => {
     renderWithTheme(<VisualEditor {...defaultProps} readOnly={true} />);
 
-    await waitFor(() => {
-      expect(mockCrepeInstance.create).toHaveBeenCalled();
-    });
+    await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
-    // 验证 editor.view.setProps({ editable: () => false })
-    expect(mockCrepeInstance.editor.view.setProps).toHaveBeenCalledWith(
-      expect.objectContaining({
-        editable: expect.any(Function),
-      })
-    );
+    expect(mockCrepeInstance.setReadonly).toHaveBeenCalledWith(true);
   });
 
-  it('readOnly=false 时编辑器可编辑', async () => {
-    renderWithTheme(<VisualEditor {...defaultProps} readOnly={false} />);
+  it('readOnly 变化时更新 setReadonly', async () => {
+    const { rerender } = renderWithTheme(<VisualEditor {...defaultProps} readOnly={false} />);
 
-    await waitFor(() => {
-      expect(mockCrepeInstance.create).toHaveBeenCalled();
-    });
+    await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
-    // 验证编辑器可编辑状态
-    expect(mockCrepeInstance.editor.view.setProps).toHaveBeenCalledWith(
-      expect.objectContaining({
-        editable: expect.any(Function),
-      })
+    mockCrepeInstance.setReadonly.mockClear();
+
+    // 切换为只读
+    rerender(
+      <ThemeProvider theme={lightTheme}>
+        <VisualEditor {...defaultProps} readOnly={true} />
+      </ThemeProvider>
     );
+
+    expect(mockCrepeInstance.setReadonly).toHaveBeenCalledWith(true);
   });
 
   it('卸载时调用 crepe.destroy()', async () => {
     const { unmount } = renderWithTheme(<VisualEditor {...defaultProps} />);
 
-    await waitFor(() => {
-      expect(mockCrepeInstance.create).toHaveBeenCalled();
-    });
+    await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
     unmount();
 
     expect(mockCrepeInstance.destroy).toHaveBeenCalled();
   });
 
-  it('用户编辑触发 onChange 回调', async () => {
-    renderWithTheme(<VisualEditor {...defaultProps} />);
-
-    await waitFor(() => {
-      expect(mockCrepeInstance.on).toHaveBeenCalled();
-    });
-
-    // 获取 markdownUpdated 回调并模拟用户编辑
-    const markdownUpdatedCallback = (mockCrepeInstance as unknown as { markdownUpdatedCallback?: (ctx: unknown, markdown: string, prevMarkdown: string) => void }).markdownUpdatedCallback;
-    expect(markdownUpdatedCallback).toBeDefined();
-
-    if (markdownUpdatedCallback) {
-      markdownUpdatedCallback({}, '# 新内容', '# 初始标题\n\n初始段落');
-
-      expect(defaultProps.onChange).toHaveBeenCalledWith('# 新内容');
-    }
-  });
-
   it('空内容正常初始化', async () => {
     renderWithTheme(<VisualEditor {...defaultProps} content="" />);
 
-    await waitFor(() => {
-      expect(mockCrepeInstance.create).toHaveBeenCalled();
-    });
+    await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
     const { Crepe } = vi.mocked(await import('@milkdown/crepe'));
-    const crepeCall = Crepe.mock.calls[0] as [Record<string, unknown>];
-    expect(crepeCall[0].defaultValue).toBe('');
+    const call = Crepe.mock.calls[0] as [Record<string, unknown>];
+    expect(call[0].defaultValue).toBe('');
   });
 });

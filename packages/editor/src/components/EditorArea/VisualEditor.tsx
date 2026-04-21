@@ -1,17 +1,18 @@
 /**
  * 可视化编辑器（基于 @milkdown/crepe）
  *
- * 使用 Crepe 提供的 WYSIWYG Markdown 编辑功能
+ * 使用 Crepe 提供的 WYSIWYG Markdown 编辑功能，
+ * 包括格式工具栏、斜杠命令、块拖拽、表格、链接编辑等。
  */
 import '@milkdown/crepe/theme/frame.css';
 import { css } from '@emotion/react';
-import { useEffect, useRef, useState } from 'react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
-// @ts-ignore - @milkdown/crepe types are not properly exported in package.json
+import { useEffect, useRef } from 'react';
+// @ts-ignore — @milkdown/crepe 的 package.json exports 未正确声明类型
 import { Crepe } from '@milkdown/crepe';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { EditorAreaProps } from '../../types.js';
 
-// 定义 ListenerManager 类型（简化版）
+/** listenerCtx 的 ListenerManager 类型（简化版） */
 interface ListenerManager {
   markdownUpdated: (
     callback: (ctx: unknown, markdown: string, prevMarkdown: string) => void,
@@ -30,15 +31,16 @@ export function VisualEditor({
   const theme = useTheme();
   const rootRef = useRef<HTMLDivElement>(null);
   const crepeRef = useRef<Crepe | null>(null);
-  const [isInternalChange, setIsInternalChange] = useState(false);
-  const [isEditorReady, setIsEditorReady] = useState(false);
+  const isInternalChange = useRef(false);
+  const onChangeRef = useRef(onChange);
 
+  // 保持 onChange 引用最新，避免闭包过期
+  onChangeRef.current = onChange;
+
+  // 初始化 Crepe
   useEffect(() => {
-    if (!rootRef.current) {
-      return;
-    }
+    if (!rootRef.current) return;
 
-    // 创建 Crepe 实例
     const crepe = new Crepe({
       root: rootRef.current,
       defaultValue: content,
@@ -51,91 +53,62 @@ export function VisualEditor({
 
     crepeRef.current = crepe;
 
-    // 初始化编辑器
     const initEditor = async () => {
       await crepe.create();
 
       // 绑定 onChange 回调
       crepe.on((listener: ListenerManager) => {
-        listener.markdownUpdated((_ctx: unknown, markdown: string, _prevMarkdown: string) => {
-          // 防止循环：如果是内部触发的更新（通过 props），不调用 onChange
-          if (isInternalChange) {
+        listener.markdownUpdated((_ctx: unknown, markdown: string, _prev: string) => {
+          // isInternalChange 标记会在 content 同步 useEffect 中重置，
+          // 这里用 setTimeout(0) 确保 replaceAll 完成后才重置
+          if (isInternalChange.current) {
+            isInternalChange.current = false;
             return;
           }
-
-          onChange(markdown);
+          onChangeRef.current(markdown);
         });
       });
 
-      // 设置只读状态
-      const editor = crepe.editor;
-      if (editor.view) {
-        const editableState = readOnly
-          ? () => false
-          : () => true;
-
-        editor.view.setProps({
-          editable: editableState,
-        });
-      }
-
-      setIsEditorReady(true);
+      // 设置初始只读状态
+      crepe.setReadonly(readOnly);
     };
 
     initEditor();
 
-    // 清理函数
     return () => {
-      const destroyPromise = crepe.destroy();
-      if (destroyPromise && typeof destroyPromise.catch === 'function') {
-        destroyPromise.catch((error: unknown) => {
-          console.error('Failed to destroy Crepe editor:', error);
-        });
-      }
+      crepe.destroy().catch((err: unknown) => {
+        console.error('销毁 Crepe 编辑器失败:', err);
+      });
+      crepeRef.current = null;
     };
-    // 只在挂载时运行，不依赖 content 和 onChange
+    // 仅挂载时执行
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 处理 content prop 变化（文件切换场景）
+  // content prop 变化 → 同步到 Crepe（文件切换场景）
   useEffect(() => {
-    if (!crepeRef.current || !isEditorReady || isInternalChange) {
-      return;
-    }
+    const crepe = crepeRef.current;
+    if (!crepe) return;
 
-    const currentMarkdown = crepeRef.current.getMarkdown();
-    if (currentMarkdown !== content) {
-      // 标记为内部更新，防止触发 onChange
-      setIsInternalChange(true);
+    const editor = crepe.editor;
+    if (editor?.status !== 'Created') return;
 
-      // 注意：Crepe 没有提供直接的 setContent 方法
-      // 这里我们跳过内容同步，因为重新创建编辑器成本太高
-      // 在实际使用中，文件切换时会重新挂载组件
-
-      // 重置内部更新标记
-      setTimeout(() => {
-        setIsInternalChange(false);
-      }, 0);
-    }
-  }, [content, isInternalChange, isEditorReady]);
-
-  // 处理 readOnly prop 变化
-  useEffect(() => {
-    if (!crepeRef.current || !isEditorReady) {
-      return;
-    }
-
-    const editor = crepeRef.current.editor;
-    if (editor.view) {
-      const editableState = readOnly
-        ? () => false
-        : () => true;
-
-      editor.view.setProps({
-        editable: editableState,
+    const currentMd = crepe.getMarkdown();
+    if (currentMd !== content) {
+      isInternalChange.current = true;
+      // @ts-ignore — replaceAll 存在于运行时但类型定义解析有问题
+      import('@milkdown/utils').then((utils: { replaceAll: (md: string) => (ctx: unknown) => void }) => {
+        editor.action(utils.replaceAll(content));
       });
     }
-  }, [readOnly, isEditorReady]);
+  }, [content]);
+
+  // readOnly 变化 → 同步到 Crepe
+  useEffect(() => {
+    const crepe = crepeRef.current;
+    if (!crepe) return;
+    crepe.setReadonly(!!readOnly);
+  }, [readOnly]);
 
   return (
     <div
@@ -143,7 +116,6 @@ export function VisualEditor({
         height: 100%;
         overflow-y: auto;
         padding: ${theme.spacing[3]} ${theme.spacing[4]};
-        color: ${theme.color.text};
       `}
     >
       <div
@@ -152,7 +124,6 @@ export function VisualEditor({
         css={css`
           min-height: 200px;
           outline: none;
-          font-size: ${theme.font.size.sm};
         `}
       />
     </div>
