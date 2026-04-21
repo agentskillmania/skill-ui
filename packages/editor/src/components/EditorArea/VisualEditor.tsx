@@ -97,11 +97,9 @@ export function VisualEditor({
     if (currentMd !== content) {
       isInternalChange.current = true;
       // @ts-ignore — replaceAll 存在于运行时但类型定义解析有问题
-      import('@milkdown/utils').then(
-        (utils: any) => {
-          editor.action(utils.replaceAll(content));
-        }
-      );
+      import('@milkdown/utils').then((utils: any) => {
+        editor.action(utils.replaceAll(content));
+      });
     }
   }, [content]);
 

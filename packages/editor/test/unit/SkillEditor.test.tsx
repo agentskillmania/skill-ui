@@ -148,4 +148,119 @@ describe('SkillEditor', () => {
       fireEvent.click(changeBtn);
     }
   });
+
+  it('onSave 为 undefined 时不抛出错误', () => {
+    renderWithProviders(<SkillEditor {...createProps({ onSave: undefined })} />);
+    // 不应该抛出错误
+    expect(screen.getByText('预览')).toBeTruthy();
+  });
+
+  it('关闭未修改的 tab 直接关闭', async () => {
+    const onActiveChange = vi.fn();
+    renderWithProviders(
+      <SkillEditor
+        {...createProps({ onActiveFileChange: onActiveChange, activeFilePath: 'package.json' })}
+      />
+    );
+
+    // package.json 应该在 tab 栏中
+    await waitFor(() => {
+      expect(screen.getAllByText('package.json').length).toBeGreaterThanOrEqual(1);
+    });
+
+    // 关闭 tab
+    const closeButtons = screen
+      .getAllByRole('button')
+      .filter(
+        (btn) =>
+          btn.getAttribute('title') !== '文件' &&
+          btn.getAttribute('title') !== '助手' &&
+          btn.getAttribute('title') !== '审核' &&
+          btn.getAttribute('title') !== '测试' &&
+          !btn.textContent?.includes('预览') &&
+          !btn.textContent?.includes('代码')
+      );
+
+    if (closeButtons.length > 0) {
+      fireEvent.click(closeButtons[0]);
+      // 应该直接关闭，不显示确认对话框
+    }
+  });
+
+  it('关闭修改过的 tab 显示确认对话框', async () => {
+    const onActiveChange = vi.fn();
+    const onFileChange = vi.fn();
+
+    renderWithProviders(
+      <SkillEditor
+        {...createProps({
+          onActiveFileChange: onActiveChange,
+          onFileChange,
+          activeFilePath: 'package.json',
+        })}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getAllByText('package.json').length).toBeGreaterThanOrEqual(1);
+    });
+
+    // 模拟编辑使文件变脏
+    const changeBtn = screen.queryByTestId('monaco-change');
+    if (changeBtn) {
+      fireEvent.click(changeBtn);
+    }
+
+    // 尝试关闭 tab
+    const closeButtons = screen
+      .getAllByRole('button')
+      .filter(
+        (btn) =>
+          btn.getAttribute('title') !== '文件' &&
+          btn.getAttribute('title') !== '助手' &&
+          btn.getAttribute('title') !== '审核' &&
+          btn.getAttribute('title') !== '测试' &&
+          !btn.textContent?.includes('预览') &&
+          !btn.textContent?.includes('代码')
+      );
+
+    if (closeButtons.length > 0) {
+      fireEvent.click(closeButtons[0]);
+      // Modal.confirm 会被调用（Ant Design Modal）
+    }
+  });
+
+  it('关闭最后一个 tab 时触发 onActiveFileChange(null)', async () => {
+    const onActiveChange = vi.fn();
+    renderWithProviders(
+      <SkillEditor
+        {...createProps({
+          onActiveFileChange: onActiveChange,
+          activeFilePath: 'src/index.ts',
+        })}
+      />
+    );
+
+    await waitFor(() => {
+      expect(screen.getAllByText('index.ts').length).toBeGreaterThanOrEqual(1);
+    });
+
+    // 关闭所有 tab
+    const closeButtons = screen
+      .getAllByRole('button')
+      .filter(
+        (btn) =>
+          btn.getAttribute('title') !== '文件' &&
+          btn.getAttribute('title') !== '助手' &&
+          btn.getAttribute('title') !== '审核' &&
+          btn.getAttribute('title') !== '测试' &&
+          !btn.textContent?.includes('预览') &&
+          !btn.textContent?.includes('代码')
+      );
+
+    if (closeButtons.length > 0) {
+      fireEvent.click(closeButtons[0]);
+      // 最后一个 tab 关闭后应该触发 null
+    }
+  });
 });

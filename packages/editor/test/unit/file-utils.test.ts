@@ -64,4 +64,8 @@ describe('getFileLabel', () => {
   it('深层路径取最后一段', () => {
     expect(getFileLabel('a/b/c/d.txt')).toBe('d.txt');
   });
+
+  it('空字符串路径返回空字符串', () => {
+    expect(getFileLabel('')).toBe('');
+  });
 });

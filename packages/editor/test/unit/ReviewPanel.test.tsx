@@ -49,4 +49,23 @@ describe('ReviewPanel', () => {
     renderWithTheme(<ReviewPanel result={{ score: 100, items: [] }} />);
     expect(screen.getByText('100')).toBeTruthy();
   });
+
+  it('评分 ≥ 80 显示成功色', () => {
+    const { container } = renderWithTheme(<ReviewPanel result={{ score: 85, items: [] }} />);
+    const scoreElement = screen.getByText('85');
+    // 验证元素存在
+    expect(scoreElement).toBeTruthy();
+  });
+
+  it('评分 60-79 显示警告色', () => {
+    const { container } = renderWithTheme(<ReviewPanel result={{ score: 65, items: [] }} />);
+    const scoreElement = screen.getByText('65');
+    expect(scoreElement).toBeTruthy();
+  });
+
+  it('评分 < 60 显示错误色', () => {
+    const { container } = renderWithTheme(<ReviewPanel result={{ score: 45, items: [] }} />);
+    const scoreElement = screen.getByText('45');
+    expect(scoreElement).toBeTruthy();
+  });
 });

@@ -92,4 +92,44 @@ describe('StatusBar', () => {
     fireEvent.click(screen.getByText('预览'));
     expect(onChange).toHaveBeenCalledWith('wysiwyg');
   });
+
+  it('wysiwyg 模式点击按钮切换到 code', () => {
+    const onChange = vi.fn();
+    renderWithTheme(
+      <StatusBar
+        filePath="src/index.ts"
+        editMode="wysiwyg"
+        cursorPosition={null}
+        onEditModeChange={onChange}
+      />
+    );
+    fireEvent.click(screen.getByText('代码'));
+    expect(onChange).toHaveBeenCalledWith('code');
+  });
+
+  it('光标位置为 null 时不显示', () => {
+    renderWithTheme(
+      <StatusBar
+        filePath="src/index.ts"
+        editMode="code"
+        cursorPosition={null}
+        onEditModeChange={vi.fn()}
+      />
+    );
+    expect(screen.queryByText(/行 \d+/)).toBeNull();
+    expect(screen.queryByText(/列 \d+/)).toBeNull();
+  });
+
+  it('isDirty 为 false 时不显示未保存标记', () => {
+    renderWithTheme(
+      <StatusBar
+        filePath="src/index.ts"
+        editMode="code"
+        cursorPosition={null}
+        isDirty={false}
+        onEditModeChange={vi.fn()}
+      />
+    );
+    expect(screen.queryByText('未保存')).toBeNull();
+  });
 });
