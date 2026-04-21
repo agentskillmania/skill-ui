@@ -5,7 +5,10 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "files": ["dist", "README.md"],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -35,6 +38,7 @@
     "@agentskillmania/skill-ui-chat": "workspace:*",
     "@agentskillmania/skill-ui-theme": "workspace:*",
     "@emotion/react": "^11.14.0",
+    "@milkdown/crepe": "^7.20.0",
     "@monaco-editor/react": "^4.7.0",
     "lucide-react": "^0.460.0"
   },
