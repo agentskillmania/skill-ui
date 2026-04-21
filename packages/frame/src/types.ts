@@ -85,6 +85,9 @@ export interface WorkspaceCard {
   icon?: ReactNode;
 }
 
+/** Workspace 启动页布局模式 */
+export type WorkspaceLayoutMode = 'list' | 'mondrian';
+
 /** WorkspaceLauncher 组件属性 */
 export interface WorkspaceLauncherProps {
   /** Workspace 卡片列表 */
@@ -93,4 +96,6 @@ export interface WorkspaceLauncherProps {
   onSelect: (id: string) => void;
   /** 新建回调 */
   onCreate?: () => void;
+  /** 布局模式，默认 'list' */
+  layoutMode?: WorkspaceLayoutMode;
 }

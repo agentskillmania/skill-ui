@@ -29,12 +29,32 @@ const sampleWorkspaces = [
   },
 ];
 
+/** 超过 5 个 workspace 时自动显示搜索框 */
+const manyWorkspaces = Array.from({ length: 8 }, (_, i) => ({
+  id: `ws-${i + 1}`,
+  name: `workspace-${i + 1}`,
+  description: `第 ${i + 1} 个项目`,
+  lastOpened: new Date(Date.now() - i * 86400_000).toISOString(),
+}));
+
+/** 带图标的 workspaces */
+const iconWorkspaces = [
+  { id: 'bot', name: 'my-agent', icon: <Bot size={16} />, lastOpened: new Date().toISOString() },
+  {
+    id: 'folder',
+    name: 'data-files',
+    icon: <FolderOpen size={16} />,
+    lastOpened: new Date(Date.now() - 3600_000).toISOString(),
+  },
+];
+
 const meta: Meta<typeof WorkspaceLauncher> = {
   title: 'Frame/WorkspaceLauncher',
   component: WorkspaceLauncher,
   argTypes: {
     onSelect: { action: 'select' },
     onCreate: { action: 'create' },
+    layoutMode: { control: 'radio', options: ['list', 'mondrian'] },
   },
 };
 
@@ -46,24 +66,28 @@ export const Default: Story = {
 };
 
 export const WithIcons: Story = {
-  args: {
-    workspaces: [
-      { id: '1', name: 'my-agent', icon: <Bot size={16} />, lastOpened: new Date().toISOString() },
-      {
-        id: '2',
-        name: 'data-files',
-        icon: <FolderOpen size={16} />,
-        lastOpened: new Date(Date.now() - 3600_000).toISOString(),
-      },
-    ],
-  },
+  args: { workspaces: iconWorkspaces },
 };
 
 export const Empty: Story = {
   args: { workspaces: [] },
 };
 
-export const WithoutCreate: Story = {
-  args: { workspaces: sampleWorkspaces },
-  // onCreate 不传，不显示新建按钮
+export const ManyWorkspaces: Story = {
+  args: { workspaces: manyWorkspaces, onCreate: () => {} },
+};
+
+export const Mondrian: Story = {
+  args: { workspaces: manyWorkspaces, layoutMode: 'mondrian', onCreate: () => {} },
+};
+
+export const MondrianFew: Story = {
+  args: { workspaces: sampleWorkspaces, layoutMode: 'mondrian' },
+};
+
+export const MondrianWithIcons: Story = {
+  args: {
+    workspaces: [...iconWorkspaces, ...manyWorkspaces.slice(2, 8)],
+    layoutMode: 'mondrian',
+  },
 };

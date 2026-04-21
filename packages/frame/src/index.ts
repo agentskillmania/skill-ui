@@ -9,6 +9,7 @@ export type {
   TrafficLightsProps,
   AppBrandProps,
   WorkspaceCard,
+  WorkspaceLayoutMode,
   WorkspaceLauncherProps,
 } from './types.js';
 
