@@ -1,128 +1,31 @@
 /** @jsxImportSource @emotion/react */
 /**
  * WorkspaceLauncher 组件
- * 未选择 workspace 时的启动页，展示最近 workspace 卡片 + 新建按钮
+ * 未选择 workspace 时的启动页，搜索 + 卡片列表 + 新建按钮
  */
+import { useState, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { Plus, Clock } from 'lucide-react';
-import { useTheme, card, textTruncate } from '@agentskillmania/skill-ui-theme';
+import { Clock } from 'lucide-react';
+import { Card, Input, Empty, Button } from 'antd';
+import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { WorkspaceLauncherProps, WorkspaceCard as WorkspaceCardData } from '../../types.js';
 
-/** 单张 workspace 卡片 */
-function WorkspaceCardItem({
-  workspace,
-  onSelect,
-}: {
-  workspace: WorkspaceCardData;
-  onSelect: (id: string) => void;
-}) {
-  const theme = useTheme();
-
-  return (
-    <button
-      css={[
-        card(theme),
-        css`
-          display: flex;
-          align-items: center;
-          gap: ${theme.spacing['3']};
-          width: 100%;
-          padding: ${theme.spacing['3']} ${theme.spacing['4']};
-          cursor: pointer;
-          text-align: left;
-          border: 1px solid ${theme.color.border};
-          border-radius: ${theme.radius.lg};
-          background: ${theme.color.bgContainer};
-          transition:
-            border-color ${theme.motion.duration.fast},
-            box-shadow ${theme.motion.duration.fast};
-
-          &:hover {
-            border-color: ${theme.color.primary};
-            box-shadow: 0 0 0 1px ${theme.color.primary};
-          }
-        `,
-      ]}
-      onClick={() => onSelect(workspace.id)}
-      type="button"
-      aria-label={`打开 ${workspace.name}`}
-    >
-      {/* 图标 */}
-      {workspace.icon && (
-        <div
-          css={css`
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: ${theme.radius.md};
-            background: ${theme.color.primaryBg};
-            color: ${theme.color.primary};
-            flex-shrink: 0;
-          `}
-        >
-          {workspace.icon}
-        </div>
-      )}
-
-      {/* 信息 */}
-      <div
-        css={css`
-          flex: 1;
-          min-width: 0;
-        `}
-      >
-        <div
-          css={[
-            textTruncate(theme),
-            css`
-              font-size: ${theme.font.size.lg};
-              font-weight: 600;
-              color: ${theme.color.text};
-            `,
-          ]}
-        >
-          {workspace.name}
-        </div>
-        {workspace.description && (
-          <div
-            css={[
-              textTruncate(theme),
-              css`
-                font-size: ${theme.font.size.sm};
-                color: ${theme.color.textTertiary};
-                margin-top: ${theme.spacing['0.5']};
-              `,
-            ]}
-          >
-            {workspace.description}
-          </div>
-        )}
-      </div>
-
-      {/* 最后打开时间 */}
-      {workspace.lastOpened && (
-        <div
-          css={css`
-            display: flex;
-            align-items: center;
-            gap: ${theme.spacing['1']};
-            font-size: ${theme.font.size.xs};
-            color: ${theme.color.textQuaternary};
-            flex-shrink: 0;
-          `}
-        >
-          <Clock size={12} />
-          {formatRelativeTime(workspace.lastOpened)}
-        </div>
-      )}
-    </button>
-  );
-}
+/** 卡片列表最大高度 */
+const LIST_MAX_HEIGHT = '400px';
 
 export function WorkspaceLauncher({ workspaces, onSelect, onCreate }: WorkspaceLauncherProps) {
   const theme = useTheme();
+  const [search, setSearch] = useState('');
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return workspaces;
+    const keyword = search.trim().toLowerCase();
+    return workspaces.filter(
+      (ws) =>
+        ws.name.toLowerCase().includes(keyword) || ws.description?.toLowerCase().includes(keyword)
+    );
+  }, [workspaces, search]);
 
   return (
     <div
@@ -155,6 +58,22 @@ export function WorkspaceLauncher({ workspaces, onSelect, onCreate }: WorkspaceL
         选择一个已有的 workspace，或创建新的
       </p>
 
+      {/* 搜索框 */}
+      {workspaces.length > 5 && (
+        <Input
+          prefix={<SearchOutlined />}
+          placeholder="搜索 workspace..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          allowClear
+          css={css`
+            width: 100%;
+            max-width: 480px;
+            margin-bottom: ${theme.spacing['3']};
+          `}
+        />
+      )}
+
       {/* 卡片列表 */}
       <div
         css={css`
@@ -163,45 +82,148 @@ export function WorkspaceLauncher({ workspaces, onSelect, onCreate }: WorkspaceL
           gap: ${theme.spacing['2']};
           width: 100%;
           max-width: 480px;
+          max-height: ${LIST_MAX_HEIGHT};
+          overflow-y: auto;
+          padding: ${theme.spacing['1']};
         `}
       >
-        {workspaces.map((ws) => (
-          <WorkspaceCardItem key={ws.id} workspace={ws} onSelect={onSelect} />
-        ))}
+        {filtered.length > 0 ? (
+          filtered.map((ws) => <WorkspaceCardItem key={ws.id} workspace={ws} onSelect={onSelect} />)
+        ) : (
+          <Empty
+            description={search ? '没有匹配的 workspace' : '暂无 workspace'}
+            css={css`
+              margin: ${theme.spacing['8']} 0;
+            `}
+          />
+        )}
       </div>
 
       {/* 新建按钮 */}
       {onCreate && (
-        <button
+        <Button
+          type="dashed"
+          icon={<PlusOutlined />}
+          onClick={onCreate}
+          css={css`
+            margin-top: ${theme.spacing['4']};
+          `}
+        >
+          新建 Workspace
+        </Button>
+      )}
+    </div>
+  );
+}
+
+/** 单张 workspace 卡片 */
+function WorkspaceCardItem({
+  workspace,
+  onSelect,
+}: {
+  workspace: WorkspaceCardData;
+  onSelect: (id: string) => void;
+}) {
+  const theme = useTheme();
+
+  return (
+    <Card
+      hoverable
+      size="small"
+      onClick={() => onSelect(workspace.id)}
+      css={css`
+        cursor: pointer;
+        border-color: ${theme.color.border};
+        box-shadow: ${theme.shadow.sm};
+        border-radius: ${theme.radius.lg};
+        transition:
+          border-color ${theme.motion.duration.fast},
+          box-shadow ${theme.motion.duration.fast};
+
+        &:hover {
+          border-color: ${theme.color.primary} !important;
+          box-shadow: 0 0 0 1px ${theme.color.primary} !important;
+        }
+
+        .ant-card-body {
+          display: flex;
+          align-items: center;
+          gap: ${theme.spacing['3']};
+          padding: ${theme.spacing['3']} ${theme.spacing['4']};
+        }
+      `}
+    >
+      {/* 图标 */}
+      {workspace.icon && (
+        <div
+          css={css`
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: ${theme.radius.md};
+            background: ${theme.color.primaryBg};
+            color: ${theme.color.primary};
+            flex-shrink: 0;
+          `}
+        >
+          {workspace.icon}
+        </div>
+      )}
+
+      {/* 信息 */}
+      <div
+        css={css`
+          flex: 1;
+          min-width: 0;
+        `}
+      >
+        <div
+          css={css`
+            font-size: ${theme.font.size.lg};
+            font-weight: 600;
+            color: ${theme.color.text};
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+          `}
+        >
+          {workspace.name}
+        </div>
+        {workspace.description && (
+          <div
+            css={css`
+              font-size: ${theme.font.size.sm};
+              color: ${theme.color.textTertiary};
+              margin-top: ${theme.spacing['0.5']};
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            `}
+          >
+            {workspace.description}
+          </div>
+        )}
+      </div>
+
+      {/* 最后打开时间 */}
+      {workspace.lastOpened && (
+        <div
           css={css`
             display: flex;
             align-items: center;
-            gap: ${theme.spacing['2']};
-            margin-top: ${theme.spacing['6']};
-            padding: ${theme.spacing['2']} ${theme.spacing['4']};
-            border: 1px dashed ${theme.color.border};
-            border-radius: ${theme.radius.md};
-            background: transparent;
-            color: ${theme.color.textSecondary};
-            font-size: ${theme.font.size.base};
-            cursor: pointer;
-            transition:
-              border-color ${theme.motion.duration.fast},
-              color ${theme.motion.duration.fast};
-
-            &:hover {
-              border-color: ${theme.color.primary};
-              color: ${theme.color.primary};
-            }
+            gap: ${theme.spacing['1']};
+            font-size: ${theme.font.size.xs};
+            color: ${theme.color.textQuaternary};
+            flex-shrink: 0;
           `}
-          onClick={onCreate}
-          type="button"
         >
-          <Plus size={16} />
-          新建 Workspace
-        </button>
+          <Clock size={12} />
+          {formatRelativeTime(workspace.lastOpened)}
+        </div>
       )}
-    </div>
+    </Card>
   );
 }
 

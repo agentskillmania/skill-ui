@@ -24,14 +24,28 @@ const MonacoEditor = _MonacoEditor as unknown as React.ComponentType<{
   onMount?: (editor: unknown, monaco: unknown) => void;
 }>;
 
-export function CodeEditor({ content, filePath, readOnly, onChange }: EditorAreaProps) {
+export function CodeEditor({ content, filePath, readOnly, onChange, onSave }: EditorAreaProps) {
   const theme = useTheme();
   const { language } = getFileInfo(filePath);
   const monacoTheme = theme.mode === 'dark' ? 'vs-dark' : 'vs';
   const editorRef = useRef<unknown>(null);
 
+  // 使用 ref 保持 onSave 和 content 最新值，避免闭包陷阱
+  const onSaveRef = useRef(onSave);
+  onSaveRef.current = onSave;
+  const contentRef = useRef(content);
+  contentRef.current = content;
+
   const handleMount = (editor: unknown) => {
     editorRef.current = editor;
+    // 注册 Ctrl+S 保存快捷键
+    if (editor && typeof editor === 'object' && 'addCommand' in editor) {
+      const e = editor as { addCommand: (keybinding: number, handler: () => void) => void };
+      // KeyMod.CtrlCmd | KeyCode.KeyS = 2048 | 49 = 2097
+      e.addCommand(2097, () => {
+        onSaveRef.current?.(contentRef.current);
+      });
+    }
   };
 
   return (
