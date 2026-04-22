@@ -1,5 +1,5 @@
 /**
- * chat-demo 主界面
+ * chat-demo main UI
  */
 import { css } from '@emotion/react';
 import { useState, useCallback } from 'react';
@@ -54,7 +54,7 @@ function ChatUI({
 }) {
   const theme = useTheme();
 
-  /** 指令选择回调：将 command 文本作为消息发送 */
+  /** Command selection callback: sends command text as message */
   const handleCommand = useCallback(
     (cmd: ChatCommand) => {
       sendMessage(cmd.command);
@@ -62,7 +62,7 @@ function ChatUI({
     [sendMessage]
   );
 
-  /** 消息装饰器：在消息上方显示时间戳 */
+  /** Message decorator: displays timestamp above message */
   const messageDecorator = useCallback(
     (message: { createdAt?: number }, element: React.ReactNode) => (
       <div>
@@ -96,7 +96,7 @@ function ChatUI({
         background: ${theme.color.bgBase};
       `}
     >
-      {/* 顶栏 */}
+      {/* Header */}
       <div
         css={css`
           display: flex;
@@ -134,7 +134,7 @@ function ChatUI({
         </div>
       </div>
 
-      {/* 聊天区域 */}
+      {/* Chat area */}
       <div
         css={css`
           flex: 1;

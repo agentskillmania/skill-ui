@@ -1,5 +1,5 @@
 /**
- * useChatAgent — SSE 连接 hook，将服务端事件映射为 skill-ui-chat Message[]
+ * useChatAgent — SSE connection hook, maps server events to skill-ui-chat Message[]
  */
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type { Message, Block, ChatCommand } from '@agentskillmania/skill-ui-chat';
@@ -26,10 +26,10 @@ interface SSEData {
   result?: string;
   message?: string;
   aborted?: boolean;
-  // skill 事件
+  // Skill events
   tokenCount?: number;
   task?: string;
-  // human-input 事件
+  // human-input events
   requestId?: string;
   questions?: Array<{ id: string; question: string; type: string; options?: string[] }>;
   context?: string;
@@ -43,13 +43,13 @@ export function useChatAgent() {
   const abortRef = useRef<AbortController | null>(null);
   const assistantIdRef = useRef<string>('');
 
-  // 启动时拉取指令列表
+  // Fetch command list on mount
   useEffect(() => {
     fetch('/api/chat/commands')
       .then((res) => res.json())
       .then((data) => setCommands(data))
       .catch(() => {
-        // 忽略
+        // Ignore
       });
   }, []);
 
@@ -95,11 +95,11 @@ export function useChatAgent() {
       const decoder = new TextDecoder();
       let buffer = '';
 
-      // 当前 thinking block ID（用于增量更新）
+      // Current thinking block ID (for incremental updates)
       let thinkingBlockId: string | null = null;
-      // 当前 skill block ID（用于增量更新）
+      // Current skill block ID (for incremental updates)
       let skillBlockId: string | null = null;
-      // 当前 tool_call blocks 映射 name → blockId
+      // Current tool_call blocks mapping name → blockId
       const toolBlockIds = new Map<string, string>();
 
       // eslint-disable-next-line no-constant-condition
@@ -109,7 +109,7 @@ export function useChatAgent() {
 
         buffer += decoder.decode(value, { stream: true });
 
-        // 解析 SSE 格式
+        // Parse SSE format
         const parts = buffer.split('\n\n');
         buffer = parts.pop() ?? '';
 
@@ -151,7 +151,7 @@ export function useChatAgent() {
             case 'thinking': {
               const content = data.content ?? '';
               if (thinkingBlockId) {
-                // 增量更新
+                // Incremental update
                 setMessages((prev) =>
                   prev.map((m) =>
                     m.id === aid
@@ -165,7 +165,7 @@ export function useChatAgent() {
                   )
                 );
               } else {
-                // 新建 thinking block
+                // Create new thinking block
                 const blockId = genBlockId();
                 thinkingBlockId = blockId;
                 const block: Block = {
@@ -334,7 +334,7 @@ export function useChatAgent() {
               const reqId = data.requestId ?? '';
               const questions = data.questions ?? [];
 
-              // 构建 human_input block
+              // Build human_input block
               const firstQuestion = questions[0];
               let inputType: 'confirmation' | 'input' | 'single-select' | 'multi-select' = 'input';
               let options: Array<{ label: string; value: string }> | undefined;
@@ -377,7 +377,7 @@ export function useChatAgent() {
             case 'done': {
               thinkingBlockId = null;
               skillBlockId = null;
-              // 标记所有 streaming blocks 为 completed
+              // Mark all streaming blocks as completed
               setMessages((prev) =>
                 prev.map((m) => {
                   if (m.id !== aid) return m;
@@ -414,7 +414,7 @@ export function useChatAgent() {
       }
     } catch (err: unknown) {
       if (err instanceof Error && err.name === 'AbortError') {
-        // 用户主动停止
+        // User actively stopped
         const aid = assistantIdRef.current;
         setMessages((prev) =>
           prev.map((m) =>
@@ -445,11 +445,11 @@ export function useChatAgent() {
     try {
       await fetch('/api/chat/stop', { method: 'POST' });
     } catch {
-      // 忽略
+      // Ignore
     }
   }, []);
 
-  /** 用户回复 AskHuman 请求 */
+  /** User responds to AskHuman request */
   const respondHumanInput = useCallback(async (requestId: string, response: unknown) => {
     try {
       await fetch('/api/chat/respond', {
@@ -458,7 +458,7 @@ export function useChatAgent() {
         body: JSON.stringify({ requestId, response }),
       });
     } catch {
-      // 忽略
+      // Ignore
     }
   }, []);
 

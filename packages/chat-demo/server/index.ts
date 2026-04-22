@@ -1,5 +1,5 @@
 /**
- * chat-demo 服务端入口
+ * chat-demo server entry
  */
 import 'dotenv/config';
 import express from 'express';
@@ -12,10 +12,10 @@ const port = Number(process.env.PORT ?? 3100);
 app.use(cors());
 app.use(express.json());
 
-// 聊天 API
+// Chat API
 app.use('/api', createChatRouter());
 
-// 健康检查
+// Health check
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });

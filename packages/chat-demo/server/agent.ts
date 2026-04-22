@@ -1,5 +1,5 @@
 /**
- * colts 智能体会话管理
+ * colts agent session management
  */
 import 'dotenv/config';
 import path from 'path';
@@ -15,37 +15,37 @@ import { z } from 'zod';
 import { tavily } from '@tavily/core';
 import type { Response } from 'express';
 
-/** SSE 事件载荷 */
+/** SSE event payload */
 export interface SSEEvent {
   event: string;
   data: unknown;
 }
 
 /**
- * 单个智能体会话（内存维护）
+ * Single agent session (in-memory)
  */
 export class AgentSession {
   private runner: AgentRunner;
   private state: AgentState;
   private abortController: AbortController | null = null;
 
-  /** AskHuman pending 等待队列：requestId → { resolve, reject } */
+  /** AskHuman pending wait queue: requestId → { resolve, reject } */
   private pendingHumanInput = new Map<
     string,
     { resolve: (value: unknown) => void; reject: (reason?: unknown) => void }
   >();
 
-  /** 发送 SSE 事件的回调（在 handleMessage 期间设置） */
+  /** SSE event sender callback (set during handleMessage) */
   private sseSender: ((event: SSEEvent) => void) | null = null;
 
   constructor() {
     const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY ?? '' });
 
-    // AskHuman handler：发送 SSE human-input 事件，然后挂起等待用户回复
+    // AskHuman handler: sends SSE human-input event, then suspends waiting for user response
     const askHumanHandler: AskHumanHandler = async ({ questions, context }) => {
       const requestId = `human-${Date.now()}`;
 
-      // 发送 human-input SSE 事件
+      // Send human-input SSE event
       this.sseSender?.({
         event: 'human-input',
         data: {
@@ -55,13 +55,13 @@ export class AgentSession {
         },
       });
 
-      // 挂起等待用户回复
+      // Suspend waiting for user response
       return new Promise((resolve, reject) => {
         this.pendingHumanInput.set(requestId, { resolve, reject });
       });
     };
 
-    // 技能目录
+    // Skill directory
     const __dirname = path.dirname(fileURLToPath(import.meta.url));
     const skillDir = path.resolve(__dirname, 'skills');
 
@@ -108,7 +108,7 @@ export class AgentSession {
     });
   }
 
-  /** 用户回复 AskHuman 请求 */
+  /** User responds to AskHuman request */
   respondHumanInput(requestId: string, response: unknown): boolean {
     const pending = this.pendingHumanInput.get(requestId);
     if (!pending) return false;
@@ -117,15 +117,15 @@ export class AgentSession {
     return true;
   }
 
-  /** 流式处理用户消息，yield SSE 事件 */
+  /** Stream process user message, yield SSE events */
   async *handleMessage(message: string): AsyncIterable<SSEEvent> {
     this.abortController = new AbortController();
 
-    // 设置 SSE sender，让 ask_human handler 可以发送事件
+    // Set SSE sender so ask_human handler can send events
     const eventQueue: SSEEvent[] = [];
     this.sseSender = (event: SSEEvent) => eventQueue.push(event);
 
-    // 将用户消息加入状态
+    // Add user message to state
     this.state = addUserMessage(this.state, message);
 
     try {
@@ -133,7 +133,7 @@ export class AgentSession {
         signal: this.abortController.signal,
       });
 
-      // 用 while 循环而非 for-await，以捕获 generator 的 return value（最终 state）
+      // Use while loop instead of for-await to capture generator's return value (final state)
       while (true) {
         const { done, value } = await stream.next();
         if (done) {
@@ -148,7 +148,7 @@ export class AgentSession {
         const sse = this.mapEvent(event);
         if (sse) yield sse;
 
-        // 发送 ask_human handler 产生的事件
+        // Send events produced by ask_human handler
         while (eventQueue.length > 0) {
           yield eventQueue.shift()!;
         }
@@ -164,13 +164,13 @@ export class AgentSession {
     }
   }
 
-  /** 停止当前流 */
+  /** Stop current stream */
   stop(): void {
     this.abortController?.abort();
     this.abortController = null;
   }
 
-  /** 将 colts RunStreamEvent 映射为 SSE 事件 */
+  /** Map colts RunStreamEvent to SSE events */
   private mapEvent(event: RunStreamEvent): SSEEvent | null {
     switch (event.type) {
       case 'token':
@@ -232,7 +232,7 @@ export class AgentSession {
       case 'error':
         return { event: 'error', data: { message: event.error.message } };
 
-      // 忽略不需要的事件
+      // Ignore unnecessary events
       case 'phase-change':
       case 'tools:start':
       case 'tools:end':
@@ -252,7 +252,7 @@ export class AgentSession {
   }
 }
 
-/** 获取当前时间工具 */
+/** Get current time tool */
 const currentTimeTool = {
   name: 'get_current_time',
   description: '获取当前日期和时间',
@@ -262,7 +262,7 @@ const currentTimeTool = {
   },
 };
 
-/** 计算工具 */
+/** Calculate tool */
 const calculateTool = {
   name: 'calculate',
   description: '计算数学表达式并返回结果。支持基本四则运算、幂运算和常用数学函数。',
@@ -283,7 +283,7 @@ const calculateTool = {
   },
 };
 
-/** 创建 Tavily 搜索工具 */
+/** Create Tavily search tool */
 function webSearchTool(client: ReturnType<typeof tavily>) {
   return {
     name: 'web_search',
@@ -313,7 +313,7 @@ function webSearchTool(client: ReturnType<typeof tavily>) {
   };
 }
 
-/** 模拟错误工具 */
+/** Simulate error tool */
 const failingTool = {
   name: 'failing_tool',
   description: '总是返回错误的工具（用于测试错误处理）',
@@ -325,7 +325,7 @@ const failingTool = {
   },
 };
 
-/** 将 SSE 事件写入 Express Response */
+/** Write SSE event to Express Response */
 export function writeSSE(res: Response, sse: SSEEvent): void {
   res.write(`event: ${sse.event}\ndata: ${JSON.stringify(sse.data)}\n\n`);
 }

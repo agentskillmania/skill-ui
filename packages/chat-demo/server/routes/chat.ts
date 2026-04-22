@@ -1,11 +1,11 @@
 /**
- * 聊天 API 路由
+ * Chat API routes
  */
 import { Router } from 'express';
 import type { Request, Response } from 'express';
 import { AgentSession, writeSSE } from '../agent.js';
 
-/** 指令列表 */
+/** Command list */
 const COMMANDS = [
   {
     id: 'time',
@@ -61,10 +61,10 @@ const COMMANDS = [
 export function createChatRouter(): Router {
   const router = Router();
 
-  // 单例会话（demo 用）
+  // Singleton session (for demo)
   let session: AgentSession | null = null;
 
-  // POST /api/chat — SSE 流式对话
+  // POST /api/chat — SSE streaming chat
   router.post('/chat', async (req: Request, res: Response) => {
     const { message } = req.body as { message?: string };
 
@@ -73,12 +73,12 @@ export function createChatRouter(): Router {
       return;
     }
 
-    // 初始化或复用会话
+    // Initialize or reuse session
     if (!session) {
       session = new AgentSession();
     }
 
-    // 设置 SSE 响应头
+    // Set SSE response headers
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
@@ -96,19 +96,19 @@ export function createChatRouter(): Router {
     res.end();
   });
 
-  // POST /api/chat/stop — 停止当前生成
+  // POST /api/chat/stop — stop current generation
   router.post('/chat/stop', (_req: Request, res: Response) => {
     session?.stop();
     res.json({ ok: true });
   });
 
-  // POST /api/chat/reset — 重置会话
+  // POST /api/chat/reset — reset session
   router.post('/chat/reset', (_req: Request, res: Response) => {
     session = new AgentSession();
     res.json({ ok: true });
   });
 
-  // POST /api/chat/respond — 用户回复 AskHuman 请求
+  // POST /api/chat/respond — user responds to AskHuman request
   router.post('/chat/respond', (req: Request, res: Response) => {
     const { requestId, response } = req.body as { requestId?: string; response?: unknown };
 
@@ -131,7 +131,7 @@ export function createChatRouter(): Router {
     res.json({ ok: true });
   });
 
-  // GET /api/chat/commands — 获取指令列表
+  // GET /api/chat/commands — get command list
   router.get('/chat/commands', (_req: Request, res: Response) => {
     res.json(COMMANDS);
   });
