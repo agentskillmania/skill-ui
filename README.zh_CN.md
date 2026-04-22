@@ -1,7 +1,9 @@
 # @agentskillmania/skill-ui
 
 [![npm version](https://img.shields.io/npm/v/@agentskillmania/skill-ui-workspace.svg)](https://www.npmjs.com/package/@agentskillmania/skill-ui-workspace)
-[![license](https://img.shields.io/npm/l/@agentskillmania/skill-ui-workspace.svg)](https://github.com/agentskillmania/skill-ui/blob/main/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![CI](https://github.com/agentskillmania/skill-ui/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/agentskillmania/skill-ui/actions/workflows/ci.yml)
+[![English Documentation](https://img.shields.io/badge/docs-English-blue.svg)](./README.md)
 
 @agentskillmania 生态的 UI 组件 monorepo。
 

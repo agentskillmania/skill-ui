@@ -1,7 +1,8 @@
 # @agentskillmania/skill-ui-frame
 
 [![npm version](https://img.shields.io/npm/v/@agentskillmania/skill-ui-frame.svg)](https://www.npmjs.com/package/@agentskillmania/skill-ui-frame)
-[![license](https://img.shields.io/npm/l/@agentskillmania/skill-ui-frame.svg)](https://github.com/agentskillmania/skill-ui/blob/main/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![English Documentation](https://img.shields.io/badge/docs-English-blue.svg)](./README.md)
 
 App frame UI components for @agentskillmania — titlebar, panels, sidebar.
 
