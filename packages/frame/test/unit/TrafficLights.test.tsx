@@ -10,54 +10,54 @@ function wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe('TrafficLights', () => {
-  it('渲染三个按钮', () => {
+  it('renders three buttons', () => {
     render(<TrafficLights />, { wrapper });
     const buttons = screen.getAllByRole('button');
     expect(buttons).toHaveLength(3);
   });
 
-  it('关闭按钮有正确的 aria-label', () => {
+  it('close button has correct aria-label', () => {
     render(<TrafficLights />, { wrapper });
     expect(screen.getByLabelText('关闭窗口')).toBeInTheDocument();
   });
 
-  it('最小化按钮有正确的 aria-label', () => {
+  it('minimize button has correct aria-label', () => {
     render(<TrafficLights />, { wrapper });
     expect(screen.getByLabelText('最小化窗口')).toBeInTheDocument();
   });
 
-  it('最大化按钮默认显示"最大化窗口"', () => {
+  it('maximize button defaults to "maximize window"', () => {
     render(<TrafficLights />, { wrapper });
     expect(screen.getByLabelText('最大化窗口')).toBeInTheDocument();
   });
 
-  it('isMaximized=true 时显示"还原窗口"', () => {
+  it('shows "restore window" when isMaximized=true', () => {
     render(<TrafficLights isMaximized />, { wrapper });
     expect(screen.getByLabelText('还原窗口')).toBeInTheDocument();
   });
 
-  it('点击关闭按钮触发 onClose', () => {
+  it('clicking close button triggers onClose', () => {
     const onClose = vi.fn();
     render(<TrafficLights onClose={onClose} />, { wrapper });
     fireEvent.click(screen.getByLabelText('关闭窗口'));
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it('点击最小化按钮触发 onMinimize', () => {
+  it('clicking minimize button triggers onMinimize', () => {
     const onMinimize = vi.fn();
     render(<TrafficLights onMinimize={onMinimize} />, { wrapper });
     fireEvent.click(screen.getByLabelText('最小化窗口'));
     expect(onMinimize).toHaveBeenCalledOnce();
   });
 
-  it('点击最大化按钮触发 onMaximize', () => {
+  it('clicking maximize button triggers onMaximize', () => {
     const onMaximize = vi.fn();
     render(<TrafficLights onMaximize={onMaximize} />, { wrapper });
     fireEvent.click(screen.getByLabelText('最大化窗口'));
     expect(onMaximize).toHaveBeenCalledOnce();
   });
 
-  it('不传回调时点击不报错', () => {
+  it('clicking does not throw when callbacks are not passed', () => {
     render(<TrafficLights />, { wrapper });
     expect(() => fireEvent.click(screen.getByLabelText('关闭窗口'))).not.toThrow();
   });

@@ -29,7 +29,7 @@ const sampleWorkspaces = [
   },
 ];
 
-/** 超过 5 个 workspace 时自动显示搜索框 */
+/** Automatically shows search box when there are more than 5 workspaces */
 const manyWorkspaces = Array.from({ length: 8 }, (_, i) => ({
   id: `ws-${i + 1}`,
   name: `workspace-${i + 1}`,
@@ -37,7 +37,7 @@ const manyWorkspaces = Array.from({ length: 8 }, (_, i) => ({
   lastOpened: new Date(Date.now() - i * 86400_000).toISOString(),
 }));
 
-/** 带图标的 workspaces */
+/** Workspaces with icons */
 const iconWorkspaces = [
   { id: 'bot', name: 'my-agent', icon: <Bot size={16} />, lastOpened: new Date().toISOString() },
   {

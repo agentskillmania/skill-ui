@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 /**
- * AppBrand 组件
- * 应用品牌展示（图标 + 名称），第一个单词使用默认文字色、第二个单词主色
+ * AppBrand component
+ * App brand display (icon + name), first word in default text color, second in primary color
  */
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';

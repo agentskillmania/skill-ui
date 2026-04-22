@@ -11,45 +11,45 @@ function wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe('AppBrand', () => {
-  it('默认显示 "Skill Studio"', () => {
+  it('displays "Skill Studio" by default', () => {
     render(<AppBrand />, { wrapper });
     expect(screen.getByText('Skill')).toBeInTheDocument();
     expect(screen.getByText('Studio')).toBeInTheDocument();
   });
 
-  it('自定义标题正确拆分单词', () => {
+  it('custom title splits words correctly', () => {
     render(<AppBrand title="Agent IDE" />, { wrapper });
     expect(screen.getByText('Agent')).toBeInTheDocument();
     expect(screen.getByText('IDE')).toBeInTheDocument();
   });
 
-  it('单个单词不渲染第二部分', () => {
+  it('single word does not render second part', () => {
     render(<AppBrand title="Studio" />, { wrapper });
     expect(screen.getByText('Studio')).toBeInTheDocument();
-    // 不应有主色 span
+    // should not have primary color span
     const container = screen.getByText('Studio').parentElement!;
     const spans = container.querySelectorAll('span');
     expect(spans).toHaveLength(1);
   });
 
-  it('三个单词时后两个合并', () => {
+  it('last two words merge when there are three words', () => {
     render(<AppBrand title="My App Name" />, { wrapper });
     expect(screen.getByText('My')).toBeInTheDocument();
     expect(screen.getByText('App Name')).toBeInTheDocument();
   });
 
-  it('传入 icon 时渲染图标', () => {
+  it('renders icon when passed', () => {
     const { container } = render(<AppBrand icon={<Zap size={16} data-testid="icon" />} />, {
       wrapper,
     });
     expect(container.querySelector('[data-testid="icon"]')).toBeInTheDocument();
   });
 
-  it('不传 icon 时不渲染图标容器', () => {
+  it('does not render icon container when not passed', () => {
     const { container } = render(<AppBrand />, { wrapper });
-    // icon 容器有 width: 18px 的内联样式
+    // icon container has width: 18px inline style
     const iconContainer = container.querySelector('div > div:first-child');
-    // 只有根 div，不应有 icon 子 div
+    // only root div, should not have icon child div
     const root = container.firstChild as HTMLElement;
     expect(root.children).toHaveLength(1); // 只有文字 span
   });

@@ -1,8 +1,8 @@
 /** @jsxImportSource @emotion/react */
 /**
- * WorkspaceLauncher 组件
- * 未选择 workspace 时的启动页，支持 list / mondrian 两种布局模式
- * 背景使用浮动渐变色块 + 前景毛玻璃效果
+ * WorkspaceLauncher component
+ * Launcher page when no workspace is selected, supports list / mondrian layout modes
+ * Background uses floating gradient blobs + foreground glassmorphism effect
  */
 import { useState, useMemo } from 'react';
 import { css } from '@emotion/react';
@@ -15,7 +15,7 @@ import { MondrianLayout } from './MondrianLayout.js';
 import { GradientBackground } from './GradientBackground.js';
 import type { WorkspaceLauncherProps, WorkspaceCard as WorkspaceCardData } from '../../types.js';
 
-/** 卡片列表最大高度 */
+/** Maximum height of card list */
 const LIST_MAX_HEIGHT = '400px';
 
 export function WorkspaceLauncher({
@@ -48,10 +48,10 @@ export function WorkspaceLauncher({
         overflow: hidden;
       `}
     >
-      {/* 浮动渐变色块背景 */}
+      {/* Floating gradient blob background */}
       <GradientBackground />
 
-      {/* 前景内容（毛玻璃） */}
+      {/* Foreground content (glassmorphism) */}
       <div
         css={css`
           position: relative;
@@ -91,7 +91,7 @@ export function WorkspaceLauncher({
         </p>
 
         {layoutMode === 'mondrian' ? (
-          /* 蒙德里安装饰画布局 */
+          /* Mondrian decorative painting layout */
           <>
             {filtered.length > 0 ? (
               <MondrianLayout workspaces={filtered} onSelect={onSelect} />
@@ -105,9 +105,9 @@ export function WorkspaceLauncher({
             )}
           </>
         ) : (
-          /* 经典列表布局 */
+          /* Classic list layout */
           <>
-            {/* 搜索框 */}
+            {/* Search box */}
             {workspaces.length > 5 && (
               <Input
                 prefix={<SearchOutlined />}
@@ -123,7 +123,7 @@ export function WorkspaceLauncher({
               />
             )}
 
-            {/* 卡片列表 */}
+            {/* Card list */}
             <div
               css={css`
                 display: flex;
@@ -152,7 +152,7 @@ export function WorkspaceLauncher({
           </>
         )}
 
-        {/* 新建按钮 */}
+        {/* Create button */}
         {onCreate && (
           <Button
             type="dashed"
@@ -170,7 +170,7 @@ export function WorkspaceLauncher({
   );
 }
 
-/** 单张 workspace 卡片（列表模式） */
+/** Single workspace card (list mode) */
 function WorkspaceCardItem({
   workspace,
   onSelect,
@@ -207,7 +207,7 @@ function WorkspaceCardItem({
         }
       `}
     >
-      {/* 图标 */}
+      {/* Icon */}
       {workspace.icon && (
         <div
           css={css`
@@ -226,7 +226,7 @@ function WorkspaceCardItem({
         </div>
       )}
 
-      {/* 信息 */}
+      {/* Info */}
       <div
         css={css`
           flex: 1;
@@ -261,7 +261,7 @@ function WorkspaceCardItem({
         )}
       </div>
 
-      {/* 最后打开时间 */}
+      {/* Last opened time */}
       {workspace.lastOpened && (
         <div
           css={css`

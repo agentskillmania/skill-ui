@@ -1,8 +1,8 @@
 /**
- * @agentskillmania/skill-ui-frame 统一导出
+ * @agentskillmania/skill-ui-frame unified exports
  */
 
-// 类型
+// Types
 export type {
   AppFrameProps,
   TitlebarProps,
@@ -13,7 +13,7 @@ export type {
   WorkspaceLauncherProps,
 } from './types.js';
 
-// 组件
+// Components
 export { AppFrame } from './components/AppFrame/index.js';
 export { Titlebar } from './components/Titlebar/index.js';
 export { TrafficLights } from './components/TrafficLights/index.js';

@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 /**
- * TrafficLights 组件
- * macOS 风格窗口控制按钮（红黄绿），纯展示 + 回调，不调用 window API
+ * TrafficLights component
+ * macOS-style window control buttons (red/yellow/green), display-only + callbacks, does not call window API
  */
 import { css } from '@emotion/react';
 import { X, Minus, Copy, Expand } from 'lucide-react';
@@ -58,7 +58,7 @@ export function TrafficLights({
         }
       `}
     >
-      {/* 关闭 — 红色 */}
+      {/* Close — red */}
       <button
         css={css`
           ${buttonBase}
@@ -72,7 +72,7 @@ export function TrafficLights({
         <X size={8} strokeWidth={5} />
       </button>
 
-      {/* 最小化 — 黄色 */}
+      {/* Minimize — yellow */}
       <button
         css={css`
           ${buttonBase}
@@ -86,7 +86,7 @@ export function TrafficLights({
         <Minus size={8} strokeWidth={5} />
       </button>
 
-      {/* 最大化/还原 — 绿色 */}
+      {/* Maximize/restore — green */}
       <button
         css={css`
           ${buttonBase}

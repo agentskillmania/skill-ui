@@ -1,8 +1,8 @@
 /**
- * 相对时间格式化工具
+ * Relative time formatting utility
  */
 
-/** 格式化 ISO 时间为相对时间文本 */
+/** Format ISO time as relative time text */
 export function formatRelativeTime(isoTime: string): string {
   const now = Date.now();
   const then = new Date(isoTime).getTime();

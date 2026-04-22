@@ -10,43 +10,43 @@ function wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe('AppFrame', () => {
-  it('渲染 children 作为 Portal 内容', () => {
+  it('renders children as Portal content', () => {
     render(<AppFrame>Portal 内容</AppFrame>, { wrapper });
     expect(screen.getByText('Portal 内容')).toBeInTheDocument();
   });
 
-  it('渲染 Titlebar 带默认品牌', () => {
+  it('renders Titlebar with default brand', () => {
     render(<AppFrame>content</AppFrame>, { wrapper });
     expect(screen.getByText('Skill')).toBeInTheDocument();
     expect(screen.getByText('Studio')).toBeInTheDocument();
   });
 
-  it('传递 title 和 icon 给 Titlebar', () => {
+  it('passes title and icon to Titlebar', () => {
     render(<AppFrame title="Agent IDE">content</AppFrame>, { wrapper });
     expect(screen.getByText('Agent')).toBeInTheDocument();
     expect(screen.getByText('IDE')).toBeInTheDocument();
   });
 
-  it('传递 titlebarCenter 给 Titlebar', () => {
+  it('passes titlebarCenter to Titlebar', () => {
     render(<AppFrame titlebarCenter={<span>workspace-selector</span>}>content</AppFrame>, {
       wrapper,
     });
     expect(screen.getByText('workspace-selector')).toBeInTheDocument();
   });
 
-  it('传递 titlebarEnd 给 Titlebar', () => {
+  it('passes titlebarEnd to Titlebar', () => {
     render(<AppFrame titlebarEnd={<button>Settings</button>}>content</AppFrame>, { wrapper });
     expect(screen.getByText('Settings')).toBeInTheDocument();
   });
 
-  it('窗口控制回调正确传递到 TrafficLights', () => {
+  it('window control callbacks correctly passed to TrafficLights', () => {
     const onClose = vi.fn();
     render(<AppFrame onClose={onClose}>content</AppFrame>, { wrapper });
     fireEvent.click(screen.getByLabelText('关闭窗口'));
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it('有 banner 区域和内容区域', () => {
+  it('has banner area and content area', () => {
     render(<AppFrame>content</AppFrame>, { wrapper });
     expect(screen.getByRole('banner')).toBeInTheDocument();
     expect(screen.getByText('content')).toBeInTheDocument();

@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 /**
- * AppFrame 组件
- * 顶层窗口壳子，Titlebar + Portal（children）
+ * AppFrame component
+ * Top-level window shell, Titlebar + Portal (children)
  */
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
@@ -44,7 +44,7 @@ export function AppFrame({
         onMaximize={onMaximize}
       />
 
-      {/* Portal — 消费方决定内容 */}
+      {/* Portal — content decided by consumer */}
       <div
         css={css`
           flex: 1;

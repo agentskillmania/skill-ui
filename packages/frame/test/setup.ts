@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
 
-// antd 组件依赖 ResizeObserver
+// antd components depend on ResizeObserver
 class ResizeObserverMock {
   observe() {}
   unobserve() {}
@@ -9,7 +9,7 @@ class ResizeObserverMock {
 }
 globalThis.ResizeObserver = ResizeObserverMock as unknown as typeof ResizeObserver;
 
-// antd 可能依赖的 matchMedia
+// matchMedia that antd may depend on
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
   value: vi.fn().mockImplementation((query: string) => ({

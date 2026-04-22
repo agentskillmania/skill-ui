@@ -1,8 +1,8 @@
 /** @jsxImportSource @emotion/react */
 /**
- * Titlebar 组件
- * macOS 风格标题栏，frameless 窗口专用
- * 结构：[TrafficLights] [AppBrand] [center 插槽] —靠右— [end 插槽]
+ * Titlebar component
+ * macOS-style titlebar for frameless windows
+ * Structure: [TrafficLights] [AppBrand] [center slot] —right— [end slot]
  */
 import { css } from '@emotion/react';
 import { useTheme, layout } from '@agentskillmania/skill-ui-theme';
@@ -37,7 +37,7 @@ export function Titlebar({
       `}
       role="banner"
     >
-      {/* 左侧：窗口控制 + 品牌 */}
+      {/* Left: window controls + brand */}
       <TrafficLights
         isMaximized={isMaximized}
         onClose={onClose}
@@ -46,7 +46,7 @@ export function Titlebar({
       />
       <AppBrand title={title} icon={icon} />
 
-      {/* 中间插槽 */}
+      {/* Center slot */}
       {center && (
         <div
           css={css`
@@ -61,7 +61,7 @@ export function Titlebar({
         </div>
       )}
 
-      {/* 弹性间距 */}
+      {/* Flexible spacing */}
       {!center && (
         <div
           css={css`
@@ -70,7 +70,7 @@ export function Titlebar({
         />
       )}
 
-      {/* 右侧插槽 */}
+      {/* Right slot */}
       {end && (
         <div
           css={css`

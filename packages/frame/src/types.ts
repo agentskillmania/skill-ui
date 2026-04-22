@@ -1,101 +1,101 @@
 /**
- * @agentskillmania/skill-ui-frame 类型定义
+ * @agentskillmania/skill-ui-frame type definitions
  */
 import type { ReactNode } from 'react';
 
-/** AppFrame 组件属性 */
+/** AppFrame component props */
 export interface AppFrameProps {
-  /** 主内容区（Portal 插槽） */
+  /** Main content area (Portal slot) */
   children: ReactNode;
 
-  // Titlebar 插槽
-  /** 应用名称 */
+  // Titlebar slots
+  /** App name */
   title?: string;
-  /** 应用图标 */
+  /** App icon */
   icon?: ReactNode;
-  /** Titlebar 中间区域（放 WorkspaceSelector 等） */
+  /** Titlebar center area (for WorkspaceSelector, etc.) */
   titlebarCenter?: ReactNode;
-  /** Titlebar 右侧区域（放 Toolbar 等） */
+  /** Titlebar right area (for Toolbar, etc.) */
   titlebarEnd?: ReactNode;
 
-  // 窗口控制
-  /** 是否最大化 */
+  // Window controls
+  /** Whether maximized */
   isMaximized?: boolean;
-  /** 关闭回调 */
+  /** Close callback */
   onClose?: () => void;
-  /** 最小化回调 */
+  /** Minimize callback */
   onMinimize?: () => void;
-  /** 最大化/还原回调 */
+  /** Maximize/restore callback */
   onMaximize?: () => void;
 }
 
-/** Titlebar 组件属性 */
+/** Titlebar component props */
 export interface TitlebarProps {
-  /** 左侧品牌名称 */
+  /** Left brand name */
   title?: string;
-  /** 左侧品牌图标 */
+  /** Left brand icon */
   icon?: ReactNode;
-  /** 中间区域（workspace 选择器等） */
+  /** Center area (workspace selector, etc.) */
   center?: ReactNode;
-  /** 右侧工具区域 */
+  /** Right toolbar area */
   end?: ReactNode;
 
-  // 窗口控制
-  /** 是否最大化 */
+  // Window controls
+  /** Whether maximized */
   isMaximized?: boolean;
-  /** 关闭回调 */
+  /** Close callback */
   onClose?: () => void;
-  /** 最小化回调 */
+  /** Minimize callback */
   onMinimize?: () => void;
-  /** 最大化/还原回调 */
+  /** Maximize/restore callback */
   onMaximize?: () => void;
 }
 
-/** TrafficLights 组件属性 */
+/** TrafficLights component props */
 export interface TrafficLightsProps {
-  /** 关闭回调 */
+  /** Close callback */
   onClose?: () => void;
-  /** 最小化回调 */
+  /** Minimize callback */
   onMinimize?: () => void;
-  /** 最大化/还原回调 */
+  /** Maximize/restore callback */
   onMaximize?: () => void;
-  /** 是否最大化状态 */
+  /** Whether maximized */
   isMaximized?: boolean;
 }
 
-/** AppBrand 组件属性 */
+/** AppBrand component props */
 export interface AppBrandProps {
-  /** 应用名称（空格分隔，第一个单词黑色，第二个单词主色） */
+  /** App name (space-separated, first word in default text color, second in primary) */
   title?: string;
-  /** 自定义图标 */
+  /** Custom icon */
   icon?: ReactNode;
 }
 
-/** Workspace 卡片数据 */
+/** Workspace card data */
 export interface WorkspaceCard {
-  /** 唯一标识 */
+  /** Unique identifier */
   id: string;
-  /** 显示名称 */
+  /** Display name */
   name: string;
-  /** 描述 */
+  /** Description */
   description?: string;
-  /** 最后打开时间（ISO 格式） */
+  /** Last opened time (ISO format) */
   lastOpened?: string;
-  /** 自定义图标 */
+  /** Custom icon */
   icon?: ReactNode;
 }
 
-/** Workspace 启动页布局模式 */
+/** Workspace launcher layout mode */
 export type WorkspaceLayoutMode = 'list' | 'mondrian';
 
-/** WorkspaceLauncher 组件属性 */
+/** WorkspaceLauncher component props */
 export interface WorkspaceLauncherProps {
-  /** Workspace 卡片列表 */
+  /** Workspace card list */
   workspaces: WorkspaceCard[];
-  /** 选择回调 */
+  /** Select callback */
   onSelect: (id: string) => void;
-  /** 新建回调 */
+  /** Create callback */
   onCreate?: () => void;
-  /** 布局模式，默认 'list' */
+  /** Layout mode, defaults to 'list' */
   layoutMode?: WorkspaceLayoutMode;
 }

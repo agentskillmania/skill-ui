@@ -1,14 +1,14 @@
 /** @jsxImportSource @emotion/react */
 /**
- * GradientBackground 组件
- * 浮动渐变色块背景，模拟颜料洒开效果
+ * GradientBackground component
+ * Floating gradient blob background, simulating paint splatter effect
  *
- * 源自 skill-studio 的 GradientBackground，适配 skill-ui-theme
+ * Derived from skill-studio's GradientBackground, adapted for skill-ui-theme
  */
 import { css, keyframes } from '@emotion/react';
 import { useTheme, absoluteFill } from '@agentskillmania/skill-ui-theme';
 
-/** 柔和浮动动画 — 每个色块用不同参数，含透明度变化形成"此消彼长" */
+/** Soft floating animation — each blob uses different parameters, with opacity changes creating a "wax and wane" effect */
 const float1 = keyframes`
   0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
   25% { transform: translate(-60px, 80px) scale(1.3); opacity: 0.6; }
@@ -45,7 +45,7 @@ export function GradientBackground() {
         pointer-events: none;
       `}
     >
-      {/* 日落橙粉 */}
+      {/* Sunset orange-pink */}
       <div
         css={css`
           position: absolute;
@@ -59,7 +59,7 @@ export function GradientBackground() {
           animation: ${float1} 15s ease-in-out infinite;
         `}
       />
-      {/* 玫瑰粉 */}
+      {/* Rose pink */}
       <div
         css={css`
           position: absolute;
@@ -73,7 +73,7 @@ export function GradientBackground() {
           animation: ${float2} 12s ease-in-out infinite;
         `}
       />
-      {/* 薰衣草紫 */}
+      {/* Lavender purple */}
       <div
         css={css`
           position: absolute;
@@ -87,7 +87,7 @@ export function GradientBackground() {
           animation: ${float3} 18s ease-in-out infinite;
         `}
       />
-      {/* 桃色 */}
+      {/* Peach */}
       <div
         css={css`
           position: absolute;

@@ -8,7 +8,7 @@ import { WorkspaceLauncher } from '../../src/components/WorkspaceLauncher/Worksp
 import { FolderOpen } from 'lucide-react';
 import { formatRelativeTime } from '../../src/components/WorkspaceLauncher/time.js';
 
-// antd 依赖 ResizeObserver
+// antd depends on ResizeObserver
 beforeAll(() => {
   class ResizeObserverMock {
     observe() {}
@@ -39,45 +39,45 @@ const sampleWorkspaces = [
   { id: '3', name: 'old-project', lastOpened: new Date(now - 365 * 86400_000).toISOString() },
 ];
 
-describe('WorkspaceLauncher — list 模式', () => {
-  it('渲染标题和副标题', () => {
+describe('WorkspaceLauncher — list mode', () => {
+  it('renders title and subtitle', () => {
     render(<WorkspaceLauncher workspaces={[]} onSelect={vi.fn()} />, { wrapper });
     expect(screen.getByText('打开 Workspace')).toBeInTheDocument();
     expect(screen.getByText('选择一个已有的 workspace，或创建新的')).toBeInTheDocument();
   });
 
-  it('渲染 workspace 卡片列表', () => {
+  it('renders workspace card list', () => {
     render(<WorkspaceLauncher workspaces={sampleWorkspaces} onSelect={vi.fn()} />, { wrapper });
     expect(screen.getByText('my-agent')).toBeInTheDocument();
     expect(screen.getByText('hello-skill')).toBeInTheDocument();
     expect(screen.getByText('old-project')).toBeInTheDocument();
   });
 
-  it('渲染描述信息', () => {
+  it('renders description info', () => {
     render(<WorkspaceLauncher workspaces={sampleWorkspaces} onSelect={vi.fn()} />, { wrapper });
     expect(screen.getByText('A swarm project')).toBeInTheDocument();
   });
 
-  it('点击卡片触发 onSelect', () => {
+  it('clicking card triggers onSelect', () => {
     const onSelect = vi.fn();
     render(<WorkspaceLauncher workspaces={sampleWorkspaces} onSelect={onSelect} />, { wrapper });
     fireEvent.click(screen.getByText('my-agent'));
     expect(onSelect).toHaveBeenCalledWith('1');
   });
 
-  it('传入 onCreate 时渲染新建按钮', () => {
+  it('renders create button when onCreate is passed', () => {
     render(<WorkspaceLauncher workspaces={[]} onSelect={vi.fn()} onCreate={vi.fn()} />, {
       wrapper,
     });
     expect(screen.getByText('新建 Workspace')).toBeInTheDocument();
   });
 
-  it('不传 onCreate 时不渲染新建按钮', () => {
+  it('does not render create button when onCreate is not passed', () => {
     render(<WorkspaceLauncher workspaces={[]} onSelect={vi.fn()} />, { wrapper });
     expect(screen.queryByText('新建 Workspace')).not.toBeInTheDocument();
   });
 
-  it('点击新建按钮触发 onCreate', () => {
+  it('clicking create button triggers onCreate', () => {
     const onCreate = vi.fn();
     render(<WorkspaceLauncher workspaces={[]} onSelect={vi.fn()} onCreate={onCreate} />, {
       wrapper,
@@ -86,7 +86,7 @@ describe('WorkspaceLauncher — list 模式', () => {
     expect(onCreate).toHaveBeenCalledOnce();
   });
 
-  it('渲染带图标的卡片', () => {
+  it('renders card with icon', () => {
     const workspaces = [
       { id: '1', name: 'test', icon: <FolderOpen size={16} data-testid="ws-icon" /> },
     ];
@@ -94,7 +94,7 @@ describe('WorkspaceLauncher — list 模式', () => {
     expect(screen.getByTestId('ws-icon')).toBeInTheDocument();
   });
 
-  it('workspace 数量 > 5 时显示搜索框', () => {
+  it('shows search box when workspace count > 5', () => {
     const many = Array.from({ length: 6 }, (_, i) => ({
       id: String(i),
       name: `ws-${i}`,
@@ -103,13 +103,13 @@ describe('WorkspaceLauncher — list 模式', () => {
     expect(screen.getByPlaceholderText('搜索 workspace...')).toBeInTheDocument();
   });
 
-  it('workspace 数量 <= 5 时不显示搜索框', () => {
+  it('does not show search box when workspace count <= 5', () => {
     const few = [{ id: '1', name: 'ws-1' }];
     render(<WorkspaceLauncher workspaces={few} onSelect={vi.fn()} />, { wrapper });
     expect(screen.queryByPlaceholderText('搜索 workspace...')).not.toBeInTheDocument();
   });
 
-  it('搜索过滤 workspace', () => {
+  it('search filters workspaces', () => {
     const many = Array.from({ length: 6 }, (_, i) => ({
       id: String(i),
       name: `workspace-${i}`,
@@ -123,7 +123,7 @@ describe('WorkspaceLauncher — list 模式', () => {
     expect(screen.queryByText('workspace-1')).not.toBeInTheDocument();
   });
 
-  it('搜索无匹配显示空状态', () => {
+  it('search with no matches shows empty state', () => {
     const many = Array.from({ length: 6 }, (_, i) => ({
       id: String(i),
       name: `workspace-${i}`,
@@ -135,14 +135,14 @@ describe('WorkspaceLauncher — list 模式', () => {
     expect(screen.getByText('没有匹配的 workspace')).toBeInTheDocument();
   });
 
-  it('空列表显示空状态', () => {
+  it('empty list shows empty state', () => {
     render(<WorkspaceLauncher workspaces={[]} onSelect={vi.fn()} />, { wrapper });
     expect(screen.getByText('暂无 workspace')).toBeInTheDocument();
   });
 });
 
-describe('WorkspaceLauncher — mondrian 模式', () => {
-  it('渲染蒙德里安网格中的 workspace', () => {
+describe('WorkspaceLauncher — mondrian mode', () => {
+  it('renders workspaces in Mondrian grid', () => {
     render(
       <WorkspaceLauncher workspaces={sampleWorkspaces} onSelect={vi.fn()} layoutMode="mondrian" />,
       { wrapper }
@@ -152,7 +152,7 @@ describe('WorkspaceLauncher — mondrian 模式', () => {
     expect(screen.getByText('old-project')).toBeInTheDocument();
   });
 
-  it('点击色块触发 onSelect', () => {
+  it('clicking color block triggers onSelect', () => {
     const onSelect = vi.fn();
     render(
       <WorkspaceLauncher workspaces={sampleWorkspaces} onSelect={onSelect} layoutMode="mondrian" />,
@@ -169,7 +169,7 @@ describe('WorkspaceLauncher — mondrian 模式', () => {
     expect(screen.getByText('暂无 workspace')).toBeInTheDocument();
   });
 
-  it('色块有 aria-label', () => {
+  it('color block has aria-label', () => {
     render(
       <WorkspaceLauncher workspaces={sampleWorkspaces} onSelect={vi.fn()} layoutMode="mondrian" />,
       { wrapper }
@@ -177,7 +177,7 @@ describe('WorkspaceLauncher — mondrian 模式', () => {
     expect(screen.getByLabelText('打开 my-agent')).toBeInTheDocument();
   });
 
-  it('渲染带图标的色块', () => {
+  it('renders color block with icon', () => {
     const workspaces = [
       { id: 'icon-1', name: 'test', icon: <FolderOpen size={16} data-testid="ws-icon" /> },
     ];
@@ -187,8 +187,8 @@ describe('WorkspaceLauncher — mondrian 模式', () => {
     expect(screen.getByTestId('ws-icon')).toBeInTheDocument();
   });
 
-  it('带描述的宽色块显示描述', () => {
-    // 构造多种 id 覆盖不同 span 和颜色组合
+  it('wide color block with description shows description', () => {
+    // construct multiple ids to cover different span and color combinations
     const workspaces = Array.from({ length: 30 }, (_, i) => ({
       id: `mondrian-test-${i}`,
       name: `ws-${i}`,
@@ -200,22 +200,22 @@ describe('WorkspaceLauncher — mondrian 模式', () => {
       <WorkspaceLauncher workspaces={workspaces} onSelect={vi.fn()} layoutMode="mondrian" />,
       { wrapper }
     );
-    // 验证名称渲染了
+    // verify name is rendered
     expect(screen.getByText('ws-0')).toBeInTheDocument();
-    // 验证部分描述渲染了（宽/大块才显示，不保证每个 id 都有，所以检查 DOM 中是否存在任何描述）
+    // verify some descriptions are rendered (only wide/large blocks show them, not guaranteed for every id, so check if any description exists in DOM)
     const descriptionTexts = container.querySelectorAll('button');
     let foundDescription = false;
     descriptionTexts.forEach((btn) => {
       if (btn.textContent?.includes('描述')) foundDescription = true;
     });
     expect(foundDescription).toBe(true);
-    // 验证时间格式化（至少部分块会显示时间）
+    // verify time formatting (at least some blocks will show time)
     expect(screen.getByText('刚刚')).toBeInTheDocument();
-    // 验证图标
+    // verify icon
     expect(screen.getByTestId('icon-0')).toBeInTheDocument();
   });
 
-  it('无描述无时间的色块只显示名称', () => {
+  it('color block without description or time only shows name', () => {
     const workspaces = [
       { id: 'simple-1', name: 'simple' },
       { id: 'simple-2', name: 'another' },
@@ -229,31 +229,31 @@ describe('WorkspaceLauncher — mondrian 模式', () => {
 });
 
 describe('formatRelativeTime', () => {
-  it('刚刚', () => {
+  it('just now', () => {
     expect(formatRelativeTime(new Date(now - 30_000).toISOString())).toBe('刚刚');
   });
 
-  it('分钟前', () => {
+  it('minutes ago', () => {
     expect(formatRelativeTime(new Date(now - 5 * 60_000).toISOString())).toBe('5 分钟前');
   });
 
-  it('小时前', () => {
+  it('hours ago', () => {
     expect(formatRelativeTime(new Date(now - 3 * 3600_000).toISOString())).toBe('3 小时前');
   });
 
-  it('天前', () => {
+  it('days ago', () => {
     expect(formatRelativeTime(new Date(now - 5 * 86400_000).toISOString())).toBe('5 天前');
   });
 
-  it('个月前', () => {
+  it('months ago', () => {
     expect(formatRelativeTime(new Date(now - 60 * 86400_000).toISOString())).toBe('2 个月前');
   });
 
-  it('年前', () => {
+  it('years ago', () => {
     expect(formatRelativeTime(new Date(now - 400 * 86400_000).toISOString())).toBe('1 年前');
   });
 
-  it('未来时间显示"刚刚"', () => {
+  it('future time shows "just now"', () => {
     expect(formatRelativeTime(new Date(now + 60_000).toISOString())).toBe('刚刚');
   });
 });
