@@ -1,26 +1,26 @@
 /**
- * Chat 组件上下文
+ * Chat component context
  */
 import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
 import type { ChatRenderers, Message } from './types.js';
 
 export interface ChatContextValue {
-  /** 自定义渲染器注册表 */
+  /** Custom renderer registry */
   renderers: ChatRenderers;
-  /** 人机交互确认回调 */
+  /** Human interaction confirmation callback */
   onConfirmHumanRequest?: (requestId: string, response: unknown) => void;
-  /** 消息装饰器 */
+  /** Message decorator */
   messageDecorator?: (message: Message, element: ReactNode) => ReactNode;
 }
 
 export const ChatContext = createContext<ChatContextValue | null>(null);
 
-/** 获取 Chat 上下文 */
+/** Get Chat context */
 export function useChatContext(): ChatContextValue {
   const ctx = useContext(ChatContext);
   if (!ctx) {
-    throw new Error('useChatContext 必须在 Chat 组件内部使用');
+    throw new Error('useChatContext must be used inside Chat component');
   }
   return ctx;
 }

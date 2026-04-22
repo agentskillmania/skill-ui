@@ -1,5 +1,5 @@
 /**
- * 斜杠自动补全下拉菜单组件
+ * Slash autocomplete dropdown component
  */
 import { css } from '@emotion/react';
 import { Dropdown } from 'antd';
@@ -10,15 +10,15 @@ import type { ChatCommand } from '../types.js';
 import { extractSearchTerm, filterCommands, groupCommands } from './commandUtils.js';
 
 export interface CommandAutocompleteProps {
-  /** 所有可用指令 */
+  /** All available commands */
   commands: ChatCommand[];
-  /** 选择指令回调 */
+  /** Select command callback */
   onCommand: (command: ChatCommand) => void;
-  /** 当前输入文本 */
+  /** Current input text */
   inputValue: string;
-  /** 触发字符（默认 "/"） */
+  /** Trigger character (default "/") */
   trigger?: string;
-  /** 子元素（包裹 Dropdown） */
+  /** Child element (wraps Dropdown) */
   children: React.ReactNode;
 }
 
@@ -32,7 +32,7 @@ export function CommandAutocomplete({
   const theme = useTheme();
   const [open, setOpen] = useState(false);
 
-  // 输入以 trigger 开头时自动打开下拉
+  // Auto-open dropdown when input starts with trigger
   useEffect(() => {
     if (inputValue.startsWith(trigger) && commands.length > 0) {
       setOpen(true);

@@ -47,7 +47,7 @@ const meta: Meta<typeof Chat> = {
 export default meta;
 type Story = StoryObj<typeof Chat>;
 
-/** 空消息列表 */
+/** Empty message list */
 export const Empty: Story = {
   args: {
     messages: [],
@@ -56,7 +56,7 @@ export const Empty: Story = {
   },
 };
 
-/** 带消息历史 */
+/** With message history */
 const WithMessagesComponent = () => {
   const [messages, setMessages] = React.useState<Message[]>([
     { id: '1', role: 'user', content: '你好', status: 'completed' },
@@ -110,7 +110,7 @@ export const WithMessages: Story = {
   render: () => <WithMessagesComponent />,
 };
 
-/** 流式输出状态 */
+/** Streaming output status */
 const StreamingComponent = () => {
   const messages: Message[] = [
     { id: '1', role: 'user', content: '写一段代码', status: 'completed' },
@@ -139,7 +139,7 @@ export const Streaming: Story = {
   render: () => <StreamingComponent />,
 };
 
-/** 带 blocks 的完整示例 */
+/** Complete example with blocks */
 const WithBlocksComponent = () => {
   const messages: Message[] = [
     { id: '1', role: 'user', content: '帮我分析一下项目结构', status: 'completed' },
@@ -187,7 +187,7 @@ export const WithBlocks: Story = {
   render: () => <WithBlocksComponent />,
 };
 
-/** 快捷指令 + 斜杠自动补全 */
+/** Quick commands + slash autocomplete */
 const WithCommandsComponent = () => {
   const [messages, setMessages] = React.useState<Message[]>([]);
   const [inputValue, setInputValue] = React.useState('');

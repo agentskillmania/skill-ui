@@ -20,7 +20,7 @@ const meta: Meta<typeof MarkdownRenderer> = {
 export default meta;
 type Story = StoryObj<typeof MarkdownRenderer>;
 
-/** 纯文本 */
+/** Plain text */
 export const PlainText: Story = {
   render: () => (
     <Wrapper>
@@ -29,7 +29,7 @@ export const PlainText: Story = {
   ),
 };
 
-/** 多行文本 */
+/** Multi-line text */
 export const Multiline: Story = {
   render: () => (
     <Wrapper>
@@ -38,7 +38,7 @@ export const Multiline: Story = {
   ),
 };
 
-/** 流式输出 */
+/** Streaming output */
 export const Streaming: Story = {
   render: () => (
     <Wrapper>
@@ -47,7 +47,7 @@ export const Streaming: Story = {
   ),
 };
 
-/** 长文本 */
+/** Long text */
 export const LongText: Story = {
   render: () => (
     <Wrapper>

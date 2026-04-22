@@ -1,5 +1,5 @@
 /**
- * 执行计划块
+ * Execution plan block
  */
 import { css } from '@emotion/react';
 import { FileText } from 'lucide-react';

@@ -1,57 +1,57 @@
 /**
- * Chat UI 组件类型定义
+ * Chat UI component type definitions
  */
 import type { ComponentType, ReactNode, CSSProperties } from 'react';
 
-// ---- 基础枚举 ----
+// ---- Basic Enums ----
 
-/** 消息状态 */
+/** Message status */
 export type MessageStatus = 'streaming' | 'completed' | 'error';
 
-/** 消息角色 */
+/** Message role */
 export type MessageRole = 'user' | 'assistant' | 'system' | 'tool';
 
-/** 执行块状态 */
+/** Block status */
 export type BlockStatus = 'streaming' | 'completed' | 'error' | 'pending';
 
-/** 人机交互类型 */
+/** Human interaction type */
 export type HumanInputType = 'confirmation' | 'input' | 'single-select' | 'multi-select';
 
-// ---- 核心数据模型 ----
+// ---- Core Data Models ----
 
-/** 消息 */
+/** Message */
 export interface Message {
-  /** 唯一标识 */
+  /** Unique identifier */
   id: string;
-  /** 发送者角色 */
+  /** Sender role */
   role: MessageRole;
-  /** 文本内容（Markdown） */
+  /** Text content (Markdown) */
   content: string;
-  /** 执行块列表（assistant 消息） */
+  /** Block list (assistant messages) */
   blocks?: Block[];
-  /** 消息状态 */
+  /** Message status */
   status: MessageStatus;
-  /** 创建时间戳 */
+  /** Creation timestamp */
   createdAt?: number;
 }
 
-/** 执行块 */
+/** Execution block */
 export interface Block {
-  /** 唯一标识 */
+  /** Unique identifier */
   id: string;
-  /** 块类型 */
+  /** Block type */
   type: string;
-  /** 块状态 */
+  /** Block status */
   status: BlockStatus;
-  /** 文本内容 */
+  /** Text content */
   content: string;
-  /** 附加元数据 */
+  /** Additional metadata */
   metadata?: Record<string, unknown>;
 }
 
-// ---- 元数据约定结构 ----
+// ---- Metadata Convention Structures ----
 
-/** 工具调用元数据 */
+/** Tool call metadata */
 export interface ToolCallMetadata {
   toolName?: string;
   toolType?: 'mcp' | 'script' | 'builtin';
@@ -59,18 +59,18 @@ export interface ToolCallMetadata {
   toolResult?: string;
 }
 
-/** 计划步骤 */
+/** Plan step */
 export interface PlanStep {
   content: string;
   status: 'completed' | 'running' | 'pending' | 'error' | 'skipped';
 }
 
-/** 计划元数据 */
+/** Plan metadata */
 export interface PlanMetadata {
   steps?: PlanStep[];
 }
 
-/** 人机交互元数据 */
+/** Human interaction metadata */
 export interface HumanInputMetadata {
   requestId?: string;
   inputType?: HumanInputType;
@@ -80,123 +80,123 @@ export interface HumanInputMetadata {
   defaultValue?: string;
 }
 
-/** 错误元数据 */
+/** Error metadata */
 export interface ErrorMetadata {
   errorCode?: string;
 }
 
-/** 技能块元数据 */
+/** Skill block metadata */
 export interface SkillBlockMetadata {
-  /** 技能名称 */
+  /** Skill name */
   skillName?: string;
-  /** 技能执行阶段 */
+  /** Skill execution phase */
   phase?: 'loading' | 'loaded' | 'executing' | 'completed';
-  /** 执行任务描述 */
+  /** Execution task description */
   task?: string;
-  /** 技能文档 token 数量 */
+  /** Skill document token count */
   tokenCount?: number;
-  /** 执行结果摘要 */
+  /** Execution result summary */
   result?: string;
 }
 
-// ---- 指令系统 ----
+// ---- Command System ----
 
-/** 指令 */
+/** Command */
 export interface ChatCommand {
-  /** 唯一标识 */
+  /** Unique identifier */
   id: string;
-  /** 显示名称 */
+  /** Display name */
   label: string;
-  /** 触发指令（不含 `/`，如 "search" 表示 /search） */
+  /** Trigger command (without "/", e.g. "search" means /search) */
   command: string;
-  /** 指令描述（下拉菜单中显示） */
+  /** Command description (shown in dropdown menu) */
   description?: string;
-  /** 指令图标 */
+  /** Command icon */
   icon?: ReactNode;
-  /** 分组名称（下拉菜单中按组展示） */
+  /** Group name (grouped display in dropdown menu) */
   group?: string;
-  /** 搜索关键词（用于模糊匹配，补充 label 和 command 之外的别名） */
+  /** Search keywords (for fuzzy matching, aliases beyond label and command) */
   keywords?: string[];
 }
 
-// ---- 组件 Props ----
+// ---- Component Props ----
 
-/** 消息渲染组件 props */
+/** Message rendering component props */
 export interface MessageProps {
   message: Message;
   children?: ReactNode;
 }
 
-/** 执行块渲染组件 props */
+/** Block rendering component props */
 export interface BlockProps {
   block: Block;
   onConfirm?: (requestId: string, response: unknown) => void;
 }
 
-// ---- 渲染器注册表 ----
+// ---- Renderer Registry ----
 
-/** 自定义渲染器注册表 */
+/** Custom renderer registry */
 export interface ChatRenderers {
-  /** 按消息角色注册自定义渲染器（可覆盖内置、可扩展新 role） */
+  /** Register custom renderers by message role (can override built-in, extend new roles) */
   messages?: Record<string, ComponentType<MessageProps>>;
-  /** 按块类型注册自定义渲染器（可覆盖内置、可扩展新 type） */
+  /** Register custom renderers by block type (can override built-in, extend new types) */
   blocks?: Record<string, ComponentType<BlockProps>>;
 }
 
-// ---- 顶层组件 Props ----
+// ---- Top-level Component Props ----
 
-/** Chat 组件 Props */
+/** Chat component props */
 export interface ChatProps {
-  /** 消息列表 */
+  /** Message list */
   messages: Message[];
 
-  // 消息交互
-  /** 发送消息回调 */
+  // Message interactions
+  /** Send message callback */
   onSendMessage?: (content: string) => void;
-  /** 停止生成回调 */
+  /** Stop generation callback */
   onStop?: () => void;
-  /** 人机交互确认回调 */
+  /** Human interaction confirmation callback */
   onConfirmHumanRequest?: (requestId: string, response: unknown) => void;
 
-  // 受控输入
-  /** 输入框内容（受控模式） */
+  // Controlled input
+  /** Input value (controlled mode) */
   inputValue?: string;
-  /** 输入框内容变化回调 */
+  /** Input value change callback */
   onInputChange?: (value: string) => void;
 
-  // 状态
-  /** Chat 整体状态 */
+  // Status
+  /** Chat overall status */
   status?: 'idle' | 'streaming' | 'error';
-  /** 是否禁用输入 */
+  /** Whether input is disabled */
   disabled?: boolean;
 
-  // 扩展性
-  /** 自定义渲染器注册表 */
+  // Extensibility
+  /** Custom renderer registry */
   renderers?: ChatRenderers;
-  /** 输入框前缀内容 */
+  /** Input prefix content */
   inputPrefix?: ReactNode;
-  /** 输入框后缀内容 */
+  /** Input suffix content */
   inputSuffix?: ReactNode;
-  /** 消息装饰器（在消息前后加内容，如时间戳、操作按钮） */
+  /** Message decorator (add content before/after messages, e.g. timestamps, action buttons) */
   messageDecorator?: (message: Message, element: ReactNode) => ReactNode;
 
-  // 布局
-  /** 内容区最大宽度 */
+  // Layout
+  /** Content area max width */
   maxWidth?: string;
-  /** 输入框占位文本 */
+  /** Input placeholder text */
   placeholder?: string;
-  /** 自定义类名 */
+  /** Custom class name */
   className?: string;
-  /** 自定义样式 */
+  /** Custom style */
   style?: CSSProperties;
 
-  // 指令系统
-  /** 指令列表 */
+  // Command system
+  /** Command list */
   commands?: ChatCommand[];
-  /** 选择指令回调（快捷指令 + 自动补全统一出口） */
+  /** Select command callback (unified exit for quick commands + autocomplete) */
   onCommand?: (command: ChatCommand) => void;
-  /** 快捷指令最多显示几个（默认 5） */
+  /** Maximum number of quick commands to display (default 5) */
   maxQuickCommands?: number;
-  /** 斜杠触发字符（默认 "/"） */
+  /** Slash trigger character (default "/") */
   commandTrigger?: string;
 }

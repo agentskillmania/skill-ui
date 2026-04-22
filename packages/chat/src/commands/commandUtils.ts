@@ -1,15 +1,15 @@
 /**
- * 指令搜索/过滤/分组工具函数
+ * Command search/filter/group utility functions
  */
 import type { ChatCommand } from '../types.js';
 
-/** 无分组指令的默认组名 */
+/** Default group name for commands without a group */
 const DEFAULT_GROUP = '常用';
 
 /**
- * 从输入文本中提取搜索词（去掉触发字符前缀）
+ * Extract search term from input text (remove trigger character prefix)
  *
- * @returns 输入以 trigger 开头时返回去掉前缀的文本，否则返回 null
+ * @returns Returns text with prefix removed when input starts with trigger, otherwise null
  */
 export function extractSearchTerm(input: string, trigger: string): string | null {
   if (!input.startsWith(trigger)) {
@@ -19,12 +19,12 @@ export function extractSearchTerm(input: string, trigger: string): string | null
 }
 
 /**
- * 模糊过滤指令
+ * Fuzzy filter commands
  *
- * 匹配规则（大小写不敏感）：
- * - command 字段前缀匹配
- * - label 字段包含匹配
- * - keywords 任一包含匹配
+ * Matching rules (case-insensitive):
+ * - command field prefix match
+ * - label field contains match
+ * - keywords any contains match
  */
 export function filterCommands(commands: ChatCommand[], searchTerm: string): ChatCommand[] {
   const term = searchTerm.toLowerCase().trim();
@@ -54,9 +54,9 @@ export function filterCommands(commands: ChatCommand[], searchTerm: string): Cha
 }
 
 /**
- * 按分组聚合指令
+ * Aggregate commands by group
  *
- * group 为空的指令归入默认组（"常用"）
+ * Commands with empty group are placed in default group ("常用")
  */
 export function groupCommands(commands: ChatCommand[]): Map<string, ChatCommand[]> {
   const groups = new Map<string, ChatCommand[]>();

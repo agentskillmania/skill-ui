@@ -1,8 +1,8 @@
 /**
- * @agentskillmania/skill-ui-chat 统一导出
+ * @agentskillmania/skill-ui-chat unified exports
  */
 
-// 组件
+// Components
 export { Chat } from './Chat/index.js';
 export { MessageList } from './MessageList/index.js';
 export { ChatInput } from './ChatInput/index.js';
@@ -23,7 +23,7 @@ export { MarkdownRenderer } from './content/MarkdownRenderer.js';
 export { QuickCommands } from './commands/QuickCommands.js';
 export { CommandAutocomplete } from './commands/CommandAutocomplete.js';
 
-// 类型
+// Types
 export type {
   Message,
   Block,
@@ -44,7 +44,7 @@ export type {
   SkillBlockMetadata,
 } from './types.js';
 
-// 组件 Props 类型
+// Component Props types
 export type { MessageListProps } from './MessageList/index.js';
 export type { ChatInputProps } from './ChatInput/index.js';
 export type { MessageItemProps } from './messages/MessageItem.js';
@@ -55,5 +55,5 @@ export type { MarkdownRendererProps } from './content/MarkdownRenderer.js';
 export type { QuickCommandsProps } from './commands/QuickCommands.js';
 export type { CommandAutocompleteProps } from './commands/CommandAutocomplete.js';
 
-// 工具函数
+// Utility functions
 export { extractSearchTerm, filterCommands, groupCommands } from './commands/commandUtils.js';

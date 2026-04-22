@@ -1,5 +1,5 @@
 /**
- * 快捷指令胶囊标签组件
+ * Quick command capsule tag component
  */
 import { css } from '@emotion/react';
 import { Tag } from 'antd';
@@ -7,13 +7,13 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { ChatCommand } from '../types.js';
 
 export interface QuickCommandsProps {
-  /** 指令列表 */
+  /** Command list */
   commands: ChatCommand[];
-  /** 选择指令回调 */
+  /** Select command callback */
   onCommand: (command: ChatCommand) => void;
-  /** 最多显示几个标签（默认 5） */
+  /** Maximum number of tags to display (default 5) */
   maxCommands?: number;
-  /** 是否禁用 */
+  /** Whether disabled */
   disabled?: boolean;
 }
 

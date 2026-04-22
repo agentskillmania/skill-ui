@@ -1,5 +1,5 @@
 /**
- * 错误展示块
+ * Error display block
  */
 import { css } from '@emotion/react';
 import { AlertTriangle } from 'lucide-react';

@@ -19,46 +19,46 @@ function Wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe('Chat', () => {
-  it('渲染消息列表和输入框', () => {
+  it('renders message list and input', () => {
     render(<Chat messages={mockMessages} />, { wrapper: Wrapper });
     expect(screen.getByText('你好')).toBeInTheDocument();
     expect(screen.getByText('你好！')).toBeInTheDocument();
   });
 
-  it('空消息列表时不崩溃', () => {
+  it('does not crash with empty message list', () => {
     render(<Chat messages={[]} />, { wrapper: Wrapper });
     expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument();
   });
 
-  it('传入 placeholder', () => {
+  it('passes placeholder', () => {
     render(<Chat messages={[]} placeholder="请输入..." />, { wrapper: Wrapper });
     expect(screen.getByPlaceholderText('请输入...')).toBeInTheDocument();
   });
 
-  it('streaming 状态显示停止按钮', () => {
+  it('streaming status shows stop button', () => {
     render(<Chat messages={mockMessages} status="streaming" />, { wrapper: Wrapper });
-    // antdx Sender loading 状态渲染取消按钮
+    // antdx Sender loading state renders cancel button
     const buttons = screen.getAllByRole('button');
     expect(buttons.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('error 状态不显示停止按钮', () => {
+  it('error status does not show stop button', () => {
     render(<Chat messages={mockMessages} status="error" />, { wrapper: Wrapper });
-    // 非 streaming 状态下 Sender 不渲染 loading 按钮
+    // in non-streaming state Sender does not render loading button
     expect(screen.queryByPlaceholderText('输入消息...')).toBeInTheDocument();
   });
 
-  it('completed 状态不显示停止按钮', () => {
+  it('completed status does not show stop button', () => {
     render(<Chat messages={mockMessages} status="completed" />, { wrapper: Wrapper });
     expect(screen.queryByPlaceholderText('输入消息...')).toBeInTheDocument();
   });
 
-  it('idle 状态不显示停止按钮', () => {
+  it('idle status does not show stop button', () => {
     render(<Chat messages={mockMessages} status="idle" />, { wrapper: Wrapper });
     expect(screen.queryByPlaceholderText('输入消息...')).toBeInTheDocument();
   });
 
-  it('输入文本后 Enter 触发 onSendMessage', () => {
+  it('Enter triggers onSendMessage after typing', () => {
     const onSend = vi.fn();
     render(
       <Chat messages={[]} onSendMessage={onSend} inputValue="hello" onInputChange={() => {}} />,
@@ -69,7 +69,7 @@ describe('Chat', () => {
     expect(onSend).toHaveBeenCalledWith('hello');
   });
 
-  it('应用 className 和 style', () => {
+  it('applies className and style', () => {
     render(<Chat messages={[]} className="my-chat" style={{ border: '1px solid red' }} />, {
       wrapper: Wrapper,
     });
@@ -78,12 +78,12 @@ describe('Chat', () => {
     expect((chatEl as HTMLElement).style.border).toBe('1px solid red');
   });
 
-  it('使用自定义 maxWidth', () => {
+  it('uses custom maxWidth', () => {
     render(<Chat messages={[]} maxWidth="600px" />, { wrapper: Wrapper });
     expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument();
   });
 
-  it('传入 commands 和 onCommand 时渲染快捷指令标签', () => {
+  it('renders quick command tags when commands and onCommand are passed', () => {
     const onCommand = vi.fn();
     render(<Chat messages={[]} commands={mockCommands} onCommand={onCommand} />, {
       wrapper: Wrapper,
@@ -92,7 +92,7 @@ describe('Chat', () => {
     expect(screen.getByText('帮助')).toBeInTheDocument();
   });
 
-  it('无 onCommand 时不渲染快捷指令', () => {
+  it('does not render quick commands without onCommand', () => {
     render(<Chat messages={[]} commands={mockCommands} />, { wrapper: Wrapper });
     expect(screen.queryByText('搜索')).not.toBeInTheDocument();
   });

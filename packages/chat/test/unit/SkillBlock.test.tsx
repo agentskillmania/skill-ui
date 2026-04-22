@@ -4,7 +4,7 @@ import { ChatWrapper } from './testUtils.js';
 import { SkillBlock } from '../../src/blocks/SkillBlock.js';
 import type { Block } from '../../src/types.js';
 
-/** 基础 skill block 模板 */
+/** Base skill block template */
 const baseSkillBlock: Block = {
   id: 'sk1',
   type: 'skill',
@@ -17,7 +17,7 @@ const baseSkillBlock: Block = {
 };
 
 describe('SkillBlock', () => {
-  it('loading 阶段显示加载中', () => {
+  it('loading phase shows loading', () => {
     render(
       <ChatWrapper>
         <SkillBlock block={baseSkillBlock} />
@@ -27,7 +27,7 @@ describe('SkillBlock', () => {
     expect(screen.getByText('加载中')).toBeInTheDocument();
   });
 
-  it('loaded 阶段显示 token 数量', () => {
+  it('loaded phase shows token count', () => {
     const loadedBlock: Block = {
       ...baseSkillBlock,
       metadata: { skillName: 'web-search', phase: 'loaded', tokenCount: 1500 },
@@ -41,7 +41,7 @@ describe('SkillBlock', () => {
     expect(screen.getByText('已加载')).toBeInTheDocument();
   });
 
-  it('executing 阶段显示执行中和任务描述', () => {
+  it('executing phase shows executing and task description', () => {
     const executingBlock: Block = {
       ...baseSkillBlock,
       metadata: { skillName: 'web-search', phase: 'executing', task: '搜索 AI 新闻' },
@@ -55,7 +55,7 @@ describe('SkillBlock', () => {
     expect(screen.getByText('搜索 AI 新闻')).toBeInTheDocument();
   });
 
-  it('completed 阶段显示完成', () => {
+  it('completed phase shows completed', () => {
     const completedBlock: Block = {
       ...baseSkillBlock,
       status: 'completed',
@@ -69,7 +69,7 @@ describe('SkillBlock', () => {
     expect(screen.getByText('web-search 完成')).toBeInTheDocument();
   });
 
-  it('error 状态显示失败信息', () => {
+  it('error status shows failure message', () => {
     const errorBlock: Block = {
       ...baseSkillBlock,
       status: 'error',
@@ -85,7 +85,7 @@ describe('SkillBlock', () => {
     expect(screen.getByText('加载失败')).toBeInTheDocument();
   });
 
-  it('有 content 时渲染内容文本', () => {
+  it('renders content text when content exists', () => {
     const block: Block = {
       ...baseSkillBlock,
       content: '搜索结果: AI 技术发展迅速',
@@ -99,17 +99,17 @@ describe('SkillBlock', () => {
     expect(screen.getByText('搜索结果: AI 技术发展迅速')).toBeInTheDocument();
   });
 
-  it('无 content 时不渲染内容区域', () => {
+  it('does not render content area when no content', () => {
     render(
       <ChatWrapper>
         <SkillBlock block={baseSkillBlock} />
       </ChatWrapper>
     );
-    // 只有标题区域，没有内容文本
+    // only title area, no content text
     expect(screen.getByText('加载技能: web-search...')).toBeInTheDocument();
   });
 
-  it('无 metadata 时使用默认技能名称', () => {
+  it('uses default skill name when no metadata', () => {
     const noMeta: Block = {
       id: 'sk-nm',
       type: 'skill',
@@ -124,7 +124,7 @@ describe('SkillBlock', () => {
     expect(screen.getByText('技能')).toBeInTheDocument();
   });
 
-  it('无 skillName 时使用默认技能名称', () => {
+  it('uses default skill name when no skillName', () => {
     const noName: Block = {
       ...baseSkillBlock,
       metadata: { phase: 'loading' },
@@ -137,7 +137,7 @@ describe('SkillBlock', () => {
     expect(screen.getByText('加载技能: 技能...')).toBeInTheDocument();
   });
 
-  it('loaded 阶段无 tokenCount 时显示 0', () => {
+  it('shows 0 when no tokenCount in loaded phase', () => {
     const loadedBlock: Block = {
       ...baseSkillBlock,
       metadata: { phase: 'loaded' },
@@ -150,7 +150,7 @@ describe('SkillBlock', () => {
     expect(screen.getByText('技能（0 tokens）')).toBeInTheDocument();
   });
 
-  it('executing 阶段无 task 时标签显示执行中', () => {
+  it('tag shows executing when no task in executing phase', () => {
     const executingBlock: Block = {
       ...baseSkillBlock,
       metadata: { skillName: 'web-search', phase: 'executing' },
@@ -163,7 +163,7 @@ describe('SkillBlock', () => {
     expect(screen.getByText('执行中')).toBeInTheDocument();
   });
 
-  it('completed 阶段不显示 tag', () => {
+  it('does not show tag in completed phase', () => {
     const completedBlock: Block = {
       ...baseSkillBlock,
       status: 'completed',
@@ -175,7 +175,7 @@ describe('SkillBlock', () => {
       </ChatWrapper>
     );
     expect(screen.getByText('web-search 完成')).toBeInTheDocument();
-    // 不应有 tag 元素
+    // should not have tag element
     expect(screen.queryByText('已完成')).not.toBeInTheDocument();
   });
 });

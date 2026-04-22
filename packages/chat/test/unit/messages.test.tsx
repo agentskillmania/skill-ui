@@ -23,7 +23,7 @@ const systemMsg: Message = {
 };
 
 describe('UserMessage', () => {
-  it('渲染用户消息内容', () => {
+  it('renders user message content', () => {
     render(
       <ChatWrapper>
         <UserMessage message={userMsg} />
@@ -34,7 +34,7 @@ describe('UserMessage', () => {
 });
 
 describe('AssistantMessage', () => {
-  it('渲染助手消息内容', () => {
+  it('renders assistant message content', () => {
     render(
       <ChatWrapper>
         <AssistantMessage message={assistantMsg} />
@@ -43,7 +43,7 @@ describe('AssistantMessage', () => {
     expect(screen.getByText('Hi there')).toBeInTheDocument();
   });
 
-  it('渲染带 blocks 的消息', () => {
+  it('renders message with blocks', () => {
     const msg: Message = {
       ...assistantMsg,
       blocks: [{ id: 'b1', type: 'thinking', status: 'completed', content: '思考中...' }],
@@ -58,7 +58,7 @@ describe('AssistantMessage', () => {
 });
 
 describe('SystemMessage', () => {
-  it('渲染系统消息内容', () => {
+  it('renders system message content', () => {
     render(
       <ChatWrapper>
         <SystemMessage message={systemMsg} />
@@ -69,7 +69,7 @@ describe('SystemMessage', () => {
 });
 
 describe('MessageWrapper', () => {
-  it('渲染 children', () => {
+  it('renders children', () => {
     render(
       <ChatWrapper>
         <MessageWrapper message={userMsg}>
@@ -82,7 +82,7 @@ describe('MessageWrapper', () => {
 });
 
 describe('MessageItem', () => {
-  it('按 role 分发到 UserMessage', () => {
+  it('routes to UserMessage by role', () => {
     render(
       <ChatWrapper>
         <MessageItem message={userMsg} />
@@ -91,7 +91,7 @@ describe('MessageItem', () => {
     expect(screen.getByText('Hello')).toBeInTheDocument();
   });
 
-  it('按 role 分发到 AssistantMessage', () => {
+  it('routes to AssistantMessage by role', () => {
     render(
       <ChatWrapper>
         <MessageItem message={assistantMsg} />
@@ -100,7 +100,7 @@ describe('MessageItem', () => {
     expect(screen.getByText('Hi there')).toBeInTheDocument();
   });
 
-  it('按 role 分发到 SystemMessage', () => {
+  it('routes to SystemMessage by role', () => {
     render(
       <ChatWrapper>
         <MessageItem message={systemMsg} />
@@ -109,7 +109,7 @@ describe('MessageItem', () => {
     expect(screen.getByText('System notice')).toBeInTheDocument();
   });
 
-  it('使用自定义消息渲染器', () => {
+  it('uses custom message renderer', () => {
     const CustomMsg = ({ message }: { message: Message }) => <div>Custom: {message.content}</div>;
     render(
       <ChatWrapper context={{ renderers: { messages: { user: CustomMsg } } }}>
@@ -119,7 +119,7 @@ describe('MessageItem', () => {
     expect(screen.getByText('Custom: Hello')).toBeInTheDocument();
   });
 
-  it('应用 messageDecorator', () => {
+  it('applies messageDecorator', () => {
     render(
       <ChatWrapper
         context={{
@@ -132,15 +132,15 @@ describe('MessageItem', () => {
     expect(screen.getByTestId('decorated')).toBeInTheDocument();
   });
 
-  it('未识别的 role 使用 SystemMessage 兜底渲染', () => {
-    // 使用不在内置映射中的 role（如 "tool"）触发 else 分支
+  it('unrecognized role falls back to SystemMessage', () => {
+    // use role not in built-in mapping (e.g. "tool") to trigger else branch
     const unknownMsg: Message = { id: '4', role: 'tool', content: '工具输出', status: 'completed' };
     render(
       <ChatWrapper>
         <MessageItem message={unknownMsg} />
       </ChatWrapper>
     );
-    // 应该以 SystemMessage 样式渲染内容
+    // should render content in SystemMessage style
     expect(screen.getByText('工具输出')).toBeInTheDocument();
   });
 });

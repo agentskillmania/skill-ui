@@ -1,5 +1,5 @@
 /**
- * commandUtils 工具函数单元测试
+ * commandUtils utility function unit tests
  */
 import { describe, it, expect } from 'vitest';
 import {
@@ -32,92 +32,92 @@ const mockCommands: ChatCommand[] = [
 ];
 
 describe('extractSearchTerm', () => {
-  it('以 trigger 开头时返回去掉前缀的文本', () => {
+  it('returns text with prefix removed when starting with trigger', () => {
     expect(extractSearchTerm('/search', '/')).toBe('search');
   });
 
-  it('以 trigger 开头但无后续文本时返回空字符串', () => {
+  it('returns empty string when starting with trigger but no subsequent text', () => {
     expect(extractSearchTerm('/', '/')).toBe('');
   });
 
-  it('不以 trigger 开头时返回 null', () => {
+  it('returns null when not starting with trigger', () => {
     expect(extractSearchTerm('hello', '/')).toBeNull();
   });
 
-  it('空字符串不以 trigger 开头', () => {
+  it('empty string does not start with trigger', () => {
     expect(extractSearchTerm('', '/')).toBeNull();
   });
 
-  it('支持自定义 trigger', () => {
+  it('supports custom trigger', () => {
     expect(extractSearchTerm('>search', '>')).toBe('search');
   });
 
-  it('trigger 在中间不算', () => {
+  it('trigger in the middle does not count', () => {
     expect(extractSearchTerm('hello/world', '/')).toBeNull();
   });
 });
 
 describe('filterCommands', () => {
-  it('空搜索词返回全部指令', () => {
+  it('empty search term returns all commands', () => {
     expect(filterCommands(mockCommands, '')).toEqual(mockCommands);
   });
 
-  it('空格搜索词返回全部指令', () => {
+  it('whitespace search term returns all commands', () => {
     expect(filterCommands(mockCommands, '   ')).toEqual(mockCommands);
   });
 
-  it('按 command 前缀匹配', () => {
+  it('matches by command prefix', () => {
     const result = filterCommands(mockCommands, 'sea');
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('1');
   });
 
-  it('按 command 前缀匹配大小写不敏感', () => {
+  it('command prefix match is case-insensitive', () => {
     const result = filterCommands(mockCommands, 'SEA');
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('1');
   });
 
-  it('按 label 包含匹配', () => {
+  it('matches by label contains', () => {
     const result = filterCommands(mockCommands, '新建');
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('3');
   });
 
-  it('按 keywords 包含匹配', () => {
+  it('matches by keywords contains', () => {
     const result = filterCommands(mockCommands, '查询');
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('1');
   });
 
-  it('按 keywords 部分匹配', () => {
+  it('matches by keywords partial match', () => {
     const result = filterCommands(mockCommands, '清空');
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe('5');
   });
 
-  it('无匹配时返回空数组', () => {
+  it('returns empty array when no match', () => {
     expect(filterCommands(mockCommands, 'xyz')).toHaveLength(0);
   });
 
-  it('多个字段均可命中', () => {
+  it('multiple fields can match', () => {
     // "se" 匹配 command: "search"
     const result = filterCommands(mockCommands, 'se');
     expect(result.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('空指令列表', () => {
+  it('empty command list', () => {
     expect(filterCommands([], 'search')).toHaveLength(0);
   });
 
-  it('keywords 为 undefined 的指令不受影响', () => {
+  it('commands with undefined keywords are not affected', () => {
     const cmds: ChatCommand[] = [{ id: '1', label: '测试', command: 'test' }];
     expect(filterCommands(cmds, 'test')).toHaveLength(1);
   });
 });
 
 describe('groupCommands', () => {
-  it('按 group 分组', () => {
+  it('groups by group', () => {
     const groups = groupCommands(mockCommands);
     expect(groups.get('工具')).toBeDefined();
     expect(groups.get('工具')!.length).toBe(2);
@@ -125,14 +125,14 @@ describe('groupCommands', () => {
     expect(groups.get('文件')!.length).toBe(1);
   });
 
-  it('无 group 的指令归入"常用"组', () => {
+  it('commands without group are placed in "常用" group', () => {
     const groups = groupCommands(mockCommands);
     expect(groups.get('常用')).toBeDefined();
-    // help 和 clear 没有 group
+    // help and clear have no group
     expect(groups.get('常用')!.length).toBe(2);
   });
 
-  it('全部无 group 时只有一个"常用"组', () => {
+  it('only one "常用" group when all have no group', () => {
     const cmds: ChatCommand[] = [
       { id: '1', label: 'A', command: 'a' },
       { id: '2', label: 'B', command: 'b' },
@@ -142,15 +142,15 @@ describe('groupCommands', () => {
     expect(groups.get('常用')).toHaveLength(2);
   });
 
-  it('空指令列表返回空 Map', () => {
+  it('empty command list returns empty Map', () => {
     const groups = groupCommands([]);
     expect(groups.size).toBe(0);
   });
 
-  it('保持插入顺序', () => {
+  it('maintains insertion order', () => {
     const groups = groupCommands(mockCommands);
     const keys = [...groups.keys()];
-    // "工具"组在 "文件"组之前
+    // "工具" group is before "文件" group
     expect(keys.indexOf('工具')).toBeLessThan(keys.indexOf('文件'));
   });
 });

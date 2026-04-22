@@ -1,5 +1,5 @@
 /**
- * 技能执行块
+ * Skill execution block
  */
 import { css, keyframes } from '@emotion/react';
 import { Sparkles, CheckCircle, XCircle, Loader } from 'lucide-react';
@@ -8,7 +8,7 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { BlockCard } from './BlockCard.js';
 import type { Theme } from '@agentskillmania/skill-ui-theme';
 
-/** 旋转动画 */
+/** Spin animation */
 const spin = keyframes`
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -23,7 +23,7 @@ const spinningLoader = (
   />
 );
 
-/** 根据 phase 返回展示信息 */
+/** Return display info based on phase */
 function getPhaseDisplay(
   meta: SkillBlockMetadata | undefined,
   status: string,

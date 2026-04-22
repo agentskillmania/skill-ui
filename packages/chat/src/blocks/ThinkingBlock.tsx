@@ -1,5 +1,5 @@
 /**
- * 思考过程块
+ * Thinking process block
  */
 import { css } from '@emotion/react';
 import { Brain } from 'lucide-react';

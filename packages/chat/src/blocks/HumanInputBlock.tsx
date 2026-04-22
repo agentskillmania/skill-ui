@@ -1,5 +1,5 @@
 /**
- * 人机交互块
+ * Human interaction block
  */
 import { useState } from 'react';
 import { css } from '@emotion/react';

@@ -1,5 +1,5 @@
 /**
- * 工具调用块
+ * Tool call block
  */
 import { css } from '@emotion/react';
 import { Wrench } from 'lucide-react';
@@ -7,7 +7,7 @@ import type { BlockProps, ToolCallMetadata } from '../types.js';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { BlockCard } from './BlockCard.js';
 
-/** 根据 toolType 获取对应的 blockColor key */
+/** Get corresponding blockColor key by toolType */
 function getToolColorKey(toolType?: string): string {
   switch (toolType) {
     case 'mcp':

@@ -1,5 +1,5 @@
 /**
- * 消息外框（头像、对齐、间距）
+ * Message wrapper (avatar, alignment, spacing)
  */
 import { css } from '@emotion/react';
 import type { ReactNode } from 'react';

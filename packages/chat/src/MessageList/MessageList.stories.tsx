@@ -41,14 +41,14 @@ const sampleMessages: Message[] = [
   { id: '5', role: 'system', content: '会话已开始', status: 'completed' },
 ];
 
-/** 消息列表 */
+/** Message list */
 export const Default: Story = {
   args: {
     messages: sampleMessages,
   },
 };
 
-/** 空列表 */
+/** Empty list */
 export const Empty: Story = {
   args: {
     messages: [],

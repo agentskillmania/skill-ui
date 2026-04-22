@@ -1,8 +1,8 @@
 /**
- * Markdown 渲染器
+ * Markdown renderer
  *
- * 基于 @ant-design/x-markdown（marked.js），与 skill-studio 保持一致。
- * 支持流式渲染、代码高亮、GFM 语法。
+ * Based on @ant-design/x-markdown (marked.js), consistent with skill-studio.
+ * Supports streaming rendering, code highlighting, GFM syntax.
  */
 import { css } from '@emotion/react';
 import React from 'react';
@@ -11,16 +11,16 @@ import type { ComponentProps, XMarkdownProps } from '@ant-design/x-markdown';
 import { CodeHighlighter } from '@ant-design/x';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 
-// React 19 类型兼容：XMarkdown 声明为 FC 但 TS 无法识别为 JSX 组件
+// React 19 type compatibility: XMarkdown declared as FC but TS cannot recognize it as JSX component
 const XMarkdown = _XMarkdown as unknown as React.ComponentType<XMarkdownProps>;
 
 export interface MarkdownRendererProps {
   children: string;
-  /** 是否流式输出 */
+  /** Whether streaming output */
   streaming?: boolean;
 }
 
-/** 代码块渲染：集成 CodeHighlighter */
+/** Code block rendering: integrates CodeHighlighter */
 function CodeComponent({ className, children, block }: ComponentProps) {
   if (!block) {
     return <code className={className}>{children}</code>;
@@ -41,7 +41,7 @@ export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps)
       css={css`
         line-height: 1.6;
 
-        /* 标题 */
+        /* Headings */
         h1,
         h2,
         h3,
@@ -70,12 +70,12 @@ export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps)
           font-size: ${theme.font.size.xs};
         }
 
-        /* 段落 */
+        /* Paragraphs */
         p {
           margin: ${theme.spacing[1]} 0;
         }
 
-        /* 列表 */
+        /* Lists */
         ul,
         ol {
           margin: ${theme.spacing[1]} 0;
@@ -91,7 +91,7 @@ export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps)
           margin: ${theme.spacing['0.5']} 0;
         }
 
-        /* 引用 */
+        /* Blockquotes */
         blockquote {
           margin: ${theme.spacing[2]} 0;
           padding: ${theme.spacing[1]} ${theme.spacing[2]};
@@ -104,14 +104,14 @@ export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps)
           }
         }
 
-        /* 分隔线 */
+        /* Horizontal rules */
         hr {
           margin: ${theme.spacing[3]} 0;
           border: none;
           border-top: 1px solid ${theme.color.borderSecondary};
         }
 
-        /* 链接 */
+        /* Links */
         a {
           color: ${theme.color.primary};
           text-decoration: none;
@@ -120,7 +120,7 @@ export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps)
           }
         }
 
-        /* 表格 */
+        /* Tables */
         table {
           width: 100%;
           margin: ${theme.spacing[2]} 0;
@@ -138,7 +138,7 @@ export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps)
           font-weight: 600;
         }
 
-        /* 内联代码 */
+        /* Inline code */
         code:not(pre code) {
           padding: ${theme.spacing['0.5']} ${theme.spacing[1]};
           background: ${theme.color.fillSubtle};

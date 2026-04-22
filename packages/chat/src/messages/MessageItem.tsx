@@ -1,5 +1,5 @@
 /**
- * 消息路由分发组件
+ * Message routing component
  */
 import type { Message } from '../types.js';
 import { useChatContext } from '../context.js';
@@ -12,7 +12,7 @@ export interface MessageItemProps {
   message: Message;
 }
 
-/** 内置消息渲染器 */
+/** Built-in message renderers */
 const builtinMessageRenderers: Record<string, React.ComponentType<{ message: Message }>> = {
   user: UserMessage,
   assistant: AssistantMessage,
@@ -22,7 +22,7 @@ const builtinMessageRenderers: Record<string, React.ComponentType<{ message: Mes
 export function MessageItem({ message }: MessageItemProps) {
   const { renderers, messageDecorator } = useChatContext();
 
-  // 查找渲染器：自定义优先，然后内置，最后兜底 SystemMessage
+  // Find renderer: custom first, then built-in, fallback to SystemMessage
   const customRenderer = renderers.messages?.[message.role];
   const BuiltinRenderer = builtinMessageRenderers[message.role];
   const Renderer = customRenderer ?? BuiltinRenderer ?? SystemMessage;
@@ -33,7 +33,7 @@ export function MessageItem({ message }: MessageItemProps) {
     </MessageWrapper>
   );
 
-  // 应用消息装饰器
+  // Apply message decorator
   if (messageDecorator) {
     return <>{messageDecorator(message, element)}</>;
   }

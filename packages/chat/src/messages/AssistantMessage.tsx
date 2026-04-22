@@ -1,5 +1,5 @@
 /**
- * AI 助手消息
+ * AI assistant message
  */
 import { css } from '@emotion/react';
 import type { MessageProps } from '../types.js';

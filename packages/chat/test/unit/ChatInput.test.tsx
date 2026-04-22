@@ -10,7 +10,7 @@ const mockCommands: ChatCommand[] = [
 ];
 
 describe('ChatInput', () => {
-  it('渲染输入框', () => {
+  it('renders input', () => {
     render(
       <ChatWrapper>
         <ChatInput />
@@ -19,7 +19,7 @@ describe('ChatInput', () => {
     expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument();
   });
 
-  it('使用自定义 placeholder', () => {
+  it('uses custom placeholder', () => {
     render(
       <ChatWrapper>
         <ChatInput placeholder="说点什么..." />
@@ -28,7 +28,7 @@ describe('ChatInput', () => {
     expect(screen.getByPlaceholderText('说点什么...')).toBeInTheDocument();
   });
 
-  it('渲染 prefix 和 suffix', () => {
+  it('renders prefix and suffix', () => {
     render(
       <ChatWrapper>
         <ChatInput prefix={<span>前缀</span>} suffix={<span>后缀</span>} />
@@ -38,7 +38,7 @@ describe('ChatInput', () => {
     expect(screen.getByText('后缀')).toBeInTheDocument();
   });
 
-  it('loading 状态显示停止按钮', () => {
+  it('loading status shows stop button', () => {
     render(
       <ChatWrapper>
         <ChatInput loading onCancel={() => {}} />
@@ -48,7 +48,7 @@ describe('ChatInput', () => {
     expect(buttons.length).toBeGreaterThan(0);
   });
 
-  it('disabled 状态', () => {
+  it('disabled status', () => {
     render(
       <ChatWrapper>
         <ChatInput disabled />
@@ -58,7 +58,7 @@ describe('ChatInput', () => {
     expect(textarea).toBeDisabled();
   });
 
-  it('传入受控 value', () => {
+  it('passes controlled value', () => {
     render(
       <ChatWrapper>
         <ChatInput value="测试文本" onChange={() => {}} />
@@ -67,7 +67,7 @@ describe('ChatInput', () => {
     expect(screen.getByDisplayValue('测试文本')).toBeInTheDocument();
   });
 
-  it('提交空白文本时不触发 onSubmit', () => {
+  it('does not trigger onSubmit when submitting blank text', () => {
     const onSubmit = vi.fn();
     render(
       <ChatWrapper>
@@ -79,7 +79,7 @@ describe('ChatInput', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('提交纯空格文本时不触发 onSubmit', () => {
+  it('does not trigger onSubmit when submitting whitespace-only text', () => {
     const onSubmit = vi.fn();
     const onChange = vi.fn();
     render(
@@ -92,7 +92,7 @@ describe('ChatInput', () => {
     expect(onSubmit).not.toHaveBeenCalled();
   });
 
-  it('提交有效文本时触发 onSubmit 并 trim', () => {
+  it('triggers onSubmit and trims when submitting valid text', () => {
     const onSubmit = vi.fn();
     const onChange = vi.fn();
     render(
@@ -105,18 +105,18 @@ describe('ChatInput', () => {
     expect(onSubmit).toHaveBeenCalledWith('hello');
   });
 
-  it('传入 commands 和 onCommand 时渲染自动补全包裹', () => {
+  it('renders autocomplete wrapper when commands and onCommand are passed', () => {
     const onCommand = vi.fn();
     render(
       <ChatWrapper>
         <ChatInput value="/" onChange={() => {}} commands={mockCommands} onCommand={onCommand} />
       </ChatWrapper>
     );
-    // 输入框应该被 CommandAutocomplete 包裹
+    // input should be wrapped by CommandAutocomplete
     expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument();
   });
 
-  it('无 commands 时直接渲染 senderElement', () => {
+  it('renders senderElement directly without commands', () => {
     render(
       <ChatWrapper>
         <ChatInput value="/" onChange={() => {}} />
@@ -125,7 +125,7 @@ describe('ChatInput', () => {
     expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument();
   });
 
-  it('空 commands 列表直接渲染 senderElement', () => {
+  it('renders senderElement directly with empty commands list', () => {
     render(
       <ChatWrapper>
         <ChatInput value="/" onChange={() => {}} commands={[]} onCommand={() => {}} />
@@ -134,7 +134,7 @@ describe('ChatInput', () => {
     expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument();
   });
 
-  it('Shift+Enter 不触发 onSubmit', () => {
+  it('Shift+Enter does not trigger onSubmit', () => {
     const onSubmit = vi.fn();
     render(
       <ChatWrapper>

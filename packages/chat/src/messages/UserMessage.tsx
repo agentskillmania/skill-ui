@@ -1,5 +1,5 @@
 /**
- * 用户消息
+ * User message
  */
 import { css } from '@emotion/react';
 import type { MessageProps } from '../types.js';

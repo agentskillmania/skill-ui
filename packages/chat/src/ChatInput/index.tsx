@@ -1,5 +1,5 @@
 /**
- * 聊天输入框组件
+ * Chat input component
  */
 import { css } from '@emotion/react';
 import { Sender } from '@ant-design/x';
@@ -18,11 +18,11 @@ export interface ChatInputProps {
   placeholder?: string;
   prefix?: ReactNode;
   suffix?: ReactNode;
-  /** 指令列表（启用斜杠自动补全） */
+  /** Command list (enables slash autocomplete) */
   commands?: ChatCommand[];
-  /** 选择指令回调 */
+  /** Select command callback */
   onCommand?: (command: ChatCommand) => void;
-  /** 斜杠触发字符（默认 "/"） */
+  /** Slash trigger character (default "/") */
   commandTrigger?: string;
 }
 
@@ -51,7 +51,7 @@ export function ChatInput({
 
   const handleCommandSelect = (command: ChatCommand) => {
     onCommand?.(command);
-    // 清空输入框
+    // Clear input
     onChange?.('');
   };
 
@@ -99,7 +99,7 @@ export function ChatInput({
     </div>
   );
 
-  // 启用指令自动补全时，用 CommandAutocomplete 包裹
+  // Wrap with CommandAutocomplete when command autocomplete is enabled
   if (commands && commands.length > 0 && onCommand) {
     return (
       <CommandAutocomplete

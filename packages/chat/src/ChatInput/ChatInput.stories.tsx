@@ -27,7 +27,7 @@ const meta: Meta<typeof ChatInputWrapper> = {
 export default meta;
 type Story = StoryObj<typeof ChatInputWrapper>;
 
-/** 基础可交互 */
+/** Basic interactive */
 const BasicComponent = () => {
   const [value, setValue] = React.useState('');
   return (
@@ -65,7 +65,7 @@ export const Loading: Story = {
   render: () => <LoadingComponent />,
 };
 
-/** 禁用状态 */
+/** Disabled state */
 export const Disabled: Story = {
   args: {
     disabled: true,
@@ -73,7 +73,7 @@ export const Disabled: Story = {
   },
 };
 
-/** 带 prefix 和 suffix */
+/** With prefix and suffix */
 const WithAffixesComponent = () => {
   const [value, setValue] = React.useState('');
   return (

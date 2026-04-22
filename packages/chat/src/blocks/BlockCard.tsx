@@ -1,20 +1,20 @@
 /**
- * 统一执行块卡片壳
+ * Unified execution block card shell
  */
 import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 
 export interface BlockCardProps {
-  /** 左侧图标 */
+  /** Left icon */
   icon?: ReactNode;
-  /** 标题 */
+  /** Title */
   title: string;
-  /** 左侧色条颜色 */
+  /** Left accent color */
   accentColor?: string;
-  /** 标签文本（标题右侧） */
+  /** Tag text (right of title) */
   tag?: string;
-  /** 内容 */
+  /** Content */
   children?: ReactNode;
 }
 

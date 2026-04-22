@@ -1,5 +1,5 @@
 /**
- * QuickCommands 组件单元测试
+ * QuickCommands component unit tests
  */
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
@@ -32,34 +32,34 @@ function renderQuickCommands(
 }
 
 describe('QuickCommands', () => {
-  it('渲染所有指令标签', () => {
+  it('renders all command tags', () => {
     renderQuickCommands();
     expect(screen.getByText('搜索')).toBeInTheDocument();
     expect(screen.getByText('分析')).toBeInTheDocument();
     expect(screen.getByText('新建')).toBeInTheDocument();
   });
 
-  it('点击标签触发 onCommand', async () => {
+  it('clicking tag triggers onCommand', async () => {
     const { onCommand } = renderQuickCommands();
     await userEvent.click(screen.getByText('搜索'));
     expect(onCommand).toHaveBeenCalledWith(mockCommands[0]);
   });
 
-  it('空指令列表不渲染', () => {
+  it('does not render with empty command list', () => {
     const { container } = renderQuickCommands({ commands: [] });
     expect(container.firstChild).toBeNull();
   });
 
-  it('maxCommands 限制显示数量', () => {
+  it('maxCommands limits display count', () => {
     renderQuickCommands({ maxCommands: 2 });
     expect(screen.getByText('搜索')).toBeInTheDocument();
     expect(screen.getByText('分析')).toBeInTheDocument();
     expect(screen.queryByText('新建')).not.toBeInTheDocument();
   });
 
-  it('disabled 状态不触发回调', () => {
+  it('disabled status does not trigger callback', () => {
     const { onCommand } = renderQuickCommands({ disabled: true });
-    // pointer-events: none 导致无法点击，验证回调未被调用即可
+    // pointer-events: none prevents clicking, just verify callback is not called
     expect(onCommand).not.toHaveBeenCalled();
   });
 });

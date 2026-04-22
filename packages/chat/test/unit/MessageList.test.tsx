@@ -11,7 +11,7 @@ const messages: Message[] = [
 ];
 
 describe('MessageList', () => {
-  it('渲染所有消息', () => {
+  it('renders all messages', () => {
     render(
       <ChatWrapper>
         <MessageList messages={messages} />
@@ -22,16 +22,16 @@ describe('MessageList', () => {
     expect(screen.getByText('系统消息')).toBeInTheDocument();
   });
 
-  it('空列表不崩溃', () => {
+  it('does not crash with empty list', () => {
     render(
       <ChatWrapper>
         <MessageList messages={[]} />
       </ChatWrapper>
     );
-    // 不崩溃即可
+    // just verify it does not crash
   });
 
-  it('长列表正常渲染', () => {
+  it('long list renders normally', () => {
     const long: Message[] = Array.from({ length: 50 }, (_, i) => ({
       id: `m${i}`,
       role: 'user' as const,

@@ -6,7 +6,7 @@ import { createMockContext } from './testUtils.js';
 import type { ChatContextValue } from '../../src/context.js';
 
 describe('ChatContext', () => {
-  it('提供上下文值', () => {
+  it('provides context value', () => {
     const mockCtx = createMockContext();
     const { result } = renderHook(() => useChatContext(), {
       wrapper: ({ children }) => (
@@ -17,7 +17,7 @@ describe('ChatContext', () => {
     expect(result.current.renderers).toEqual({});
   });
 
-  it('在 Chat 外部使用时抛出错误', () => {
+  it('throws error when used outside Chat', () => {
     const { result } = renderHook(() => {
       try {
         useChatContext();
@@ -29,7 +29,7 @@ describe('ChatContext', () => {
     expect((result.current as Error).message).toContain('useChatContext');
   });
 
-  it('透传 onConfirmHumanRequest', () => {
+  it('forwards onConfirmHumanRequest', () => {
     const fn = () => {};
     const mockCtx = createMockContext({ onConfirmHumanRequest: fn });
     const { result } = renderHook(() => useChatContext(), {
@@ -40,7 +40,7 @@ describe('ChatContext', () => {
     expect(result.current.onConfirmHumanRequest).toBe(fn);
   });
 
-  it('透传 renderers', () => {
+  it('forwards renderers', () => {
     const MyRenderer = () => null;
     const mockCtx = createMockContext({
       renderers: { messages: { custom: MyRenderer } },
@@ -53,7 +53,7 @@ describe('ChatContext', () => {
     expect(result.current.renderers.messages?.custom).toBe(MyRenderer);
   });
 
-  it('上下文值更新后 hook 返回新值', () => {
+  it('hook returns new value after context update', () => {
     const fn1 = () => {};
     const fn2 = () => {};
     const mockCtx1 = createMockContext({ onConfirmHumanRequest: fn1 });
@@ -67,7 +67,7 @@ describe('ChatContext', () => {
     const { result, rerender } = renderHook(() => useChatContext(), { wrapper });
     expect(result.current.onConfirmHumanRequest).toBe(fn1);
 
-    // 更新外部变量后触发重渲染
+    // trigger re-render after updating external variable
     ctxValue = mockCtx2;
     rerender(undefined);
 

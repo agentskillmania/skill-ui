@@ -1,5 +1,5 @@
 /**
- * 执行块渲染路由
+ * Execution block rendering router
  */
 import type { Block } from '../types.js';
 import type { BlockProps } from '../types.js';
@@ -17,7 +17,7 @@ export interface BlocksRendererProps {
   blocks: Block[];
 }
 
-/** 内置块渲染器 */
+/** Built-in block renderers */
 const builtinBlockRenderers: Record<string, React.ComponentType<BlockProps>> = {
   thinking: ThinkingBlock,
   tool_call: ToolCallBlock,
@@ -40,7 +40,7 @@ export function BlocksRenderer({ blocks }: BlocksRendererProps) {
       `}
     >
       {blocks.map((block) => {
-        // 自定义渲染器优先
+        // Custom renderer takes priority
         const CustomRenderer = renderers.blocks?.[block.type];
         const BuiltinRenderer = builtinBlockRenderers[block.type];
         const Renderer = CustomRenderer ?? BuiltinRenderer;

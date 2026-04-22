@@ -1,12 +1,12 @@
 /**
- * 测试辅助：统一的 Provider wrapper
+ * Test helper: unified Provider wrapper
  */
 import type { ReactNode } from 'react';
 import { ThemeProvider, lightTheme } from '@agentskillmania/skill-ui-theme';
 import { ChatContext } from '../../src/context.js';
 import type { ChatContextValue } from '../../src/context.js';
 
-/** 默认 Chat 上下文值 */
+/** Default Chat context value */
 export function createMockContext(overrides?: Partial<ChatContextValue>): ChatContextValue {
   return {
     renderers: {},
@@ -16,12 +16,12 @@ export function createMockContext(overrides?: Partial<ChatContextValue>): ChatCo
   };
 }
 
-/** 包裹 ThemeProvider */
+/** Wraps ThemeProvider */
 export function ThemeWrapper({ children }: { children: ReactNode }) {
   return <ThemeProvider theme={lightTheme}>{children}</ThemeProvider>;
 }
 
-/** 包裹 ThemeProvider + ChatContext */
+/** Wraps ThemeProvider + ChatContext */
 export function ChatWrapper({
   children,
   context,

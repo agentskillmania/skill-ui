@@ -1,11 +1,11 @@
 /**
- * 自动滚动 hook
+ * Auto-scroll hook
  */
 import { useEffect, useRef, useCallback } from 'react';
 
 /**
- * 监听容器内容变化，自动滚动到底部。
- * 用户主动上滚时暂停自动滚动，滚到底部后恢复。
+ * Monitor container content changes, auto-scroll to bottom.
+ * Pause auto-scroll when user scrolls up manually, resume when scrolled to bottom.
  */
 export function useAutoScroll<T extends HTMLElement>(deps: unknown[]) {
   const ref = useRef<T>(null);
@@ -22,7 +22,7 @@ export function useAutoScroll<T extends HTMLElement>(deps: unknown[]) {
     if (shouldAutoScroll.current && ref.current) {
       ref.current.scrollTop = ref.current.scrollHeight;
     }
-    // deps 是动态传入的依赖数组，无法静态分析
+    // deps is a dynamically passed dependency array, cannot be statically analyzed
   }, deps);
 
   return { ref, handleScroll };

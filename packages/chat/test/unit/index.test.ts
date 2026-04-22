@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 
 describe('placeholder', () => {
-  it('占位测试', () => {
+  it('placeholder test', () => {
     expect(true).toBe(true);
   });
 });

@@ -1,5 +1,5 @@
 /**
- * Chat 顶层组件
+ * Chat top-level component
  */
 import { css } from '@emotion/react';
 import { useTheme, flexColumn } from '@agentskillmania/skill-ui-theme';

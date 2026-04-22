@@ -1,5 +1,5 @@
 /**
- * 消息列表组件
+ * Message list component
  */
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
