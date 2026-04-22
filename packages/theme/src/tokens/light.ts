@@ -1,17 +1,17 @@
 /**
- * 浅色主题颜色 token
+ * Light theme color tokens
  */
 import type { Theme } from '../types.js';
 import { spacing, radius, shadow, blur, motion, font, icon } from './shared.js';
 
 export const lightColor: Theme['color'] = {
-  // 品牌（主色 #4361ee 蓝紫色）
+  // Brand (primary #4361ee blue-purple)
   primary: '#4361ee',
   primaryHover: '#3651d8',
   primaryActive: '#2a41be',
   primaryBg: 'rgba(67, 97, 238, 0.1)',
 
-  // 语义
+  // Semantic
   success: '#16a34a',
   successBg: 'rgba(22, 163, 74, 0.1)',
   successBorder: 'rgba(22, 163, 74, 0.3)',
@@ -25,7 +25,7 @@ export const lightColor: Theme['color'] = {
   infoBg: 'rgba(67, 97, 238, 0.1)',
   infoBorder: 'rgba(67, 97, 238, 0.3)',
 
-  // 扩展颜色
+  // Extended colors
   green: '#16a34a',
   greenBg: 'rgba(22, 163, 74, 0.1)',
   blue: '#4361ee',
@@ -37,7 +37,7 @@ export const lightColor: Theme['color'] = {
   cyan: '#06b6d4',
   cyanBg: 'rgba(6, 182, 212, 0.1)',
 
-  // 背景
+  // Background
   bgBase: '#f8fafc',
   bgLayout: '#f8fafc',
   bgContainer: '#ffffff',
@@ -45,7 +45,7 @@ export const lightColor: Theme['color'] = {
   bgSpotlight: '#f1f5f9',
   bgMask: 'rgba(0, 0, 0, 0.4)',
 
-  // 文字
+  // Text
   text: '#0f172a',
   textSecondary: '#475569',
   textTertiary: '#94a3b8',
@@ -53,29 +53,29 @@ export const lightColor: Theme['color'] = {
   textDisabled: '#94a3b8',
   textInverse: '#ffffff',
 
-  // 边框
+  // Border
   border: '#e2e8f0',
   borderSecondary: '#f1f5f9',
   borderHover: '#cbd5e1',
   borderActive: '#94a3b8',
 
-  // 填充
+  // Fill
   fill: '#f1f5f9',
   fillSecondary: '#f8fafc',
   fillTertiary: '#ffffff',
   fillSubtle: 'rgba(0, 0, 0, 0.04)',
   fillLight: 'rgba(0, 0, 0, 0.08)',
 
-  // 链接
+  // Link
   link: '#4361ee',
   linkHover: '#3651d8',
   linkActive: '#2a41be',
 
-  // 玻璃效果
+  // Glass effect
   glassLight: 'rgba(255, 255, 255, 0.5)',
   glassLightStrong: 'rgba(255, 255, 255, 0.7)',
 
-  // 交互状态
+  // Interaction states
   hoverOverlay: 'rgba(0, 0, 0, 0.04)',
   activeOverlay: 'rgba(0, 0, 0, 0.08)',
 };

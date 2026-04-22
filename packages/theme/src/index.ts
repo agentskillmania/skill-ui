@@ -1,14 +1,14 @@
 /**
- * @agentskillmania/skill-ui-theme 统一导出
+ * @agentskillmania/skill-ui-theme unified exports
  */
 
-// 类型
+// Types
 export type { Theme, BlockColorItem } from './types.js';
 
-// 业务常量（不随主题变化）
+// Business constants (not theme-dependent)
 export { layout, zIndex } from './constants.js';
 
-// Token
+// Tokens
 export {
   getTheme,
   breakpoints,
@@ -23,7 +23,7 @@ export {
 // Provider
 export { ThemeProvider, useTheme, createEmotionTheme, GlobalStyles } from './provider/index.js';
 
-// Ant Design 适配
+// Ant Design adapter
 export {
   createAntdConfig,
   lightAntdConfig,
@@ -33,7 +33,7 @@ export {
   darkAntdXTokens,
 } from './antd/index.js';
 
-// 样式工具
+// Style utilities
 export {
   flexColumn,
   flexRow,

@@ -1,50 +1,50 @@
 /**
- * 主题类型定义
+ * Theme type definitions
  */
 
-/** Block 组件专用色项 */
+/** Block component color items */
 export interface BlockColorItem {
-  /** 文字色 */
+  /** Text color */
   text: string;
-  /** 背景色 */
+  /** Background color */
   bg: string;
 }
 
-/** 主题定义 */
+/** Theme definition */
 export interface Theme {
-  /** 主题模式 */
+  /** Theme mode */
   mode: 'light' | 'dark';
   /**
-   * 基础颜色
+   * Base colors
    *
-   * 包含：品牌色(primary/primaryHover/primaryActive/primaryBg)、
-   * 语义色(success/warning/error/info 及对应 Bg/Border)、
-   * 扩展色(green/blue/purple/orange/cyan 及对应 Bg)、
-   * 背景(bgBase/bgContainer/bgElevated/bgSpotlight/bgMask)、
-   * 文字(text/textSecondary/textTertiary/textQuaternary/textDisabled/textInverse)、
-   * 边框(border/borderSecondary/borderHover/borderActive)、
-   * 填充(fill/fillSecondary/fillTertiary/fillSubtle/fillLight)、
-   * 链接(link/linkHover/linkActive)、
-   * 玻璃效果(glassLight/glassLightStrong)、
-   * 交互状态(hoverOverlay/activeOverlay)
+   * Includes: brand colors (primary/primaryHover/primaryActive/primaryBg),
+   * semantic colors (success/warning/error/info and corresponding Bg/Border),
+   * extended colors (green/blue/purple/orange/cyan and corresponding Bg),
+   * backgrounds (bgBase/bgContainer/bgElevated/bgSpotlight/bgMask),
+   * text colors (text/textSecondary/textTertiary/textQuaternary/textDisabled/textInverse),
+   * borders (border/borderSecondary/borderHover/borderActive),
+   * fills (fill/fillSecondary/fillTertiary/fillSubtle/fillLight),
+   * links (link/linkHover/linkActive),
+   * glass effects (glassLight/glassLightStrong),
+   * interaction states (hoverOverlay/activeOverlay)
    */
   color: Record<string, string>;
-  /** Block 组件专用色（thinking/toolMcp/toolScript/toolBuiltin/plan 等） */
+  /** Block component dedicated colors (thinking/toolMcp/toolScript/toolBuiltin/plan, etc.) */
   blockColor: Record<string, BlockColorItem>;
-  /** 间距 */
+  /** Spacing */
   spacing: Record<string, string>;
-  /** 圆角 */
+  /** Border radius */
   radius: Record<string, string>;
-  /** 阴影 */
+  /** Shadows */
   shadow: Record<string, string>;
-  /** 模糊 */
+  /** Blur */
   blur: Record<string, string>;
-  /** 动效 */
+  /** Motion */
   motion: {
     duration: Record<string, string>;
     easing: Record<string, string>;
   };
-  /** 字体 */
+  /** Font */
   font: {
     family: string;
     familyMono: string;
@@ -60,6 +60,6 @@ export interface Theme {
     lineHeight: string;
     lineHeightHeading: string;
   };
-  /** 图标尺寸 */
+  /** Icon sizes */
   icon: Record<string, string>;
 }

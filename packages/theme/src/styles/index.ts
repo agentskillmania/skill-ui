@@ -1,24 +1,24 @@
 /**
- * 样式工具统一导出
+ * Style utilities unified exports
  */
 
-// 布局
+// Layout
 export { flexColumn, flexRow, flexCenter, flexWrap, gridAutoFill } from './layouts.js';
 
-// 视觉效果
+// Visual effects
 export { glassEffect, card, borderDefault, borderAccent } from './effects.js';
 
-// 交互状态
+// Interaction states
 export { hoverPrimary, hoverBg, disabled, focusVisible } from './interactions.js';
 
-// 过渡动画
+// Transitions & animations
 export { transition, spin, scaleActive } from './animations.js';
 
-// 文字
+// Text
 export { textTruncate, textSecondary } from './text.js';
 
-// 特殊容器
+// Special containers
 export { iconBox, scrollable, absoluteFill } from './containers.js';
 
-// 响应式媒体查询
+// Responsive media queries
 export { media, container } from './media.js';

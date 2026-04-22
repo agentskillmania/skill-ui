@@ -1,11 +1,11 @@
 /**
- * 容器样式工具
+ * Container style utilities
  */
 import { css } from '@emotion/react';
 import type { Theme } from '../types.js';
 
 /**
- * 图标容器
+ * Icon box container
  */
 export function iconBox(
   theme: Theme,
@@ -25,7 +25,7 @@ export function iconBox(
 }
 
 /**
- * 可滚动容器
+ * Scrollable container
  */
 export function scrollable(
   theme: Theme,
@@ -68,7 +68,7 @@ interface AbsoluteFillOptions {
 }
 
 /**
- * 绝对定位填充容器
+ * Absolute positioning fill container
  */
 export function absoluteFill(
   _theme: Theme,

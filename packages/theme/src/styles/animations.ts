@@ -1,14 +1,14 @@
 /**
- * 过渡动画样式工具
+ * Transition and animation style utilities
  */
 import { css } from '@emotion/react';
 import type { Theme } from '../types.js';
 
 /**
- * 通用过渡动画
- * @param properties - 过渡的属性，默认包含常用属性
- * @param duration - 持续时间 key 或自定义值
- * @param timing - 时间函数 key 或自定义值
+ * Common transition animation
+ * @param properties - Properties to transition, defaults to commonly used properties
+ * @param duration - Duration key or custom value
+ * @param timing - Timing function key or custom value
  */
 export function transition(
   theme: Theme,
@@ -32,7 +32,7 @@ export function transition(
 }
 
 /**
- * 旋转动画（用于 loading 等场景）
+ * Spin animation (for loading scenarios, etc.)
  */
 export function spin(
   _theme: Theme,
@@ -55,7 +55,7 @@ export function spin(
 }
 
 /**
- * 点击缩放动画
+ * Click scale animation
  */
 export function scaleActive(_theme: Theme, scale = 0.95, duration = '200ms') {
   return css`

@@ -1,14 +1,14 @@
 /**
- * 业务常量（不属于主题变量，不随主题模式变化）
+ * Business constants (not part of theme variables, do not change with theme mode)
  */
 
-/** 布局常量 */
+/** Layout constants */
 export const layout = {
   titlebarHeight: '38px',
   chatInputHeight: '56px',
 } as const;
 
-/** 层级常量 */
+/** Z-index constants */
 export const zIndex = {
   base: 0,
   dropdown: 1000,

@@ -1,10 +1,10 @@
 /**
- * 非颜色类 token（亮暗主题共用）
+ * Non-color tokens (shared by light and dark themes)
  */
 import type { Theme } from '../types.js';
 
 export const breakpoints = {
-  /** 小于此值为紧凑模式 */
+  /** Below this value is compact mode */
   compact: '768px',
 } as const;
 

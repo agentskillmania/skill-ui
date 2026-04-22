@@ -1,11 +1,11 @@
 /**
- * 交互状态样式工具
+ * Interaction state style utilities
  */
 import { css } from '@emotion/react';
 import type { Theme } from '../types.js';
 
 /**
- * 主色 hover 效果（边框变主色 + 背景变主色背景）
+ * Primary hover effect (border turns primary + background turns primary background)
  */
 export function hoverPrimary(theme: Theme) {
   return css`
@@ -17,7 +17,7 @@ export function hoverPrimary(theme: Theme) {
 }
 
 /**
- * 背景 hover 效果
+ * Background hover effect
  */
 export function hoverBg(theme: Theme) {
   return css`
@@ -28,7 +28,7 @@ export function hoverBg(theme: Theme) {
 }
 
 /**
- * 禁用状态
+ * Disabled state
  */
 export function disabled(_theme: Theme, isDisabled = true) {
   return css`
@@ -38,7 +38,7 @@ export function disabled(_theme: Theme, isDisabled = true) {
 }
 
 /**
- * 焦点可见状态
+ * Focus visible state
  */
 export function focusVisible(theme: Theme) {
   return css`

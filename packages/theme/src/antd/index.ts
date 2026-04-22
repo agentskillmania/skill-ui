@@ -1,5 +1,5 @@
 /**
- * Ant Design / Ant Design X 主题配置映射
+ * Ant Design / Ant Design X theme config mapping
  */
 import { theme } from 'antd';
 import type { ThemeConfig } from 'antd';
@@ -7,7 +7,7 @@ import type { Theme } from '../types.js';
 import { lightTheme, darkTheme } from '../tokens/index.js';
 
 /**
- * 从 Theme token 创建 Ant Design ThemeConfig
+ * Create Ant Design ThemeConfig from Theme tokens
  */
 export function createAntdConfig(t: Theme): ThemeConfig {
   return {
@@ -70,7 +70,7 @@ export const lightAntdConfig = createAntdConfig(lightTheme);
 export const darkAntdConfig = createAntdConfig(darkTheme);
 
 /**
- * Ant Design X 专用 Token
+ * Ant Design X dedicated tokens
  */
 export function getAntdXTokens(t: Theme) {
   return {

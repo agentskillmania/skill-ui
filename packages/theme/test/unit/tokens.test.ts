@@ -21,14 +21,14 @@ import {
 import { layout, zIndex } from '../../src/constants.js';
 
 describe('getTheme', () => {
-  it('返回浅色主题', () => {
+  it('returns light theme', () => {
     const theme = getTheme('light');
     expect(theme.mode).toBe('light');
     expect(theme.color).toBe(lightColor);
     expect(theme.blockColor).toBe(lightBlockColor);
   });
 
-  it('返回深色主题', () => {
+  it('returns dark theme', () => {
     const theme = getTheme('dark');
     expect(theme.mode).toBe('dark');
     expect(theme.color).toBe(darkColor);
@@ -37,24 +37,24 @@ describe('getTheme', () => {
 });
 
 describe('lightTheme', () => {
-  it('有正确的 mode', () => {
+  it('has correct mode', () => {
     expect(lightTheme.mode).toBe('light');
   });
 
-  it('包含必需的颜色 token', () => {
+  it('contains required color tokens', () => {
     expect(lightTheme.color.primary).toBe('#4361ee');
     expect(lightTheme.color.text).toBeTruthy();
     expect(lightTheme.color.bgBase).toBeTruthy();
     expect(lightTheme.color.border).toBeTruthy();
   });
 
-  it('包含新增的颜色 token', () => {
+  it('contains new color tokens', () => {
     expect(lightTheme.color.textInverse).toBe('#ffffff');
     expect(lightTheme.color.borderHover).toBeTruthy();
     expect(lightTheme.color.borderActive).toBeTruthy();
   });
 
-  it('包含 blockColor（嵌套结构）', () => {
+  it('contains blockColor (nested structure)', () => {
     expect(lightTheme.blockColor.thinking.text).toBeTruthy();
     expect(lightTheme.blockColor.thinking.bg).toBeTruthy();
     expect(lightTheme.blockColor.humanInput.text).toBeTruthy();
@@ -64,7 +64,7 @@ describe('lightTheme', () => {
     expect(lightTheme.blockColor.plan.text).toBeTruthy();
   });
 
-  it('复用 shared 非 color token', () => {
+  it('reuses shared non-color tokens', () => {
     expect(lightTheme.spacing).toBe(spacing);
     expect(lightTheme.radius).toBe(radius);
     expect(lightTheme.shadow).toBe(shadow);
@@ -74,35 +74,35 @@ describe('lightTheme', () => {
     expect(lightTheme.icon).toBe(icon);
   });
 
-  it('不包含 layout 和 zIndex（已提取到 constants）', () => {
+  it('does not contain layout and zIndex (extracted to constants)', () => {
     expect('layout' in lightTheme).toBe(false);
     expect('zIndex' in lightTheme).toBe(false);
   });
 });
 
 describe('darkTheme', () => {
-  it('有正确的 mode', () => {
+  it('has correct mode', () => {
     expect(darkTheme.mode).toBe('dark');
   });
 
-  it('包含必需的颜色 token', () => {
+  it('contains required color tokens', () => {
     expect(darkTheme.color.primary).toBeTruthy();
     expect(darkTheme.color.text).toBeTruthy();
     expect(darkTheme.color.bgBase).toBeTruthy();
   });
 
-  it('深色背景比浅色深', () => {
+  it('dark background is darker than light', () => {
     expect(darkTheme.color.bgBase).toMatch(/^#[0-9a-f]{6}$/);
     expect(darkTheme.color.bgContainer).toMatch(/^#[0-9a-f]{6}$/);
   });
 
-  it('包含新增的颜色 token', () => {
+  it('contains new color tokens', () => {
     expect(darkTheme.color.textInverse).toBe('#0f172a');
     expect(darkTheme.color.borderHover).toBeTruthy();
     expect(darkTheme.color.borderActive).toBeTruthy();
   });
 
-  it('复用 shared 非 color token', () => {
+  it('reuses shared non-color tokens', () => {
     expect(darkTheme.spacing).toBe(spacing);
     expect(darkTheme.radius).toBe(radius);
     expect(darkTheme.blur).toBe(blur);
@@ -110,51 +110,51 @@ describe('darkTheme', () => {
     expect(darkTheme.font).toBe(font);
   });
 
-  it('不包含 layout 和 zIndex', () => {
+  it('does not contain layout and zIndex', () => {
     expect('layout' in darkTheme).toBe(false);
     expect('zIndex' in darkTheme).toBe(false);
   });
 });
 
 describe('shared tokens', () => {
-  it('spacing 包含常用间距', () => {
+  it('spacing contains common spacing values', () => {
     expect(spacing[1]).toBe('4px');
     expect(spacing[2]).toBe('8px');
     expect(spacing[4]).toBe('16px');
     expect(spacing[8]).toBe('32px');
   });
 
-  it('radius 包含常用圆角', () => {
+  it('radius contains common border radius values', () => {
     expect(radius.sm).toBe('4px');
     expect(radius.md).toBe('8px');
     expect(radius.full).toBe('9999px');
   });
 
-  it('shadow 包含常用阴影', () => {
+  it('shadow contains common shadows', () => {
     expect(shadow.sm).toBeTruthy();
     expect(shadow.base).toBeTruthy();
     expect(shadow.md).toBeTruthy();
   });
 
-  it('font 包含字体配置', () => {
+  it('font contains font configuration', () => {
     expect(font.family).toContain('sans-serif');
     expect(font.familyMono).toContain('monospace');
     expect(font.size.base).toBe('14px');
     expect(font.weight.normal).toBe(400);
   });
 
-  it('breakpoints 定义了紧凑断点', () => {
+  it('breakpoints defines compact breakpoint', () => {
     expect(breakpoints.compact).toBe('768px');
   });
 });
 
 describe('constants', () => {
-  it('layout 包含布局常量', () => {
+  it('layout contains layout constants', () => {
     expect(layout.titlebarHeight).toBe('38px');
     expect(layout.chatInputHeight).toBe('56px');
   });
 
-  it('zIndex 按层级递增', () => {
+  it('zIndex increases by level', () => {
     expect(zIndex.base).toBeLessThan(zIndex.dropdown);
     expect(zIndex.dropdown).toBeLessThan(zIndex.modal);
     expect(zIndex.modal).toBeLessThan(zIndex.tooltip);

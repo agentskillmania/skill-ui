@@ -1,17 +1,17 @@
 /**
- * 深色主题颜色 token
+ * Dark theme color tokens
  */
 import type { Theme } from '../types.js';
 import { spacing, radius, darkShadow, blur, motion, font, icon } from './shared.js';
 
 export const darkColor: Theme['color'] = {
-  // 品牌（主色 #6b83f2 蓝紫色，深色模式下提亮）
+  // Brand (primary #6b83f2 blue-purple, brightened in dark mode)
   primary: '#6b83f2',
   primaryHover: '#7d93f5',
   primaryActive: '#5a72e0',
   primaryBg: 'rgba(107, 131, 242, 0.15)',
 
-  // 语义
+  // Semantic
   success: '#4ade80',
   successBg: 'rgba(74, 222, 128, 0.12)',
   successBorder: 'rgba(74, 222, 128, 0.25)',
@@ -25,7 +25,7 @@ export const darkColor: Theme['color'] = {
   infoBg: 'rgba(107, 131, 242, 0.15)',
   infoBorder: 'rgba(107, 131, 242, 0.25)',
 
-  // 扩展颜色
+  // Extended colors
   green: '#4ade80',
   greenBg: 'rgba(74, 222, 128, 0.12)',
   blue: '#6b83f2',
@@ -37,7 +37,7 @@ export const darkColor: Theme['color'] = {
   cyan: '#22d3ee',
   cyanBg: 'rgba(34, 211, 238, 0.12)',
 
-  // 背景
+  // Background
   bgBase: '#0f172a',
   bgLayout: '#0f172a',
   bgContainer: '#1e293b',
@@ -45,7 +45,7 @@ export const darkColor: Theme['color'] = {
   bgSpotlight: '#1e293b',
   bgMask: 'rgba(0, 0, 0, 0.6)',
 
-  // 文字
+  // Text
   text: '#f1f5f9',
   textSecondary: '#94a3b8',
   textTertiary: '#64748b',
@@ -53,29 +53,29 @@ export const darkColor: Theme['color'] = {
   textDisabled: '#475569',
   textInverse: '#0f172a',
 
-  // 边框
+  // Border
   border: '#334155',
   borderSecondary: '#1e293b',
   borderHover: '#475569',
   borderActive: '#64748b',
 
-  // 填充
+  // Fill
   fill: '#1e293b',
   fillSecondary: '#0f172a',
   fillTertiary: '#334155',
   fillSubtle: 'rgba(255, 255, 255, 0.04)',
   fillLight: 'rgba(255, 255, 255, 0.08)',
 
-  // 链接
+  // Link
   link: '#6b83f2',
   linkHover: '#7d93f5',
   linkActive: '#5a72e0',
 
-  // 玻璃效果
+  // Glass effect
   glassLight: 'rgba(30, 41, 59, 0.6)',
   glassLightStrong: 'rgba(30, 41, 59, 0.8)',
 
-  // 交互状态
+  // Interaction states
   hoverOverlay: 'rgba(255, 255, 255, 0.04)',
   activeOverlay: 'rgba(255, 255, 255, 0.08)',
 };

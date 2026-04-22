@@ -1,5 +1,5 @@
 /**
- * 全局样式组件
+ * Global styles component
  */
 import { Global, css } from '@emotion/react';
 import { useTheme } from './index.js';
@@ -10,7 +10,7 @@ export function GlobalStyles() {
   return (
     <Global
       styles={css`
-        /* ========== 全局重置 ========== */
+        /* ========== Global reset ========== */
         *,
         *::before,
         *::after {
@@ -38,7 +38,7 @@ export function GlobalStyles() {
           text-rendering: optimizeLegibility;
         }
 
-        /* ========== 滚动条样式 ========== */
+        /* ========== Scrollbar styles ========== */
         ::-webkit-scrollbar {
           width: 8px;
           height: 8px;
@@ -62,19 +62,19 @@ export function GlobalStyles() {
           scrollbar-color: ${theme.color.border} transparent;
         }
 
-        /* ========== 选中文本样式 ========== */
+        /* ========== Text selection styles ========== */
         ::selection {
           background: ${theme.color.primary};
           color: ${theme.color.textInverse};
         }
 
-        /* ========== 焦点样式 ========== */
+        /* ========== Focus styles ========== */
         :focus-visible {
           outline: 2px solid ${theme.color.primary};
           outline-offset: 2px;
         }
 
-        /* ========== 链接样式 ========== */
+        /* ========== Link styles ========== */
         a {
           color: ${theme.color.link};
           text-decoration: none;
@@ -85,7 +85,7 @@ export function GlobalStyles() {
           color: ${theme.color.linkHover};
         }
 
-        /* ========== 代码样式 ========== */
+        /* ========== Code styles ========== */
         code,
         pre,
         kbd,
@@ -112,7 +112,7 @@ export function GlobalStyles() {
           background: transparent;
         }
 
-        /* ========== 动效减弱模式 ========== */
+        /* ========== Reduced motion mode ========== */
         @media (prefers-reduced-motion: reduce) {
           *,
           *::before,
@@ -123,7 +123,7 @@ export function GlobalStyles() {
           }
         }
 
-        /* ========== Ant Design X Sender 发送按钮 ========== */
+        /* ========== Ant Design X Sender send button ========== */
         .ant-sender-actions-list button:not(:disabled) {
           background: ${theme.color.primary} !important;
           color: white !important;

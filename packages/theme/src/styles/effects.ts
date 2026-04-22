@@ -1,14 +1,14 @@
 /**
- * 视觉效果样式工具
+ * Visual effect style utilities
  */
 import { css } from '@emotion/react';
 import type { Theme } from '../types.js';
 
 /**
- * 毛玻璃效果
+ * Glassmorphism effect
  */
 export function glassEffect(theme: Theme, strength: 'light' | 'strong' = 'light') {
-  // 浅/深色模式统一使用 glassLight / glassLightStrong token
+  // Light/dark modes uniformly use glassLight / glassLightStrong tokens
   const bgKey = strength === 'strong' ? 'glassLightStrong' : 'glassLight';
   return css`
     background: ${theme.color[bgKey]};
@@ -18,7 +18,7 @@ export function glassEffect(theme: Theme, strength: 'light' | 'strong' = 'light'
 }
 
 /**
- * 卡片容器（圆角 + 阴影 + 背景）
+ * Card container (border radius + shadow + background)
  */
 export function card(
   theme: Theme,
@@ -39,7 +39,7 @@ export function card(
 }
 
 /**
- * 默认边框
+ * Default border
  */
 export function borderDefault(theme: Theme) {
   return css`
@@ -48,7 +48,7 @@ export function borderDefault(theme: Theme) {
 }
 
 /**
- * 强调边框（左侧彩色边框）
+ * Accent border (colored left border)
  */
 export function borderAccent(theme: Theme, color: keyof Theme['color']) {
   return css`

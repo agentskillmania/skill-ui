@@ -15,166 +15,166 @@ import { iconBox, scrollable, absoluteFill } from '../../src/styles/containers.j
 import { media, container } from '../../src/styles/media.js';
 
 /**
- * 验证样式工具函数返回 SerializedStyles（非空、可序列化）
+ * Verify style utility functions return SerializedStyles (non-null, serializable)
  */
-describe('布局样式', () => {
-  it('flexColumn 返回有效样式', () => {
+describe('layout styles', () => {
+  it('flexColumn returns valid styles', () => {
     const s = flexColumn(lightTheme, 4);
     expect(s.styles).toContain('flex-direction: column');
     expect(s.styles).toContain(lightTheme.spacing[4]);
   });
 
-  it('flexRow 返回有效样式', () => {
+  it('flexRow returns valid styles', () => {
     const s = flexRow(lightTheme, 2);
     expect(s.styles).toContain('display: flex');
     expect(s.styles).toContain('align-items: center');
   });
 
-  it('flexCenter 返回有效样式', () => {
+  it('flexCenter returns valid styles', () => {
     const s = flexCenter(lightTheme);
     expect(s.styles).toContain('justify-content: center');
   });
 
-  it('flexWrap 返回有效样式', () => {
+  it('flexWrap returns valid styles', () => {
     const s = flexWrap(lightTheme, 3);
     expect(s.styles).toContain('flex-wrap: wrap');
   });
 
-  it('gridAutoFill 返回有效样式', () => {
+  it('gridAutoFill returns valid styles', () => {
     const s = gridAutoFill(lightTheme);
     expect(s.styles).toContain('display: grid');
   });
 });
 
-describe('视觉效果', () => {
-  it('glassEffect 返回有效样式', () => {
+describe('visual effects', () => {
+  it('glassEffect returns valid styles', () => {
     const s = glassEffect(lightTheme);
     expect(s.styles).toContain('backdrop-filter');
   });
 
-  it('glassEffect dark 模式不崩溃', () => {
+  it('glassEffect does not crash in dark mode', () => {
     const s = glassEffect(darkTheme);
     expect(s.styles).toContain('backdrop-filter');
     expect(s.styles).not.toContain('undefined');
   });
 
-  it('card 返回有效样式', () => {
+  it('card returns valid styles', () => {
     const s = card(lightTheme);
     expect(s.styles).toContain('border-radius');
     expect(s.styles).toContain('box-shadow');
   });
 
-  it('borderDefault 返回有效样式', () => {
+  it('borderDefault returns valid styles', () => {
     const s = borderDefault(lightTheme);
     expect(s.styles).toContain(lightTheme.color.border);
   });
 
-  it('borderAccent 返回有效样式', () => {
+  it('borderAccent returns valid styles', () => {
     const s = borderAccent(lightTheme, 'primary');
     expect(s.styles).toContain('border-left');
     expect(s.styles).toContain(lightTheme.color.primary);
   });
 });
 
-describe('交互状态', () => {
-  it('hoverPrimary 返回有效样式', () => {
+describe('interaction states', () => {
+  it('hoverPrimary returns valid styles', () => {
     const s = hoverPrimary(lightTheme);
     expect(s.styles).toContain(':hover');
     expect(s.styles).toContain(lightTheme.color.primary);
   });
 
-  it('hoverBg 返回有效样式', () => {
+  it('hoverBg returns valid styles', () => {
     const s = hoverBg(lightTheme);
     expect(s.styles).toContain(lightTheme.color.hoverOverlay);
   });
 
-  it('disabled 返回有效样式', () => {
+  it('disabled returns valid styles', () => {
     const s = disabled(lightTheme, true);
     expect(s.styles).toContain('not-allowed');
   });
 
-  it('focusVisible 返回有效样式', () => {
+  it('focusVisible returns valid styles', () => {
     const s = focusVisible(lightTheme);
     expect(s.styles).toContain('focus-visible');
   });
 });
 
-describe('动画', () => {
-  it('transition 返回有效样式', () => {
+describe('animations', () => {
+  it('transition returns valid styles', () => {
     const s = transition(lightTheme);
     expect(s.styles).toContain('transition');
   });
 
-  it('spin 返回有效样式', () => {
+  it('spin returns valid styles', () => {
     const s = spin(lightTheme);
     expect(s.styles).toContain('@keyframes spin');
     expect(s.styles).toContain('animation');
   });
 
-  it('scaleActive 返回有效样式', () => {
+  it('scaleActive returns valid styles', () => {
     const s = scaleActive(lightTheme);
     expect(s.styles).toContain('scale');
   });
 });
 
-describe('文字', () => {
-  it('textTruncate 单行截断', () => {
+describe('text', () => {
+  it('textTruncate single-line truncation', () => {
     const s = textTruncate(lightTheme);
     expect(s.styles).toContain('white-space: nowrap');
     expect(s.styles).toContain('overflow: hidden');
   });
 
-  it('textTruncate 多行截断', () => {
+  it('textTruncate multi-line truncation', () => {
     const s = textTruncate(lightTheme, 3);
     expect(s.styles).toContain('-webkit-line-clamp: 3');
   });
 
-  it('textSecondary 返回有效样式', () => {
+  it('textSecondary returns valid styles', () => {
     const s = textSecondary(lightTheme);
     expect(s.styles).toContain(lightTheme.color.textSecondary);
   });
 });
 
-describe('容器', () => {
-  it('iconBox 返回有效样式', () => {
+describe('containers', () => {
+  it('iconBox returns valid styles', () => {
     const s = iconBox(lightTheme);
     expect(s.styles).toContain('display: flex');
   });
 
-  it('scrollable 返回有效样式', () => {
+  it('scrollable returns valid styles', () => {
     const s = scrollable(lightTheme);
     expect(s.styles).toContain('overflow-y: auto');
   });
 
-  it('scrollable hidden 滚动条', () => {
+  it('scrollable hidden scrollbar', () => {
     const s = scrollable(lightTheme, '200px', 3, 'hidden');
     expect(s.styles).toContain('scrollbar-width: none');
   });
 
-  it('absoluteFill 返回有效样式', () => {
+  it('absoluteFill returns valid styles', () => {
     const s = absoluteFill(lightTheme);
     expect(s.styles).toContain('position: absolute');
   });
 
-  it('absoluteFill 支持选项对象', () => {
+  it('absoluteFill supports options object', () => {
     const s = absoluteFill(lightTheme, { top: 10, zIndex: 100 });
     expect(s.styles).toContain('top: 10px');
     expect(s.styles).toContain('z-index: 100');
   });
 
-  it('absoluteFill 传入 null 不崩溃', () => {
+  it('absoluteFill does not crash when passed null', () => {
     const s = absoluteFill(lightTheme, null);
     expect(s.styles).toContain('position: absolute');
   });
 });
 
-describe('媒体查询', () => {
-  it('media 包含 compact 和 standard', () => {
+describe('media queries', () => {
+  it('media contains compact and standard', () => {
     expect(media.compact).toContain('max-width');
     expect(media.standard).toContain('min-width');
   });
 
-  it('container 包含 compact 和 standard', () => {
+  it('container contains compact and standard', () => {
     expect(container.compact).toContain('@container');
     expect(container.standard).toContain('@container');
   });

@@ -1,11 +1,11 @@
 /**
- * 文字样式工具
+ * Text style utilities
  */
 import { css } from '@emotion/react';
 import type { Theme } from '../types.js';
 
 /**
- * 文本截断（单行或多行）
+ * Text truncation (single or multiple lines)
  */
 export function textTruncate(_theme: Theme, lineClamp = 1) {
   if (lineClamp === 1) {
@@ -26,7 +26,7 @@ export function textTruncate(_theme: Theme, lineClamp = 1) {
 }
 
 /**
- * 次要文本颜色
+ * Secondary text color
  */
 export function textSecondary(theme: Theme, color?: keyof Theme['color'], opacity = 0.7) {
   const colorValue = color ? theme.color[color] : theme.color.textSecondary;

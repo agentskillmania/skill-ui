@@ -1,11 +1,11 @@
 /**
- * 布局样式工具
+ * Layout style utilities
  */
 import { css } from '@emotion/react';
 import type { Theme } from '../types.js';
 
 /**
- * Flex 列布局
+ * Flex column layout
  */
 export function flexColumn(theme: Theme, gap?: keyof Theme['spacing']) {
   return css`
@@ -16,7 +16,7 @@ export function flexColumn(theme: Theme, gap?: keyof Theme['spacing']) {
 }
 
 /**
- * Flex 行布局
+ * Flex row layout
  */
 export function flexRow(theme: Theme, gap?: keyof Theme['spacing']) {
   return css`
@@ -27,7 +27,7 @@ export function flexRow(theme: Theme, gap?: keyof Theme['spacing']) {
 }
 
 /**
- * Flex 居中布局
+ * Flex center layout
  */
 export function flexCenter(_theme: Theme) {
   return css`
@@ -38,7 +38,7 @@ export function flexCenter(_theme: Theme) {
 }
 
 /**
- * Flex 换行布局
+ * Flex wrap layout
  */
 export function flexWrap(theme: Theme, gap?: keyof Theme['spacing']) {
   return css`
@@ -49,7 +49,7 @@ export function flexWrap(theme: Theme, gap?: keyof Theme['spacing']) {
 }
 
 /**
- * 响应式网格布局
+ * Responsive grid layout
  */
 export function gridAutoFill(theme: Theme, minWidth = '200px', gap: keyof Theme['spacing'] = '3') {
   return css`

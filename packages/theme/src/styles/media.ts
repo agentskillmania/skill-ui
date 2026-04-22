@@ -1,12 +1,12 @@
 /**
- * 响应式媒体查询工具
+ * Responsive media query utilities
  */
 import { breakpoints } from '../tokens/index.js';
 
 /**
- * 媒体查询工具
- * - compact: 紧凑模式（窗口宽度 < 768px）
- * - standard: 标准模式（窗口宽度 ≥ 768px）
+ * Media query utilities
+ * - compact: compact mode (window width < 768px)
+ * - standard: standard mode (window width ≥ 768px)
  */
 export const media = {
   compact: `@media (max-width: ${breakpoints.compact})`,
@@ -14,7 +14,7 @@ export const media = {
 } as const;
 
 /**
- * 容器查询工具
+ * Container query utilities
  */
 export const container = {
   compact: `@container main-content (max-width: ${breakpoints.compact})`,

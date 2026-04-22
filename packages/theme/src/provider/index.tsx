@@ -1,7 +1,7 @@
 /**
- * 主题 Provider 与 hooks
+ * Theme provider and hooks
  *
- * 三层注入：Emotion ThemeProvider + Ant Design XProvider + CSS data-theme 属性
+ * Three-layer injection: Emotion ThemeProvider + Ant Design XProvider + CSS data-theme attribute
  */
 import { useEffect, useState, useCallback, type ReactNode } from 'react';
 import { ThemeProvider as EmotionThemeProvider, useTheme as useEmotionTheme } from '@emotion/react';
@@ -11,14 +11,14 @@ import { getTheme } from '../tokens/index.js';
 export { GlobalStyles } from './GlobalStyles.js';
 
 /**
- * 类型安全的主题 hook
+ * Type-safe theme hook
  */
 export function useTheme(): Theme {
   return useEmotionTheme() as Theme;
 }
 
 /**
- * 创建 Emotion 主题对象
+ * Create Emotion theme object
  */
 export function createEmotionTheme(mode: 'light' | 'dark'): Theme {
   return getTheme(mode);
@@ -32,19 +32,19 @@ interface ThemeContextValue {
 
 interface ThemeProviderProps {
   children: ReactNode | ((ctx: ThemeContextValue) => ReactNode);
-  /** 初始主题模式，默认 "light" */
+  /** Initial theme mode, defaults to "light" */
   defaultMode?: 'light' | 'dark';
-  /** 外部受控模式 */
+  /** External controlled mode */
   mode?: 'light' | 'dark';
-  /** 模式变更回调 */
+  /** Mode change callback */
   onModeChange?: (mode: 'light' | 'dark') => void;
 }
 
 /**
- * 主题 Provider
- * - 注入 Emotion 主题
- * - 设置 data-theme 属性
- * - 管理亮/暗模式切换
+ * Theme provider
+ * - Inject Emotion theme
+ * - Set data-theme attribute
+ * - Manage light/dark mode switching
  */
 export function ThemeProvider({
   children,
