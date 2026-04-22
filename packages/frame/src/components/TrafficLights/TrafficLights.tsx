@@ -6,6 +6,7 @@
 import { css } from '@emotion/react';
 import { X, Minus, Copy, Expand } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTranslation } from 'react-i18next';
 import type { TrafficLightsProps } from '../../types.js';
 
 export function TrafficLights({
@@ -15,6 +16,7 @@ export function TrafficLights({
   isMaximized = false,
 }: TrafficLightsProps) {
   const theme = useTheme();
+  const { t } = useTranslation('skill-ui-frame');
 
   const buttonBase = css`
     width: 12px;
@@ -65,9 +67,9 @@ export function TrafficLights({
           background: #ff5f57;
         `}
         onClick={() => onClose?.()}
-        title="关闭"
+        title={t('trafficLights.close')}
         type="button"
-        aria-label="关闭窗口"
+        aria-label={t('trafficLights.closeWindow')}
       >
         <X size={8} strokeWidth={5} />
       </button>
@@ -79,9 +81,9 @@ export function TrafficLights({
           background: #febc2e;
         `}
         onClick={() => onMinimize?.()}
-        title="最小化"
+        title={t('trafficLights.minimize')}
         type="button"
-        aria-label="最小化窗口"
+        aria-label={t('trafficLights.minimizeWindow')}
       >
         <Minus size={8} strokeWidth={5} />
       </button>
@@ -93,9 +95,11 @@ export function TrafficLights({
           background: #28c840;
         `}
         onClick={() => onMaximize?.()}
-        title={isMaximized ? '还原' : '最大化'}
+        title={isMaximized ? t('trafficLights.restore') : t('trafficLights.maximize')}
         type="button"
-        aria-label={isMaximized ? '还原窗口' : '最大化窗口'}
+        aria-label={
+          isMaximized ? t('trafficLights.restoreWindow') : t('trafficLights.maximizeWindow')
+        }
       >
         {isMaximized ? <Copy size={7} strokeWidth={5} /> : <Expand size={7} strokeWidth={5} />}
       </button>

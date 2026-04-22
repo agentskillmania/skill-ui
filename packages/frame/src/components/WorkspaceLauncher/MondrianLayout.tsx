@@ -13,6 +13,7 @@
 import { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTranslation } from 'react-i18next';
 import { formatRelativeTime } from './time.js';
 import type { WorkspaceCard as WorkspaceCardData } from '../../types.js';
 
@@ -132,6 +133,7 @@ function MondrianBlock({
   onSelect: (id: string) => void;
 }) {
   const theme = useTheme();
+  const { t } = useTranslation('skill-ui-frame');
   const span = useMemo(() => getSpan(workspace.id), [workspace.id]);
   const color = useMemo(() => getColor(workspace.id), [workspace.id]);
 
@@ -170,7 +172,7 @@ function MondrianBlock({
       `}
       onClick={() => onSelect(workspace.id)}
       type="button"
-      aria-label={`打开 ${workspace.name}`}
+      aria-label={t('launcher.open', { name: workspace.name })}
     >
       {/* Icon */}
       {workspace.icon && (

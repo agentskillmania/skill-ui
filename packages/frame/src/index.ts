@@ -19,3 +19,6 @@ export { Titlebar } from './components/Titlebar/index.js';
 export { TrafficLights } from './components/TrafficLights/index.js';
 export { AppBrand } from './components/AppBrand/index.js';
 export { WorkspaceLauncher } from './components/WorkspaceLauncher/index.js';
+
+// i18n
+export { NAMESPACE, resources } from './locales/index.js';

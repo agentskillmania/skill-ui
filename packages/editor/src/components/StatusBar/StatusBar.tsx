@@ -4,6 +4,7 @@
 import { css } from '@emotion/react';
 import { Code, Eye } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTranslation } from 'react-i18next';
 import type { StatusBarProps } from '../../types.js';
 
 export function StatusBar({
@@ -14,6 +15,7 @@ export function StatusBar({
   onEditModeChange,
 }: StatusBarProps) {
   const theme = useTheme();
+  const { t } = useTranslation('skill-ui-editor');
 
   return (
     <div
@@ -53,7 +55,7 @@ export function StatusBar({
               color: ${theme.color.warning};
             `}
           >
-            未保存
+            {t('statusBar.unsaved')}
           </span>
         )}
       </div>
@@ -68,7 +70,10 @@ export function StatusBar({
       >
         {cursorPosition && (
           <span>
-            行 {cursorPosition.line}, 列 {cursorPosition.column}
+            {t('statusBar.cursorPosition', {
+              line: cursorPosition.line,
+              column: cursorPosition.column,
+            })}
           </span>
         )}
         <button
@@ -95,11 +100,11 @@ export function StatusBar({
         >
           {editMode === 'code' ? (
             <>
-              <Eye size={12} /> 预览
+              <Eye size={12} /> {t('statusBar.preview')}
             </>
           ) : (
             <>
-              <Code size={12} /> 代码
+              <Code size={12} /> {t('statusBar.code')}
             </>
           )}
         </button>

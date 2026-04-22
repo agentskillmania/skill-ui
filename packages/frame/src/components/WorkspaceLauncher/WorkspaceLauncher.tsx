@@ -10,6 +10,7 @@ import { Clock } from 'lucide-react';
 import { Card, Input, Empty, Button } from 'antd';
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
 import { useTheme, glassEffect } from '@agentskillmania/skill-ui-theme';
+import { useTranslation } from 'react-i18next';
 import { formatRelativeTime } from './time.js';
 import { MondrianLayout } from './MondrianLayout.js';
 import { GradientBackground } from './GradientBackground.js';
@@ -25,6 +26,7 @@ export function WorkspaceLauncher({
   layoutMode = 'list',
 }: WorkspaceLauncherProps) {
   const theme = useTheme();
+  const { t } = useTranslation('skill-ui-frame');
   const [search, setSearch] = useState('');
 
   const filtered = useMemo(() => {
@@ -78,7 +80,7 @@ export function WorkspaceLauncher({
             margin-bottom: ${theme.spacing['1']};
           `}
         >
-          打开 Workspace
+          {t('launcher.title')}
         </h1>
         <p
           css={css`
@@ -87,7 +89,7 @@ export function WorkspaceLauncher({
             margin-bottom: ${theme.spacing['6']};
           `}
         >
-          选择一个已有的 workspace，或创建新的
+          {t('launcher.subtitle')}
         </p>
 
         {layoutMode === 'mondrian' ? (
@@ -97,7 +99,7 @@ export function WorkspaceLauncher({
               <MondrianLayout workspaces={filtered} onSelect={onSelect} />
             ) : (
               <Empty
-                description={search ? '没有匹配的 workspace' : '暂无 workspace'}
+                description={search ? t('launcher.noMatch') : t('launcher.empty')}
                 css={css`
                   margin: ${theme.spacing['8']} 0;
                 `}
@@ -111,7 +113,7 @@ export function WorkspaceLauncher({
             {workspaces.length > 5 && (
               <Input
                 prefix={<SearchOutlined />}
-                placeholder="搜索 workspace..."
+                placeholder={t('launcher.searchPlaceholder')}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 allowClear
@@ -142,7 +144,7 @@ export function WorkspaceLauncher({
                 ))
               ) : (
                 <Empty
-                  description={search ? '没有匹配的 workspace' : '暂无 workspace'}
+                  description={search ? t('launcher.noMatch') : t('launcher.empty')}
                   css={css`
                     margin: ${theme.spacing['8']} 0;
                   `}
@@ -162,7 +164,7 @@ export function WorkspaceLauncher({
               margin-top: ${theme.spacing['4']};
             `}
           >
-            新建 Workspace
+            {t('launcher.newWorkspace')}
           </Button>
         )}
       </div>

@@ -6,6 +6,7 @@
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { MessageList, ChatInput } from '@agentskillmania/skill-ui-chat';
+import { useTranslation } from 'react-i18next';
 import type { AssistantPanelProps } from '../../types.js';
 
 export function AssistantPanel({
@@ -16,6 +17,7 @@ export function AssistantPanel({
   onStop,
 }: AssistantPanelProps) {
   const theme = useTheme();
+  const { t } = useTranslation('skill-ui-editor');
 
   return (
     <div
@@ -46,7 +48,7 @@ export function AssistantPanel({
               padding: ${theme.spacing[3]};
             `}
           >
-            <span>向 AI 助手提问，或使用快捷命令</span>
+            <span>{t('assistant.emptyHint')}</span>
             {commands && commands.length > 0 && (
               <div
                 css={css`
@@ -100,7 +102,7 @@ export function AssistantPanel({
           loading={status === 'streaming'}
           onSubmit={(msg) => onSend?.(msg)}
           onCancel={onStop}
-          placeholder="向助手提问..."
+          placeholder={t('assistant.placeholder')}
         />
       </div>
     </div>

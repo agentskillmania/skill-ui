@@ -42,7 +42,7 @@ const sampleWorkspaces = [
 describe('WorkspaceLauncher — list mode', () => {
   it('renders title and subtitle', () => {
     render(<WorkspaceLauncher workspaces={[]} onSelect={vi.fn()} />, { wrapper });
-    expect(screen.getByText('打开 Workspace')).toBeInTheDocument();
+    expect(screen.getByText('打开工作区')).toBeInTheDocument();
     expect(screen.getByText('选择一个已有的 workspace，或创建新的')).toBeInTheDocument();
   });
 

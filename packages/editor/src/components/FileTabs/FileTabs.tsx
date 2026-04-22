@@ -7,6 +7,7 @@
 import { css } from '@emotion/react';
 import { X, FileCode, Book, File } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTranslation } from 'react-i18next';
 import type { FileTabsProps, FileTab } from '../../types.js';
 
 /** Get icon by file name */
@@ -58,6 +59,7 @@ function TabItem({
   onClose: (path: string) => void;
 }) {
   const theme = useTheme();
+  const { t } = useTranslation('skill-ui-editor');
 
   return (
     <div
@@ -145,7 +147,7 @@ function TabItem({
           }
         `}
         type="button"
-        aria-label={`关闭 ${tab.label}`}
+        aria-label={t('fileTabs.close', { label: tab.label })}
       >
         <X size={12} />
       </button>

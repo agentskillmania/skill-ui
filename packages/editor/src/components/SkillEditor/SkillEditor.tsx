@@ -7,6 +7,7 @@ import { Modal, Empty } from 'antd';
 import { css } from '@emotion/react';
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTranslation } from 'react-i18next';
 import type { SkillEditorProps, FileTab, CursorPosition } from '../../types.js';
 import { EditorContext } from '../../context/EditorContext.js';
 import { getFileLabel } from '../../utils/file-utils.js';
@@ -36,6 +37,7 @@ export function SkillEditor({
   onRunTests,
 }: SkillEditorProps) {
   const theme = useTheme();
+  const { t } = useTranslation('skill-ui-editor');
   const [isDirty, setIsDirty] = useState(false);
   const [cursorPosition, setCursorPosition] = useState<CursorPosition | null>(null);
   const [openTabs, setOpenTabs] = useState<FileTab[]>([]);
@@ -117,10 +119,10 @@ export function SkillEditor({
 
       if (dirtyFiles.current.has(path)) {
         Modal.confirm({
-          title: '关闭确认',
-          content: `"${getFileLabel(path)}" 有未保存的修改，确定要关闭吗？`,
-          okText: '关闭',
-          cancelText: '取消',
+          title: t('editor.closeConfirm.title'),
+          content: t('editor.closeConfirm.content', { label: getFileLabel(path) }),
+          okText: t('editor.closeConfirm.ok'),
+          cancelText: t('editor.closeConfirm.cancel'),
           onOk: doClose,
         });
       } else {
@@ -195,7 +197,9 @@ export function SkillEditor({
                   justify-content: center;
                 `}
               >
-                <Empty description={activeFilePath ? '此文件为目录' : '选择一个文件开始编辑'} />
+                <Empty
+                  description={activeFilePath ? t('editor.isDirectory') : t('editor.emptyHint')}
+                />
               </div>
             )}
           </div>

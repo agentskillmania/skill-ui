@@ -1,0 +1,43 @@
+{
+  "activityBar": {
+    "files": "文件",
+    "assistant": "助手",
+    "review": "审核",
+    "test": "测试"
+  },
+  "assistant": {
+    "emptyHint": "向 AI 助手提问，或使用快捷命令",
+    "placeholder": "向助手提问..."
+  },
+  "fileTabs": {
+    "close": "关闭 {{label}}"
+  },
+  "statusBar": {
+    "unsaved": "未保存",
+    "cursorPosition": "行 {{line}}, 列 {{column}}",
+    "preview": "预览",
+    "code": "代码"
+  },
+  "editor": {
+    "closeConfirm": {
+      "title": "关闭确认",
+      "content": "\"{{label}}\" 有未保存的修改，确定要关闭吗？",
+      "ok": "关闭",
+      "cancel": "取消"
+    },
+    "isDirectory": "此文件为目录",
+    "emptyHint": "选择一个文件开始编辑",
+    "placeholder": "输入 / 唤起菜单，或直接开始写作..."
+  },
+  "review": {
+    "emptyHint": "尚未审核，通过助手发起审核",
+    "scoreUnit": "/ 100"
+  },
+  "testCase": {
+    "title": "测试用例",
+    "runAll": "全部运行",
+    "emptyHint": "暂无测试用例",
+    "passed": "通过",
+    "failed": "失败"
+  }
+}

@@ -10,6 +10,7 @@ import { useEffect, useRef } from 'react';
 // @ts-expect-error — @milkdown/crepe's package.json exports do not correctly declare types
 import { Crepe } from '@milkdown/crepe';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTranslation } from 'react-i18next';
 import type { EditorAreaProps } from '../../types.js';
 
 /** ListenerManager type for listenerCtx (simplified) */
@@ -29,6 +30,7 @@ export function VisualEditor({
   onCursorChange: _onCursorChange,
 }: EditorAreaProps) {
   const theme = useTheme();
+  const { t } = useTranslation('skill-ui-editor');
   const rootRef = useRef<HTMLDivElement>(null);
   const crepeRef = useRef<Crepe | null>(null);
   const isInternalChange = useRef(false);
@@ -46,7 +48,7 @@ export function VisualEditor({
       defaultValue: content,
       featureConfigs: {
         placeholder: {
-          text: '输入 / 唤起菜单，或直接开始写作...',
+          text: t('editor.placeholder'),
         },
       },
     });

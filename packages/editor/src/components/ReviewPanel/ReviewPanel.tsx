@@ -6,6 +6,7 @@
 import { css } from '@emotion/react';
 import { CheckCircle, AlertTriangle, XCircle, ClipboardCheck } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTranslation } from 'react-i18next';
 import type { ReviewPanelProps, ReviewItem } from '../../types.js';
 
 /** Status → icon + color */
@@ -17,6 +18,7 @@ const STATUS_CONFIG: Record<ReviewItem['status'], { icon: typeof CheckCircle; co
 
 export function ReviewPanel({ result }: ReviewPanelProps) {
   const theme = useTheme();
+  const { t } = useTranslation('skill-ui-editor');
 
   if (!result) {
     return (
@@ -33,7 +35,7 @@ export function ReviewPanel({ result }: ReviewPanelProps) {
         `}
       >
         <ClipboardCheckIcon theme={theme} />
-        <span>尚未审核，通过助手发起审核</span>
+        <span>{t('review.emptyHint')}</span>
       </div>
     );
   }
@@ -83,7 +85,7 @@ export function ReviewPanel({ result }: ReviewPanelProps) {
               color: ${theme.color.textTertiary};
             `}
           >
-            / 100
+            {t('review.scoreUnit')}
           </span>
         </div>
       </div>

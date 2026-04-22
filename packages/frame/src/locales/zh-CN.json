@@ -1,0 +1,21 @@
+{
+  "trafficLights": {
+    "close": "关闭",
+    "closeWindow": "关闭窗口",
+    "minimize": "最小化",
+    "minimizeWindow": "最小化窗口",
+    "restore": "还原",
+    "restoreWindow": "还原窗口",
+    "maximize": "最大化",
+    "maximizeWindow": "最大化窗口"
+  },
+  "launcher": {
+    "title": "打开工作区",
+    "subtitle": "选择一个已有的 workspace，或创建新的",
+    "searchPlaceholder": "搜索 workspace...",
+    "noMatch": "没有匹配的 workspace",
+    "empty": "暂无 workspace",
+    "newWorkspace": "新建 Workspace",
+    "open": "打开 {{name}}"
+  }
+}

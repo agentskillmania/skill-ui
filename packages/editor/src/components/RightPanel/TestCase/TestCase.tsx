@@ -4,6 +4,7 @@
 import { css } from '@emotion/react';
 import { TestTube2, Play } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTranslation } from 'react-i18next';
 import type { SkillTestCase, TestResult } from '../../../types.js';
 
 interface TestCasePanelProps {
@@ -14,6 +15,7 @@ interface TestCasePanelProps {
 
 export function TestCase({ testCases, testResults, onRunTests }: TestCasePanelProps) {
   const theme = useTheme();
+  const { t } = useTranslation('skill-ui-editor');
 
   return (
     <div
@@ -44,7 +46,7 @@ export function TestCase({ testCases, testResults, onRunTests }: TestCasePanelPr
           `}
         >
           <TestTube2 size={14} />
-          测试用例
+          {t('testCase.title')}
         </div>
         <button
           onClick={() => onRunTests?.()}
@@ -67,7 +69,7 @@ export function TestCase({ testCases, testResults, onRunTests }: TestCasePanelPr
           `}
           type="button"
         >
-          <Play size={12} /> 全部运行
+          <Play size={12} /> {t('testCase.runAll')}
         </button>
       </div>
 
@@ -90,7 +92,7 @@ export function TestCase({ testCases, testResults, onRunTests }: TestCasePanelPr
               font-size: ${theme.font.size.xs};
             `}
           >
-            暂无测试用例
+            {t('testCase.emptyHint')}
           </div>
         )}
         {testCases?.map((tc) => {
@@ -129,7 +131,7 @@ export function TestCase({ testCases, testResults, onRunTests }: TestCasePanelPr
                       color: ${result.passed ? theme.color.success : theme.color.error};
                     `}
                   >
-                    {result.passed ? '通过' : '失败'}
+                    {result.passed ? t('testCase.passed') : t('testCase.failed')}
                   </span>
                 )}
               </div>

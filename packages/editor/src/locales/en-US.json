@@ -1,0 +1,43 @@
+{
+  "activityBar": {
+    "files": "Files",
+    "assistant": "Assistant",
+    "review": "Review",
+    "test": "Tests"
+  },
+  "assistant": {
+    "emptyHint": "Ask the AI assistant, or use quick commands",
+    "placeholder": "Ask the assistant..."
+  },
+  "fileTabs": {
+    "close": "Close {{label}}"
+  },
+  "statusBar": {
+    "unsaved": "Unsaved",
+    "cursorPosition": "Ln {{line}}, Col {{column}}",
+    "preview": "Preview",
+    "code": "Code"
+  },
+  "editor": {
+    "closeConfirm": {
+      "title": "Close Confirmation",
+      "content": "\"{{label}}\" has unsaved changes. Close anyway?",
+      "ok": "Close",
+      "cancel": "Cancel"
+    },
+    "isDirectory": "This file is a directory",
+    "emptyHint": "Select a file to start editing",
+    "placeholder": "Type / for commands, or start writing..."
+  },
+  "review": {
+    "emptyHint": "Not reviewed yet. Start a review via the assistant",
+    "scoreUnit": "/ 100"
+  },
+  "testCase": {
+    "title": "Test Cases",
+    "runAll": "Run All",
+    "emptyHint": "No test cases yet",
+    "passed": "Passed",
+    "failed": "Failed"
+  }
+}
