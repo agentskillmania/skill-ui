@@ -1,2 +1,2 @@
 // @agentskillmania/skill-ui-settings
-// 设置页面组件包
+// Settings page component package
