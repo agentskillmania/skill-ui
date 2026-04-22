@@ -1,5 +1,5 @@
 /**
- * 编辑区域组件 — 根据模式切换代码/可视化编辑器
+ * Editor area component — switches between code/visual editor based on mode
  */
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';

@@ -20,56 +20,56 @@ const sampleFiles: SkillFile[] = [
 ];
 
 describe('FileTree', () => {
-  it('渲染所有根级文件', () => {
+  it('renders all root-level files', () => {
     renderWithProviders(<FileTree files={sampleFiles} activeFilePath={null} onSelect={vi.fn()} />);
     expect(screen.getByText('SKILL.md')).toBeTruthy();
     expect(screen.getByText('src')).toBeTruthy();
     expect(screen.getByText('package.json')).toBeTruthy();
   });
 
-  it('展开目录显示子文件', () => {
+  it('expanding directory shows child files', () => {
     renderWithProviders(<FileTree files={sampleFiles} activeFilePath={null} onSelect={vi.fn()} />);
-    // 目录默认展开，子文件应可见
+    // Directory expanded by default, child files should be visible
     expect(screen.getByText('index.ts')).toBeTruthy();
     expect(screen.getByText('util.ts')).toBeTruthy();
   });
 
-  it('点击文件触发选中', () => {
+  it('clicking file triggers selection', () => {
     const onSelect = vi.fn();
     renderWithProviders(<FileTree files={sampleFiles} activeFilePath={null} onSelect={onSelect} />);
     fireEvent.click(screen.getByText('SKILL.md'));
     expect(onSelect).toHaveBeenCalledWith('SKILL.md');
   });
 
-  it('点击目录切换展开/收起', () => {
+  it('clicking directory toggles expand/collapse', () => {
     renderWithProviders(<FileTree files={sampleFiles} activeFilePath={null} onSelect={vi.fn()} />);
-    // 点击目录名收起
+    // Click directory name to collapse
     fireEvent.click(screen.getByText('src'));
     expect(screen.queryByText('index.ts')).toBeNull();
-    // 再次点击展开
+    // Click again to expand
     fireEvent.click(screen.getByText('src'));
     expect(screen.getByText('index.ts')).toBeTruthy();
   });
 
-  it('空文件列表正常渲染', () => {
+  it('renders empty file list correctly', () => {
     const { container } = renderWithProviders(
       <FileTree files={[]} activeFilePath={null} onSelect={vi.fn()} />
     );
     expect(container).toBeTruthy();
   });
 
-  it('高亮当前选中文件', () => {
+  it('highlights currently selected file', () => {
     renderWithProviders(
       <FileTree files={sampleFiles} activeFilePath="SKILL.md" onSelect={vi.fn()} />
     );
     const fileEl = screen.getByText('SKILL.md').closest('[class]');
     expect(fileEl).toBeTruthy();
-    // 验证高亮样式（背景色不应为 transparent）
+    // Verify highlight style (background should not be transparent)
     const styles = window.getComputedStyle(fileEl!);
     expect(styles.backgroundColor).not.toBe('');
   });
 
-  it('无扩展名文件使用默认图标', () => {
+  it('uses default icon for files without extension', () => {
     const files: SkillFile[] = [{ path: 'Makefile', content: 'all:' }];
     renderWithProviders(<FileTree files={files} activeFilePath={null} onSelect={vi.fn()} />);
     expect(screen.getByText('Makefile')).toBeTruthy();

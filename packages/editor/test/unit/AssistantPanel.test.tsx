@@ -5,7 +5,7 @@ import { renderWithProviders } from './testUtils.js';
 import { AssistantPanel } from '../../src/components/AssistantPanel/AssistantPanel.js';
 import type { ChatCommand } from '@agentskillmania/skill-ui-chat';
 
-// Mock chat 组件以避免完整渲染依赖
+// Mock chat components to avoid full render dependencies
 vi.mock('@agentskillmania/skill-ui-chat', () => ({
   MessageList: ({ messages }: { messages: Array<{ id: string }> }) => (
     <div data-testid="message-list">{messages.length} 条消息</div>
@@ -30,40 +30,40 @@ const sampleCommands: ChatCommand[] = [
 ];
 
 describe('AssistantPanel', () => {
-  it('空消息时显示快捷命令提示', () => {
+  it('displays quick command hint when no messages', () => {
     renderWithProviders(<AssistantPanel commands={sampleCommands} />);
     expect(screen.getByText('向 AI 助手提问，或使用快捷命令')).toBeTruthy();
     expect(screen.getByText('生成技能')).toBeTruthy();
     expect(screen.getByText('查找类似')).toBeTruthy();
   });
 
-  it('点击快捷命令触发 onSend', () => {
+  it('clicking quick command triggers onSend', () => {
     const onSend = vi.fn();
     renderWithProviders(<AssistantPanel commands={sampleCommands} onSend={onSend} />);
     fireEvent.click(screen.getByText('生成技能'));
     expect(onSend).toHaveBeenCalledWith('帮我生成一个');
   });
 
-  it('有消息时显示 MessageList', () => {
+  it('displays MessageList when there are messages', () => {
     renderWithProviders(
       <AssistantPanel messages={[{ id: '1', role: 'user', content: '你好' } as any]} />
     );
     expect(screen.getByTestId('message-list')).toBeTruthy();
   });
 
-  it('渲染输入框', () => {
+  it('renders input box', () => {
     renderWithProviders(<AssistantPanel />);
     expect(screen.getByText('向助手提问...')).toBeTruthy();
   });
 
-  it('点击发送按钮触发 onSend', () => {
+  it('clicking send button triggers onSend', () => {
     const onSend = vi.fn();
     renderWithProviders(<AssistantPanel onSend={onSend} />);
     fireEvent.click(screen.getByText('发送'));
     expect(onSend).toHaveBeenCalledWith('test message');
   });
 
-  it('无快捷命令时不显示命令按钮', () => {
+  it('does not show command buttons when no quick commands', () => {
     renderWithProviders(<AssistantPanel />);
     expect(screen.queryByText('生成技能')).toBeNull();
   });

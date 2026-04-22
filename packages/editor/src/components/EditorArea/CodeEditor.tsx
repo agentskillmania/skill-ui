@@ -1,8 +1,8 @@
 /**
- * 代码编辑器（基于 Monaco）
+ * Code editor (based on Monaco)
  *
- * 使用受控模式（value + onChange），切换文件时正确更新内容。
- * 通过 key={filePath} 强制 Monaco 在文件切换时重建实例。
+ * Uses controlled mode (value + onChange), correctly updates content when switching files.
+ * Forces Monaco to rebuild instance on file switch via key={filePath}.
  */
 import React, { useRef } from 'react';
 import _MonacoEditor from '@monaco-editor/react';
@@ -10,7 +10,7 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { EditorAreaProps } from '../../types.js';
 import { getFileInfo } from '../../utils/file-utils.js';
 
-// React 19 类型兼容
+// React 19 type compatibility
 const MonacoEditor = _MonacoEditor as unknown as React.ComponentType<{
   defaultLanguage?: string;
   defaultValue?: string;
@@ -30,7 +30,7 @@ export function CodeEditor({ content, filePath, readOnly, onChange, onSave }: Ed
   const monacoTheme = theme.mode === 'dark' ? 'vs-dark' : 'vs';
   const editorRef = useRef<unknown>(null);
 
-  // 使用 ref 保持 onSave 和 content 最新值，避免闭包陷阱
+  // Use ref to keep onSave and content up-to-date, avoiding closure trap
   const onSaveRef = useRef(onSave);
   onSaveRef.current = onSave;
   const contentRef = useRef(content);
@@ -38,7 +38,7 @@ export function CodeEditor({ content, filePath, readOnly, onChange, onSave }: Ed
 
   const handleMount = (editor: unknown) => {
     editorRef.current = editor;
-    // 注册 Ctrl+S 保存快捷键
+    // Register Ctrl+S save shortcut
     if (editor && typeof editor === 'object' && 'addCommand' in editor) {
       const e = editor as { addCommand: (keybinding: number, handler: () => void) => void };
       // KeyMod.CtrlCmd | KeyCode.KeyS = 2048 | 49 = 2097

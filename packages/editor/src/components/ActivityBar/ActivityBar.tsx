@@ -1,14 +1,14 @@
 /**
- * ActivityBar — 右侧竖排图标栏
+ * ActivityBar — right-side vertical icon bar
  *
- * 点击图标展开/收起对应面板。
+ * Click icon to expand/collapse corresponding panel.
  */
 import { css } from '@emotion/react';
 import { FolderOpen, Bot, ClipboardCheck, TestTube2 } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { ActivityBarProps, SidebarPanel } from '../../types.js';
 
-/** 面板图标配置 */
+/** Panel icon configuration */
 const PANEL_ICONS: { panel: SidebarPanel; icon: typeof FolderOpen; label: string }[] = [
   { panel: 'files', icon: FolderOpen, label: '文件' },
   { panel: 'assistant', icon: Bot, label: '助手' },

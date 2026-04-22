@@ -1,15 +1,15 @@
 /**
- * 文件标签组件
+ * File tab component
  *
- * 从 skill-studio PanelTabs 改造，适配 editor 包。
- * 支持弹性收缩、未保存标记、关闭按钮。
+ * Adapted from skill-studio PanelTabs, adapted for the editor package.
+ * Supports elastic shrinkage, unsaved indicator, close button.
  */
 import { css } from '@emotion/react';
 import { X, FileCode, Book, File } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { FileTabsProps, FileTab } from '../../types.js';
 
-/** 根据文件名获取图标 */
+/** Get icon by file name */
 function getFileIcon(filename: string) {
   const ext = filename.split('.').pop()?.toLowerCase();
   const docExts = ['md', 'mdx', 'txt', 'rst', 'adoc'];
@@ -45,7 +45,7 @@ function getFileIcon(filename: string) {
   return <File size={12} />;
 }
 
-/** 单个标签 */
+/** Single tab */
 function TabItem({
   tab,
   isActive,

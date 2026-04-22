@@ -1,5 +1,5 @@
 /**
- * 状态栏组件 — 包含模式切换
+ * Status bar component — includes mode switch
  */
 import { css } from '@emotion/react';
 import { Code, Eye } from 'lucide-react';
@@ -30,7 +30,7 @@ export function StatusBar({
         user-select: none;
       `}
     >
-      {/* 左侧：文件信息 */}
+      {/* Left: file info */}
       <div
         css={css`
           display: flex;
@@ -58,7 +58,7 @@ export function StatusBar({
         )}
       </div>
 
-      {/* 右侧：光标位置 + 模式切换 */}
+      {/* Right: cursor position + mode switch */}
       <div
         css={css`
           display: flex;

@@ -26,14 +26,14 @@ function createWrapper(mockValue: ReturnType<typeof createMockContext>) {
 }
 
 describe('useEditorContext', () => {
-  it('在 SkillEditor 内正常返回上下文', () => {
+  it('returns context normally within SkillEditor', () => {
     const mockValue = createMockContext();
     const { result } = renderHook(() => useEditorContext(), { wrapper: createWrapper(mockValue) });
     expect(result.current.editMode).toBe('code');
     expect(result.current.activeFilePath).toBe('test.ts');
   });
 
-  it('在 SkillEditor 外抛出异常', () => {
+  it('throws error outside SkillEditor', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <EditorWrapper>{children}</EditorWrapper>
     );
@@ -42,7 +42,7 @@ describe('useEditorContext', () => {
     }).toThrow('useEditorContext must be used within a SkillEditor');
   });
 
-  it('调用 setEditMode 更新编辑模式', () => {
+  it('calling setEditMode updates edit mode', () => {
     const setEditMode = vi.fn();
     const mockValue = createMockContext({ setEditMode });
     const { result } = renderHook(() => useEditorContext(), { wrapper: createWrapper(mockValue) });
@@ -53,7 +53,7 @@ describe('useEditorContext', () => {
     expect(setEditMode).toHaveBeenCalledWith('preview');
   });
 
-  it('调用 setDirty 更新脏标记', () => {
+  it('calling setDirty updates dirty flag', () => {
     const setDirty = vi.fn();
     const mockValue = createMockContext({ setDirty });
     const { result } = renderHook(() => useEditorContext(), { wrapper: createWrapper(mockValue) });
@@ -64,7 +64,7 @@ describe('useEditorContext', () => {
     expect(setDirty).toHaveBeenCalledWith(true);
   });
 
-  it('调用 setCursorPosition 更新光标位置', () => {
+  it('calling setCursorPosition updates cursor position', () => {
     const setCursorPosition = vi.fn();
     const mockValue = createMockContext({ setCursorPosition });
     const { result } = renderHook(() => useEditorContext(), { wrapper: createWrapper(mockValue) });

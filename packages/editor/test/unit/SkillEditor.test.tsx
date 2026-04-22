@@ -50,45 +50,45 @@ const defaultProps = {
   onPanelChange: vi.fn(),
 };
 
-/** 获取所有 tab 关闭按钮 */
+/** Get all tab close buttons */
 function getTabCloseButtons() {
   return screen.getAllByRole('button', { name: /关闭/ });
 }
 
 describe('SkillEditor', () => {
-  it('渲染编辑器区域和侧边栏', () => {
+  it('renders editor area and sidebar', () => {
     renderWithProviders(<SkillEditor {...defaultProps} />);
     expect(screen.getByText('预览')).toBeTruthy();
     expect(screen.getByTitle('文件')).toBeTruthy();
   });
 
-  it('显示当前文件路径', () => {
+  it('displays current file path', () => {
     renderWithProviders(<SkillEditor {...defaultProps} />);
     const matches = screen.getAllByText('SKILL.md');
     expect(matches.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('activeFilePath 为 null 时显示空状态', () => {
+  it('shows empty state when activeFilePath is null', () => {
     renderWithProviders(<SkillEditor {...defaultProps} activeFilePath={null} />);
     expect(screen.getByText('选择一个文件开始编辑')).toBeTruthy();
   });
 
-  it('选择目录文件显示空状态提示', () => {
+  it('shows empty state hint when selecting directory', () => {
     renderWithProviders(<SkillEditor {...defaultProps} activeFilePath="src" />);
     expect(screen.getByText('此文件为目录')).toBeTruthy();
   });
 
-  it('点击 ActivityBar 图标展开面板', () => {
+  it('clicking ActivityBar icon expands panel', () => {
     const onPanel = vi.fn();
     renderWithProviders(<SkillEditor {...defaultProps} onPanelChange={onPanel} />);
     fireEvent.click(screen.getByTitle('文件'));
     expect(onPanel).toHaveBeenCalledWith('files');
   });
 
-  it('关闭最后一个 tab 触发 onActiveFileChange(null)', async () => {
+  it('closing last tab triggers onActiveFileChange(null)', async () => {
     const onActiveChange = vi.fn();
     renderWithProviders(<SkillEditor {...defaultProps} onActiveFileChange={onActiveChange} />);
-    // SKILL.md 是唯一的 tab，关闭它
+    // SKILL.md is the only tab, close it
     const closeButtons = getTabCloseButtons();
     expect(closeButtons.length).toBeGreaterThanOrEqual(1);
     fireEvent.click(closeButtons[0]);
@@ -97,7 +97,7 @@ describe('SkillEditor', () => {
     });
   });
 
-  it('切换文件后新增 tab', async () => {
+  it('adds new tab after switching files', async () => {
     const { rerender } = renderWithProviders(<SkillEditor {...createProps()} />);
     rerender(<SkillEditor {...createProps({ activeFilePath: 'package.json' })} />);
     await waitFor(() => {
@@ -105,29 +105,29 @@ describe('SkillEditor', () => {
     });
   });
 
-  it('onFileChange 在编辑内容时被调用', () => {
+  it('onFileChange is called when editing content', () => {
     const onFileChange = vi.fn();
     renderWithProviders(<SkillEditor {...createProps({ onFileChange })} />);
-    // 模拟 Monaco 内容变更
+    // Simulate Monaco content change
     fireEvent.click(screen.getByTestId('monaco-change'));
     expect(onFileChange).toHaveBeenCalledWith('SKILL.md', 'new content');
   });
 
-  it('调用 onSave 时清除 dirty 状态', () => {
+  it('clears dirty state when calling onSave', () => {
     const onSave = vi.fn();
     renderWithProviders(<SkillEditor {...createProps({ onSave })} />);
-    // 模拟编辑（触发 dirty）
+    // Simulate editing (trigger dirty)
     fireEvent.click(screen.getByTestId('monaco-change'));
-    // 验证 dirty 状态已触发
+    // Verify dirty state has been triggered
     expect(screen.getByText('未保存')).toBeTruthy();
   });
 
-  it('onSave 为 undefined 时不抛出错误', () => {
+  it('does not throw error when onSave is undefined', () => {
     renderWithProviders(<SkillEditor {...createProps({ onSave: undefined })} />);
     expect(screen.getByText('预览')).toBeTruthy();
   });
 
-  it('关闭未修改的 tab 直接关闭', async () => {
+  it('closes unmodified tab directly', async () => {
     const onActiveChange = vi.fn();
     renderWithProviders(
       <SkillEditor
@@ -139,18 +139,18 @@ describe('SkillEditor', () => {
       expect(screen.getAllByText('package.json').length).toBeGreaterThanOrEqual(1);
     });
 
-    // 关闭 tab — 未修改，应直接关闭而不显示确认对话框
+    // Close tab — unmodified, should close directly without confirmation dialog
     const closeButtons = getTabCloseButtons();
     expect(closeButtons.length).toBeGreaterThanOrEqual(1);
     fireEvent.click(closeButtons[0]);
     await waitFor(() => {
       expect(onActiveChange).toHaveBeenCalled();
     });
-    // 确认没有弹窗（ant-modal 不应出现）
+    // Confirm no modal dialog appears
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
-  it('关闭修改过的 tab 显示确认对话框', async () => {
+  it('shows confirmation dialog when closing modified tab', async () => {
     const onActiveChange = vi.fn();
     const onFileChange = vi.fn();
 
@@ -168,20 +168,20 @@ describe('SkillEditor', () => {
       expect(screen.getAllByText('package.json').length).toBeGreaterThanOrEqual(1);
     });
 
-    // 模拟编辑使文件变脏
+    // Simulate editing to make file dirty
     fireEvent.click(screen.getByTestId('monaco-change'));
 
-    // 关闭 tab — 修改过，应显示确认对话框
+    // Close tab — modified, should show confirmation dialog
     const closeButtons = getTabCloseButtons();
     expect(closeButtons.length).toBeGreaterThanOrEqual(1);
     fireEvent.click(closeButtons[0]);
-    // Modal.confirm 会被调用（Ant Design Modal）
+    // Modal.confirm will be called (Ant Design Modal)
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeTruthy();
     });
   });
 
-  it('关闭最后一个 tab 时触发 onActiveFileChange(null)', async () => {
+  it('triggers onActiveFileChange(null) when closing last tab', async () => {
     const onActiveChange = vi.fn();
     renderWithProviders(
       <SkillEditor
@@ -196,69 +196,69 @@ describe('SkillEditor', () => {
       expect(screen.getAllByText('index.ts').length).toBeGreaterThanOrEqual(1);
     });
 
-    // 关闭所有 tab
+    // Close all tabs
     const closeButtons = getTabCloseButtons();
     expect(closeButtons.length).toBeGreaterThanOrEqual(1);
     fireEvent.click(closeButtons[0]);
-    // 最后一个 tab 关闭后应该触发 null
+    // Should trigger null after last tab is closed
     await waitFor(() => {
       expect(onActiveChange).toHaveBeenCalledWith(null);
     });
   });
 
-  it('编辑文件后切换到另一个文件 → isDirty 应为 false', async () => {
+  it('isDirty should be false after editing and switching to another file', async () => {
     const { rerender } = renderWithProviders(<SkillEditor {...createProps()} />);
 
-    // 模拟编辑 SKILL.md（触发 dirty）
+    // Simulate editing SKILL.md (trigger dirty)
     fireEvent.click(screen.getByTestId('monaco-change'));
 
-    // 确认"未保存"出现
+    // Confirm "未保存" appears
     await waitFor(() => {
       expect(screen.getByText('未保存')).toBeTruthy();
     });
 
-    // 切换到 package.json（未被编辑的文件）
+    // Switch to package.json (unedited file)
     rerender(<SkillEditor {...createProps({ activeFilePath: 'package.json' })} />);
 
-    // isDirty 应为 false，"未保存"不应显示
+    // isDirty should be false, "未保存" should not appear
     expect(screen.queryByText('未保存')).toBeNull();
   });
 
-  it('切回已编辑的文件 → isDirty 应为 true', async () => {
+  it('isDirty should be true when switching back to edited file', async () => {
     const { rerender } = renderWithProviders(<SkillEditor {...createProps()} />);
 
-    // 编辑 SKILL.md
+    // Edit SKILL.md
     fireEvent.click(screen.getByTestId('monaco-change'));
 
     await waitFor(() => {
       expect(screen.getByText('未保存')).toBeTruthy();
     });
 
-    // 切换到 package.json
+    // Switch to package.json
     rerender(<SkillEditor {...createProps({ activeFilePath: 'package.json' })} />);
 
     expect(screen.queryByText('未保存')).toBeNull();
 
-    // 切回 SKILL.md
+    // Switch back to SKILL.md
     rerender(<SkillEditor {...createProps({ activeFilePath: 'SKILL.md' })} />);
 
-    // SKILL.md 仍然是 dirty 的
+    // SKILL.md is still dirty
     await waitFor(() => {
       expect(screen.getByText('未保存')).toBeTruthy();
     });
   });
 
-  it('关闭非活动 tab 时 activeFile 不变', async () => {
+  it('activeFile does not change when closing inactive tab', async () => {
     const onActiveChange = vi.fn();
 
-    // 先打开两个文件
+    // Open two files first
     const { rerender } = renderWithProviders(
       <SkillEditor
         {...createProps({ activeFilePath: 'SKILL.md', onActiveFileChange: onActiveChange })}
       />
     );
 
-    // 切换到第二个文件，使其出现在 tab 栏
+    // Switch to second file to make it appear in tab bar
     rerender(
       <SkillEditor
         {...createProps({ activeFilePath: 'package.json', onActiveFileChange: onActiveChange })}
@@ -271,29 +271,29 @@ describe('SkillEditor', () => {
 
     onActiveChange.mockClear();
 
-    // 找到 SKILL.md 的关闭按钮（非活动 tab）
+    // Find close button for SKILL.md (inactive tab)
     const closeButtons = getTabCloseButtons();
     expect(closeButtons.length).toBeGreaterThanOrEqual(2);
-    // 关闭第一个 tab（SKILL.md，非活动）
+    // Close first tab (SKILL.md, inactive)
     fireEvent.click(closeButtons[0]);
 
-    // 非活动 tab 关闭不应改变当前 activeFile
+    // Closing inactive tab should not change current activeFile
     expect(onActiveChange).not.toHaveBeenCalled();
   });
 
-  it('保存后 isDirty 变为 false', async () => {
+  it('isDirty becomes false after save', async () => {
     const onSave = vi.fn();
     renderWithProviders(<SkillEditor {...createProps({ onSave })} />);
 
-    // 编辑触发 dirty
+    // Edit triggers dirty
     fireEvent.click(screen.getByTestId('monaco-change'));
 
     await waitFor(() => {
       expect(screen.getByText('未保存')).toBeTruthy();
     });
 
-    // 注意：目前 onSave 无法通过 UI 触发（Ctrl+S 在 mock 中不可用）
-    // 所以这个测试只验证编辑后 dirty 为 true 的状态
-    // Ctrl+S 触发 onSave 的测试在 EditorArea.test.tsx 中
+    // Note: onSave cannot be triggered via UI currently (Ctrl+S not available in mock)
+    // So this test only verifies dirty is true after editing
+    // Ctrl+S triggering onSave is tested in EditorArea.test.tsx
   });
 });

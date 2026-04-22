@@ -5,7 +5,7 @@ import { renderWithProviders } from './testUtils.js';
 import { StatusBar } from '../../src/components/StatusBar/StatusBar.js';
 
 describe('StatusBar', () => {
-  it('显示文件路径', () => {
+  it('displays file path', () => {
     renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
@@ -17,14 +17,14 @@ describe('StatusBar', () => {
     expect(screen.getByText('src/index.ts')).toBeTruthy();
   });
 
-  it('无文件路径时不显示', () => {
+  it('does not display when no file path', () => {
     renderWithProviders(
       <StatusBar filePath={null} editMode="code" cursorPosition={null} onEditModeChange={vi.fn()} />
     );
     expect(screen.queryByText('src/index.ts')).toBeNull();
   });
 
-  it('显示未保存标记', () => {
+  it('shows unsaved indicator', () => {
     renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
@@ -37,7 +37,7 @@ describe('StatusBar', () => {
     expect(screen.getByText('未保存')).toBeTruthy();
   });
 
-  it('显示光标位置', () => {
+  it('displays cursor position', () => {
     renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
@@ -50,7 +50,7 @@ describe('StatusBar', () => {
     expect(screen.getByText(/列 12/)).toBeTruthy();
   });
 
-  it('code 模式显示"预览"按钮', () => {
+  it('shows "预览" button in code mode', () => {
     renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
@@ -62,7 +62,7 @@ describe('StatusBar', () => {
     expect(screen.getByText('预览')).toBeTruthy();
   });
 
-  it('wysiwyg 模式显示"代码"按钮', () => {
+  it('shows "代码" button in wysiwyg mode', () => {
     renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
@@ -74,7 +74,7 @@ describe('StatusBar', () => {
     expect(screen.getByText('代码')).toBeTruthy();
   });
 
-  it('点击模式切换按钮触发回调', () => {
+  it('clicking mode switch button triggers callback', () => {
     const onChange = vi.fn();
     renderWithProviders(
       <StatusBar
@@ -88,7 +88,7 @@ describe('StatusBar', () => {
     expect(onChange).toHaveBeenCalledWith('wysiwyg');
   });
 
-  it('wysiwyg 模式点击按钮切换到 code', () => {
+  it('clicking button switches to code in wysiwyg mode', () => {
     const onChange = vi.fn();
     renderWithProviders(
       <StatusBar
@@ -102,7 +102,7 @@ describe('StatusBar', () => {
     expect(onChange).toHaveBeenCalledWith('code');
   });
 
-  it('光标位置为 null 时不显示', () => {
+  it('does not display when cursor position is null', () => {
     renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
@@ -115,7 +115,7 @@ describe('StatusBar', () => {
     expect(screen.queryByText(/列 \d+/)).toBeNull();
   });
 
-  it('isDirty 为 false 时不显示未保存标记', () => {
+  it('does not show unsaved indicator when isDirty is false', () => {
     renderWithProviders(
       <StatusBar
         filePath="src/index.ts"

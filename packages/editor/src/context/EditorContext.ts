@@ -1,5 +1,5 @@
 /**
- * 编辑器上下文
+ * Editor context
  */
 import { createContext, useContext } from 'react';
 import type { EditorContextValue } from '../types.js';
@@ -7,7 +7,7 @@ import type { EditorContextValue } from '../types.js';
 /** @internal */
 export const EditorContext = createContext<EditorContextValue | null>(null);
 
-/** 获取编辑器上下文 */
+/** Get editor context */
 export function useEditorContext(): EditorContextValue {
   const ctx = useContext(EditorContext);
   if (!ctx) {

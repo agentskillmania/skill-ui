@@ -1,9 +1,9 @@
 /**
- * 文件工具函数
+ * File utility functions
  */
 import type { FileInfo } from '../types.js';
 
-/** 扩展名 → Monaco 语言映射 */
+/** Extension → Monaco language mapping */
 const EXT_LANGUAGE_MAP: Record<string, string> = {
   ts: 'typescript',
   tsx: 'typescript',
@@ -27,7 +27,7 @@ const EXT_LANGUAGE_MAP: Record<string, string> = {
   sql: 'sql',
 };
 
-/** 根据文件路径获取文件信息 */
+/** Get file info from file path */
 export function getFileInfo(filePath: string): FileInfo {
   const ext = filePath.split('.').pop()?.toLowerCase() ?? '';
   return {
@@ -36,7 +36,7 @@ export function getFileInfo(filePath: string): FileInfo {
   };
 }
 
-/** 获取文件显示名（最后一段路径） */
+/** Get file display name (last path segment) */
 export function getFileLabel(filePath: string): string {
   return filePath.split('/').pop() ?? filePath;
 }

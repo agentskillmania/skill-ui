@@ -5,7 +5,7 @@ import { renderWithProviders } from './testUtils.js';
 import React from 'react';
 import { EditorArea } from '../../src/components/EditorArea/EditorArea.js';
 
-// Mock Crepe 以避免完整渲染
+// Mock Crepe to avoid full rendering
 vi.mock('@milkdown/crepe', () => ({
   Crepe: vi
     .fn()
@@ -41,18 +41,18 @@ vi.mock('@milkdown/utils', () => ({
   replaceAll: vi.fn((md: string) => (_ctx: unknown) => md),
 }));
 
-// 模拟 Monaco editor 的 addCommand 方法
+// Mock Monaco editor's addCommand method
 const mockAddCommand = vi.fn();
 
-// Mock Monaco Editor 以避免完整渲染
+// Mock Monaco Editor to avoid full rendering
 const mockOnMount = vi.fn();
 vi.mock('@monaco-editor/react', () => ({
   __esModule: true,
   default: ({ value, defaultValue, onChange, onMount }: any) => {
-    // 触发 onMount 回调以测试 handleMount 分支
+    // Trigger onMount callback to test handleMount branch
     React.useEffect(() => {
       if (onMount) {
-        // 模拟真实的 Monaco editor 实例，包含 addCommand 方法
+        // Mock real Monaco editor instance with addCommand method
         const mockEditor = {
           addCommand: mockAddCommand,
         };
@@ -77,17 +77,17 @@ describe('EditorArea', () => {
     onChange: vi.fn(),
   };
 
-  it('code 模式渲染 Monaco', () => {
+  it('renders Monaco in code mode', () => {
     renderWithProviders(<EditorArea {...defaultProps} />);
     expect(screen.getByTestId('monaco-editor')).toBeTruthy();
   });
 
-  it('code 模式渲染 Monaco', () => {
+  it('renders Monaco in code mode', () => {
     renderWithProviders(<EditorArea {...defaultProps} />);
     expect(screen.getByTestId('monaco-editor')).toBeTruthy();
   });
 
-  it('wysiwyg 模式渲染 VisualEditor（Crepe 容器）', () => {
+  it('renders VisualEditor (Crepe container) in wysiwyg mode', () => {
     const { container } = renderWithProviders(
       <EditorArea {...defaultProps} mode="wysiwyg" content="# 标题\n\n段落" />
     );
@@ -95,32 +95,32 @@ describe('EditorArea', () => {
     expect(container.querySelector('[data-crepe-root]')).toBeTruthy();
   });
 
-  it('传递 content 到子编辑器', () => {
+  it('passes content to child editor', () => {
     renderWithProviders(<EditorArea {...defaultProps} />);
     expect(screen.getByTestId('monaco-value').textContent).toBe('console.log("hello")');
   });
 
-  it('Monaco onMount 回调被正确触发', () => {
+  it('Monaco onMount callback is triggered correctly', () => {
     renderWithProviders(<EditorArea {...defaultProps} />);
-    // 等待 onMount 被调用
+    // Wait for onMount to be called
     expect(mockOnMount).toHaveBeenCalledWith(expect.any(Object));
   });
 
-  it('Monaco onChange 处理 undefined 值', () => {
+  it('Monaco onChange handles undefined values', () => {
     const onChange = vi.fn();
     renderWithProviders(<EditorArea {...defaultProps} onChange={onChange} />);
 
     const editButton = screen.getByText('mock-edit');
     fireEvent.click(editButton);
 
-    // onChange 应该被调用，即使 Monaco 传递 undefined
+    // onChange should be called even if Monaco passes undefined
     expect(onChange).toHaveBeenCalled();
   });
 
-  it('CodeEditor 在 onMount 时注册 Ctrl+S 保存命令', () => {
+  it('CodeEditor registers Ctrl+S save command on onMount', () => {
     const onSave = vi.fn();
 
-    // 清除之前的调用记录
+    // Clear previous call records
     mockAddCommand.mockClear();
 
     renderWithProviders(
@@ -133,7 +133,7 @@ describe('EditorArea', () => {
       />
     );
 
-    // 验证 addCommand 被调用，参数为 Ctrl+S 的键码 (2097 = CtrlCmd | KeyS)
+    // Verify addCommand is called with Ctrl+S keycode (2097 = CtrlCmd | KeyS)
     expect(mockAddCommand).toHaveBeenCalledWith(2097, expect.any(Function));
   });
 });

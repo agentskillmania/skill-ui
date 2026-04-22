@@ -1,7 +1,7 @@
 /**
- * Sidebar — 右侧面板容器
+ * Sidebar — right-side panel container
  *
- * ActivityBar（图标栏） + 面板内容区，切换文件/助手/审核/测试。
+ * ActivityBar (icon bar) + panel content area, switch between files/assistant/review/test.
  */
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
@@ -40,7 +40,7 @@ export function Sidebar({
         flex-shrink: 0;
       `}
     >
-      {/* 面板内容区 */}
+      {/* Panel content area */}
       {activePanel && (
         <div
           css={css`
@@ -69,7 +69,7 @@ export function Sidebar({
         </div>
       )}
 
-      {/* 图标栏 */}
+      {/* Icon bar */}
       <ActivityBar activePanel={activePanel} onPanelChange={onPanelChange} />
     </div>
   );

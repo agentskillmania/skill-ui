@@ -1,5 +1,5 @@
 /**
- * TestCase 面板 — 测试用例管理
+ * TestCase panel — test case management
  */
 import { css } from '@emotion/react';
 import { TestTube2, Play } from 'lucide-react';
@@ -23,7 +23,7 @@ export function TestCase({ testCases, testResults, onRunTests }: TestCasePanelPr
         flex-direction: column;
       `}
     >
-      {/* 头部 */}
+      {/* Header */}
       <div
         css={css`
           display: flex;
@@ -71,7 +71,7 @@ export function TestCase({ testCases, testResults, onRunTests }: TestCasePanelPr
         </button>
       </div>
 
-      {/* 用例列表 */}
+      {/* Case list */}
       <div
         css={css`
           flex: 1;

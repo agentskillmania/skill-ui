@@ -1,18 +1,18 @@
 /**
- * 可视化编辑器（基于 @milkdown/crepe）
+ * Visual editor (based on @milkdown/crepe)
  *
- * 使用 Crepe 提供的 WYSIWYG Markdown 编辑功能，
- * 包括格式工具栏、斜杠命令、块拖拽、表格、链接编辑等。
+ * Uses WYSIWYG Markdown editing features provided by Crepe,
+ * including format toolbar, slash commands, block drag-and-drop, tables, link editing, etc.
  */
 import '@milkdown/crepe/theme/frame.css';
 import { css } from '@emotion/react';
 import { useEffect, useRef } from 'react';
-// @ts-expect-error — @milkdown/crepe 的 package.json exports 未正确声明类型
+// @ts-expect-error — @milkdown/crepe's package.json exports do not correctly declare types
 import { Crepe } from '@milkdown/crepe';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { EditorAreaProps } from '../../types.js';
 
-/** listenerCtx 的 ListenerManager 类型（简化版） */
+/** ListenerManager type for listenerCtx (simplified) */
 interface ListenerManager {
   markdownUpdated: (
     callback: (ctx: unknown, markdown: string, prevMarkdown: string) => void
@@ -34,10 +34,10 @@ export function VisualEditor({
   const isInternalChange = useRef(false);
   const onChangeRef = useRef(onChange);
 
-  // 保持 onChange 引用最新，避免闭包过期
+  // Keep onChange reference up-to-date to avoid stale closure
   onChangeRef.current = onChange;
 
-  // 初始化 Crepe
+  // Initialize Crepe
   useEffect(() => {
     if (!rootRef.current) return;
 
@@ -56,11 +56,11 @@ export function VisualEditor({
     const initEditor = async () => {
       await crepe.create();
 
-      // 绑定 onChange 回调
+      // Bind onChange callback
       crepe.on((listener: ListenerManager) => {
         listener.markdownUpdated((_ctx: unknown, markdown: string, _prev: string) => {
-          // isInternalChange 标记会在 content 同步 useEffect 中重置，
-          // 这里用 setTimeout(0) 确保 replaceAll 完成后才重置
+          // isInternalChange flag will be reset in content sync useEffect,
+          // uses setTimeout(0) here to ensure reset happens after replaceAll completes
           if (isInternalChange.current) {
             isInternalChange.current = false;
             return;
@@ -69,7 +69,7 @@ export function VisualEditor({
         });
       });
 
-      // 设置初始只读状态
+      // Set initial read-only state
       crepe.setReadonly(readOnly);
     };
 
@@ -81,10 +81,10 @@ export function VisualEditor({
       });
       crepeRef.current = null;
     };
-    // 仅挂载时执行
+    // Only execute on mount
   }, []);
 
-  // content prop 变化 → 同步到 Crepe（文件切换场景）
+  // content prop changes → sync to Crepe (file switch scenario)
   useEffect(() => {
     const crepe = crepeRef.current;
     if (!crepe) return;
@@ -102,7 +102,7 @@ export function VisualEditor({
     }
   }, [content]);
 
-  // readOnly 变化 → 同步到 Crepe
+  // readOnly changes → sync to Crepe
   useEffect(() => {
     const crepe = crepeRef.current;
     if (!crepe) return;

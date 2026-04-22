@@ -1,7 +1,7 @@
 /**
- * AssistantPanel — AI 助手面板
+ * AssistantPanel — AI assistant panel
  *
- * 嵌入 skill-ui-chat 的 MessageList + ChatInput，带快捷命令。
+ * Embeds skill-ui-chat's MessageList + ChatInput, with quick commands.
  */
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
@@ -25,7 +25,7 @@ export function AssistantPanel({
         flex-direction: column;
       `}
     >
-      {/* 消息列表 */}
+      {/* Message list */}
       <div
         css={css`
           flex: 1;
@@ -89,7 +89,7 @@ export function AssistantPanel({
         )}
       </div>
 
-      {/* 输入框 */}
+      {/* Input box */}
       <div
         css={css`
           padding: ${theme.spacing[2]};

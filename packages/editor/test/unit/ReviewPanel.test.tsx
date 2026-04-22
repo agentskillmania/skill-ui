@@ -16,18 +16,18 @@ const sampleResult: ReviewResult = {
 };
 
 describe('ReviewPanel', () => {
-  it('无审核结果时显示空状态', () => {
+  it('shows empty state when no review result', () => {
     renderWithProviders(<ReviewPanel />);
     expect(screen.getByText('尚未审核，通过助手发起审核')).toBeTruthy();
   });
 
-  it('显示审核评分', () => {
+  it('displays review score', () => {
     renderWithProviders(<ReviewPanel result={sampleResult} />);
     expect(screen.getByText('85')).toBeTruthy();
     expect(screen.getByText('/ 100')).toBeTruthy();
   });
 
-  it('显示所有检查项', () => {
+  it('displays all check items', () => {
     renderWithProviders(<ReviewPanel result={sampleResult} />);
     expect(screen.getByText('描述清晰')).toBeTruthy();
     expect(screen.getByText('步骤完整')).toBeTruthy();
@@ -35,30 +35,30 @@ describe('ReviewPanel', () => {
     expect(screen.getByText('未定义超时策略')).toBeTruthy();
   });
 
-  it('显示检查项详细说明', () => {
+  it('displays check item details', () => {
     renderWithProviders(<ReviewPanel result={sampleResult} />);
     expect(screen.getByText('当前未处理 API 超时场景')).toBeTruthy();
   });
 
-  it('空检查项列表正常渲染', () => {
+  it('renders empty check item list correctly', () => {
     renderWithProviders(<ReviewPanel result={{ score: 100, items: [] }} />);
     expect(screen.getByText('100')).toBeTruthy();
   });
 
-  it('评分 ≥ 80 显示成功色', () => {
+  it('shows success color for score ≥ 80', () => {
     const { container } = renderWithProviders(<ReviewPanel result={{ score: 85, items: [] }} />);
     const scoreElement = screen.getByText('85');
-    // 验证元素存在
+    // Verify element exists
     expect(scoreElement).toBeTruthy();
   });
 
-  it('评分 60-79 显示警告色', () => {
+  it('shows warning color for score 60-79', () => {
     const { container } = renderWithProviders(<ReviewPanel result={{ score: 65, items: [] }} />);
     const scoreElement = screen.getByText('65');
     expect(scoreElement).toBeTruthy();
   });
 
-  it('评分 < 60 显示错误色', () => {
+  it('shows error color for score < 60', () => {
     const { container } = renderWithProviders(<ReviewPanel result={{ score: 45, items: [] }} />);
     const scoreElement = screen.getByText('45');
     expect(scoreElement).toBeTruthy();

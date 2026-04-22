@@ -1,14 +1,14 @@
 /**
- * ReviewPanel — 审核结果面板
+ * ReviewPanel — review result panel
  *
- * 展示 AI 审核评分和检查项列表。
+ * Displays AI review score and check item list.
  */
 import { css } from '@emotion/react';
 import { CheckCircle, AlertTriangle, XCircle, ClipboardCheck } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { ReviewPanelProps, ReviewItem } from '../../types.js';
 
-/** 状态 → 图标 + 颜色 */
+/** Status → icon + color */
 const STATUS_CONFIG: Record<ReviewItem['status'], { icon: typeof CheckCircle; color: string }> = {
   pass: { icon: CheckCircle, color: 'success' },
   warn: { icon: AlertTriangle, color: 'warning' },
@@ -46,7 +46,7 @@ export function ReviewPanel({ result }: ReviewPanelProps) {
         flex-direction: column;
       `}
     >
-      {/* 评分 */}
+      {/* Score */}
       <div
         css={css`
           display: flex;
@@ -88,7 +88,7 @@ export function ReviewPanel({ result }: ReviewPanelProps) {
         </div>
       </div>
 
-      {/* 检查项列表 */}
+      {/* Check item list */}
       <div
         css={css`
           flex: 1;

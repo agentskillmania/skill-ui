@@ -1,7 +1,7 @@
 /**
- * SkillEditor 顶层容器组件
+ * SkillEditor top-level container component
  *
- * 两栏布局：编辑区（FileTabs + EditorArea + StatusBar） | Sidebar
+ * Two-column layout: editor area (FileTabs + EditorArea + StatusBar) | Sidebar
  */
 import { Modal, Empty } from 'antd';
 import { css } from '@emotion/react';
@@ -39,10 +39,10 @@ export function SkillEditor({
   const [isDirty, setIsDirty] = useState(false);
   const [cursorPosition, setCursorPosition] = useState<CursorPosition | null>(null);
   const [openTabs, setOpenTabs] = useState<FileTab[]>([]);
-  // 跟踪每个文件是否修改过
+  // Track whether each file has been modified
   const dirtyFiles = useRef<Set<string>>(new Set());
 
-  // 当 activeFilePath 变化时，确保 tab 存在（实际写入 state）
+  // When activeFilePath changes, ensure tab exists (actually write to state)
   useEffect(() => {
     if (!activeFilePath) return;
     setOpenTabs((prev) => {
@@ -59,7 +59,7 @@ export function SkillEditor({
     });
   }, [activeFilePath]);
 
-  // 文件切换时同步 isDirty 状态
+  // Synchronize isDirty state when switching files
   useEffect(() => {
     setIsDirty(activeFilePath ? dirtyFiles.current.has(activeFilePath) : false);
   }, [activeFilePath]);
@@ -74,7 +74,7 @@ export function SkillEditor({
       if (!activeFilePath) return;
       setIsDirty(true);
       dirtyFiles.current.add(activeFilePath);
-      // 更新 tab 的 modified 状态
+      // Update tab modified status
       setOpenTabs((prev) =>
         prev.map((t) => (t.path === activeFilePath ? { ...t, modified: true } : t))
       );
@@ -88,7 +88,7 @@ export function SkillEditor({
       if (!activeFilePath) return;
       setIsDirty(false);
       dirtyFiles.current.delete(activeFilePath);
-      // 更新 tab 的 modified 状态
+      // Update tab modified status
       setOpenTabs((prev) =>
         prev.map((t) => (t.path === activeFilePath ? { ...t, modified: false } : t))
       );
@@ -103,7 +103,7 @@ export function SkillEditor({
         setOpenTabs((prev) => {
           const remaining = prev.filter((t) => t.path !== path);
           dirtyFiles.current.delete(path);
-          // 当前活动文件被关闭
+          // Currently active file was closed
           if (activeFilePath === path) {
             if (remaining.length > 0) {
               onActiveFileChange(remaining[remaining.length - 1].path);
@@ -155,7 +155,7 @@ export function SkillEditor({
           font-family: ${theme.font.family};
         `}
       >
-        {/* 编辑区 */}
+        {/* Editor area */}
         <div
           css={css`
             flex: 1;
@@ -209,7 +209,7 @@ export function SkillEditor({
           />
         </div>
 
-        {/* 右侧 Sidebar */}
+        {/* Right Sidebar */}
         <Sidebar
           activePanel={activePanel}
           files={files}
@@ -231,7 +231,7 @@ export function SkillEditor({
   );
 }
 
-/** 递归查找文件 */
+/** Recursively find file */
 function findFile(
   files: import('../../types.js').SkillFile[],
   path: string

@@ -2,7 +2,7 @@
 import { vi } from 'vitest';
 import { describe, it, expect } from 'vitest';
 
-// Mock chat 组件
+// Mock chat components
 vi.mock('@agentskillmania/skill-ui-chat', () => ({
   MessageList: () => <div data-testid="message-list" />,
   ChatInput: ({ placeholder }: { placeholder: string }) => <span>{placeholder}</span>,
@@ -23,7 +23,7 @@ const sampleReview: ReviewResult = {
 };
 
 describe('Sidebar', () => {
-  it('面板收起时只显示 ActivityBar', () => {
+  it('only shows ActivityBar when panel is collapsed', () => {
     renderWithProviders(
       <Sidebar
         activePanel={null}
@@ -32,13 +32,13 @@ describe('Sidebar', () => {
         onFileSelect={vi.fn()}
       />
     );
-    // ActivityBar 图标应存在
+    // ActivityBar icons should exist
     expect(screen.getByTitle('文件')).toBeTruthy();
-    // 不应有文件树内容
+    // Should not have file tree content
     expect(screen.queryByText('SKILL.md')).toBeNull();
   });
 
-  it('展开文件面板显示 FileTree', () => {
+  it('expanding file panel shows FileTree', () => {
     renderWithProviders(
       <Sidebar
         activePanel="files"
@@ -50,7 +50,7 @@ describe('Sidebar', () => {
     expect(screen.getByText('SKILL.md')).toBeTruthy();
   });
 
-  it('展开审核面板显示 ReviewPanel', () => {
+  it('expanding review panel shows ReviewPanel', () => {
     renderWithProviders(
       <Sidebar
         activePanel="review"
@@ -64,7 +64,7 @@ describe('Sidebar', () => {
     expect(screen.getByText('结构完整')).toBeTruthy();
   });
 
-  it('展开测试面板显示 TestCase', () => {
+  it('expanding test panel shows TestCase', () => {
     renderWithProviders(
       <Sidebar
         activePanel="test"
@@ -77,7 +77,7 @@ describe('Sidebar', () => {
     expect(screen.getByText('测试1')).toBeTruthy();
   });
 
-  it('点击 ActivityBar 图标触发面板切换', () => {
+  it('clicking ActivityBar icon triggers panel switch', () => {
     const onPanel = vi.fn();
     renderWithProviders(
       <Sidebar
@@ -91,7 +91,7 @@ describe('Sidebar', () => {
     expect(onPanel).toHaveBeenCalledWith('files');
   });
 
-  it('展开助手面板显示 AssistantPanel', () => {
+  it('expanding assistant panel shows AssistantPanel', () => {
     renderWithProviders(
       <Sidebar
         activePanel="assistant"
@@ -100,7 +100,7 @@ describe('Sidebar', () => {
         onFileSelect={vi.fn()}
       />
     );
-    // AssistantPanel 应显示输入框占位文本
+    // AssistantPanel should display input placeholder text
     expect(screen.getByText('向助手提问...')).toBeTruthy();
   });
 });

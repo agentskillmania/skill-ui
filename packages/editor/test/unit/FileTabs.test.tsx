@@ -12,7 +12,7 @@ const sampleTabs: FileTab[] = [
 ];
 
 describe('FileTabs', () => {
-  it('渲染所有标签', () => {
+  it('renders all tabs', () => {
     renderWithProviders(
       <FileTabs
         tabs={sampleTabs}
@@ -26,7 +26,7 @@ describe('FileTabs', () => {
     expect(screen.getByText('package.json')).toBeTruthy();
   });
 
-  it('显示未保存标记', () => {
+  it('shows unsaved indicator', () => {
     renderWithProviders(
       <FileTabs
         tabs={sampleTabs}
@@ -35,12 +35,12 @@ describe('FileTabs', () => {
         onTabClose={vi.fn()}
       />
     );
-    // modified tab 应显示圆点标记
+    // Modified tab should show dot indicator
     const dot = screen.getByText('•');
     expect(dot).toBeTruthy();
   });
 
-  it('点击标签触发切换', () => {
+  it('clicking tab triggers switch', () => {
     const onChange = vi.fn();
     renderWithProviders(
       <FileTabs
@@ -54,7 +54,7 @@ describe('FileTabs', () => {
     expect(onChange).toHaveBeenCalledWith('package.json');
   });
 
-  it('点击关闭按钮触发关闭（不触发切换）', () => {
+  it('clicking close button triggers close (not switch)', () => {
     const onClose = vi.fn();
     const onChange = vi.fn();
     renderWithProviders(
@@ -65,19 +65,19 @@ describe('FileTabs', () => {
         onTabClose={onClose}
       />
     );
-    // 每个标签有一个关闭按钮（X 图标）
+    // Each tab has a close button (X icon)
     const closeButtons = screen.getAllByRole('button', { hidden: true });
-    // 点击第一个关闭按钮
+    // Click the first close button
     fireEvent.click(closeButtons[0]);
     expect(onClose).toHaveBeenCalled();
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it('空标签列表正常渲染', () => {
+  it('renders empty tab list correctly', () => {
     renderWithProviders(
       <FileTabs tabs={[]} activePath={null} onTabChange={vi.fn()} onTabClose={vi.fn()} />
     );
-    // 不应有任何标签文本
+    // Should not have any tab text
     expect(screen.queryByRole('tab')).toBeNull();
   });
 });

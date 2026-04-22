@@ -1,9 +1,9 @@
 /**
  * @agentskillmania/skill-ui-editor
- * Skill 编辑器组件包
+ * Skill editor component package
  */
 
-// 类型
+// Types
 export type {
   SkillFile,
   EditMode,
@@ -28,7 +28,7 @@ export type {
   EditorContextValue,
 } from './types.js';
 
-// 组件
+// Components
 export { SkillEditor } from './components/SkillEditor/index.js';
 export { FileTree } from './components/FileTree/index.js';
 export { FileTabs } from './components/FileTabs/index.js';
@@ -39,8 +39,8 @@ export { ActivityBar } from './components/ActivityBar/index.js';
 export { AssistantPanel } from './components/AssistantPanel/index.js';
 export { ReviewPanel } from './components/ReviewPanel/index.js';
 
-// 上下文
+// Context
 export { useEditorContext } from './context/EditorContext.js';
 
-// 工具
+// Utilities
 export { getFileInfo, getFileLabel } from './utils/file-utils.js';

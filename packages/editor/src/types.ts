@@ -1,205 +1,205 @@
 /**
- * @agentskillmania/skill-ui-editor 类型定义
+ * @agentskillmania/skill-ui-editor type definitions
  */
 import type { Message, ChatCommand } from '@agentskillmania/skill-ui-chat';
 
-/** 技能项目文件 */
+/** Skill project file */
 export interface SkillFile {
-  /** 文件路径（相对项目根，如 "SKILL.md"、"src/index.ts"） */
+  /** File path (relative to project root, e.g. "SKILL.md", "src/index.ts") */
   path: string;
-  /** 文件内容 */
+  /** File content */
   content: string;
-  /** 是否为目录 */
+  /** Whether it's a directory */
   isDirectory?: boolean;
-  /** 子文件（目录时使用） */
+  /** Child files (used for directories) */
   children?: SkillFile[];
 }
 
-/** 编辑模式 */
+/** Edit mode */
 export type EditMode = 'code' | 'wysiwyg';
 
-/** Sidebar 面板标识 */
+/** Sidebar panel identifier */
 export type SidebarPanel = 'files' | 'assistant' | 'review' | 'test' | null;
 
-/** 编辑器光标位置 */
+/** Editor cursor position */
 export interface CursorPosition {
   line: number;
   column: number;
 }
 
-/** 文件类型信息 */
+/** File type info */
 export interface FileInfo {
-  /** 文件扩展名 */
+  /** File extension */
   extension: string;
-  /** 语言名称（用于 Monaco） */
+  /** Language name (for Monaco) */
   language: string;
 }
 
-/** 测试用例 */
+/** Test case */
 export interface SkillTestCase {
-  /** 用例 ID */
+  /** Case ID */
   id: string;
-  /** 用例名称 */
+  /** Case name */
   name: string;
-  /** 输入消息 */
+  /** Input message */
   input: string;
-  /** 期望的工具调用序列（可选） */
+  /** Expected tool call sequence (optional) */
   expectedToolCalls?: string[];
-  /** 期望输出关键词（可选） */
+  /** Expected output keywords (optional) */
   expectedKeywords?: string[];
 }
 
-/** 测试结果 */
+/** Test result */
 export interface TestResult {
-  /** 用例 ID */
+  /** Case ID */
   caseId: string;
-  /** 是否通过 */
+  /** Whether passed */
   passed: boolean;
-  /** 实际输出 */
+  /** Actual output */
   output?: string;
-  /** 失败原因 */
+  /** Failure reason */
   failureReason?: string;
-  /** 执行耗时（ms） */
+  /** Execution duration (ms) */
   duration?: number;
 }
 
-/** 审核结果项 */
+/** Review result item */
 export interface ReviewItem {
-  /** 通过/警告/失败 */
+  /** Pass/warn/fail */
   status: 'pass' | 'warn' | 'fail';
-  /** 检查项名称 */
+  /** Check item name */
   label: string;
-  /** 详细说明 */
+  /** Detailed description */
   detail?: string;
 }
 
-/** 审核结果 */
+/** Review result */
 export interface ReviewResult {
-  /** 评分 0-100 */
+  /** Score 0-100 */
   score: number;
-  /** 检查项列表 */
+  /** Check item list */
   items: ReviewItem[];
 }
 
-// ─── 组件 Props ───────────────────────────────
+// ─── Component Props ───────────────────────────────
 
-/** 文件标签项 */
+/** File tab item */
 export interface FileTab {
-  /** 文件路径（唯一标识） */
+  /** File path (unique identifier) */
   path: string;
-  /** 显示名称（文件名） */
+  /** Display name (file name) */
   label: string;
-  /** 是否有未保存修改 */
+  /** Whether there are unsaved changes */
   modified?: boolean;
 }
 
-/** FileTabs 组件 Props */
+/** FileTabs component props */
 export interface FileTabsProps {
-  /** 标签页列表 */
+  /** Tab list */
   tabs: FileTab[];
-  /** 当前激活的文件路径 */
+  /** Currently active file path */
   activePath: string | null;
-  /** 标签切换回调 */
+  /** Tab switch callback */
   onTabChange: (path: string) => void;
-  /** 标签关闭回调 */
+  /** Tab close callback */
   onTabClose: (path: string) => void;
 }
 
-/** SkillEditor 顶层组件 Props */
+/** SkillEditor top-level component props */
 export interface SkillEditorProps {
-  /** 文件列表 */
+  /** File list */
   files: SkillFile[];
-  /** 当前打开的文件路径 */
+  /** Currently open file path */
   activeFilePath: string | null;
-  /** 编辑模式 */
+  /** Edit mode */
   editMode: EditMode;
-  /** 当前展开的 Sidebar 面板 */
+  /** Currently expanded Sidebar panel */
   activePanel: SidebarPanel;
 
-  // 回调
+  // Callbacks
   onFileChange: (path: string, content: string) => void;
   onActiveFileChange: (path: string | null) => void;
   onEditModeChange: (mode: EditMode) => void;
   onPanelChange: (panel: SidebarPanel) => void;
   onSave?: (path: string, content: string) => void;
 
-  // 助手面板
+  // Assistant panel
   assistantMessages?: Message[];
   assistantStatus?: 'idle' | 'streaming' | 'error';
   assistantCommands?: ChatCommand[];
   onAssistantSend?: (content: string) => void;
   onAssistantStop?: () => void;
 
-  // 审核面板
+  // Review panel
   reviewResult?: ReviewResult;
 
-  // 测试面板
+  // Test panel
   testCases?: SkillTestCase[];
   testResults?: TestResult[];
   onRunTests?: (caseIds?: string[]) => void;
 }
 
-/** FileTree 组件 Props */
+/** FileTree component props */
 export interface FileTreeProps {
-  /** 文件列表 */
+  /** File list */
   files: SkillFile[];
-  /** 当前选中文件路径 */
+  /** Currently selected file path */
   activeFilePath: string | null;
-  /** 选中文件回调 */
+  /** Select file callback */
   onSelect: (path: string) => void;
 }
 
-/** EditorArea 组件 Props */
+/** EditorArea component props */
 export interface EditorAreaProps {
-  /** 当前文件内容 */
+  /** Current file content */
   content: string;
-  /** 当前文件路径（用于判断语言） */
+  /** Current file path (for language detection) */
   filePath: string;
-  /** 编辑模式 */
+  /** Edit mode */
   mode: EditMode;
-  /** 是否只读 */
+  /** Whether read-only */
   readOnly?: boolean;
 
-  // 回调
+  // Callbacks
   onChange: (content: string) => void;
   onSave?: (content: string) => void;
   onCursorChange?: (position: CursorPosition) => void;
 }
 
-/** StatusBar 组件 Props */
+/** StatusBar component props */
 export interface StatusBarProps {
-  /** 当前文件路径 */
+  /** Current file path */
   filePath: string | null;
-  /** 编辑模式 */
+  /** Edit mode */
   editMode: EditMode;
-  /** 光标位置 */
+  /** Cursor position */
   cursorPosition: CursorPosition | null;
-  /** 是否有未保存的修改 */
+  /** Whether there are unsaved changes */
   isDirty?: boolean;
 
-  // 回调
+  // Callbacks
   onEditModeChange: (mode: EditMode) => void;
 }
 
-/** Sidebar 组件 Props */
+/** Sidebar component props */
 export interface SidebarProps {
-  /** 当前展开的面板 */
+  /** Currently expanded panel */
   activePanel: SidebarPanel;
-  /** 文件列表（文件面板） */
+  /** File list (file panel) */
   files: SkillFile[];
-  /** 当前选中文件 */
+  /** Currently selected file */
   activeFilePath: string | null;
-  /** 助手面板 */
+  /** Assistant panel */
   assistantMessages?: Message[];
   assistantStatus?: 'idle' | 'streaming' | 'error';
   assistantCommands?: ChatCommand[];
-  /** 审核面板 */
+  /** Review panel */
   reviewResult?: ReviewResult;
-  /** 测试面板 */
+  /** Test panel */
   testCases?: SkillTestCase[];
   testResults?: TestResult[];
 
-  // 回调
+  // Callbacks
   onPanelChange: (panel: SidebarPanel) => void;
   onFileSelect: (path: string | null) => void;
   onAssistantSend?: (content: string) => void;
@@ -207,15 +207,15 @@ export interface SidebarProps {
   onRunTests?: (caseIds?: string[]) => void;
 }
 
-/** ActivityBar 组件 Props */
+/** ActivityBar component props */
 export interface ActivityBarProps {
-  /** 当前选中的面板 */
+  /** Currently selected panel */
   activePanel: SidebarPanel;
-  /** 面板切换回调 */
+  /** Panel switch callback */
   onPanelChange: (panel: SidebarPanel) => void;
 }
 
-/** AssistantPanel 组件 Props */
+/** AssistantPanel component props */
 export interface AssistantPanelProps {
   messages?: Message[];
   status?: 'idle' | 'streaming' | 'error';
@@ -224,34 +224,34 @@ export interface AssistantPanelProps {
   onStop?: () => void;
 }
 
-/** ReviewPanel 组件 Props */
+/** ReviewPanel component props */
 export interface ReviewPanelProps {
   result?: ReviewResult;
 }
 
-/** TestCasePanel 组件 Props */
+/** TestCasePanel component props */
 export interface TestCasePanelProps {
   testCases?: SkillTestCase[];
   testResults?: TestResult[];
   onRunTests?: (caseIds?: string[]) => void;
 }
 
-// ─── 上下文类型 ───────────────────────────────
+// ─── Context Types ───────────────────────────────
 
-/** 编辑器内部上下文 */
+/** Editor internal context */
 export interface EditorContextValue {
-  /** 当前编辑模式 */
+  /** Current edit mode */
   editMode: EditMode;
-  /** 当前文件路径 */
+  /** Current file path */
   activeFilePath: string | null;
-  /** 是否有未保存修改 */
+  /** Whether there are unsaved changes */
   isDirty: boolean;
-  /** 光标位置 */
+  /** Cursor position */
   cursorPosition: CursorPosition | null;
-  /** 切换编辑模式 */
+  /** Switch edit mode */
   setEditMode: (mode: EditMode) => void;
-  /** 更新光标位置 */
+  /** Update cursor position */
   setCursorPosition: (pos: CursorPosition | null) => void;
-  /** 标记为脏 */
+  /** Mark as dirty */
   setDirty: (dirty: boolean) => void;
 }

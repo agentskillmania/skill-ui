@@ -87,7 +87,7 @@ export const ReadOnly: Story = {
       mode: 'wysiwyg',
       readOnly: true,
       onChange: () => {
-        // 只读模式下不应该有变化
+        // Should not change in read-only mode
       },
     };
 

@@ -1,5 +1,5 @@
 /**
- * 文件树组件
+ * File tree component
  */
 import { css } from '@emotion/react';
 import { ChevronRight, ChevronDown, FileCode, Book, FolderOpen } from 'lucide-react';
@@ -7,7 +7,7 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useState, useCallback } from 'react';
 import type { FileTreeProps, SkillFile } from '../../types.js';
 
-/** 根据扩展名获取文件图标 */
+/** Get file icon by extension */
 function getFileIcon(name: string) {
   const ext = name.split('.').pop()?.toLowerCase() ?? '';
   const docExts = ['md', 'mdx', 'txt', 'rst'];
@@ -15,7 +15,7 @@ function getFileIcon(name: string) {
   return <FileCode size={14} />;
 }
 
-/** 单个树节点 */
+/** Single tree node */
 function TreeNode({
   file,
   activeFilePath,

@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { waitFor } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
 
-// ── Mock @milkdown/utils（replaceAll） ──────────────────
+// ── Mock @milkdown/utils (replaceAll) ──────────────────
 const mockReplaceAll = vi.fn((markdown: string) => (_ctx: unknown) => markdown);
 vi.mock('@milkdown/utils', () => ({
   replaceAll: (...args: unknown[]) => mockReplaceAll(...args),
@@ -58,7 +58,7 @@ const defaultProps = {
   onChange: vi.fn(),
 };
 
-describe('VisualEditor (Crepe 实现)', () => {
+describe('VisualEditor (Crepe implementation)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     markdownUpdatedCallback = null;
@@ -66,7 +66,7 @@ describe('VisualEditor (Crepe 实现)', () => {
     mockEditor.action.mockReset();
   });
 
-  it('初始化时创建 Crepe 实例并传入 content 作为 defaultValue', async () => {
+  it('creates Crepe instance on init and passes content as defaultValue', async () => {
     renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
@@ -77,7 +77,7 @@ describe('VisualEditor (Crepe 实现)', () => {
     expect(call[0].defaultValue).toBe('# 初始标题\n\n初始段落');
   });
 
-  it('配置 Placeholder feature', async () => {
+  it('configures Placeholder feature', async () => {
     renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
@@ -89,7 +89,7 @@ describe('VisualEditor (Crepe 实现)', () => {
     });
   });
 
-  it('渲染 Crepe 挂载点容器', async () => {
+  it('renders Crepe mount point container', async () => {
     const { container } = renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
@@ -97,22 +97,22 @@ describe('VisualEditor (Crepe 实现)', () => {
     expect(container.querySelector('[data-crepe-root]')).toBeTruthy();
   });
 
-  it('用户编辑触发 onChange 回调', async () => {
-    // getMarkdown 返回值与初始 content 一致，避免初始化时触发 content sync
+  it('user editing triggers onChange callback', async () => {
+    // getMarkdown return value matches initial content to avoid triggering content sync on init
     mockCrepeInstance.getMarkdown.mockReturnValue('# 初始标题\n\n初始段落');
 
     renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.on).toHaveBeenCalled());
 
-    // 模拟用户编辑
+    // Simulate user editing
     expect(markdownUpdatedCallback).toBeTruthy();
     markdownUpdatedCallback!({}, '# 新内容', '# 初始标题\n\n初始段落');
 
     expect(defaultProps.onChange).toHaveBeenCalledWith('# 新内容');
   });
 
-  it('内部变更时不触发 onChange（防循环）', async () => {
+  it('does not trigger onChange on internal changes (loop prevention)', async () => {
     const onChange = vi.fn();
     mockCrepeInstance.getMarkdown.mockReturnValue('# 旧内容');
 
@@ -122,36 +122,36 @@ describe('VisualEditor (Crepe 实现)', () => {
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
-    // 模拟 content prop 变化触发 replaceAll（内部变更）
+    // Simulate content prop change triggering replaceAll (internal change)
     rerender(<VisualEditor {...defaultProps} content="# 新内容" onChange={onChange} />);
 
-    // 此时 isInternalChange 应为 true，markdownUpdatedCallback 不应调用 onChange
+    // At this point isInternalChange should be true, markdownUpdatedCallback should not call onChange
     if (markdownUpdatedCallback) {
       markdownUpdatedCallback({}, '# 新内容', '# 旧内容');
     }
 
-    // 不应调用，因为 isInternalChange 标记生效
+    // Should not be called because isInternalChange flag is active
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it('content prop 变化时调用 replaceAll 同步内容（文件切换）', async () => {
+  it('calls replaceAll to sync content when content prop changes (file switch)', async () => {
     mockCrepeInstance.getMarkdown.mockReturnValue('# 旧内容');
 
     const { rerender } = renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
-    // 模拟文件切换
+    // Simulate file switch
     rerender(<VisualEditor {...defaultProps} content="# 切换后的内容" />);
 
-    // 动态 import 是异步的，需要 waitFor
+    // Dynamic import is async, needs waitFor
     await waitFor(() => {
       expect(mockReplaceAll).toHaveBeenCalledWith('# 切换后的内容');
       expect(mockEditor.action).toHaveBeenCalled();
     });
   });
 
-  it('readOnly=true 时调用 setReadonly(true)', async () => {
+  it('calls setReadonly(true) when readOnly=true', async () => {
     renderWithProviders(<VisualEditor {...defaultProps} readOnly={true} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
@@ -159,20 +159,20 @@ describe('VisualEditor (Crepe 实现)', () => {
     expect(mockCrepeInstance.setReadonly).toHaveBeenCalledWith(true);
   });
 
-  it('readOnly 变化时更新 setReadonly', async () => {
+  it('updates setReadonly when readOnly changes', async () => {
     const { rerender } = renderWithProviders(<VisualEditor {...defaultProps} readOnly={false} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
     mockCrepeInstance.setReadonly.mockClear();
 
-    // 切换为只读
+    // Switch to read-only
     rerender(<VisualEditor {...defaultProps} readOnly={true} />);
 
     expect(mockCrepeInstance.setReadonly).toHaveBeenCalledWith(true);
   });
 
-  it('卸载时调用 crepe.destroy()', async () => {
+  it('calls crepe.destroy() on unmount', async () => {
     const { unmount } = renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
@@ -182,7 +182,7 @@ describe('VisualEditor (Crepe 实现)', () => {
     expect(mockCrepeInstance.destroy).toHaveBeenCalled();
   });
 
-  it('destroy 失败时静默处理（不抛出异常）', async () => {
+  it('silently handles destroy failure (does not throw)', async () => {
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     mockCrepeInstance.destroy.mockRejectedValue(new Error('destroy failed'));
 
@@ -192,7 +192,7 @@ describe('VisualEditor (Crepe 实现)', () => {
 
     unmount();
 
-    // 等待 catch 回调执行
+    // Wait for catch callback to execute
     await waitFor(() => {
       expect(consoleSpy).toHaveBeenCalledWith('销毁 Crepe 编辑器失败:', expect.any(Error));
     });
@@ -200,7 +200,7 @@ describe('VisualEditor (Crepe 实现)', () => {
     consoleSpy.mockRestore();
   });
 
-  it('空内容正常初始化', async () => {
+  it('initializes normally with empty content', async () => {
     renderWithProviders(<VisualEditor {...defaultProps} content="" />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
@@ -210,21 +210,21 @@ describe('VisualEditor (Crepe 实现)', () => {
     expect(call[0].defaultValue).toBe('');
   });
 
-  it('rootRef.current 为 null 时提前返回（不创建 Crepe）', async () => {
-    // 修改 mock 使 rootRef.current 为 null
+  it('returns early when rootRef.current is null (does not create Crepe)', async () => {
+    // Modify mock to make rootRef.current null
     const originalCreate = mockCrepeInstance.create;
     mockCrepeInstance.create = vi.fn().mockResolvedValue(null);
 
     renderWithProviders(<VisualEditor {...defaultProps} />);
 
-    // 由于 rootRef 是通过 ref 获取的，我们需要测试 null 分支
-    // 这个分支在实际渲染中很难触发，因为 ref 总会被设置
-    // 但我们可以通过不等待 create 来验证
+    // Since rootRef is obtained via ref, we need to test the null branch
+    // This branch is hard to trigger in actual rendering because ref is always set
+    // But we can verify by not waiting for create
     mockCrepeInstance.create = originalCreate;
   });
 
-  it('editor.status 不为 Created 时不执行 replaceAll', async () => {
-    // 模拟 editor.status 为 undefined 或其他非 Created 值
+  it('does not execute replaceAll when editor.status is not Created', async () => {
+    // Simulate editor.status as undefined or other non-Created value
     const originalEditor = mockCrepeInstance.editor;
     Object.defineProperty(mockCrepeInstance, 'editor', {
       get: () => ({ status: 'NotCreated' }),
@@ -237,31 +237,31 @@ describe('VisualEditor (Crepe 实现)', () => {
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
-    // 触发 content 变化
+    // Trigger content change
     rerender(<VisualEditor {...defaultProps} content="# 新内容" />);
 
-    // 不应该调用 replaceAll，因为 editor.status !== 'Created'
+    // Should not call replaceAll because editor.status !== 'Created'
     await waitFor(() => {
       expect(mockReplaceAll).not.toHaveBeenCalled();
     });
 
-    // 恢复原始 editor
+    // Restore original editor
     Object.defineProperty(mockCrepeInstance, 'editor', {
       get: () => originalEditor,
       configurable: true,
     });
   });
 
-  it('crepeRef.current 为 null 时不执行 setReadonly', async () => {
-    // 测试 crepe 为 null 的分支
+  it('does not execute setReadonly when crepeRef.current is null', async () => {
+    // Test branch where crepe is null
     const { unmount } = renderWithProviders(<VisualEditor {...defaultProps} />);
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
-    // 卸载后 crepeRef.current 会被设置为 null
+    // After unmount crepeRef.current will be set to null
     unmount();
 
-    // 此时 crepeRef.current 为 null，setReadonly 不应被调用
+    // At this point crepeRef.current is null, setReadonly should not be called
     expect(mockCrepeInstance.setReadonly).not.toHaveBeenCalledWith(true);
   });
 });
