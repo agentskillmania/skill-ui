@@ -187,8 +187,13 @@ export class AgentSession {
             break;
           }
 
-          const sse = this.mapEvent(value as RunStreamEvent);
-          if (sse) this.pushEvent(sse);
+          const mapped = this.mapEvent(value as RunStreamEvent);
+          if (mapped) {
+            const events = Array.isArray(mapped) ? mapped : [mapped];
+            for (const sse of events) {
+              this.pushEvent(sse);
+            }
+          }
         }
       } catch (err: unknown) {
         if (err instanceof Error && err.name === 'AbortError') {
@@ -220,7 +225,7 @@ export class AgentSession {
   }
 
   /** Map colts RunStreamEvent to SSE events */
-  private mapEvent(event: RunStreamEvent): SSEEvent | null {
+  private mapEvent(event: RunStreamEvent): SSEEvent | SSEEvent[] | null {
     switch (event.type) {
       case 'token':
         return { event: 'token', data: { delta: event.token } };
@@ -238,6 +243,16 @@ export class AgentSession {
           },
         };
 
+      case 'tools:start':
+        return event.actions.map((action) => ({
+          event: 'tool-start' as const,
+          data: {
+            id: action.id,
+            name: action.tool,
+            args: action.arguments,
+          },
+        }));
+
       case 'tool:end':
         return {
           event: 'tool-end',
@@ -249,6 +264,15 @@ export class AgentSession {
                 : String(event.result),
           },
         };
+
+      case 'tools:end':
+        return Object.entries(event.results).map(([callId, result]) => ({
+          event: 'tool-end' as const,
+          data: {
+            callId,
+            result: typeof result === 'object' ? JSON.stringify(result, null, 2) : String(result),
+          },
+        }));
 
       case 'skill:loading':
         return {
@@ -283,8 +307,6 @@ export class AgentSession {
 
       // Ignore unnecessary events
       case 'phase-change':
-      case 'tools:start':
-      case 'tools:end':
       case 'step:start':
       case 'step:end':
       case 'compressing':
