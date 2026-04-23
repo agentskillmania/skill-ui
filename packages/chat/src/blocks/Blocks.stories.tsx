@@ -7,6 +7,7 @@ import { ToolCallBlock } from './ToolCallBlock.js';
 import { PlanBlock } from './PlanBlock.js';
 import { ErrorBlock } from './ErrorBlock.js';
 import { HumanInputBlock } from './HumanInputBlock.js';
+import { SkillBlock } from './SkillBlock.js';
 import { BlocksRenderer } from './BlocksRenderer.js';
 import type { Block } from '../types.js';
 
@@ -401,6 +402,109 @@ export const HumanInputCompleted: Story = {
   },
 };
 
+// ---- SkillBlock ----
+
+export const SkillLoading: Story = {
+  render: () => {
+    const block: Block = {
+      id: 'b16',
+      type: 'skill',
+      status: 'streaming',
+      content: '',
+      metadata: {
+        skillName: 'code-reviewer',
+        phase: 'loading',
+      },
+    };
+    return (
+      <Wrapper>
+        <SkillBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+export const SkillLoaded: Story = {
+  render: () => {
+    const block: Block = {
+      id: 'b17',
+      type: 'skill',
+      status: 'completed',
+      content: '',
+      metadata: {
+        skillName: 'code-reviewer',
+        phase: 'loaded',
+        tokenCount: 3420,
+      },
+    };
+    return (
+      <Wrapper>
+        <SkillBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+export const SkillExecuting: Story = {
+  render: () => {
+    const block: Block = {
+      id: 'b18',
+      type: 'skill',
+      status: 'streaming',
+      content: '',
+      metadata: {
+        skillName: 'code-reviewer',
+        phase: 'executing',
+        task: '审查 src/index.ts',
+      },
+    };
+    return (
+      <Wrapper>
+        <SkillBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+export const SkillCompleted: Story = {
+  render: () => {
+    const block: Block = {
+      id: 'b19',
+      type: 'skill',
+      status: 'completed',
+      content: '发现 3 处潜在问题，已给出修改建议。',
+      metadata: {
+        skillName: 'code-reviewer',
+        phase: 'completed',
+      },
+    };
+    return (
+      <Wrapper>
+        <SkillBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+export const SkillError: Story = {
+  render: () => {
+    const block: Block = {
+      id: 'b20',
+      type: 'skill',
+      status: 'error',
+      content: '技能文件 SKILL.md 格式错误：缺少 name 字段',
+      metadata: {
+        skillName: 'broken-skill',
+      },
+    };
+    return (
+      <Wrapper>
+        <SkillBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
 // ---- BlocksRenderer ----
 
 export const AllBlocks: Story = {
@@ -439,6 +543,16 @@ export const AllBlocks: Story = {
       },
       {
         id: 'b4',
+        type: 'skill',
+        status: 'completed',
+        content: '发现 3 处潜在问题，已给出修改建议。',
+        metadata: {
+          skillName: 'code-reviewer',
+          phase: 'completed',
+        },
+      },
+      {
+        id: 'b5',
         type: 'human_input',
         status: 'pending',
         content: '',
