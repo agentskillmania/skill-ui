@@ -433,7 +433,7 @@ describe('HumanInputBlock', () => {
       </ChatWrapper>
     );
     const buttons = screen.getAllByRole('button');
-    fireEvent.click(buttons[0]);
+    fireEvent.click(buttons[1]);
     expect(onConfirm).toHaveBeenCalledWith('req1', true);
   });
 
@@ -581,8 +581,8 @@ describe('HumanInputBlock', () => {
       </ChatWrapper>
     );
     const buttons = screen.getAllByRole('button');
-    // second button is cancel button
-    fireEvent.click(buttons[1]);
+    // first button is cancel button
+    fireEvent.click(buttons[0]);
     expect(onConfirm).toHaveBeenCalledWith('req1', false);
   });
 
@@ -598,7 +598,7 @@ describe('HumanInputBlock', () => {
       </ChatWrapper>
     );
     const buttons = screen.getAllByRole('button');
-    fireEvent.click(buttons[0]);
+    fireEvent.click(buttons[1]);
     // requestId should fallback to block.id
     expect(onConfirm).toHaveBeenCalledWith('b5', true);
   });

@@ -59,14 +59,15 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
             <div
               css={css`
                 display: flex;
+                justify-content: flex-end;
                 gap: ${theme.spacing[2]};
               `}
             >
-              <Button type="default" size="small" onClick={() => handleSubmit(true)}>
-                确认
-              </Button>
               <Button type="text" size="small" onClick={() => handleSubmit(false)}>
                 取消
+              </Button>
+              <Button type="default" size="small" onClick={() => handleSubmit(true)}>
+                确认
               </Button>
             </div>
           )}
@@ -109,14 +110,21 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                   </Radio>
                 ))}
               </Radio.Group>
-              <Button
-                type="default"
-                size="small"
-                disabled={selectedValues.length === 0}
-                onClick={() => handleSubmit(selectedValues[0])}
+              <div
+                css={css`
+                  display: flex;
+                  justify-content: flex-end;
+                `}
               >
-                提交
-              </Button>
+                <Button
+                  type="default"
+                  size="small"
+                  disabled={selectedValues.length === 0}
+                  onClick={() => handleSubmit(selectedValues[0])}
+                >
+                  提交
+                </Button>
+              </div>
             </>
           )}
 
@@ -138,14 +146,21 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                   </Checkbox>
                 ))}
               </Checkbox.Group>
-              <Button
-                type="default"
-                size="small"
-                disabled={selectedValues.length === 0}
-                onClick={() => handleSubmit(selectedValues)}
+              <div
+                css={css`
+                  display: flex;
+                  justify-content: flex-end;
+                `}
               >
-                提交
-              </Button>
+                <Button
+                  type="default"
+                  size="small"
+                  disabled={selectedValues.length === 0}
+                  onClick={() => handleSubmit(selectedValues)}
+                >
+                  提交
+                </Button>
+              </div>
             </>
           )}
         </Form>
