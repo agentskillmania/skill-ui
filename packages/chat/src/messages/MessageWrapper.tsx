@@ -26,8 +26,9 @@ export function MessageWrapper({ message, children }: MessageWrapperProps) {
     >
       <div
         css={css`
-          max-width: 85%;
+          max-width: ${isUser ? '85%' : '100%'};
           min-width: 0;
+          flex: ${isUser ? '0 0 auto' : '1 1 auto'};
         `}
       >
         {children}
