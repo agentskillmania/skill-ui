@@ -33,6 +33,7 @@ interface SSEData {
   requestId?: string;
   questions?: Array<{ id: string; question: string; type: string; options?: string[] }>;
   context?: string;
+  response?: unknown;
 }
 
 export function useChatAgent() {
@@ -383,7 +384,11 @@ export function useChatAgent() {
                     ...m,
                     blocks: (m.blocks ?? []).map((b) =>
                       b.type === 'human_input' && b.metadata?.requestId === resolvedReqId
-                        ? { ...b, status: 'completed' as const }
+                        ? {
+                            ...b,
+                            status: 'completed' as const,
+                            metadata: { ...b.metadata, response: data.response },
+                          }
                         : b
                     ),
                   };

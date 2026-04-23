@@ -78,6 +78,7 @@ export interface HumanInputMetadata {
   message?: string;
   options?: Array<{ label: string; value: string }>;
   defaultValue?: string;
+  response?: unknown;
 }
 
 /** Error metadata */

@@ -9,6 +9,55 @@ import type { BlockProps, HumanInputMetadata } from '../types.js';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { BlockCard } from './BlockCard.js';
 
+/** Format human input response for display */
+function formatResponse(response: unknown): string {
+  if (response === true) return '已确认';
+  if (response === false) return '已取消';
+  if (typeof response === 'string') return response;
+  if (Array.isArray(response)) return response.join(', ');
+  if (typeof response === 'number') return String(response);
+  if (response === null || response === undefined) return '';
+  return String(response);
+}
+
+/** Display submitted response in completed state */
+function ResponseDisplay({ response }: { response: unknown }) {
+  const theme = useTheme();
+  const text = formatResponse(response);
+
+  if (!text) {
+    return (
+      <div
+        css={css`
+          font-size: ${theme.font.size.sm};
+          color: ${theme.color.textTertiary};
+        `}
+      >
+        已完成
+      </div>
+    );
+  }
+
+  return (
+    <div
+      css={css`
+        font-size: ${theme.font.size.sm};
+        color: ${theme.color.textSecondary};
+      `}
+    >
+      <span
+        css={css`
+          color: ${theme.color.textTertiary};
+          margin-right: ${theme.spacing[1]};
+        `}
+      >
+        →
+      </span>
+      {text}
+    </div>
+  );
+}
+
 export function HumanInputBlock({ block, onConfirm }: BlockProps) {
   const theme = useTheme();
   const meta = block.metadata as HumanInputMetadata | undefined;
@@ -45,14 +94,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
       )}
 
       {!isPending ? (
-        <div
-          css={css`
-            font-size: ${theme.font.size.sm};
-            color: ${theme.color.textTertiary};
-          `}
-        >
-          已完成
-        </div>
+        <ResponseDisplay response={meta?.response} />
       ) : (
         <Form layout="vertical" size="small">
           {inputType === 'confirmation' && (
