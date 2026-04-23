@@ -140,11 +140,21 @@ export function useChatAgent() {
 
           switch (eventType) {
             case 'token': {
+              const currentThinkingId = thinkingBlockId;
               thinkingBlockId = null;
               setMessages((prev) =>
-                prev.map((m) =>
-                  m.id === aid ? { ...m, content: m.content + (data.delta ?? '') } : m
-                )
+                prev.map((m) => {
+                  if (m.id !== aid) return m;
+                  return {
+                    ...m,
+                    content: m.content + (data.delta ?? ''),
+                    blocks: currentThinkingId
+                      ? (m.blocks ?? []).map((b) =>
+                          b.id === currentThinkingId ? { ...b, status: 'completed' as const } : b
+                        )
+                      : m.blocks,
+                  };
+                })
               );
               break;
             }
@@ -185,7 +195,21 @@ export function useChatAgent() {
             }
 
             case 'tool-start': {
+              const currentThinkingId = thinkingBlockId;
               thinkingBlockId = null;
+              setMessages((prev) =>
+                prev.map((m) => {
+                  if (m.id !== aid) return m;
+                  return {
+                    ...m,
+                    blocks: currentThinkingId
+                      ? (m.blocks ?? []).map((b) =>
+                          b.id === currentThinkingId ? { ...b, status: 'completed' as const } : b
+                        )
+                      : m.blocks,
+                  };
+                })
+              );
               const toolName = data.name ?? 'unknown';
               const blockId = genBlockId();
               toolBlockIds.set(toolName, blockId);
