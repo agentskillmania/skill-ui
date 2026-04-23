@@ -62,10 +62,10 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                 gap: ${theme.spacing[2]};
               `}
             >
-              <Button type="primary" size="small" onClick={() => handleSubmit(true)}>
+              <Button type="default" size="small" onClick={() => handleSubmit(true)}>
                 确认
               </Button>
-              <Button size="small" onClick={() => handleSubmit(false)}>
+              <Button type="text" size="small" onClick={() => handleSubmit(false)}>
                 取消
               </Button>
             </div>
@@ -82,9 +82,10 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="请输入..."
+                size="small"
                 style={{ flex: 1 }}
               />
-              <Button type="primary" size="small" onClick={() => handleSubmit(inputValue)}>
+              <Button type="default" size="small" onClick={() => handleSubmit(inputValue)}>
                 提交
               </Button>
             </div>
@@ -109,7 +110,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                 ))}
               </Radio.Group>
               <Button
-                type="primary"
+                type="default"
                 size="small"
                 disabled={selectedValues.length === 0}
                 onClick={() => handleSubmit(selectedValues[0])}
@@ -138,7 +139,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                 ))}
               </Checkbox.Group>
               <Button
-                type="primary"
+                type="default"
                 size="small"
                 disabled={selectedValues.length === 0}
                 onClick={() => handleSubmit(selectedValues)}
