@@ -374,6 +374,24 @@ export function useChatAgent() {
               break;
             }
 
+            case 'human-input-resolved': {
+              const resolvedReqId = data.requestId ?? '';
+              setMessages((prev) =>
+                prev.map((m) => {
+                  if (m.id !== aid) return m;
+                  return {
+                    ...m,
+                    blocks: (m.blocks ?? []).map((b) =>
+                      b.type === 'human_input' && b.metadata?.requestId === resolvedReqId
+                        ? { ...b, status: 'completed' as const }
+                        : b
+                    ),
+                  };
+                })
+              );
+              break;
+            }
+
             case 'done': {
               thinkingBlockId = null;
               skillBlockId = null;

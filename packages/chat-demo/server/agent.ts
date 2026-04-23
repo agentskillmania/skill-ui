@@ -11,6 +11,7 @@ import {
   createAskHumanTool,
 } from '@agentskillmania/colts';
 import type { AgentState, RunStreamEvent, AskHumanHandler } from '@agentskillmania/colts';
+import type { HumanResponse } from '@agentskillmania/colts';
 import { z } from 'zod';
 import { tavily } from '@tavily/core';
 import type { Response } from 'express';
@@ -32,11 +33,43 @@ export class AgentSession {
   /** AskHuman pending wait queue: requestId → { resolve, reject } */
   private pendingHumanInput = new Map<
     string,
-    { resolve: (value: unknown) => void; reject: (reason?: unknown) => void }
+    { resolve: (value: HumanResponse) => void; reject: (reason?: unknown) => void }
   >();
 
   /** SSE event sender callback (set during handleMessage) */
   private sseSender: ((event: SSEEvent) => void) | null = null;
+
+  /** Async event queue for real-time event bridging */
+  private eventQueue: SSEEvent[] = [];
+  private eventWaiters: Array<(event: SSEEvent | null) => void> = [];
+
+  /** Push an event into the shared queue (thread-safe in single-threaded Node.js) */
+  private pushEvent(event: SSEEvent): void {
+    if (this.eventWaiters.length > 0) {
+      const resolve = this.eventWaiters.shift()!;
+      resolve(event);
+    } else {
+      this.eventQueue.push(event);
+    }
+  }
+
+  /** Pull an event from the shared queue (blocks until available) */
+  private pullEvent(): Promise<SSEEvent | null> {
+    if (this.eventQueue.length > 0) {
+      return Promise.resolve(this.eventQueue.shift()!);
+    }
+    return new Promise((resolve) => {
+      this.eventWaiters.push(resolve);
+    });
+  }
+
+  /** Signal completion to all pending waiters */
+  private signalDone(): void {
+    while (this.eventWaiters.length > 0) {
+      const resolve = this.eventWaiters.shift()!;
+      resolve(null);
+    }
+  }
 
   constructor() {
     const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY ?? '' });
@@ -77,7 +110,7 @@ export class AgentSession {
         calculateTool,
         webSearchTool(tavilyClient),
         failingTool,
-        createAskHumanTool(askHumanHandler),
+        createAskHumanTool(askHumanHandler) as any,
       ],
       skillDirectories: [skillDir],
       maxSteps: 20,
@@ -112,55 +145,71 @@ export class AgentSession {
   respondHumanInput(requestId: string, response: unknown): boolean {
     const pending = this.pendingHumanInput.get(requestId);
     if (!pending) return false;
-    pending.resolve(response);
+    pending.resolve(response as HumanResponse);
     this.pendingHumanInput.delete(requestId);
+
+    // Notify frontend that human input has been resolved
+    this.sseSender?.({
+      event: 'human-input-resolved',
+      data: { requestId, response },
+    });
     return true;
   }
 
   /** Stream process user message, yield SSE events */
   async *handleMessage(message: string): AsyncIterable<SSEEvent> {
     this.abortController = new AbortController();
+    this.eventQueue = [];
+    this.eventWaiters = [];
 
-    // Set SSE sender so ask_human handler can send events
-    const eventQueue: SSEEvent[] = [];
-    this.sseSender = (event: SSEEvent) => eventQueue.push(event);
+    // Set SSE sender so ask_human handler can push events in real-time
+    this.sseSender = (event: SSEEvent) => this.pushEvent(event);
 
     // Add user message to state
     this.state = addUserMessage(this.state, message);
 
-    try {
-      const stream = this.runner.runStream(this.state, {
-        signal: this.abortController.signal,
-      });
+    // Start consuming the runner stream in the background
+    // This allows events from tool handlers to be yielded even while
+    // the stream is blocked waiting for a Promise (e.g. ask_human)
+    const consumeStream = async () => {
+      try {
+        const stream = this.runner.runStream(this.state, {
+          signal: this.abortController!.signal,
+        });
 
-      // Use while loop instead of for-await to capture generator's return value (final state)
-      while (true) {
-        const { done, value } = await stream.next();
-        if (done) {
-          // runStream return value: { state, result }
-          if (value?.state) {
-            this.state = value.state;
+        while (true) {
+          const { done, value } = await stream.next();
+          if (done) {
+            // runStream return value: { state, result }
+            if (value?.state) {
+              this.state = value.state;
+            }
+            break;
           }
-          break;
-        }
 
-        const event = value as RunStreamEvent;
-        const sse = this.mapEvent(event);
-        if (sse) yield sse;
-
-        // Send events produced by ask_human handler
-        while (eventQueue.length > 0) {
-          yield eventQueue.shift()!;
+          const sse = this.mapEvent(value as RunStreamEvent);
+          if (sse) this.pushEvent(sse);
         }
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === 'AbortError') {
+          this.pushEvent({ event: 'done', data: { aborted: true } });
+        } else {
+          this.pushEvent({ event: 'error', data: { message: String(err) } });
+        }
+      } finally {
+        this.signalDone();
+        this.sseSender = null;
       }
-    } catch (err: unknown) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        yield { event: 'done', data: { aborted: true } };
-      } else {
-        yield { event: 'error', data: { message: String(err) } };
-      }
-    } finally {
-      this.sseSender = null;
+    };
+
+    // Start background consumption
+    consumeStream();
+
+    // Yield events as they arrive (including real-time handler events)
+    while (true) {
+      const event = await this.pullEvent();
+      if (event === null) break;
+      yield event;
     }
   }
 
