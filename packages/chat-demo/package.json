@@ -9,7 +9,7 @@
     "dev:client": "pnpm exec vite"
   },
   "dependencies": {
-    "@agentskillmania/colts": "^0.2.2",
+    "@agentskillmania/colts": "link:../../../colts/packages/colts",
     "@agentskillmania/skill-ui-chat": "workspace:*",
     "@agentskillmania/skill-ui-theme": "workspace:*",
     "@ant-design/x": "^2.4.0",
