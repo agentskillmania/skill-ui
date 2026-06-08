@@ -1,0 +1,121 @@
+{
+  "common": {
+    "cancel": "取消",
+    "confirm": "确认",
+    "submit": "提交"
+  },
+  "chat": {
+    "placeholder": "输入消息... (Shift+Enter 换行)"
+  },
+  "thinking": {
+    "thinking": "思考中",
+    "process": "思考过程"
+  },
+  "toolCall": {
+    "unknownTool": "未知工具",
+    "input": "输入",
+    "output": "输出",
+    "preview": "预览",
+    "rawData": "原始数据",
+    "inputParams": "输入参数",
+    "executionResult": "执行结果"
+  },
+  "skill": {
+    "defaultName": "技能",
+    "loading": "加载技能: {{name}}...",
+    "loadingShort": "加载中",
+    "loaded": "已加载",
+    "executing": "执行技能: {{name}}",
+    "executingShort": "执行中",
+    "completed": "{{name}} 完成",
+    "failed": "失败",
+    "executionFailed": "执行失败",
+    "phase": {
+      "loading": "加载",
+      "loaded": "就绪",
+      "executing": "执行",
+      "completed": "完成"
+    }
+  },
+  "humanInput": {
+    "needConfirm": "需要确认",
+    "pending": "等待中",
+    "replied": "已回复",
+    "completed": "已完成",
+    "confirmed": "已确认",
+    "cancelled": "已取消",
+    "placeholder": "请输入..."
+  },
+  "error": {
+    "executionError": "执行错误"
+  },
+  "plan": {
+    "title": "执行计划"
+  },
+  "commands": {
+    "noMatch": "无匹配指令",
+    "defaultGroup": "常用"
+  },
+  "debugger": {
+    "panelTitle": "调试面板",
+    "execution": "当前执行",
+    "toolCalls": "工具调用",
+    "tokenStats": "Token & 性能",
+    "eventStream": "事件流",
+    "agentState": "Agent 状态",
+    "clear": "清空",
+    "empty": "暂无数据",
+    "model": "模型",
+    "duration": "耗时",
+    "promptTokens": "Prompt",
+    "completionTokens": "Completion",
+    "totalTokens": "总计",
+    "stateStep": "Step",
+    "stateTokens": "Tokens",
+    "stateTools": "Tools",
+    "stateDuration": "耗时",
+    "detailLevel": {
+      "compact": "精简",
+      "detail": "详细",
+      "verbose": "完整"
+    },
+    "eventTypes": {
+      "all": "全部",
+      "token": "Token",
+      "tool_call": "工具",
+      "thinking": "思考",
+      "human_input": "人工",
+      "error": "错误",
+      "complete": "完成",
+      "skill": "技能",
+      "plan": "计划",
+      "tool_start": "工具开始",
+      "tool_end": "工具结束",
+      "tools_start": "批量开始",
+      "tools_end": "批量结束",
+      "phase_change": "阶段变更",
+      "compressing": "压缩中",
+      "compressed": "已压缩",
+      "skill_loading": "技能加载",
+      "skill_loaded": "技能就绪",
+      "skill_start": "技能开始",
+      "skill_end": "技能结束",
+      "subagent_start": "子Agent开始",
+      "subagent_end": "子Agent结束",
+      "step_start": "Step开始",
+      "step_end": "Step结束",
+      "llm_request": "LLM请求",
+      "llm_response": "LLM响应"
+    }
+  },
+  "a2ui": {
+    "defaultTitle": "A2UI Surface",
+    "initializing": "初始化渲染引擎...",
+    "streaming": "渲染中",
+    "completed": "渲染完成",
+    "error": "渲染错误",
+    "waiting": "等待交互",
+    "expand": "展开查看",
+    "expandTitle": "完整视图"
+  }
+}

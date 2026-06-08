@@ -125,21 +125,21 @@ describe('groupCommands', () => {
     expect(groups.get('文件')!.length).toBe(1);
   });
 
-  it('commands without group are placed in "常用" group', () => {
+  it('commands without group are placed in default group', () => {
     const groups = groupCommands(mockCommands);
-    expect(groups.get('常用')).toBeDefined();
+    expect(groups.get('default')).toBeDefined();
     // help and clear have no group
-    expect(groups.get('常用')!.length).toBe(2);
+    expect(groups.get('default')!.length).toBe(2);
   });
 
-  it('only one "常用" group when all have no group', () => {
+  it('only one default group when all have no group', () => {
     const cmds: ChatCommand[] = [
       { id: '1', label: 'A', command: 'a' },
       { id: '2', label: 'B', command: 'b' },
     ];
     const groups = groupCommands(cmds);
     expect(groups.size).toBe(1);
-    expect(groups.get('常用')).toHaveLength(2);
+    expect(groups.get('default')).toHaveLength(2);
   });
 
   it('empty command list returns empty Map', () => {

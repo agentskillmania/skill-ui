@@ -7,6 +7,8 @@ import type { ReactNode } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { ChatCommand } from '../types.js';
 import { CommandAutocomplete } from '../commands/CommandAutocomplete.js';
+import { useTranslation } from 'react-i18next';
+import { NAMESPACE } from '../locales/index.js';
 
 export interface ChatInputProps {
   value?: string;
@@ -33,7 +35,7 @@ export function ChatInput({
   onCancel,
   loading = false,
   disabled = false,
-  placeholder = '输入消息...',
+  placeholder,
   prefix,
   suffix,
   commands,
@@ -41,6 +43,8 @@ export function ChatInput({
   commandTrigger = '/',
 }: ChatInputProps) {
   const theme = useTheme();
+  const { t } = useTranslation(NAMESPACE);
+  const resolvedPlaceholder = placeholder ?? t('chat.placeholder');
 
   const handleSubmit = (val: string) => {
     const trimmed = val.trim();
@@ -84,7 +88,7 @@ export function ChatInput({
           onChange={onChange}
           onSubmit={handleSubmit}
           onCancel={onCancel}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           disabled={disabled}
           loading={loading}
           autoSize={{ minRows: 1, maxRows: 4 }}

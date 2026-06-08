@@ -16,7 +16,7 @@ describe('ChatInput', () => {
         <ChatInput />
       </ChatWrapper>
     );
-    expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).toBeInTheDocument();
   });
 
   it('uses custom placeholder', () => {
@@ -54,7 +54,7 @@ describe('ChatInput', () => {
         <ChatInput disabled />
       </ChatWrapper>
     );
-    const textarea = screen.getByPlaceholderText('输入消息...');
+    const textarea = screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)');
     expect(textarea).toBeDisabled();
   });
 
@@ -74,7 +74,7 @@ describe('ChatInput', () => {
         <ChatInput value="" onSubmit={onSubmit} />
       </ChatWrapper>
     );
-    const textarea = screen.getByPlaceholderText('输入消息...');
+    const textarea = screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)');
     fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
     expect(onSubmit).not.toHaveBeenCalled();
   });
@@ -87,7 +87,7 @@ describe('ChatInput', () => {
         <ChatInput value="   " onSubmit={onSubmit} onChange={onChange} />
       </ChatWrapper>
     );
-    const textarea = screen.getByPlaceholderText('输入消息...');
+    const textarea = screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)');
     fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
     expect(onSubmit).not.toHaveBeenCalled();
   });
@@ -100,7 +100,7 @@ describe('ChatInput', () => {
         <ChatInput value="  hello  " onSubmit={onSubmit} onChange={onChange} />
       </ChatWrapper>
     );
-    const textarea = screen.getByPlaceholderText('输入消息...');
+    const textarea = screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)');
     fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
     expect(onSubmit).toHaveBeenCalledWith('hello');
   });
@@ -113,7 +113,30 @@ describe('ChatInput', () => {
       </ChatWrapper>
     );
     // input should be wrapped by CommandAutocomplete
-    expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).toBeInTheDocument();
+  });
+
+  it('selecting a command calls onCommand and clears input', async () => {
+    const onCommand = vi.fn();
+    const onChange = vi.fn();
+    const { container } = render(
+      <ChatWrapper>
+        <ChatInput value="/se" onChange={onChange} commands={mockCommands} onCommand={onCommand} />
+      </ChatWrapper>
+    );
+    // Wait for dropdown menu item to appear (antd renders portal async)
+    const { waitFor } = await import('@testing-library/react');
+    const menuItem = await waitFor(() => {
+      const item = Array.from(
+        document.querySelectorAll('[role="menuitem"], .ant-dropdown-menu-item')
+      ).find((el) => el.textContent?.includes('搜索'));
+      expect(item).toBeDefined();
+      return item!;
+    });
+    const userEvent = (await import('@testing-library/user-event')).default;
+    await userEvent.click(menuItem);
+    expect(onCommand).toHaveBeenCalledWith(expect.objectContaining({ id: '1', command: 'search' }));
+    expect(onChange).toHaveBeenCalledWith('');
   });
 
   it('renders senderElement directly without commands', () => {
@@ -122,7 +145,7 @@ describe('ChatInput', () => {
         <ChatInput value="/" onChange={() => {}} />
       </ChatWrapper>
     );
-    expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).toBeInTheDocument();
   });
 
   it('renders senderElement directly with empty commands list', () => {
@@ -131,7 +154,7 @@ describe('ChatInput', () => {
         <ChatInput value="/" onChange={() => {}} commands={[]} onCommand={() => {}} />
       </ChatWrapper>
     );
-    expect(screen.getByPlaceholderText('输入消息...')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).toBeInTheDocument();
   });
 
   it('Shift+Enter does not trigger onSubmit', () => {
@@ -141,7 +164,7 @@ describe('ChatInput', () => {
         <ChatInput value="hello" onSubmit={onSubmit} onChange={() => {}} />
       </ChatWrapper>
     );
-    const textarea = screen.getByPlaceholderText('输入消息...');
+    const textarea = screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)');
     fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter', shiftKey: true });
     expect(onSubmit).not.toHaveBeenCalled();
   });

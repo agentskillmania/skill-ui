@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ChatWrapper } from './testUtils.js';
-import { SkillBlock } from '../../src/blocks/SkillBlock.js';
+import { SkillBlock } from '../../src/blocks-redesign/SkillBlock.js';
 import type { Block } from '../../src/types.js';
 
 /** Base skill block template */
@@ -37,7 +37,8 @@ describe('SkillBlock', () => {
         <SkillBlock block={loadedBlock} />
       </ChatWrapper>
     );
-    expect(screen.getByText('web-search（1500 tokens）')).toBeInTheDocument();
+    expect(screen.getByText('web-search')).toBeInTheDocument();
+    expect(screen.getByText('1500 tokens')).toBeInTheDocument();
     expect(screen.getByText('已加载')).toBeInTheDocument();
   });
 
@@ -137,7 +138,7 @@ describe('SkillBlock', () => {
     expect(screen.getByText('加载技能: 技能...')).toBeInTheDocument();
   });
 
-  it('shows 0 when no tokenCount in loaded phase', () => {
+  it('does not show token line when no tokenCount in loaded phase', () => {
     const loadedBlock: Block = {
       ...baseSkillBlock,
       metadata: { phase: 'loaded' },
@@ -147,7 +148,8 @@ describe('SkillBlock', () => {
         <SkillBlock block={loadedBlock} />
       </ChatWrapper>
     );
-    expect(screen.getByText('技能（0 tokens）')).toBeInTheDocument();
+    expect(screen.getByText('技能')).toBeInTheDocument();
+    expect(screen.queryByText(/tokens/)).not.toBeInTheDocument();
   });
 
   it('tag shows executing when no task in executing phase', () => {
@@ -177,5 +179,54 @@ describe('SkillBlock', () => {
     expect(screen.getByText('web-search 完成')).toBeInTheDocument();
     // should not have tag element
     expect(screen.queryByText('已完成')).not.toBeInTheDocument();
+  });
+
+  it('does not render phase timeline when phase is undefined', () => {
+    const noPhaseBlock: Block = {
+      id: 'sk-np',
+      type: 'skill',
+      status: 'streaming',
+      content: '',
+    };
+    render(
+      <ChatWrapper>
+        <SkillBlock block={noPhaseBlock} />
+      </ChatWrapper>
+    );
+    // When no phase is known, the timeline arrows (→) should not be rendered
+    // because all phases would incorrectly show as "pending"
+    expect(screen.queryByText('→')).not.toBeInTheDocument();
+  });
+
+  it('does not render phase timeline when phase is unknown value', () => {
+    // metadata.phase is typed but runtime could pass unexpected values
+    // since Block.metadata is Record<string, unknown>
+    const unknownPhaseBlock: Block = {
+      id: 'sk-up',
+      type: 'skill',
+      status: 'streaming',
+      content: '',
+      metadata: { skillName: 'test', phase: 'unknown_phase' },
+    };
+    render(
+      <ChatWrapper>
+        <SkillBlock block={unknownPhaseBlock} />
+      </ChatWrapper>
+    );
+    // Even with an unknown phase value, the component should not crash
+    expect(screen.getByText('test')).toBeInTheDocument();
+  });
+
+  it('shows task description in token line when loaded with task', () => {
+    const block: Block = {
+      ...baseSkillBlock,
+      metadata: { skillName: 'web-search', phase: 'loaded', tokenCount: 500, task: '搜索新闻' },
+    };
+    render(
+      <ChatWrapper>
+        <SkillBlock block={block} />
+      </ChatWrapper>
+    );
+    expect(screen.getByText(/500 tokens · 搜索新闻/)).toBeInTheDocument();
   });
 });

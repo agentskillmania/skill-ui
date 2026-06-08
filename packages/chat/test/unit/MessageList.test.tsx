@@ -22,13 +22,16 @@ describe('MessageList', () => {
     expect(screen.getByText('系统消息')).toBeInTheDocument();
   });
 
-  it('does not crash with empty list', () => {
-    render(
+  it('renders container with no children for empty list', () => {
+    const { container } = render(
       <ChatWrapper>
         <MessageList messages={[]} />
       </ChatWrapper>
     );
-    // just verify it does not crash
+    // The scrollable div should exist but have no MessageItem children
+    const scrollContainer = container.firstElementChild as HTMLElement;
+    expect(scrollContainer).toBeTruthy();
+    expect(scrollContainer.children.length).toBe(0);
   });
 
   it('long list renders normally', () => {

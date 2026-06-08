@@ -1,0 +1,121 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "submit": "Submit"
+  },
+  "chat": {
+    "placeholder": "Type a message... (Shift+Enter for new line)"
+  },
+  "thinking": {
+    "thinking": "Thinking",
+    "process": "Thinking process"
+  },
+  "toolCall": {
+    "unknownTool": "Unknown tool",
+    "input": "Input",
+    "output": "Output",
+    "preview": "Preview",
+    "rawData": "Raw data",
+    "inputParams": "Input parameters",
+    "executionResult": "Execution result"
+  },
+  "skill": {
+    "defaultName": "Skill",
+    "loading": "Loading skill: {{name}}...",
+    "loadingShort": "Loading",
+    "loaded": "Loaded",
+    "executing": "Executing skill: {{name}}",
+    "executingShort": "Executing",
+    "completed": "{{name}} completed",
+    "failed": "Failed",
+    "executionFailed": "Execution failed",
+    "phase": {
+      "loading": "Loading",
+      "loaded": "Ready",
+      "executing": "Executing",
+      "completed": "Done"
+    }
+  },
+  "humanInput": {
+    "needConfirm": "Confirmation required",
+    "pending": "Pending",
+    "replied": "Replied",
+    "completed": "Completed",
+    "confirmed": "Confirmed",
+    "cancelled": "Cancelled",
+    "placeholder": "Please enter..."
+  },
+  "error": {
+    "executionError": "Execution error"
+  },
+  "plan": {
+    "title": "Execution plan"
+  },
+  "commands": {
+    "noMatch": "No matching commands",
+    "defaultGroup": "Common"
+  },
+  "debugger": {
+    "panelTitle": "Debugger",
+    "execution": "Execution",
+    "toolCalls": "Tool Calls",
+    "tokenStats": "Token & Performance",
+    "eventStream": "Event Stream",
+    "agentState": "Agent State",
+    "clear": "Clear",
+    "empty": "No data",
+    "model": "Model",
+    "duration": "Duration",
+    "promptTokens": "Prompt",
+    "completionTokens": "Completion",
+    "totalTokens": "Total",
+    "stateStep": "Step",
+    "stateTokens": "Tokens",
+    "stateTools": "Tools",
+    "stateDuration": "Duration",
+    "detailLevel": {
+      "compact": "Compact",
+      "detail": "Detail",
+      "verbose": "Verbose"
+    },
+    "eventTypes": {
+      "all": "All",
+      "token": "Token",
+      "tool_call": "Tool",
+      "thinking": "Thinking",
+      "human_input": "Human",
+      "error": "Error",
+      "complete": "Complete",
+      "skill": "Skill",
+      "plan": "Plan",
+      "tool_start": "Tool Start",
+      "tool_end": "Tool End",
+      "tools_start": "Batch Start",
+      "tools_end": "Batch End",
+      "phase_change": "Phase Change",
+      "compressing": "Compressing",
+      "compressed": "Compressed",
+      "skill_loading": "Skill Loading",
+      "skill_loaded": "Skill Ready",
+      "skill_start": "Skill Start",
+      "skill_end": "Skill End",
+      "subagent_start": "SubAgent Start",
+      "subagent_end": "SubAgent End",
+      "step_start": "Step Start",
+      "step_end": "Step End",
+      "llm_request": "LLM Request",
+      "llm_response": "LLM Response"
+    }
+  },
+  "a2ui": {
+    "defaultTitle": "A2UI Surface",
+    "initializing": "Initializing render engine...",
+    "streaming": "Rendering",
+    "completed": "Rendered",
+    "error": "Render error",
+    "waiting": "Waiting for interaction",
+    "expand": "Expand view",
+    "expandTitle": "Full view"
+  }
+}

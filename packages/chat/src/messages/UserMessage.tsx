@@ -19,6 +19,11 @@ export function UserMessage({ message }: MessageProps) {
         line-height: ${theme.font.lineHeight};
         white-space: pre-wrap;
         word-break: break-word;
+
+        ::selection {
+          background: ${theme.color.textInverse};
+          color: ${theme.color.primary};
+        }
       `}
     >
       {message.content}

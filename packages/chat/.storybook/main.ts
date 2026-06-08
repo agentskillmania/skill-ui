@@ -12,9 +12,14 @@ const config: StorybookConfig = {
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...config.resolve.alias,
-      // 确保主题包使用源码（方便 HMR）
       '@agentskillmania/skill-ui-theme': path.resolve(__dirname, '../../theme/src/index.ts'),
     };
+    config.server = config.server || {};
+    config.server.fs = config.server.fs || {};
+    config.server.fs.allow = [
+      ...(Array.isArray(config.server.fs.allow) ? config.server.fs.allow : []),
+      path.resolve(__dirname, '..'),
+    ];
     return config;
   },
 };

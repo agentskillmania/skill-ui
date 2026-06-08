@@ -60,7 +60,10 @@ export function QuickCommands({
               color: ${theme.color.textInverse};
             }
           `}
-          onClick={() => onCommand(cmd)}
+          onClick={() => {
+            if (disabled) return;
+            onCommand(cmd);
+          }}
         >
           {cmd.label}
         </Tag>

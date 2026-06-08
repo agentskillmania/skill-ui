@@ -31,6 +31,18 @@ describe('UserMessage', () => {
     );
     expect(screen.getByText('Hello')).toBeInTheDocument();
   });
+
+  it('renders empty content without crash', () => {
+    const emptyMsg: Message = { id: 'e1', role: 'user', content: '', status: 'completed' };
+    const { container } = render(
+      <ChatWrapper>
+        <UserMessage message={emptyMsg} />
+      </ChatWrapper>
+    );
+    // Wrapper div exists, content is empty string
+    expect(container.querySelector('div')).toBeInTheDocument();
+    expect(container.textContent).toBe('');
+  });
 });
 
 describe('AssistantMessage', () => {
@@ -55,6 +67,59 @@ describe('AssistantMessage', () => {
     );
     expect(screen.getByText('思考中...')).toBeInTheDocument();
   });
+
+  it('does not render blocks area when blocks is empty array', () => {
+    const msg: Message = { ...assistantMsg, blocks: [] };
+    render(
+      <ChatWrapper>
+        <AssistantMessage message={msg} />
+      </ChatWrapper>
+    );
+    // Content still renders, but BlocksRenderer not invoked
+    expect(screen.getByText('Hi there')).toBeInTheDocument();
+  });
+
+  it('does not render content when content is empty', () => {
+    const msg: Message = { id: 'ae1', role: 'assistant', content: '', status: 'completed' };
+    const { container } = render(
+      <ChatWrapper>
+        <AssistantMessage message={msg} />
+      </ChatWrapper>
+    );
+    // Wrapper exists, no text content
+    expect(container.querySelector('div')).toBeInTheDocument();
+    expect(container.textContent).toBe('');
+  });
+
+  it('passes streaming prop when status is streaming', () => {
+    const msg: Message = {
+      id: 'as1',
+      role: 'assistant',
+      content: '加载中...',
+      status: 'streaming',
+    };
+    render(
+      <ChatWrapper>
+        <AssistantMessage message={msg} />
+      </ChatWrapper>
+    );
+    // Content renders with streaming enabled
+    expect(screen.getByText('加载中...')).toBeInTheDocument();
+  });
+
+  it('renders blocks and content together', () => {
+    const msg: Message = {
+      ...assistantMsg,
+      blocks: [{ id: 'b1', type: 'thinking', status: 'completed', content: '思考中...' }],
+    };
+    render(
+      <ChatWrapper>
+        <AssistantMessage message={msg} />
+      </ChatWrapper>
+    );
+    expect(screen.getByText('思考中...')).toBeInTheDocument();
+    expect(screen.getByText('Hi there')).toBeInTheDocument();
+  });
 });
 
 describe('SystemMessage', () => {
@@ -65,6 +130,17 @@ describe('SystemMessage', () => {
       </ChatWrapper>
     );
     expect(screen.getByText('System notice')).toBeInTheDocument();
+  });
+
+  it('renders empty content without crash', () => {
+    const emptyMsg: Message = { id: 'se1', role: 'system', content: '', status: 'completed' };
+    const { container } = render(
+      <ChatWrapper>
+        <SystemMessage message={emptyMsg} />
+      </ChatWrapper>
+    );
+    expect(container.querySelector('div')).toBeInTheDocument();
+    expect(container.textContent).toBe('');
   });
 });
 

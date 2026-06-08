@@ -147,3 +147,102 @@ export const WrapperAssistant: Story = {
     );
   },
 };
+
+// ---- Message Actions Mockup ----
+
+const actionHandlers = {
+  onCopy: (m: Message) => console.log('copy', m.id),
+  onResend: (m: Message) => console.log('resend', m.id),
+  onRegenerate: (m: Message) => console.log('regenerate', m.id),
+  onRollback: (m: Message) => console.log('rollback', m.id),
+  onFork: (m: Message) => console.log('fork', m.id),
+};
+
+export const UserWithHoverActions: Story = {
+  render: () => (
+    <Wrapper>
+      <MessageWrapper message={userMsg} {...actionHandlers}>
+        <UserMessage message={userMsg} />
+      </MessageWrapper>
+    </Wrapper>
+  ),
+};
+
+export const AssistantWithHoverActions: Story = {
+  render: () => {
+    const msg: Message = {
+      id: '7',
+      role: 'assistant',
+      content: 'hover 这条消息，你会看到底部浮现的操作栏。默认隐藏，hover 时淡入。',
+      status: 'completed',
+    };
+    return (
+      <Wrapper>
+        <MessageWrapper message={msg} {...actionHandlers}>
+          <AssistantMessage message={msg} />
+        </MessageWrapper>
+      </Wrapper>
+    );
+  },
+};
+
+export const AssistantStreamingWithActions: Story = {
+  render: () => {
+    const msg: Message = {
+      id: '8',
+      role: 'assistant',
+      content: 'streaming 状态下操作栏里不会显示 regenerate/fork/rate，只有 copy/delete。',
+      status: 'streaming',
+    };
+    return (
+      <Wrapper>
+        <MessageWrapper message={msg} {...actionHandlers}>
+          <AssistantMessage message={msg} />
+        </MessageWrapper>
+      </Wrapper>
+    );
+  },
+};
+
+export const ConversationWithActions: Story = {
+  render: () => {
+    const messages: Message[] = [
+      {
+        id: 'c1',
+        role: 'user',
+        content: '帮我分析一下这段代码的性能瓶颈',
+        status: 'completed',
+      },
+      {
+        id: 'c2',
+        role: 'assistant',
+        content:
+          '从代码结构来看，主要有以下几个潜在的性能瓶颈：\n\n1. **循环嵌套** — 第 23 行的双重循环时间复杂度为 O(n²)，当数据量增大时会显著拖慢执行速度。\n\n2. **重复计算** — `calculateExpensiveValue` 在每次迭代都被调用，建议缓存结果或使用 memoization。\n\n3. **DOM 操作** — 直接在循环中修改 DOM 会触发多次重排，建议使用 DocumentFragment 批量更新。',
+        status: 'completed',
+      },
+      {
+        id: 'c3',
+        role: 'user',
+        content: '那怎么优化第一个问题？',
+        status: 'completed',
+      },
+      {
+        id: 'c4',
+        role: 'assistant',
+        content: '可以用哈希表将内层循环的查找降为 O(1)，整体降到 O(n)。需要我给出具体实现吗？',
+        status: 'completed',
+      },
+    ];
+    return (
+      <Wrapper>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {messages.map((m) => (
+            <MessageWrapper key={m.id} message={m} {...actionHandlers}>
+              {m.role === 'user' ? <UserMessage message={m} /> : <AssistantMessage message={m} />}
+            </MessageWrapper>
+          ))}
+        </div>
+      </Wrapper>
+    );
+  },
+};

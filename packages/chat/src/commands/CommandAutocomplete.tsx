@@ -7,7 +7,14 @@ import type { MenuProps } from 'antd';
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { ChatCommand } from '../types.js';
-import { extractSearchTerm, filterCommands, groupCommands } from './commandUtils.js';
+import {
+  extractSearchTerm,
+  filterCommands,
+  groupCommands,
+  DEFAULT_GROUP_KEY,
+} from './commandUtils.js';
+import { useTranslation } from 'react-i18next';
+import { NAMESPACE } from '../locales/index.js';
 
 export interface CommandAutocompleteProps {
   /** All available commands */
@@ -30,6 +37,7 @@ export function CommandAutocomplete({
   children,
 }: CommandAutocompleteProps) {
   const theme = useTheme();
+  const { t } = useTranslation(NAMESPACE);
   const [open, setOpen] = useState(false);
 
   // Auto-open dropdown when input starts with trigger
@@ -65,7 +73,7 @@ export function CommandAutocomplete({
         {
           key: 'empty',
           disabled: true,
-          label: '无匹配指令',
+          label: t('commands.noMatch'),
         },
       ];
     }
@@ -82,7 +90,7 @@ export function CommandAutocomplete({
       items.push({
         key: `group-${groupName}`,
         type: 'group' as const,
-        label: groupName,
+        label: groupName === DEFAULT_GROUP_KEY ? t('commands.defaultGroup') : groupName,
         children: cmds.map((cmd) => ({
           key: cmd.id,
           icon: cmd.icon,
@@ -98,7 +106,7 @@ export function CommandAutocomplete({
             >
               <span
                 css={css`
-                  font-weight: 500;
+                  font-weight: ${theme.font.weight.medium};
                   font-size: ${theme.font.size.sm};
                 `}
               >

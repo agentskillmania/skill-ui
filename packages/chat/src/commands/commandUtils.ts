@@ -3,8 +3,8 @@
  */
 import type { ChatCommand } from '../types.js';
 
-/** Default group name for commands without a group */
-const DEFAULT_GROUP = '常用';
+/** Default group key for commands without a group */
+export const DEFAULT_GROUP_KEY = 'default';
 
 /**
  * Extract search term from input text (remove trigger character prefix)
@@ -62,7 +62,7 @@ export function groupCommands(commands: ChatCommand[]): Map<string, ChatCommand[
   const groups = new Map<string, ChatCommand[]>();
 
   for (const cmd of commands) {
-    const groupName = cmd.group || DEFAULT_GROUP;
+    const groupName = cmd.group || DEFAULT_GROUP_KEY;
     const group = groups.get(groupName);
 
     if (group) {

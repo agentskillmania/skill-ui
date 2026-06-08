@@ -3,13 +3,12 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { lightTheme } from '@agentskillmania/skill-ui-theme';
 import type { Theme } from '@agentskillmania/skill-ui-theme';
 import { ChatWrapper } from './testUtils.js';
-import { BlocksRenderer } from '../../src/blocks/BlocksRenderer.js';
-import { BlockCard } from '../../src/blocks/BlockCard.js';
-import { ThinkingBlock } from '../../src/blocks/ThinkingBlock.js';
-import { ToolCallBlock } from '../../src/blocks/ToolCallBlock.js';
-import { PlanBlock } from '../../src/blocks/PlanBlock.js';
-import { ErrorBlock } from '../../src/blocks/ErrorBlock.js';
-import { HumanInputBlock } from '../../src/blocks/HumanInputBlock.js';
+import { BlocksRenderer } from '../../src/blocks-redesign/BlocksRenderer.js';
+import { ThinkingBlock } from '../../src/blocks-redesign/ThinkingBlock.js';
+import { ToolCallBlock } from '../../src/blocks-redesign/ToolCallBlock.js';
+import { PlanBlock } from '../../src/blocks-redesign/PlanBlock.js';
+import { ErrorBlock } from '../../src/blocks-redesign/ErrorBlock.js';
+import { HumanInputBlock } from '../../src/blocks-redesign/HumanInputBlock.js';
 import type { Block } from '../../src/types.js';
 
 const thinkingBlock: Block = {
@@ -58,70 +57,6 @@ const humanBlock: Block = {
   },
 };
 
-describe('BlockCard', () => {
-  it('renders title and children', () => {
-    render(
-      <ChatWrapper>
-        <BlockCard title="测试卡片">
-          <span>内容</span>
-        </BlockCard>
-      </ChatWrapper>
-    );
-    expect(screen.getByText('测试卡片')).toBeInTheDocument();
-    expect(screen.getByText('内容')).toBeInTheDocument();
-  });
-
-  it('renders tag', () => {
-    render(
-      <ChatWrapper>
-        <BlockCard title="卡片" tag="MCP" />
-      </ChatWrapper>
-    );
-    expect(screen.getByText('MCP')).toBeInTheDocument();
-  });
-
-  it('renders icon', () => {
-    render(
-      <ChatWrapper>
-        <BlockCard title="卡片" icon={<span>icon</span>} />
-      </ChatWrapper>
-    );
-    expect(screen.getByText('icon')).toBeInTheDocument();
-  });
-
-  it('does not render content area when children is undefined', () => {
-    const { container } = render(
-      <ChatWrapper>
-        <BlockCard title="无内容卡片" />
-      </ChatWrapper>
-    );
-    expect(screen.getByText('无内容卡片')).toBeInTheDocument();
-    // when no children, should not have content area padding div
-    // should only have one header div (title bar), should not have extra content div
-    const innerDivs = container.querySelectorAll('div > div');
-    // title bar exists, but should not have children container
-    expect(screen.getByText('无内容卡片')).toBeInTheDocument();
-  });
-
-  it('does not crash when children is null', () => {
-    render(
-      <ChatWrapper>
-        <BlockCard title="空卡片">{null}</BlockCard>
-      </ChatWrapper>
-    );
-    expect(screen.getByText('空卡片')).toBeInTheDocument();
-  });
-
-  it('renders normally when tag exists', () => {
-    render(
-      <ChatWrapper>
-        <BlockCard title="卡片" tag="TAG" />
-      </ChatWrapper>
-    );
-    expect(screen.getByText('TAG')).toBeInTheDocument();
-  });
-});
-
 describe('ThinkingBlock', () => {
   it('renders thinking content', () => {
     render(
@@ -132,14 +67,14 @@ describe('ThinkingBlock', () => {
     expect(screen.getByText('让我想想...')).toBeInTheDocument();
   });
 
-  it('shows in-progress tag in streaming status', () => {
+  it('shows thinking label in streaming status', () => {
     const streaming: Block = { ...thinkingBlock, status: 'streaming' };
     render(
       <ChatWrapper>
         <ThinkingBlock block={streaming} />
       </ChatWrapper>
     );
-    expect(screen.getByText('进行中')).toBeInTheDocument();
+    expect(screen.getByText('思考中')).toBeInTheDocument();
   });
 });
 
@@ -192,7 +127,7 @@ describe('ToolCallBlock', () => {
       </ChatWrapper>
     );
     expect(screen.getByText('run-script')).toBeInTheDocument();
-    expect(screen.getByText('SCRIPT')).toBeInTheDocument();
+    expect(screen.getByText('script')).toBeInTheDocument();
     expect(screen.getByText('echo hello')).toBeInTheDocument();
     expect(screen.getByText('hello')).toBeInTheDocument();
   });
@@ -211,7 +146,7 @@ describe('ToolCallBlock', () => {
       </ChatWrapper>
     );
     expect(screen.getByText('list-files')).toBeInTheDocument();
-    expect(screen.getByText('BUILTIN')).toBeInTheDocument();
+    expect(screen.getByText('builtin')).toBeInTheDocument();
     expect(screen.getByText('file1.ts')).toBeInTheDocument();
   });
 
@@ -229,7 +164,7 @@ describe('ToolCallBlock', () => {
       </ChatWrapper>
     );
     expect(screen.getByText('custom-tool')).toBeInTheDocument();
-    expect(screen.getByText('UNKNOWN_TYPE')).toBeInTheDocument();
+    expect(screen.getByText('unknown_type')).toBeInTheDocument();
   });
 
   it('renders result with error style in error status', () => {
@@ -282,6 +217,45 @@ describe('ToolCallBlock', () => {
       </ChatWrapper>
     );
     expect(screen.getByText('test-tool')).toBeInTheDocument();
+  });
+
+  it('clicking input row opens detail modal', () => {
+    render(
+      <ChatWrapper>
+        <ToolCallBlock block={toolBlock} />
+      </ChatWrapper>
+    );
+    // Modal should not be open initially
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    // Find and click the input row (contains the args text)
+    const argsRow =
+      screen.getByText('{"q":"test"}').closest('div[style]') ?? screen.getByText('{"q":"test"}');
+    fireEvent.click(screen.getByText('{"q":"test"}'));
+    // After click, detail modal should render (antd Modal uses role="dialog")
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('clicking output row opens detail modal', () => {
+    render(
+      <ChatWrapper>
+        <ToolCallBlock block={toolBlock} />
+      </ChatWrapper>
+    );
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByText('ok'));
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('detail modal shows tool name and tool type', () => {
+    render(
+      <ChatWrapper>
+        <ToolCallBlock block={toolBlock} />
+      </ChatWrapper>
+    );
+    fireEvent.click(screen.getByText('{"q":"test"}'));
+    const dialog = screen.getByRole('dialog');
+    expect(dialog.textContent).toContain('search');
+    expect(dialog.textContent).toContain('mcp');
   });
 });
 
@@ -336,7 +310,7 @@ describe('PlanBlock', () => {
     );
     expect(screen.getByText('成功的步骤')).toBeInTheDocument();
     expect(screen.getByText('失败的步骤')).toBeInTheDocument();
-    expect(screen.getByText('✗')).toBeInTheDocument();
+    // error step uses XCircle icon (SVG), no ✗ text
     expect(screen.getByText('1/2')).toBeInTheDocument();
   });
 
@@ -360,7 +334,7 @@ describe('PlanBlock', () => {
     );
     expect(screen.getByText('执行步骤')).toBeInTheDocument();
     expect(screen.getByText('跳过步骤')).toBeInTheDocument();
-    expect(screen.getByText('—')).toBeInTheDocument();
+    // skipped step uses Minus icon (SVG), no — text
   });
 
   it('renders pending status step (shows serial number)', () => {
@@ -382,10 +356,7 @@ describe('PlanBlock', () => {
         <PlanBlock block={pendingPlanBlock} />
       </ChatWrapper>
     );
-    // pending status uses index+1 as icon, step B is the 2nd (index=1), displays "2"
-    expect(screen.getByText('2')).toBeInTheDocument();
-    // step C is the 3rd (index=2), displays "3"
-    expect(screen.getByText('3')).toBeInTheDocument();
+    // pending steps use Circle icon (SVG), no numeric text
     expect(screen.getByText('1/3')).toBeInTheDocument();
   });
 });
@@ -410,6 +381,44 @@ describe('ErrorBlock', () => {
     );
     expect(screen.getByText('错误')).toBeInTheDocument();
   });
+
+  it('renders hint when metadata provides it', () => {
+    const hintBlock: Block = {
+      id: 'eh1',
+      type: 'error',
+      status: 'error',
+      content: '连接失败',
+      metadata: { errorCode: 'NET_ERR', hint: '请检查网络连接后重试' },
+    };
+    render(
+      <ChatWrapper>
+        <ErrorBlock block={hintBlock} />
+      </ChatWrapper>
+    );
+    expect(screen.getByText('连接失败')).toBeInTheDocument();
+    expect(screen.getByText('NET_ERR')).toBeInTheDocument();
+    expect(screen.getByText('请检查网络连接后重试')).toBeInTheDocument();
+  });
+
+  it('does not render hint section when no hint in metadata', () => {
+    const noHint: Block = {
+      id: 'enh1',
+      type: 'error',
+      status: 'error',
+      content: '崩溃',
+      metadata: { errorCode: 'FATAL' },
+    };
+    render(
+      <ChatWrapper>
+        <ErrorBlock block={noHint} />
+      </ChatWrapper>
+    );
+    expect(screen.getByText('崩溃')).toBeInTheDocument();
+    expect(screen.getByText('FATAL')).toBeInTheDocument();
+    // No hint section should exist — the container should have exactly 2 children (header + body)
+    const pre = screen.getByText('崩溃').closest('pre');
+    expect(pre?.nextElementSibling).toBeNull();
+  });
 });
 
 describe('HumanInputBlock', () => {
@@ -432,8 +441,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={humanBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
-    const buttons = screen.getAllByRole('button');
-    fireEvent.click(buttons[1]);
+    fireEvent.click(screen.getByText('确认'));
     expect(onConfirm).toHaveBeenCalledWith('req1', true);
   });
 
@@ -516,10 +524,7 @@ describe('HumanInputBlock', () => {
     // input type should have input box and submit button
     const input = screen.getByPlaceholderText('请输入...');
     expect(input).toBeInTheDocument();
-    // input type has only one button (submit), antd Button text may have spaces
-    const buttons = screen.getAllByRole('button');
-    expect(buttons.length).toBe(1);
-    fireEvent.click(buttons[0]);
+    fireEvent.click(screen.getByText('提交'));
     expect(onConfirm).toHaveBeenCalledWith('req1', '默认值');
   });
 
@@ -541,10 +546,9 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={selectBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
-    // single-select submit button should be initially disabled (no option selected)
-    // single-select has only one button (submit)
-    const buttons = screen.getAllByRole('button');
-    expect(buttons[0]).toBeDisabled();
+    // Submit button is disabled when no option selected
+    const submitBtn = screen.getByText('提交');
+    expect(submitBtn).toBeDisabled();
   });
 
   it('multi-select type with default value clicking submit button triggers callback', () => {
@@ -566,10 +570,10 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={multiBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
-    // has defaultValue='a', so selectedValues is initially ['a'], submit button should be enabled
-    const buttons = screen.getAllByRole('button');
-    expect(buttons[0]).not.toBeDisabled();
-    fireEvent.click(buttons[0]);
+    // has defaultValue='a', so selectedValues is initially ['a'], submit button enabled
+    const submitBtn = screen.getByText('提交');
+    expect(submitBtn).not.toBeDisabled();
+    fireEvent.click(submitBtn);
     expect(onConfirm).toHaveBeenCalledWith('req1', ['a']);
   });
 
@@ -580,9 +584,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={humanBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
-    const buttons = screen.getAllByRole('button');
-    // first button is cancel button
-    fireEvent.click(buttons[0]);
+    fireEvent.click(screen.getByText('取消'));
     expect(onConfirm).toHaveBeenCalledWith('req1', false);
   });
 
@@ -590,15 +592,15 @@ describe('HumanInputBlock', () => {
     const onConfirm = vi.fn();
     const noReqId: Block = {
       ...humanBlock,
-      metadata: { inputType: 'confirmation', title: '确认' },
+      metadata: { inputType: 'confirmation', title: '请确认操作' },
     };
     render(
       <ChatWrapper context={{ onConfirmHumanRequest: onConfirm }}>
         <HumanInputBlock block={noReqId} onConfirm={onConfirm} />
       </ChatWrapper>
     );
-    const buttons = screen.getAllByRole('button');
-    fireEvent.click(buttons[1]);
+    // title is "请确认操作", button is "确认" — no ambiguity
+    fireEvent.click(screen.getByText('确认'));
     // requestId should fallback to block.id
     expect(onConfirm).toHaveBeenCalledWith('b5', true);
   });
@@ -636,8 +638,7 @@ describe('HumanInputBlock', () => {
     // modify input value
     fireEvent.change(input, { target: { value: 'hello' } });
     // click submit button
-    const buttons = screen.getAllByRole('button');
-    fireEvent.click(buttons[0]);
+    fireEvent.click(screen.getByText('提交'));
     expect(onConfirm).toHaveBeenCalledWith('req1', 'hello');
   });
 
@@ -660,12 +661,11 @@ describe('HumanInputBlock', () => {
       </ChatWrapper>
     );
     // select an option
-    const radioA = screen.getByText('选项A');
-    fireEvent.click(radioA);
+    fireEvent.click(screen.getByText('选项A'));
     // now submit button should be enabled
-    const buttons = screen.getAllByRole('button');
-    expect(buttons[0]).not.toBeDisabled();
-    fireEvent.click(buttons[0]);
+    const submitBtn = screen.getByText('提交');
+    expect(submitBtn).not.toBeDisabled();
+    fireEvent.click(submitBtn);
     expect(onConfirm).toHaveBeenCalledWith('req1', 'a');
   });
 
@@ -688,12 +688,11 @@ describe('HumanInputBlock', () => {
       </ChatWrapper>
     );
     // select an option
-    const checkboxA = screen.getByText('选项A');
-    fireEvent.click(checkboxA);
+    fireEvent.click(screen.getByText('选项A'));
     // now submit button should be enabled
-    const buttons = screen.getAllByRole('button');
-    expect(buttons[0]).not.toBeDisabled();
-    fireEvent.click(buttons[0]);
+    const submitBtn = screen.getByText('提交');
+    expect(submitBtn).not.toBeDisabled();
+    fireEvent.click(submitBtn);
     expect(onConfirm).toHaveBeenCalledWith('req1', ['a']);
   });
 
@@ -708,6 +707,49 @@ describe('HumanInputBlock', () => {
       </ChatWrapper>
     );
     expect(screen.getByText('等待中')).toBeInTheDocument();
+  });
+
+  it('completed with object response shows String() fallback', () => {
+    const completedWithObj: Block = {
+      ...humanBlock,
+      status: 'completed',
+      metadata: { ...humanBlock.metadata, response: { text: 'hello' } },
+    };
+    render(
+      <ChatWrapper>
+        <HumanInputBlock block={completedWithObj} />
+      </ChatWrapper>
+    );
+    // formatResponse falls through to String(response) for objects
+    expect(screen.getByText('[object Object]')).toBeInTheDocument();
+  });
+
+  it('completed with number response shows stringified number', () => {
+    const completedWithNum: Block = {
+      ...humanBlock,
+      status: 'completed',
+      metadata: { ...humanBlock.metadata, response: 42 },
+    };
+    render(
+      <ChatWrapper>
+        <HumanInputBlock block={completedWithNum} />
+      </ChatWrapper>
+    );
+    expect(screen.getByText('42')).toBeInTheDocument();
+  });
+
+  it('completed with array response shows joined values', () => {
+    const completedWithArr: Block = {
+      ...humanBlock,
+      status: 'completed',
+      metadata: { ...humanBlock.metadata, response: ['a', 'b'] },
+    };
+    render(
+      <ChatWrapper>
+        <HumanInputBlock block={completedWithArr} />
+      </ChatWrapper>
+    );
+    expect(screen.getByText('a, b')).toBeInTheDocument();
   });
 });
 

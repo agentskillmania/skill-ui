@@ -34,12 +34,51 @@ describe('MarkdownRenderer', () => {
     expect(container.querySelector('div')).toBeInTheDocument();
   });
 
-  it('empty content does not crash', () => {
-    render(
+  it('empty content renders wrapper with no visible text', () => {
+    const { container } = render(
       <ChatWrapper>
         <MarkdownRenderer>{''}</MarkdownRenderer>
       </ChatWrapper>
     );
-    // just verify it renders without crashing
+    // The outer div wrapper should exist
+    const wrapper = container.firstElementChild as HTMLElement;
+    expect(wrapper).toBeTruthy();
+    // XMarkdown may render an empty div or whitespace, but no meaningful text
+    expect(wrapper.textContent?.trim()).toBe('');
+  });
+
+  it('renders inline code as <code> element', () => {
+    const { container } = render(
+      <ChatWrapper>
+        <MarkdownRenderer>{'Use `console.log` to debug'}</MarkdownRenderer>
+      </ChatWrapper>
+    );
+    const codeEl = container.querySelector('code');
+    expect(codeEl).toBeInTheDocument();
+    expect(codeEl?.textContent).toBe('console.log');
+  });
+
+  it('renders fenced code block', () => {
+    const { container } = render(
+      <ChatWrapper>
+        <MarkdownRenderer>{'```ts\nconst x = 1;\n```'}</MarkdownRenderer>
+      </ChatWrapper>
+    );
+    // Fenced code block renders inside <pre><code> with language class
+    const pre = container.querySelector('pre');
+    expect(pre).toBeInTheDocument();
+    expect(pre?.textContent).toContain('const x = 1;');
+  });
+
+  it('renders code block without language as plain code', () => {
+    const { container } = render(
+      <ChatWrapper>
+        <MarkdownRenderer>{'```\nsome output\n```'}</MarkdownRenderer>
+      </ChatWrapper>
+    );
+    const pre = container.querySelector('pre');
+    expect(pre).toBeInTheDocument();
+    // Content must be visible — never silently disappears
+    expect(pre?.textContent).toContain('some output');
   });
 });

@@ -4,7 +4,7 @@
  * Based on @ant-design/x-markdown (marked.js), consistent with skill-studio.
  * Supports streaming rendering, code highlighting, GFM syntax.
  */
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import React from 'react';
 import _XMarkdown from '@ant-design/x-markdown';
 import type { ComponentProps, XMarkdownProps } from '@ant-design/x-markdown';
@@ -13,6 +13,11 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 
 // React 19 type compatibility: XMarkdown declared as FC but TS cannot recognize it as JSX component
 const XMarkdown = _XMarkdown as unknown as React.ComponentType<XMarkdownProps>;
+
+const blink = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+`;
 
 export interface MarkdownRendererProps {
   children: string;
@@ -28,9 +33,29 @@ function CodeComponent({ className, children, block }: ComponentProps) {
 
   const lang = className?.match(/language-(\w+)/)?.[1] ?? '';
 
-  if (typeof children !== 'string') return null;
+  if (typeof children !== 'string') {
+    return <code className={className}>{children}</code>;
+  }
 
   return <CodeHighlighter lang={lang}>{children}</CodeHighlighter>;
+}
+
+/** Streaming cursor rendered inside x-markdown tail */
+function StreamingCursor() {
+  const theme = useTheme();
+  return (
+    <span
+      css={css`
+        display: inline-block;
+        width: 2px;
+        height: 1.2em;
+        background: ${theme.color.primary};
+        vertical-align: text-bottom;
+        margin-left: 2px;
+        animation: ${blink} 1s step-end infinite;
+      `}
+    />
+  );
 }
 
 export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps) {
@@ -39,7 +64,7 @@ export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps)
   return (
     <div
       css={css`
-        line-height: 1.6;
+        line-height: ${theme.font.lineHeightRelaxed};
 
         /* Headings */
         h1,
@@ -50,8 +75,8 @@ export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps)
         h6 {
           margin-top: ${theme.spacing[3]};
           margin-bottom: ${theme.spacing[1]};
-          font-weight: 600;
-          line-height: 1.4;
+          font-weight: ${theme.font.weight.semibold};
+          line-height: ${theme.font.lineHeightHeading};
         }
         h1 {
           font-size: ${theme.font.size.xl};
@@ -135,7 +160,7 @@ export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps)
         }
         th {
           background: ${theme.color.fillSubtle};
-          font-weight: 600;
+          font-weight: ${theme.font.weight.semibold};
         }
 
         /* Inline code */
@@ -157,7 +182,7 @@ export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps)
                 hasNextChunk: true,
                 enableAnimation: true,
                 animationConfig: { fadeDuration: 100, easing: 'ease-out' },
-                tail: { content: '▊' },
+                tail: { content: '|', component: StreamingCursor },
               }
             : undefined
         }

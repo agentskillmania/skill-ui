@@ -8,12 +8,20 @@ import { ChatContext } from '../context.js';
 import { MessageList } from '../MessageList/index.js';
 import { ChatInput } from '../ChatInput/index.js';
 import { QuickCommands } from '../commands/QuickCommands.js';
+import { useTranslation } from 'react-i18next';
+import { NAMESPACE } from '../locales/index.js';
 
 export function Chat({
   messages,
   onSendMessage,
   onStop,
   onConfirmHumanRequest,
+  onBlockAction,
+  onCopyMessage,
+  onResendMessage,
+  onRegenerateMessage,
+  onRollbackMessage,
+  onForkMessage,
   inputValue,
   onInputChange,
   status = 'idle',
@@ -23,7 +31,7 @@ export function Chat({
   inputSuffix,
   messageDecorator,
   maxWidth = '800px',
-  placeholder = '输入消息...',
+  placeholder,
   className,
   style,
   commands,
@@ -32,11 +40,19 @@ export function Chat({
   commandTrigger = '/',
 }: ChatProps) {
   const theme = useTheme();
+  const { t } = useTranslation(NAMESPACE);
+  const resolvedPlaceholder = placeholder ?? t('chat.placeholder');
 
   const contextValue = {
     renderers,
     onConfirmHumanRequest,
+    onBlockAction,
     messageDecorator,
+    onCopyMessage,
+    onResendMessage,
+    onRegenerateMessage,
+    onRollbackMessage,
+    onForkMessage,
   };
 
   return (
@@ -102,7 +118,7 @@ export function Chat({
               onCancel={onStop}
               loading={status === 'streaming'}
               disabled={disabled}
-              placeholder={placeholder}
+              placeholder={resolvedPlaceholder}
               prefix={inputPrefix}
               suffix={inputSuffix}
               commands={commands}

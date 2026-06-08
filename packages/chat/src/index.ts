@@ -11,14 +11,14 @@ export { MessageWrapper } from './messages/MessageWrapper.js';
 export { UserMessage } from './messages/UserMessage.js';
 export { AssistantMessage } from './messages/AssistantMessage.js';
 export { SystemMessage } from './messages/SystemMessage.js';
-export { BlocksRenderer } from './blocks/BlocksRenderer.js';
-export { BlockCard } from './blocks/BlockCard.js';
-export { ThinkingBlock } from './blocks/ThinkingBlock.js';
-export { ToolCallBlock } from './blocks/ToolCallBlock.js';
-export { PlanBlock } from './blocks/PlanBlock.js';
-export { ErrorBlock } from './blocks/ErrorBlock.js';
-export { HumanInputBlock } from './blocks/HumanInputBlock.js';
-export { SkillBlock } from './blocks/SkillBlock.js';
+export { BlocksRenderer } from './blocks-redesign/BlocksRenderer.js';
+export { ThinkingBlock } from './blocks-redesign/ThinkingBlock.js';
+export { ToolCallBlock } from './blocks-redesign/ToolCallBlock.js';
+export { PlanBlock } from './blocks-redesign/PlanBlock.js';
+export { ErrorBlock } from './blocks-redesign/ErrorBlock.js';
+export { HumanInputBlock } from './blocks-redesign/HumanInputBlock.js';
+export { SkillBlock } from './blocks-redesign/SkillBlock.js';
+export { A2UIBlock } from './blocks-redesign/A2UIBlock.js';
 export { MarkdownRenderer } from './content/MarkdownRenderer.js';
 export { QuickCommands } from './commands/QuickCommands.js';
 export { CommandAutocomplete } from './commands/CommandAutocomplete.js';
@@ -42,6 +42,8 @@ export type {
   HumanInputMetadata,
   ErrorMetadata,
   SkillBlockMetadata,
+  A2UIBlockMetadata,
+  BlockAction,
 } from './types.js';
 
 // Component Props types
@@ -49,11 +51,13 @@ export type { MessageListProps } from './MessageList/index.js';
 export type { ChatInputProps } from './ChatInput/index.js';
 export type { MessageItemProps } from './messages/MessageItem.js';
 export type { MessageWrapperProps } from './messages/MessageWrapper.js';
-export type { BlockCardProps } from './blocks/BlockCard.js';
-export type { BlocksRendererProps } from './blocks/BlocksRenderer.js';
+export type { BlocksRendererProps } from './blocks-redesign/BlocksRenderer.js';
 export type { MarkdownRendererProps } from './content/MarkdownRenderer.js';
 export type { QuickCommandsProps } from './commands/QuickCommands.js';
 export type { CommandAutocompleteProps } from './commands/CommandAutocomplete.js';
+
+// Locales
+export { NAMESPACE, resources } from './locales/index.js';
 
 // Utility functions
 export { extractSearchTerm, filterCommands, groupCommands } from './commands/commandUtils.js';

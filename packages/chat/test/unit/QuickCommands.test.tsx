@@ -2,7 +2,7 @@
  * QuickCommands component unit tests
  */
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QuickCommands } from '../../src/commands/QuickCommands.js';
 import type { ChatCommand } from '../../src/types.js';
@@ -57,9 +57,20 @@ describe('QuickCommands', () => {
     expect(screen.queryByText('新建')).not.toBeInTheDocument();
   });
 
-  it('disabled status does not trigger callback', () => {
+  it('disabled renders tags that are visually muted', () => {
+    const { container } = renderQuickCommands({ disabled: true });
+    const wrapper = container.firstElementChild as HTMLElement;
+    // Emotion CSS-in-JS applies pointer-events: none and opacity: 0.5 via generated class
+    expect(wrapper).toBeTruthy();
+    // Tags should still be rendered (just visually muted)
+    expect(screen.getByText('搜索')).toBeInTheDocument();
+  });
+
+  it('disabled prevents onCommand even when click fires via keyboard or fireEvent', () => {
     const { onCommand } = renderQuickCommands({ disabled: true });
-    // pointer-events: none prevents clicking, just verify callback is not called
+    // fireEvent bypasses CSS pointer-events: none, simulating keyboard Enter on a focused tag.
+    // The onClick handler must guard against disabled state in JS, not just CSS.
+    fireEvent.click(screen.getByText('搜索'));
     expect(onCommand).not.toHaveBeenCalled();
   });
 });
