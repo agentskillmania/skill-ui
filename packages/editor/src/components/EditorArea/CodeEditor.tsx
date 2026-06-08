@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 /**
  * Code editor (based on Monaco)
  *

@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 /**
  * CopilotPanel — AI copilot chat panel
  *
@@ -7,6 +8,7 @@ import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { MessageList, ChatInput } from '@agentskillmania/skill-ui-chat';
 import { useTranslation } from 'react-i18next';
+import { NAMESPACE } from '../../locales/index.js';
 import type { CopilotPanelProps } from '../../types.js';
 
 export function CopilotPanel({
@@ -17,7 +19,7 @@ export function CopilotPanel({
   onStop,
 }: CopilotPanelProps) {
   const theme = useTheme();
-  const { t } = useTranslation('skill-ui-editor');
+  const { t } = useTranslation(NAMESPACE);
 
   return (
     <div

@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 /**
  * Status bar component — includes mode switch
  */
@@ -5,6 +6,7 @@ import { css } from '@emotion/react';
 import { Code, Eye } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
+import { NAMESPACE } from '../../locales/index.js';
 import type { StatusBarProps } from '../../types.js';
 
 export function StatusBar({
@@ -15,7 +17,7 @@ export function StatusBar({
   onEditModeChange,
 }: StatusBarProps) {
   const theme = useTheme();
-  const { t } = useTranslation('skill-ui-editor');
+  const { t } = useTranslation(NAMESPACE);
 
   return (
     <div

@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 /**
  * Sidebar — right-side panel container
  *

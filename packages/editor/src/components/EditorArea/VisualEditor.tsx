@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 /**
  * Visual editor (based on @milkdown/crepe)
  *
@@ -11,6 +12,7 @@ import { useEffect, useRef } from 'react';
 import { Crepe } from '@milkdown/crepe';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
+import { NAMESPACE } from '../../locales/index.js';
 import type { EditorAreaProps } from '../../types.js';
 
 /** ListenerManager type for listenerCtx (simplified) */
@@ -30,7 +32,7 @@ export function VisualEditor({
   onCursorChange: _onCursorChange,
 }: EditorAreaProps) {
   const theme = useTheme();
-  const { t } = useTranslation('skill-ui-editor');
+  const { t } = useTranslation(NAMESPACE);
   const rootRef = useRef<HTMLDivElement>(null);
   const crepeRef = useRef<Crepe | null>(null);
   const isInternalChange = useRef(false);

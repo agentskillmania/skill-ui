@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 /**
  * ProjectEditor top-level container component
  *
@@ -8,6 +9,7 @@ import { css } from '@emotion/react';
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
+import { NAMESPACE } from '../../locales/index.js';
 import type { ProjectEditorProps, FileTab, CursorPosition } from '../../types.js';
 import { EditorContext } from '../../context/EditorContext.js';
 import { getFileLabel } from '../../utils/file-utils.js';
@@ -37,7 +39,7 @@ export function ProjectEditor({
   onRunTest,
 }: ProjectEditorProps) {
   const theme = useTheme();
-  const { t } = useTranslation('skill-ui-editor');
+  const { t } = useTranslation(NAMESPACE);
   const [isDirty, setIsDirty] = useState(false);
   const [cursorPosition, setCursorPosition] = useState<CursorPosition | null>(null);
   const [openTabs, setOpenTabs] = useState<FileTab[]>([]);

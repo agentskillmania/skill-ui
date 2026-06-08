@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 /**
  * ReviewPanel — continuous log stream of review items
  *
@@ -8,6 +9,7 @@ import { useState, useRef, useEffect } from 'react';
 import { AlertTriangle, Info, XCircle, ClipboardCheck } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
+import { NAMESPACE } from '../../locales/index.js';
 import type { ReviewPanelProps, ReviewItem, ReviewSeverity } from '../../types.js';
 
 const SEVERITY_CONFIG: Record<ReviewSeverity, { icon: typeof Info; color: string }> = {
@@ -102,7 +104,7 @@ function ReviewItemRow({ item }: { item: ReviewItem }) {
 
 export function ReviewPanel({ items }: ReviewPanelProps) {
   const theme = useTheme();
-  const { t } = useTranslation('skill-ui-editor');
+  const { t } = useTranslation(NAMESPACE);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

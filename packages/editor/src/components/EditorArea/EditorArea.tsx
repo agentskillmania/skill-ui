@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 /**
  * Editor area component — switches between code/visual editor based on mode
  */

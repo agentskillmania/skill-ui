@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 /**
  * TestCase panel — test case management
  */
@@ -6,6 +7,7 @@ import { useState } from 'react';
 import { TestTube2, Play, Circle, Loader, CheckCircle2, XCircle } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
+import { NAMESPACE } from '../../locales/index.js';
 import type { TestCasePanelProps, TestCaseStatus } from '../../types.js';
 import type { TestCase as TestCaseType } from '../../types.js';
 
@@ -152,7 +154,7 @@ function TestCaseRow({ tc, onRunCase }: { tc: TestCaseType; onRunCase?: (id: str
 
 export function TestCase({ cases, onRunAll, onRunCase }: TestCasePanelProps) {
   const theme = useTheme();
-  const { t } = useTranslation('skill-ui-editor');
+  const { t } = useTranslation(NAMESPACE);
 
   return (
     <div

@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 /**
  * File tab component
  *
@@ -8,6 +9,7 @@ import { css } from '@emotion/react';
 import { X, FileCode, Book, File } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
+import { NAMESPACE } from '../../locales/index.js';
 import type { FileTabsProps, FileTab } from '../../types.js';
 
 /** Get icon by file name */
@@ -59,7 +61,7 @@ function TabItem({
   onClose: (path: string) => void;
 }) {
   const theme = useTheme();
-  const { t } = useTranslation('skill-ui-editor');
+  const { t } = useTranslation(NAMESPACE);
 
   return (
     <div

@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 /**
  * ActivityBar — right-side vertical icon bar
  *
@@ -7,6 +8,7 @@ import { css } from '@emotion/react';
 import { FolderOpen, Bot, ClipboardCheck, TestTube2 } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
+import { NAMESPACE } from '../../locales/index.js';
 import type { ActivityBarProps, SidebarPanel } from '../../types.js';
 
 type PanelIconConfig = { panel: SidebarPanel; icon: typeof FolderOpen; labelKey: string };
@@ -21,7 +23,7 @@ const PANEL_ICONS: PanelIconConfig[] = [
 
 export function ActivityBar({ activePanel, onPanelChange }: ActivityBarProps) {
   const theme = useTheme();
-  const { t } = useTranslation('skill-ui-editor');
+  const { t } = useTranslation(NAMESPACE);
 
   return (
     <div
