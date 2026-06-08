@@ -1,10 +1,19 @@
 import { defineConfig } from 'vitest/config';
 import dotenv from 'dotenv';
+import path from 'path';
 
-// 从根目录 .env 文件加载环境变量
+// Load env from root .env
 dotenv.config({ path: '.env' });
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@agentskillmania/agenui': path.resolve(
+        __dirname,
+        'packages/chat/test/__mocks__/agenui.tsx',
+      ),
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',

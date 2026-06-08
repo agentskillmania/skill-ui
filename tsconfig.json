@@ -3,7 +3,11 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -11,11 +15,24 @@
     "jsx": "react-jsx"
   },
   "references": [
-    { "path": "./packages/theme" },
-    { "path": "./packages/chat" },
-    { "path": "./packages/editor" },
-    { "path": "./packages/frame" },
-    { "path": "./packages/settings" }
+    {
+      "path": "./packages/theme"
+    },
+    {
+      "path": "./packages/chat"
+    },
+    {
+      "path": "./packages/cockpit"
+    },
+    {
+      "path": "./packages/editor"
+    },
+    {
+      "path": "./packages/frame"
+    },
+    {
+      "path": "./packages/settings"
+    }
   ],
   "files": []
 }
