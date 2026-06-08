@@ -1,32 +1,32 @@
 /**
  * Sidebar — right-side panel container
  *
- * ActivityBar (icon bar) + panel content area, switch between files/assistant/review/test.
+ * ActivityBar (icon bar) + panel content area, switch between files/copilot/review/test.
  */
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { SidebarProps } from '../../types.js';
 import { ActivityBar } from '../ActivityBar/index.js';
 import { FileTree } from '../FileTree/index.js';
-import { AssistantPanel } from '../AssistantPanel/index.js';
+import { CopilotPanel } from '../CopilotPanel/index.js';
 import { ReviewPanel } from '../ReviewPanel/index.js';
-import { TestCase } from '../RightPanel/TestCase/TestCase.js';
+import { TestCase } from '../TestCase/index.js';
 
 export function Sidebar({
   activePanel,
   files,
   activeFilePath,
-  assistantMessages,
-  assistantStatus,
-  assistantCommands,
-  reviewResult,
+  copilotMessages,
+  copilotStatus,
+  copilotCommands,
+  reviewItems,
   testCases,
-  testResults,
   onPanelChange,
   onFileSelect,
-  onAssistantSend,
-  onAssistantStop,
-  onRunTests,
+  onCopilotSend,
+  onCopilotStop,
+  onRunAllTests,
+  onRunTest,
 }: SidebarProps) {
   const theme = useTheme();
 
@@ -53,18 +53,18 @@ export function Sidebar({
           {activePanel === 'files' && (
             <FileTree files={files} activeFilePath={activeFilePath} onSelect={onFileSelect} />
           )}
-          {activePanel === 'assistant' && (
-            <AssistantPanel
-              messages={assistantMessages}
-              status={assistantStatus}
-              commands={assistantCommands}
-              onSend={onAssistantSend}
-              onStop={onAssistantStop}
+          {activePanel === 'copilot' && (
+            <CopilotPanel
+              messages={copilotMessages}
+              status={copilotStatus}
+              commands={copilotCommands}
+              onSend={onCopilotSend}
+              onStop={onCopilotStop}
             />
           )}
-          {activePanel === 'review' && <ReviewPanel result={reviewResult} />}
+          {activePanel === 'review' && <ReviewPanel items={reviewItems} />}
           {activePanel === 'test' && (
-            <TestCase testCases={testCases} testResults={testResults} onRunTests={onRunTests} />
+            <TestCase cases={testCases} onRunAll={onRunAllTests} onRunCase={onRunTest} />
           )}
         </div>
       )}

@@ -1,5 +1,5 @@
 /**
- * AssistantPanel — AI assistant panel
+ * CopilotPanel — AI copilot chat panel
  *
  * Embeds skill-ui-chat's MessageList + ChatInput, with quick commands.
  */
@@ -7,15 +7,15 @@ import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { MessageList, ChatInput } from '@agentskillmania/skill-ui-chat';
 import { useTranslation } from 'react-i18next';
-import type { AssistantPanelProps } from '../../types.js';
+import type { CopilotPanelProps } from '../../types.js';
 
-export function AssistantPanel({
+export function CopilotPanel({
   messages = [],
   status = 'idle',
   commands,
   onSend,
   onStop,
-}: AssistantPanelProps) {
+}: CopilotPanelProps) {
   const theme = useTheme();
   const { t } = useTranslation('skill-ui-editor');
 
@@ -48,7 +48,7 @@ export function AssistantPanel({
               padding: ${theme.spacing[3]};
             `}
           >
-            <span>{t('assistant.emptyHint')}</span>
+            <span>{t('copilot.emptyHint')}</span>
             {commands && commands.length > 0 && (
               <div
                 css={css`
@@ -102,7 +102,7 @@ export function AssistantPanel({
           loading={status === 'streaming'}
           onSubmit={(msg) => onSend?.(msg)}
           onCancel={onStop}
-          placeholder={t('assistant.placeholder')}
+          placeholder={t('copilot.placeholder')}
         />
       </div>
     </div>

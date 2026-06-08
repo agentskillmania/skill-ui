@@ -1,5 +1,5 @@
 /**
- * SkillEditor top-level container component
+ * ProjectEditor top-level container component
  *
  * Two-column layout: editor area (FileTabs + EditorArea + StatusBar) | Sidebar
  */
@@ -8,7 +8,7 @@ import { css } from '@emotion/react';
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
-import type { SkillEditorProps, FileTab, CursorPosition } from '../../types.js';
+import type { ProjectEditorProps, FileTab, CursorPosition } from '../../types.js';
 import { EditorContext } from '../../context/EditorContext.js';
 import { getFileLabel } from '../../utils/file-utils.js';
 import { FileTabs } from '../FileTabs/index.js';
@@ -16,7 +16,7 @@ import { EditorArea } from '../EditorArea/index.js';
 import { StatusBar } from '../StatusBar/index.js';
 import { Sidebar } from '../Sidebar/index.js';
 
-export function SkillEditor({
+export function ProjectEditor({
   files,
   activeFilePath,
   editMode,
@@ -26,25 +26,23 @@ export function SkillEditor({
   onActiveFileChange,
   onEditModeChange,
   onPanelChange,
-  assistantMessages,
-  assistantStatus,
-  assistantCommands,
-  onAssistantSend,
-  onAssistantStop,
-  reviewResult,
+  copilotMessages,
+  copilotStatus,
+  copilotCommands,
+  onCopilotSend,
+  onCopilotStop,
+  reviewItems,
   testCases,
-  testResults,
-  onRunTests,
-}: SkillEditorProps) {
+  onRunAllTests,
+  onRunTest,
+}: ProjectEditorProps) {
   const theme = useTheme();
   const { t } = useTranslation('skill-ui-editor');
   const [isDirty, setIsDirty] = useState(false);
   const [cursorPosition, setCursorPosition] = useState<CursorPosition | null>(null);
   const [openTabs, setOpenTabs] = useState<FileTab[]>([]);
-  // Track whether each file has been modified
   const dirtyFiles = useRef<Set<string>>(new Set());
 
-  // When activeFilePath changes, ensure tab exists (actually write to state)
   useEffect(() => {
     if (!activeFilePath) return;
     setOpenTabs((prev) => {
@@ -61,7 +59,6 @@ export function SkillEditor({
     });
   }, [activeFilePath]);
 
-  // Synchronize isDirty state when switching files
   useEffect(() => {
     setIsDirty(activeFilePath ? dirtyFiles.current.has(activeFilePath) : false);
   }, [activeFilePath]);
@@ -76,7 +73,6 @@ export function SkillEditor({
       if (!activeFilePath) return;
       setIsDirty(true);
       dirtyFiles.current.add(activeFilePath);
-      // Update tab modified status
       setOpenTabs((prev) =>
         prev.map((t) => (t.path === activeFilePath ? { ...t, modified: true } : t))
       );
@@ -90,7 +86,6 @@ export function SkillEditor({
       if (!activeFilePath) return;
       setIsDirty(false);
       dirtyFiles.current.delete(activeFilePath);
-      // Update tab modified status
       setOpenTabs((prev) =>
         prev.map((t) => (t.path === activeFilePath ? { ...t, modified: false } : t))
       );
@@ -105,7 +100,6 @@ export function SkillEditor({
         setOpenTabs((prev) => {
           const remaining = prev.filter((t) => t.path !== path);
           dirtyFiles.current.delete(path);
-          // Currently active file was closed
           if (activeFilePath === path) {
             if (remaining.length > 0) {
               onActiveFileChange(remaining[remaining.length - 1].path);
@@ -218,17 +212,17 @@ export function SkillEditor({
           activePanel={activePanel}
           files={files}
           activeFilePath={activeFilePath}
-          assistantMessages={assistantMessages}
-          assistantStatus={assistantStatus}
-          assistantCommands={assistantCommands}
-          reviewResult={reviewResult}
+          copilotMessages={copilotMessages}
+          copilotStatus={copilotStatus}
+          copilotCommands={copilotCommands}
+          reviewItems={reviewItems}
           testCases={testCases}
-          testResults={testResults}
           onPanelChange={onPanelChange}
           onFileSelect={onActiveFileChange}
-          onAssistantSend={onAssistantSend}
-          onAssistantStop={onAssistantStop}
-          onRunTests={onRunTests}
+          onCopilotSend={onCopilotSend}
+          onCopilotStop={onCopilotStop}
+          onRunAllTests={onRunAllTests}
+          onRunTest={onRunTest}
         />
       </div>
     </EditorContext.Provider>
@@ -237,9 +231,9 @@ export function SkillEditor({
 
 /** Recursively find file */
 function findFile(
-  files: import('../../types.js').SkillFile[],
+  files: import('../../types.js').ProjectFile[],
   path: string
-): import('../../types.js').SkillFile | null {
+): import('../../types.js').ProjectFile | null {
   for (const f of files) {
     if (f.path === path) return f;
     if (f.children) {

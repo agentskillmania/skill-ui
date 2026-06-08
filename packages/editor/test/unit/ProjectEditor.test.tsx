@@ -2,8 +2,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
-import { SkillEditor } from '../../src/components/SkillEditor/SkillEditor.js';
-import type { SkillFile, SidebarPanel } from '../../src/types.js';
+import { ProjectEditor } from '../../src/components/ProjectEditor/ProjectEditor.js';
+import type { ProjectFile, SidebarPanel } from '../../src/types.js';
 
 // Mock Monaco Editor
 vi.mock('@monaco-editor/react', () => ({
@@ -18,7 +18,7 @@ vi.mock('@monaco-editor/react', () => ({
   ),
 }));
 
-const sampleFiles: SkillFile[] = [
+const sampleFiles: ProjectFile[] = [
   { path: 'SKILL.md', content: '# 网页搜索技能\n\n## 描述\n搜索互联网获取信息。' },
   {
     path: 'src',
@@ -55,40 +55,39 @@ function getTabCloseButtons() {
   return screen.getAllByRole('button', { name: /关闭/ });
 }
 
-describe('SkillEditor', () => {
+describe('ProjectEditor', () => {
   it('renders editor area and sidebar', () => {
-    renderWithProviders(<SkillEditor {...defaultProps} />);
+    renderWithProviders(<ProjectEditor {...defaultProps} />);
     expect(screen.getByText('预览')).toBeTruthy();
     expect(screen.getByTitle('文件')).toBeTruthy();
   });
 
   it('displays current file path', () => {
-    renderWithProviders(<SkillEditor {...defaultProps} />);
+    renderWithProviders(<ProjectEditor {...defaultProps} />);
     const matches = screen.getAllByText('SKILL.md');
     expect(matches.length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows empty state when activeFilePath is null', () => {
-    renderWithProviders(<SkillEditor {...defaultProps} activeFilePath={null} />);
+    renderWithProviders(<ProjectEditor {...defaultProps} activeFilePath={null} />);
     expect(screen.getByText('选择一个文件开始编辑')).toBeTruthy();
   });
 
   it('shows empty state hint when selecting directory', () => {
-    renderWithProviders(<SkillEditor {...defaultProps} activeFilePath="src" />);
+    renderWithProviders(<ProjectEditor {...defaultProps} activeFilePath="src" />);
     expect(screen.getByText('此文件为目录')).toBeTruthy();
   });
 
   it('clicking ActivityBar icon expands panel', () => {
     const onPanel = vi.fn();
-    renderWithProviders(<SkillEditor {...defaultProps} onPanelChange={onPanel} />);
+    renderWithProviders(<ProjectEditor {...defaultProps} onPanelChange={onPanel} />);
     fireEvent.click(screen.getByTitle('文件'));
     expect(onPanel).toHaveBeenCalledWith('files');
   });
 
   it('closing last tab triggers onActiveFileChange(null)', async () => {
     const onActiveChange = vi.fn();
-    renderWithProviders(<SkillEditor {...defaultProps} onActiveFileChange={onActiveChange} />);
-    // SKILL.md is the only tab, close it
+    renderWithProviders(<ProjectEditor {...defaultProps} onActiveFileChange={onActiveChange} />);
     const closeButtons = getTabCloseButtons();
     expect(closeButtons.length).toBeGreaterThanOrEqual(1);
     fireEvent.click(closeButtons[0]);
@@ -98,8 +97,8 @@ describe('SkillEditor', () => {
   });
 
   it('adds new tab after switching files', async () => {
-    const { rerender } = renderWithProviders(<SkillEditor {...createProps()} />);
-    rerender(<SkillEditor {...createProps({ activeFilePath: 'package.json' })} />);
+    const { rerender } = renderWithProviders(<ProjectEditor {...createProps()} />);
+    rerender(<ProjectEditor {...createProps({ activeFilePath: 'package.json' })} />);
     await waitFor(() => {
       expect(screen.getAllByText('package.json').length).toBeGreaterThanOrEqual(1);
     });
@@ -107,30 +106,27 @@ describe('SkillEditor', () => {
 
   it('onFileChange is called when editing content', () => {
     const onFileChange = vi.fn();
-    renderWithProviders(<SkillEditor {...createProps({ onFileChange })} />);
-    // Simulate Monaco content change
+    renderWithProviders(<ProjectEditor {...createProps({ onFileChange })} />);
     fireEvent.click(screen.getByTestId('monaco-change'));
     expect(onFileChange).toHaveBeenCalledWith('SKILL.md', 'new content');
   });
 
   it('clears dirty state when calling onSave', () => {
     const onSave = vi.fn();
-    renderWithProviders(<SkillEditor {...createProps({ onSave })} />);
-    // Simulate editing (trigger dirty)
+    renderWithProviders(<ProjectEditor {...createProps({ onSave })} />);
     fireEvent.click(screen.getByTestId('monaco-change'));
-    // Verify dirty state has been triggered
     expect(screen.getByText('未保存')).toBeTruthy();
   });
 
   it('does not throw error when onSave is undefined', () => {
-    renderWithProviders(<SkillEditor {...createProps({ onSave: undefined })} />);
+    renderWithProviders(<ProjectEditor {...createProps({ onSave: undefined })} />);
     expect(screen.getByText('预览')).toBeTruthy();
   });
 
   it('closes unmodified tab directly', async () => {
     const onActiveChange = vi.fn();
     renderWithProviders(
-      <SkillEditor
+      <ProjectEditor
         {...createProps({ onActiveFileChange: onActiveChange, activeFilePath: 'package.json' })}
       />
     );
@@ -139,14 +135,12 @@ describe('SkillEditor', () => {
       expect(screen.getAllByText('package.json').length).toBeGreaterThanOrEqual(1);
     });
 
-    // Close tab — unmodified, should close directly without confirmation dialog
     const closeButtons = getTabCloseButtons();
     expect(closeButtons.length).toBeGreaterThanOrEqual(1);
     fireEvent.click(closeButtons[0]);
     await waitFor(() => {
       expect(onActiveChange).toHaveBeenCalled();
     });
-    // Confirm no modal dialog appears
     expect(screen.queryByRole('dialog')).toBeNull();
   });
 
@@ -155,7 +149,7 @@ describe('SkillEditor', () => {
     const onFileChange = vi.fn();
 
     renderWithProviders(
-      <SkillEditor
+      <ProjectEditor
         {...createProps({
           onActiveFileChange: onActiveChange,
           onFileChange,
@@ -168,14 +162,11 @@ describe('SkillEditor', () => {
       expect(screen.getAllByText('package.json').length).toBeGreaterThanOrEqual(1);
     });
 
-    // Simulate editing to make file dirty
     fireEvent.click(screen.getByTestId('monaco-change'));
 
-    // Close tab — modified, should show confirmation dialog
     const closeButtons = getTabCloseButtons();
     expect(closeButtons.length).toBeGreaterThanOrEqual(1);
     fireEvent.click(closeButtons[0]);
-    // Modal.confirm will be called (Ant Design Modal)
     await waitFor(() => {
       expect(screen.getByRole('dialog')).toBeTruthy();
     });
@@ -184,7 +175,7 @@ describe('SkillEditor', () => {
   it('triggers onActiveFileChange(null) when closing last tab', async () => {
     const onActiveChange = vi.fn();
     renderWithProviders(
-      <SkillEditor
+      <ProjectEditor
         {...createProps({
           onActiveFileChange: onActiveChange,
           activeFilePath: 'src/index.ts',
@@ -196,53 +187,43 @@ describe('SkillEditor', () => {
       expect(screen.getAllByText('index.ts').length).toBeGreaterThanOrEqual(1);
     });
 
-    // Close all tabs
     const closeButtons = getTabCloseButtons();
     expect(closeButtons.length).toBeGreaterThanOrEqual(1);
     fireEvent.click(closeButtons[0]);
-    // Should trigger null after last tab is closed
     await waitFor(() => {
       expect(onActiveChange).toHaveBeenCalledWith(null);
     });
   });
 
   it('isDirty should be false after editing and switching to another file', async () => {
-    const { rerender } = renderWithProviders(<SkillEditor {...createProps()} />);
+    const { rerender } = renderWithProviders(<ProjectEditor {...createProps()} />);
 
-    // Simulate editing SKILL.md (trigger dirty)
     fireEvent.click(screen.getByTestId('monaco-change'));
 
-    // Confirm "未保存" appears
     await waitFor(() => {
       expect(screen.getByText('未保存')).toBeTruthy();
     });
 
-    // Switch to package.json (unedited file)
-    rerender(<SkillEditor {...createProps({ activeFilePath: 'package.json' })} />);
+    rerender(<ProjectEditor {...createProps({ activeFilePath: 'package.json' })} />);
 
-    // isDirty should be false, "未保存" should not appear
     expect(screen.queryByText('未保存')).toBeNull();
   });
 
   it('isDirty should be true when switching back to edited file', async () => {
-    const { rerender } = renderWithProviders(<SkillEditor {...createProps()} />);
+    const { rerender } = renderWithProviders(<ProjectEditor {...createProps()} />);
 
-    // Edit SKILL.md
     fireEvent.click(screen.getByTestId('monaco-change'));
 
     await waitFor(() => {
       expect(screen.getByText('未保存')).toBeTruthy();
     });
 
-    // Switch to package.json
-    rerender(<SkillEditor {...createProps({ activeFilePath: 'package.json' })} />);
+    rerender(<ProjectEditor {...createProps({ activeFilePath: 'package.json' })} />);
 
     expect(screen.queryByText('未保存')).toBeNull();
 
-    // Switch back to SKILL.md
-    rerender(<SkillEditor {...createProps({ activeFilePath: 'SKILL.md' })} />);
+    rerender(<ProjectEditor {...createProps({ activeFilePath: 'SKILL.md' })} />);
 
-    // SKILL.md is still dirty
     await waitFor(() => {
       expect(screen.getByText('未保存')).toBeTruthy();
     });
@@ -251,16 +232,14 @@ describe('SkillEditor', () => {
   it('activeFile does not change when closing inactive tab', async () => {
     const onActiveChange = vi.fn();
 
-    // Open two files first
     const { rerender } = renderWithProviders(
-      <SkillEditor
+      <ProjectEditor
         {...createProps({ activeFilePath: 'SKILL.md', onActiveFileChange: onActiveChange })}
       />
     );
 
-    // Switch to second file to make it appear in tab bar
     rerender(
-      <SkillEditor
+      <ProjectEditor
         {...createProps({ activeFilePath: 'package.json', onActiveFileChange: onActiveChange })}
       />
     );
@@ -271,29 +250,21 @@ describe('SkillEditor', () => {
 
     onActiveChange.mockClear();
 
-    // Find close button for SKILL.md (inactive tab)
     const closeButtons = getTabCloseButtons();
     expect(closeButtons.length).toBeGreaterThanOrEqual(2);
-    // Close first tab (SKILL.md, inactive)
     fireEvent.click(closeButtons[0]);
 
-    // Closing inactive tab should not change current activeFile
     expect(onActiveChange).not.toHaveBeenCalled();
   });
 
   it('isDirty becomes false after save', async () => {
     const onSave = vi.fn();
-    renderWithProviders(<SkillEditor {...createProps({ onSave })} />);
+    renderWithProviders(<ProjectEditor {...createProps({ onSave })} />);
 
-    // Edit triggers dirty
     fireEvent.click(screen.getByTestId('monaco-change'));
 
     await waitFor(() => {
       expect(screen.getByText('未保存')).toBeTruthy();
     });
-
-    // Note: onSave cannot be triggered via UI currently (Ctrl+S not available in mock)
-    // So this test only verifies dirty is true after editing
-    // Ctrl+S triggering onSave is tested in EditorArea.test.tsx
   });
 });

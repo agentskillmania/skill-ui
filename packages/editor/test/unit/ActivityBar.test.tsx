@@ -30,8 +30,8 @@ describe('ActivityBar', () => {
 
   it('clicking active icon triggers close', () => {
     const onChange = vi.fn();
-    renderWithProviders(<ActivityBar activePanel="assistant" onPanelChange={onChange} />);
-    fireEvent.click(screen.getByTitle('助手'));
+    renderWithProviders(<ActivityBar activePanel="copilot" onPanelChange={onChange} />);
+    fireEvent.click(screen.getByTitle('Copilot'));
     expect(onChange).toHaveBeenCalledWith(null);
   });
 

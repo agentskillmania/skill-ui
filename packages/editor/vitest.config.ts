@@ -1,4 +1,5 @@
 import { defineConfig } from 'vitest/config';
+import path from 'node:path';
 
 export default defineConfig({
   test: {
@@ -16,6 +17,11 @@ export default defineConfig({
         branches: 90,
         statements: 90,
       },
+    },
+  },
+  resolve: {
+    alias: {
+      '@agentskillmania/agenui': path.resolve(__dirname, '../chat/test/__mocks__/agenui.tsx'),
     },
   },
 });

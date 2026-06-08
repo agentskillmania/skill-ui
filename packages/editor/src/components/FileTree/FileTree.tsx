@@ -5,7 +5,7 @@ import { css } from '@emotion/react';
 import { ChevronRight, ChevronDown, FileCode, Book, FolderOpen } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useState, useCallback } from 'react';
-import type { FileTreeProps, SkillFile } from '../../types.js';
+import type { FileTreeProps, ProjectFile } from '../../types.js';
 
 /** Get file icon by extension */
 function getFileIcon(name: string) {
@@ -22,7 +22,7 @@ function TreeNode({
   depth,
   onSelect,
 }: {
-  file: SkillFile;
+  file: ProjectFile;
   activeFilePath: string | null;
   depth: number;
   onSelect: (path: string) => void;

@@ -29,6 +29,13 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+// lottie-web requires canvas context not available in jsdom
+vi.mock('lottie-web', () => ({
+  default: {
+    loadAnimation: () => ({ destroy: () => {}, addEventListener: () => {} }),
+  },
+}));
+
 // antd components depend on ResizeObserver
 class ResizeObserverMock {
   observe() {}

@@ -1,13 +1,13 @@
 {
   "activityBar": {
     "files": "文件",
-    "assistant": "助手",
+    "copilot": "Copilot",
     "review": "审核",
     "test": "测试"
   },
-  "assistant": {
-    "emptyHint": "向 AI 助手提问，或使用快捷命令",
-    "placeholder": "向助手提问..."
+  "copilot": {
+    "emptyHint": "向 Copilot 提问，或使用快捷命令",
+    "placeholder": "向 Copilot 提问..."
   },
   "fileTabs": {
     "close": "关闭 {{label}}"
@@ -30,14 +30,14 @@
     "placeholder": "输入 / 唤起菜单，或直接开始写作..."
   },
   "review": {
-    "emptyHint": "尚未审核，通过助手发起审核",
-    "scoreUnit": "/ 100"
+    "emptyHint": "审核项将在此显示"
   },
   "testCase": {
     "title": "测试用例",
     "runAll": "全部运行",
     "emptyHint": "暂无测试用例",
     "passed": "通过",
-    "failed": "失败"
+    "failed": "失败",
+    "running": "运行中..."
   }
 }

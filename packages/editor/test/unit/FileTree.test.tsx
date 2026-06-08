@@ -3,9 +3,9 @@ import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
 import { FileTree } from '../../src/components/FileTree/FileTree.js';
-import type { SkillFile } from '../../src/types.js';
+import type { ProjectFile } from '../../src/types.js';
 
-const sampleFiles: SkillFile[] = [
+const sampleFiles: ProjectFile[] = [
   { path: 'SKILL.md', content: '# Skill' },
   {
     path: 'src',
@@ -70,7 +70,7 @@ describe('FileTree', () => {
   });
 
   it('uses default icon for files without extension', () => {
-    const files: SkillFile[] = [{ path: 'Makefile', content: 'all:' }];
+    const files: ProjectFile[] = [{ path: 'Makefile', content: 'all:' }];
     renderWithProviders(<FileTree files={files} activeFilePath={null} onSelect={vi.fn()} />);
     expect(screen.getByText('Makefile')).toBeTruthy();
   });

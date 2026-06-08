@@ -33,13 +33,13 @@ describe('useEditorContext', () => {
     expect(result.current.activeFilePath).toBe('test.ts');
   });
 
-  it('throws error outside SkillEditor', () => {
+  it('throws error outside ProjectEditor', () => {
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <EditorWrapper>{children}</EditorWrapper>
     );
     expect(() => {
       renderHook(() => useEditorContext(), { wrapper });
-    }).toThrow('useEditorContext must be used within a SkillEditor');
+    }).toThrow('useEditorContext must be used within a ProjectEditor');
   });
 
   it('calling setEditMode updates edit mode', () => {

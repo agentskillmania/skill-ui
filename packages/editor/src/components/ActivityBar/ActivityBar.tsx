@@ -14,7 +14,7 @@ type PanelIconConfig = { panel: SidebarPanel; icon: typeof FolderOpen; labelKey:
 /** Panel icon configuration */
 const PANEL_ICONS: PanelIconConfig[] = [
   { panel: 'files', icon: FolderOpen, labelKey: 'activityBar.files' },
-  { panel: 'assistant', icon: Bot, labelKey: 'activityBar.assistant' },
+  { panel: 'copilot', icon: Bot, labelKey: 'activityBar.copilot' },
   { panel: 'review', icon: ClipboardCheck, labelKey: 'activityBar.review' },
   { panel: 'test', icon: TestTube2, labelKey: 'activityBar.test' },
 ];

@@ -2,9 +2,9 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { FileTree } from './FileTree.js';
-import type { SkillFile } from '../../types.js';
+import type { ProjectFile } from '../../types.js';
 
-const sampleFiles: SkillFile[] = [
+const sampleFiles: ProjectFile[] = [
   { path: 'SKILL.md', content: '# 我的技能\n\n这是一个示例技能。' },
   { path: 'README.md', content: '# README' },
   {

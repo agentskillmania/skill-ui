@@ -1,13 +1,13 @@
 {
   "activityBar": {
     "files": "Files",
-    "assistant": "Assistant",
+    "copilot": "Copilot",
     "review": "Review",
     "test": "Tests"
   },
-  "assistant": {
-    "emptyHint": "Ask the AI assistant, or use quick commands",
-    "placeholder": "Ask the assistant..."
+  "copilot": {
+    "emptyHint": "Ask Copilot, or use quick commands",
+    "placeholder": "Ask Copilot..."
   },
   "fileTabs": {
     "close": "Close {{label}}"
@@ -30,14 +30,14 @@
     "placeholder": "Type / for commands, or start writing..."
   },
   "review": {
-    "emptyHint": "Not reviewed yet. Start a review via the assistant",
-    "scoreUnit": "/ 100"
+    "emptyHint": "Review items will appear here"
   },
   "testCase": {
     "title": "Test Cases",
     "runAll": "Run All",
-    "emptyHint": "No test cases yet",
+    "emptyHint": "No test cases found",
     "passed": "Passed",
-    "failed": "Failed"
+    "failed": "Failed",
+    "running": "Running..."
   }
 }
