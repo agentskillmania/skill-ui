@@ -10,46 +10,47 @@ function wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe('Titlebar', () => {
-  it('renders TrafficLights and AppBrand', () => {
-    render(<Titlebar />, { wrapper });
+  it('renders TrafficLights and AppBrand on macOS', () => {
+    render(<Titlebar platform="macos" />, { wrapper });
     expect(screen.getByLabelText('关闭窗口')).toBeInTheDocument();
     expect(screen.getByText('Skill')).toBeInTheDocument();
   });
 
+  it('renders WindowControls and AppBrand on Windows', () => {
+    render(<Titlebar platform="windows" />, { wrapper });
+    expect(screen.getByLabelText('Close')).toBeInTheDocument();
+    expect(screen.getByText('Skill')).toBeInTheDocument();
+    // macOS close button should not be present
+    expect(screen.queryByLabelText('关闭窗口')).not.toBeInTheDocument();
+  });
+
   it('passes title and icon', () => {
-    render(<Titlebar title="Agent IDE" />, { wrapper });
+    render(<Titlebar platform="macos" title="Agent IDE" />, { wrapper });
     expect(screen.getByText('Agent')).toBeInTheDocument();
     expect(screen.getByText('IDE')).toBeInTheDocument();
   });
 
   it('renders center slot', () => {
-    render(<Titlebar center={<span>workspace-1</span>} />, { wrapper });
+    render(<Titlebar platform="macos" center={<span>workspace-1</span>} />, { wrapper });
     expect(screen.getByText('workspace-1')).toBeInTheDocument();
   });
 
   it('renders end slot', () => {
-    render(<Titlebar end={<button>Settings</button>} />, { wrapper });
+    render(<Titlebar platform="macos" end={<button>Settings</button>} />, { wrapper });
     expect(screen.getByText('Settings')).toBeInTheDocument();
   });
 
-  it('renders flexible spacing when center is not passed', () => {
-    const { container } = render(<Titlebar />, { wrapper });
-    // banner contains TrafficLights, AppBrand, spacer three sub-areas
-    const banner = screen.getByRole('banner');
-    // spacer 是第三个 div（在 TrafficLights 和 AppBrand 之后）
-    const children = banner.children;
-    expect(children.length).toBeGreaterThanOrEqual(3);
-  });
-
-  it('renders center content when center is passed', () => {
-    render(<Titlebar center={<span>center-content</span>} />, { wrapper });
-    expect(screen.getByText('center-content')).toBeInTheDocument();
-  });
-
-  it('window control callbacks correctly passed', () => {
+  it('window control callbacks correctly passed on macOS', () => {
     const onClose = vi.fn();
-    render(<Titlebar onClose={onClose} />, { wrapper });
+    render(<Titlebar platform="macos" onClose={onClose} />, { wrapper });
     fireEvent.click(screen.getByLabelText('关闭窗口'));
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it('window control callbacks correctly passed on Windows', () => {
+    const onClose = vi.fn();
+    render(<Titlebar platform="windows" onClose={onClose} />, { wrapper });
+    fireEvent.click(screen.getByLabelText('Close'));
     expect(onClose).toHaveBeenCalledOnce();
   });
 

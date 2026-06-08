@@ -8,14 +8,5 @@
     "restoreWindow": "Restore Window",
     "maximize": "Maximize",
     "maximizeWindow": "Maximize Window"
-  },
-  "launcher": {
-    "title": "Open Workspace",
-    "subtitle": "Select an existing workspace, or create a new one",
-    "searchPlaceholder": "Search workspace...",
-    "noMatch": "No matching workspace",
-    "empty": "No workspaces yet",
-    "newWorkspace": "New Workspace",
-    "open": "Open {{name}}"
   }
 }

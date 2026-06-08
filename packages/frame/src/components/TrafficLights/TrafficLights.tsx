@@ -52,7 +52,6 @@ export function TrafficLights({
         display: flex;
         align-items: center;
         gap: ${theme.spacing['2']};
-        padding: 0 ${theme.spacing['2']};
         -webkit-app-region: no-drag;
 
         &:hover button svg {

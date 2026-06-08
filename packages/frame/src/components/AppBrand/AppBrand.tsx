@@ -7,6 +7,8 @@ import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { AppBrandProps } from '../../types.js';
 
+const FONT_DISPLAY = "'Iowan Old Style', 'Charter', Georgia, 'Songti SC', serif";
+
 export function AppBrand({ title = 'Skill Studio', icon }: AppBrandProps) {
   const theme = useTheme();
   const words = title.split(' ');
@@ -37,6 +39,7 @@ export function AppBrand({ title = 'Skill Studio', icon }: AppBrandProps) {
       )}
       <span
         css={css`
+          font-family: ${FONT_DISPLAY};
           font-size: ${theme.font.size.lg};
           font-weight: 600;
           white-space: nowrap;

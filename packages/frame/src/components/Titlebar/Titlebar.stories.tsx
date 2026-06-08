@@ -9,6 +9,7 @@ const meta: Meta<typeof Titlebar> = {
   argTypes: {
     title: { control: 'text' },
     isMaximized: { control: 'boolean' },
+    platform: { control: 'select', options: ['macos', 'windows'] },
     onClose: { action: 'close' },
     onMinimize: { action: 'minimize' },
     onMaximize: { action: 'maximize' },
@@ -20,8 +21,16 @@ type Story = StoryObj<typeof Titlebar>;
 
 export const Default: Story = {};
 
+export const Windows: Story = {
+  args: { platform: 'windows' },
+};
+
 export const WithBrand: Story = {
   args: { title: 'Agent IDE', icon: <Zap size={16} /> },
+};
+
+export const WindowsWithBrand: Story = {
+  args: { platform: 'windows', title: 'Agent IDE', icon: <Zap size={16} /> },
 };
 
 export const WithCenterSlot: Story = {
@@ -45,6 +54,21 @@ export const WithEndSlot: Story = {
 
 export const Full: Story = {
   args: {
+    title: 'Agent IDE',
+    icon: <Zap size={16} />,
+    center: <span style={{ fontSize: 13, color: '#94a3b8' }}>workspace-1</span>,
+    end: (
+      <div style={{ display: 'flex', gap: 8 }}>
+        <Settings size={16} style={{ cursor: 'pointer' }} />
+        <User size={16} style={{ cursor: 'pointer' }} />
+      </div>
+    ),
+  },
+};
+
+export const WindowsFull: Story = {
+  args: {
+    platform: 'windows',
     title: 'Agent IDE',
     icon: <Zap size={16} />,
     center: <span style={{ fontSize: 13, color: '#94a3b8' }}>workspace-1</span>,
