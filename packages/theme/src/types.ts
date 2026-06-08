@@ -10,6 +10,22 @@ export interface BlockColorItem {
   bg: string;
 }
 
+/** Event type status colors for Cockpit EventLogPanel */
+export interface EventStatusColorItem {
+  /** Text color */
+  text: string;
+  /** Background color */
+  bg: string;
+}
+
+/** Agent/Skill status colors */
+export interface AgentStatusColorItem {
+  /** Text color */
+  text: string;
+  /** Background color */
+  bg: string;
+}
+
 /** Theme definition */
 export interface Theme {
   /** Theme mode */
@@ -31,6 +47,12 @@ export interface Theme {
   color: Record<string, string>;
   /** Block component dedicated colors (thinking/toolMcp/toolScript/toolBuiltin/plan, etc.) */
   blockColor: Record<string, BlockColorItem>;
+  /** Event type status colors for Cockpit */
+  eventStatusColor: Record<string, EventStatusColorItem>;
+  /** Agent status colors */
+  agentStatusColor: Record<string, AgentStatusColorItem>;
+  /** Skill status colors */
+  skillStatusColor: Record<string, AgentStatusColorItem>;
   /** Spacing */
   spacing: Record<string, string>;
   /** Border radius */
@@ -59,6 +81,7 @@ export interface Theme {
     size: Record<string, string>;
     lineHeight: string;
     lineHeightHeading: string;
+    lineHeightRelaxed: string;
   };
   /** Icon sizes */
   icon: Record<string, string>;

@@ -88,12 +88,46 @@ export const darkBlockColor: Theme['blockColor'] = {
   toolBuiltin: { text: '#34d399', bg: 'rgba(52, 211, 153, 0.15)' },
   humanInput: { text: '#fb923c', bg: 'rgba(251, 146, 60, 0.15)' },
   skill: { text: '#a78bfa', bg: 'rgba(167, 139, 250, 0.15)' },
+  a2ui: { text: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)' },
+};
+
+export const darkEventStatusColor: Theme['eventStatusColor'] = {
+  lifecycle: { text: '#4ade80', bg: 'rgba(74, 222, 128, 0.15)' },
+  phase: { text: '#94a3b8', bg: 'rgba(148, 163, 184, 0.15)' },
+  human: { text: '#fb923c', bg: 'rgba(251, 146, 60, 0.15)' },
+  tool: { text: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)' },
+  error: { text: '#f87171', bg: 'rgba(248, 113, 113, 0.15)' },
+  compressing: { text: '#a78bfa', bg: 'rgba(167, 139, 250, 0.15)' },
+  skill: { text: '#818cf8', bg: 'rgba(129, 140, 248, 0.15)' },
+  subagent: { text: '#22d3ee', bg: 'rgba(34, 211, 238, 0.15)' },
+  llm: { text: '#a78bfa', bg: 'rgba(167, 139, 250, 0.15)' },
+  thinking: { text: '#f472b6', bg: 'rgba(244, 114, 182, 0.15)' },
+  token: { text: '#22d3ee', bg: 'rgba(34, 211, 238, 0.15)' },
+};
+
+export const darkAgentStatusColor: Theme['agentStatusColor'] = {
+  idle: { text: '#64748b', bg: 'rgba(100, 116, 139, 0.15)' },
+  running: { text: '#4ade80', bg: 'rgba(74, 222, 128, 0.15)' },
+  paused: { text: '#facc15', bg: 'rgba(250, 204, 21, 0.15)' },
+  error: { text: '#f87171', bg: 'rgba(248, 113, 113, 0.15)' },
+  completed: { text: '#60a5fa', bg: 'rgba(96, 165, 250, 0.15)' },
+};
+
+export const darkSkillStatusColor: Theme['skillStatusColor'] = {
+  loading: { text: '#94a3b8', bg: 'rgba(148, 163, 184, 0.15)' },
+  loaded: { text: '#4ade80', bg: 'rgba(74, 222, 128, 0.15)' },
+  active: { text: '#60a5fa', bg: 'rgba(96, 165, 250, 0.15)' },
+  completed: { text: '#4ade80', bg: 'rgba(74, 222, 128, 0.15)' },
+  error: { text: '#f87171', bg: 'rgba(248, 113, 113, 0.15)' },
 };
 
 export const darkTheme: Theme = {
   mode: 'dark',
   color: darkColor,
   blockColor: darkBlockColor,
+  eventStatusColor: darkEventStatusColor,
+  agentStatusColor: darkAgentStatusColor,
+  skillStatusColor: darkSkillStatusColor,
   spacing,
   radius,
   shadow: darkShadow,

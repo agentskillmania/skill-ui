@@ -95,6 +95,7 @@ export const font: Theme['font'] = {
   },
   lineHeight: '1.5',
   lineHeightHeading: '1.4',
+  lineHeightRelaxed: '1.6',
 };
 
 export const icon: Theme['icon'] = {

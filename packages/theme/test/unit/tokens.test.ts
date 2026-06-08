@@ -148,6 +148,72 @@ describe('shared tokens', () => {
   });
 });
 
+describe('Semantic color tokens', () => {
+  it('lightTheme has eventStatusColor with all event types', () => {
+    const keys = Object.keys(lightTheme.eventStatusColor);
+    expect(keys).toContain('lifecycle');
+    expect(keys).toContain('phase');
+    expect(keys).toContain('token');
+    expect(keys).toContain('tool');
+    expect(keys).toContain('error');
+    expect(keys).toContain('compressing');
+    expect(keys).toContain('skill');
+    expect(keys).toContain('subagent');
+    expect(keys).toContain('llm');
+    expect(keys).toContain('thinking');
+    // Each entry has text and bg
+    for (const key of keys) {
+      expect(lightTheme.eventStatusColor[key]).toHaveProperty('text');
+      expect(lightTheme.eventStatusColor[key]).toHaveProperty('bg');
+    }
+  });
+
+  it('lightTheme has agentStatusColor with all agent statuses', () => {
+    const keys = Object.keys(lightTheme.agentStatusColor);
+    expect(keys).toContain('idle');
+    expect(keys).toContain('running');
+    expect(keys).toContain('paused');
+    expect(keys).toContain('error');
+    expect(keys).toContain('completed');
+    for (const key of keys) {
+      expect(lightTheme.agentStatusColor[key]).toHaveProperty('text');
+      expect(lightTheme.agentStatusColor[key]).toHaveProperty('bg');
+    }
+  });
+
+  it('lightTheme has skillStatusColor with all skill statuses', () => {
+    const keys = Object.keys(lightTheme.skillStatusColor);
+    expect(keys).toContain('loading');
+    expect(keys).toContain('loaded');
+    expect(keys).toContain('active');
+    expect(keys).toContain('completed');
+    expect(keys).toContain('error');
+    for (const key of keys) {
+      expect(lightTheme.skillStatusColor[key]).toHaveProperty('text');
+      expect(lightTheme.skillStatusColor[key]).toHaveProperty('bg');
+    }
+  });
+
+  it('darkTheme has all the same semantic color keys as lightTheme', () => {
+    expect(Object.keys(darkTheme.eventStatusColor)).toEqual(
+      Object.keys(lightTheme.eventStatusColor)
+    );
+    expect(Object.keys(darkTheme.agentStatusColor)).toEqual(
+      Object.keys(lightTheme.agentStatusColor)
+    );
+    expect(Object.keys(darkTheme.skillStatusColor)).toEqual(
+      Object.keys(lightTheme.skillStatusColor)
+    );
+  });
+
+  it('dark tokens are not identical to light tokens', () => {
+    expect(darkTheme.eventStatusColor.tool.text).not.toBe(lightTheme.eventStatusColor.tool.text);
+    expect(darkTheme.agentStatusColor.running.text).not.toBe(
+      lightTheme.agentStatusColor.running.text
+    );
+  });
+});
+
 describe('constants', () => {
   it('layout contains layout constants', () => {
     expect(layout.titlebarHeight).toBe('38px');

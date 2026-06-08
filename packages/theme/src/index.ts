@@ -3,7 +3,7 @@
  */
 
 // Types
-export type { Theme, BlockColorItem } from './types.js';
+export type { Theme, BlockColorItem, EventStatusColorItem, AgentStatusColorItem } from './types.js';
 
 // Business constants (not theme-dependent)
 export { layout, zIndex } from './constants.js';
@@ -15,9 +15,15 @@ export {
   lightTheme,
   lightColor,
   lightBlockColor,
+  lightEventStatusColor,
+  lightAgentStatusColor,
+  lightSkillStatusColor,
   darkTheme,
   darkColor,
   darkBlockColor,
+  darkEventStatusColor,
+  darkAgentStatusColor,
+  darkSkillStatusColor,
 } from './tokens/index.js';
 
 // Provider
