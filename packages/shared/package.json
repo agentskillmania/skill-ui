@@ -17,7 +17,9 @@
     "test:unit": "vitest run test/unit",
     "test:coverage": "vitest run test/unit --coverage",
     "test:watch": "vitest watch test/unit",
-    "prepublishOnly": "pnpm test:unit && pnpm build"
+    "prepublishOnly": "pnpm test:unit && pnpm build",
+    "storybook": "storybook dev -p 6008",
+    "build-storybook": "storybook build"
   },
   "author": {
     "name": "yusangeng",
@@ -57,7 +59,14 @@
     "i18next": "^24.0.0",
     "react-i18next": "^15.0.0",
     "typescript": "^5.0.0",
-    "vitest": "^2.0.0"
+    "vitest": "^2.0.0",
+    "@chromatic-com/storybook": "^5.0.2",
+    "@storybook/addon-a11y": "^10.3.3",
+    "@storybook/addon-docs": "^10.3.3",
+    "@storybook/react-vite": "^10.3.3",
+    "storybook": "^10.3.3",
+    "vite": "^5.4.21",
+    "@vitejs/plugin-react": "^4.7.0"
   },
   "engines": {
     "node": ">=18.0.0"
