@@ -4,7 +4,7 @@
  */
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import type { EditorAreaProps } from '../../types.js';
+import type { EditorAreaProps } from '../types.js';
 import { CodeEditor } from './CodeEditor.js';
 import { VisualEditor } from './VisualEditor.js';
 

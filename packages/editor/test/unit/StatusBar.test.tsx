@@ -2,7 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
-import { StatusBar } from '../../src/components/StatusBar/StatusBar.js';
+import { StatusBar } from '../../src/sections/status-bar/StatusBar.js';
 
 describe('StatusBar', () => {
   it('displays file path', () => {

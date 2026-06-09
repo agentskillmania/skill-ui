@@ -2,7 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
-import { FileTabs } from '../../src/components/FileTabs/FileTabs.js';
+import { FileTabs } from '../../src/sections/file-tabs/FileTabs.js';
 import type { FileTab } from '../../src/types.js';
 
 const sampleTabs: FileTab[] = [

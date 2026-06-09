@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { VisualEditor } from './VisualEditor.js';
-import type { EditorAreaProps } from '../../types.js';
+import type { EditorAreaProps } from '../types.js';
 
 const sampleMarkdownContent = `# 技能标题
 

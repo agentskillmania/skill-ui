@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { ActivityBar } from './ActivityBar.js';
-import type { SidebarPanel } from '../../types.js';
+import type { SidebarPanel } from '../types.js';
 
 const meta: Meta<typeof ActivityBar> = {
   title: 'Editor/ActivityBar',

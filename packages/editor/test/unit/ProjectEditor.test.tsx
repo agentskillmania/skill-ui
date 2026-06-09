@@ -2,7 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
-import { ProjectEditor } from '../../src/components/ProjectEditor/ProjectEditor.js';
+import { ProjectEditor } from '../../src/project-editor/ProjectEditor.js';
 import type { ProjectFile, SidebarPanel } from '../../src/types.js';
 
 // Mock Monaco Editor

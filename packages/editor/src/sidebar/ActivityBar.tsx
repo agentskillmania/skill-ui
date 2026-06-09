@@ -8,8 +8,8 @@ import { css } from '@emotion/react';
 import { FolderOpen, Bot, ClipboardCheck, TestTube2 } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
-import { NAMESPACE } from '../../locales/index.js';
-import type { ActivityBarProps, SidebarPanel } from '../../types.js';
+import { NAMESPACE } from '../locales/index.js';
+import type { ActivityBarProps, SidebarPanel } from '../types.js';
 
 type PanelIconConfig = { panel: SidebarPanel; icon: typeof FolderOpen; labelKey: string };
 

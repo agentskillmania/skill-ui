@@ -49,7 +49,7 @@ vi.mock('@milkdown/crepe', () => ({
 
 vi.mock('@milkdown/crepe/theme/frame.css', () => ({}));
 
-import { VisualEditor } from '../../src/components/EditorArea/VisualEditor.js';
+import { VisualEditor } from '../../src/editor-area/VisualEditor.js';
 
 const defaultProps = {
   content: '# 初始标题\n\n初始段落',

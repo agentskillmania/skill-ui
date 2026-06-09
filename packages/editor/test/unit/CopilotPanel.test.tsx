@@ -2,7 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
-import { CopilotPanel } from '../../src/components/CopilotPanel/CopilotPanel.js';
+import { CopilotPanel } from '../../src/panels/copilot/CopilotPanel.js';
 import type { ChatCommand } from '@agentskillmania/skill-ui-chat';
 
 // Mock chat components to avoid full render dependencies

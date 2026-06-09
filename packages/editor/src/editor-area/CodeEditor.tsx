@@ -8,8 +8,8 @@
 import React, { useRef } from 'react';
 import _MonacoEditor from '@monaco-editor/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import type { EditorAreaProps } from '../../types.js';
-import { getFileInfo } from '../../utils/file-utils.js';
+import type { EditorAreaProps } from '../types.js';
+import { getFileInfo } from '../shared/file-utils.js';
 
 // React 19 type compatibility
 const MonacoEditor = _MonacoEditor as unknown as React.ComponentType<{

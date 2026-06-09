@@ -9,14 +9,14 @@ import { css } from '@emotion/react';
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
-import { NAMESPACE } from '../../locales/index.js';
-import type { ProjectEditorProps, FileTab, CursorPosition } from '../../types.js';
-import { EditorContext } from '../../context/EditorContext.js';
-import { getFileLabel } from '../../utils/file-utils.js';
-import { FileTabs } from '../FileTabs/index.js';
-import { EditorArea } from '../EditorArea/index.js';
-import { StatusBar } from '../StatusBar/index.js';
-import { Sidebar } from '../Sidebar/index.js';
+import { NAMESPACE } from '../locales/index.js';
+import type { ProjectEditorProps, FileTab, CursorPosition } from '../types.js';
+import { EditorContext } from '../context/EditorContext.js';
+import { getFileLabel } from '../shared/file-utils.js';
+import { FileTabs } from '../sections/file-tabs/index.js';
+import { EditorArea } from '../editor-area/index.js';
+import { StatusBar } from '../sections/status-bar/index.js';
+import { Sidebar } from '../sidebar/index.js';
 
 export function ProjectEditor({
   files,
@@ -233,9 +233,9 @@ export function ProjectEditor({
 
 /** Recursively find file */
 function findFile(
-  files: import('../../types.js').ProjectFile[],
+  files: import('../types.js').ProjectFile[],
   path: string
-): import('../../types.js').ProjectFile | null {
+): import('../types.js').ProjectFile | null {
   for (const f of files) {
     if (f.path === path) return f;
     if (f.children) {

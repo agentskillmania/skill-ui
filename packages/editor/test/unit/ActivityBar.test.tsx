@@ -2,7 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
-import { ActivityBar } from '../../src/components/ActivityBar/ActivityBar.js';
+import { ActivityBar } from '../../src/sidebar/ActivityBar.js';
 import type { SidebarPanel } from '../../src/types.js';
 
 describe('ActivityBar', () => {

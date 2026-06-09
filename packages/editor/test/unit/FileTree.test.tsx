@@ -2,7 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
-import { FileTree } from '../../src/components/FileTree/FileTree.js';
+import { FileTree } from '../../src/panels/file-tree/FileTree.js';
 import type { ProjectFile } from '../../src/types.js';
 
 const sampleFiles: ProjectFile[] = [

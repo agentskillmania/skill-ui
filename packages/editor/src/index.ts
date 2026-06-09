@@ -29,22 +29,29 @@ export type {
   EditorContextValue,
 } from './types.js';
 
-// Components
-export { ProjectEditor } from './components/ProjectEditor/index.js';
-export { FileTree } from './components/FileTree/index.js';
-export { FileTabs } from './components/FileTabs/index.js';
-export { EditorArea, CodeEditor, VisualEditor } from './components/EditorArea/index.js';
-export { StatusBar } from './components/StatusBar/index.js';
-export { Sidebar } from './components/Sidebar/index.js';
-export { ActivityBar } from './components/ActivityBar/index.js';
-export { CopilotPanel } from './components/CopilotPanel/index.js';
-export { ReviewPanel } from './components/ReviewPanel/index.js';
+// Layout
+export { ProjectEditor } from './project-editor/index.js';
+
+// Editor area
+export { EditorArea, CodeEditor, VisualEditor } from './editor-area/index.js';
+
+// Sections
+export { FileTabs } from './sections/file-tabs/index.js';
+export { StatusBar } from './sections/status-bar/index.js';
+
+// Sidebar
+export { Sidebar, ActivityBar } from './sidebar/index.js';
+
+// Panels
+export { FileTree } from './panels/file-tree/index.js';
+export { CopilotPanel } from './panels/copilot/index.js';
+export { ReviewPanel } from './panels/review/index.js';
 
 // Context
 export { useEditorContext } from './context/EditorContext.js';
 
 // Utilities
-export { getFileInfo, getFileLabel } from './utils/file-utils.js';
+export { getFileInfo, getFileLabel } from './shared/file-utils.js';
 
 // i18n
 export { NAMESPACE, resources } from './locales/index.js';

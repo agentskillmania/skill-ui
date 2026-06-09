@@ -2,7 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
-import { ReviewPanel } from '../../src/components/ReviewPanel/ReviewPanel.js';
+import { ReviewPanel } from '../../src/panels/review/ReviewPanel.js';
 import type { ReviewItem } from '../../src/types.js';
 
 const baseItem = {

@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
 import React from 'react';
-import { EditorArea } from '../../src/components/EditorArea/EditorArea.js';
+import { EditorArea } from '../../src/editor-area/EditorArea.js';
 
 // Mock Crepe to avoid full rendering
 vi.mock('@milkdown/crepe', () => ({

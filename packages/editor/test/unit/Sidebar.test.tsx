@@ -28,7 +28,7 @@ vi.mock('@agentskillmania/skill-ui-chat', () => ({
 
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
-import { Sidebar } from '../../src/components/Sidebar/Sidebar.js';
+import { Sidebar } from '../../src/sidebar/Sidebar.js';
 import type { ProjectFile, ReviewItem, TestCase } from '../../src/types.js';
 
 const sampleFiles: ProjectFile[] = [

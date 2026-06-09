@@ -6,12 +6,12 @@
  */
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import type { SidebarProps } from '../../types.js';
-import { ActivityBar } from '../ActivityBar/index.js';
-import { FileTree } from '../FileTree/index.js';
-import { CopilotPanel } from '../CopilotPanel/index.js';
-import { ReviewPanel } from '../ReviewPanel/index.js';
-import { TestCase } from '../TestCase/index.js';
+import type { SidebarProps } from '../types.js';
+import { ActivityBar } from './ActivityBar.js';
+import { FileTree } from '../panels/file-tree/index.js';
+import { CopilotPanel } from '../panels/copilot/index.js';
+import { ReviewPanel } from '../panels/review/index.js';
+import { TestCase } from '../panels/test-case/index.js';
 
 export function Sidebar({
   activePanel,

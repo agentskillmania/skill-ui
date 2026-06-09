@@ -2,7 +2,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
-import { TestCase } from '../../src/components/TestCase/TestCase.js';
+import { TestCase } from '../../src/panels/test-case/TestCase.js';
 import type { TestCase as TestCaseType } from '../../src/types.js';
 
 const sampleCases: TestCaseType[] = [
