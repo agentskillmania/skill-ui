@@ -19,6 +19,9 @@
       "path": "./packages/theme"
     },
     {
+      "path": "./packages/shared"
+    },
+    {
       "path": "./packages/chat"
     },
     {

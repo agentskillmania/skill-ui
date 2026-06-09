@@ -1,0 +1,65 @@
+{
+  "name": "@agentskillmania/skill-ui-shared",
+  "version": "0.1.0",
+  "description": "Shared UI components and utilities for @agentskillmania skill-ui packages.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:unit": "vitest run test/unit",
+    "test:coverage": "vitest run test/unit --coverage",
+    "test:watch": "vitest watch test/unit",
+    "prepublishOnly": "pnpm test:unit && pnpm build"
+  },
+  "author": {
+    "name": "yusangeng",
+    "email": "yusangeng@outlook.com"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agentskillmania/skill-ui.git",
+    "directory": "packages/shared"
+  },
+  "dependencies": {
+    "@agentskillmania/skill-ui-theme": "workspace:*",
+    "@emotion/react": "^11.14.0"
+  },
+  "peerDependencies": {
+    "antd": "^6.0.0",
+    "lucide-react": ">=0.400.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-i18next": "^15.0.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitest/coverage-v8": "^2.0.0",
+    "antd": "^6.3.3",
+    "jsdom": "^29.0.1",
+    "lucide-react": "^0.460.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "i18next": "^24.0.0",
+    "react-i18next": "^15.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
