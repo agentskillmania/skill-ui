@@ -19,21 +19,82 @@ describe('useResize', () => {
     expect(typeof result.current.dividerProps.onMouseDown).toBe('function');
   });
 
+  it('starts resizing on mousedown', () => {
+    const { result } = renderHook(() =>
+      useResize({ initialWidth: 380 }),
+    );
+
+    act(() => result.current.dividerProps.onMouseDown());
+    expect(result.current.isResizing).toBe(true);
+  });
+
+  it('updates width on mousemove and stops on mouseup', () => {
+    const { result } = renderHook(() =>
+      useResize({ initialWidth: 380, minWidth: 100, maxWidth: 800 }),
+    );
+
+    // Start drag
+    act(() => result.current.dividerProps.onMouseDown());
+    expect(result.current.isResizing).toBe(true);
+
+    // First mousemove captures startX
+    act(() => {
+      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 400 }));
+    });
+
+    // Second mousemove calculates delta
+    act(() => {
+      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 350 }));
+    });
+
+    // Width should have changed (delta = 400 - 350 = 50, newWidth = 380 + 50 = 430)
+    expect(result.current.width).toBe(430);
+
+    // End drag
+    act(() => {
+      document.dispatchEvent(new MouseEvent('mouseup'));
+    });
+    expect(result.current.isResizing).toBe(false);
+  });
+
   it('clamps width to minWidth on drag', () => {
     const { result } = renderHook(() =>
       useResize({ initialWidth: 380, minWidth: 200 }),
     );
 
-    // Simulate mousedown
     act(() => result.current.dividerProps.onMouseDown());
 
-    // Simulate mousemove past min
+    // First move captures startX
     act(() => {
-      const event = new MouseEvent('mousemove', { clientX: 9999 });
-      document.dispatchEvent(event);
+      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 400 }));
+    });
+
+    // Drag far right — delta = 400 - 9999 = very negative, width clamped to minWidth
+    act(() => {
+      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 9999 }));
     });
 
     expect(result.current.width).toBeGreaterThanOrEqual(200);
+  });
+
+  it('clamps width to maxWidth on drag', () => {
+    const { result } = renderHook(() =>
+      useResize({ initialWidth: 380, maxWidth: 500 }),
+    );
+
+    act(() => result.current.dividerProps.onMouseDown());
+
+    // First move captures startX
+    act(() => {
+      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 400 }));
+    });
+
+    // Drag far left — delta = 400 - (-9999) = very positive, width clamped to maxWidth
+    act(() => {
+      document.dispatchEvent(new MouseEvent('mousemove', { clientX: -9999 }));
+    });
+
+    expect(result.current.width).toBeLessThanOrEqual(500);
   });
 
   it('does not start drag when disabled', () => {
