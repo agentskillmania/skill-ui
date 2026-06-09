@@ -20,5 +20,15 @@ export { textTruncate, textSecondary } from './text.js';
 // Special containers
 export { iconBox, scrollable, absoluteFill } from './containers.js';
 
+// Interactive styles
+export { interactiveItem, subtleBackground } from './interactive.js';
+
+// Separator
+export { borderSeparator } from './separator.js';
+
+// Scroll
+export { scrollContainer } from './scroll.js';
+export type { ScrollContainerOptions } from './scroll.js';
+
 // Responsive media queries
 export { media, container } from './media.js';

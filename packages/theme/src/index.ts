@@ -62,6 +62,10 @@ export {
   iconBox,
   scrollable,
   absoluteFill,
+  interactiveItem,
+  subtleBackground,
+  borderSeparator,
+  scrollContainer,
   media,
   container,
 } from './styles/index.js';
