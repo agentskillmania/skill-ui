@@ -81,8 +81,6 @@ export function SidebarIcons({
         </button>
       </Tooltip>
 
-      <div css={css`flex: 1;`} />
-
       {items.map((item) => {
         const isActive = item.id === activeId && !isCollapsed;
         const Icon = item.icon;
