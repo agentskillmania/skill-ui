@@ -1,6 +1,5 @@
 /** @jsxImportSource @emotion/react */
 import type { Theme } from '@agentskillmania/skill-ui-theme';
-import { flexRow } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 
 /** Empty state text — muted, centered. */
@@ -15,19 +14,6 @@ export const tagRowStyle = (theme: Theme) => css`
   display: flex;
   flex-wrap: wrap;
   gap: ${theme.spacing[1]};
-`;
-
-/** Tool item row — name + enabled badge + description toggle (used by SkillsCard). */
-export const toolItemStyle = (theme: Theme) => css`
-  ${flexRow(theme, '1')};
-  align-items: center;
-  padding: 2px ${theme.spacing[1]};
-  background: ${theme.color.fillSecondary};
-  border-radius: ${theme.radius.base};
-
-  & + & {
-    margin-top: 2px;
-  }
 `;
 
 /** Tool/skill name — monospace for technical names. */
@@ -47,21 +33,6 @@ export const sourcePathStyle = (theme: Theme) => css`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-`;
-
-/** Collapse header style — clickable row. */
-export const collapseHeaderStyle = (theme: Theme) => css`
-  font-size: ${theme.font.size.xs};
-  color: ${theme.color.textSecondary};
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  cursor: pointer;
-  user-select: none;
-
-  &:hover {
-    color: ${theme.color.text};
-  }
 `;
 
 /** Collapsible description area. */

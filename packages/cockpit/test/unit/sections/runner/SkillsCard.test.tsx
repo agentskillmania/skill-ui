@@ -71,20 +71,20 @@ describe('SkillsCard', () => {
     // Description not visible initially
     expect(screen.queryByText('Plan and execute specifications')).not.toBeInTheDocument();
 
-    // Click to expand
-    fireEvent.click(screen.getByTestId('skill-toggle-spec-plan'));
+    // Click to expand (toggle target is the skill item row itself)
+    fireEvent.click(screen.getByTestId('skill-item-spec-plan'));
     expect(screen.getByText('Plan and execute specifications')).toBeInTheDocument();
 
     // Click again to collapse
-    fireEvent.click(screen.getByTestId('skill-toggle-spec-plan'));
+    fireEvent.click(screen.getByTestId('skill-item-spec-plan'));
     expect(screen.queryByText('Plan and execute specifications')).not.toBeInTheDocument();
   });
 
   it('does not render description area when description is missing', () => {
     const skills: RunnerSkillInfo[] = [{ name: 'no-desc-skill', source: '/skills/no-desc' }];
     renderWithTheme(<SkillsCard skills={skills} />);
-    fireEvent.click(screen.getByTestId('skill-toggle-no-desc-skill'));
-    // Item should exist, no crash, but no description text
+    // No description means expandable=false, click should not crash
+    fireEvent.click(screen.getByTestId('skill-item-no-desc-skill'));
     expect(screen.getByTestId('skill-item-no-desc-skill')).toBeInTheDocument();
   });
 

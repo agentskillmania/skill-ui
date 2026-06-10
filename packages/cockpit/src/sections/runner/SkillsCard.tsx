@@ -1,5 +1,6 @@
 /** @jsxImportSource @emotion/react */
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+import { useTheme, interactiveRow } from '@agentskillmania/skill-ui-theme';
 import { Typography } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -8,10 +9,8 @@ import { NAMESPACE } from '../../locales/index.js';
 import {
   emptyTextStyle,
   titleRowStyle,
-  toolItemStyle,
   itemNameStyle,
   sourcePathStyle,
-  collapseHeaderStyle,
   descriptionStyle,
 } from './styles.js';
 import type { RunnerSkillInfo } from './types.js';
@@ -57,11 +56,17 @@ export function SkillsCard({ skills }: SkillsCardProps) {
                 expandable={!!skill.description}
                 defaultExpanded={false}
                 renderSummary={({ expanded, toggle }) => (
-                  <div css={toolItemStyle(theme)} data-testid={`skill-item-${skill.name}`}>
+                  <div
+                    css={interactiveRow(theme, { active: expanded })}
+                    onClick={toggle}
+                    data-testid={`skill-item-${skill.name}`}
+                  >
                     <div
-                      css={collapseHeaderStyle(theme)}
-                      onClick={toggle}
-                      data-testid={`skill-toggle-${skill.name}`}
+                      css={css`
+                        display: flex;
+                        align-items: center;
+                        gap: ${theme.spacing[1]};
+                      `}
                     >
                       {expanded ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
                       <span css={itemNameStyle(theme)}>{skill.name}</span>
