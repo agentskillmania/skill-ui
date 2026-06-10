@@ -5,7 +5,7 @@
  * Embeds skill-ui-chat's MessageList + ChatInput, with quick commands.
  */
 import { css } from '@emotion/react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTheme, borderSeparator } from '@agentskillmania/skill-ui-theme';
 import { MessageList, ChatInput } from '@agentskillmania/skill-ui-chat';
 import { useTranslation } from 'react-i18next';
 import { EmptyState } from '@agentskillmania/skill-ui-shared';
@@ -88,7 +88,7 @@ export function CopilotPanel({
       <div
         css={css`
           padding: ${theme.spacing[2]};
-          border-top: 1px solid ${theme.color.borderSecondary};
+          ${borderSeparator(theme, 'top')}
         `}
       >
         <ChatInput

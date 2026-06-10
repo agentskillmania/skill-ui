@@ -4,7 +4,7 @@
  */
 import { css } from '@emotion/react';
 import { TestTube2, Play, Circle, Loader, CheckCircle2, XCircle } from 'lucide-react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTheme, interactiveItem, borderSeparator } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
 import { useToggle, EmptyState } from '@agentskillmania/skill-ui-shared';
 import { NAMESPACE } from '../../locales/index.js';
@@ -36,9 +36,7 @@ function TestCaseRow({ tc, onRunCase }: { tc: TestCaseType; onRunCase?: (id: str
         font-size: ${theme.font.size.xs};
         margin-bottom: ${theme.spacing['0.5']};
 
-        &:hover {
-          background: ${theme.color.fillSubtle};
-        }
+        ${interactiveItem(theme, theme.color.fillSubtle)}
       `}
     >
       <div
@@ -171,7 +169,7 @@ export function TestCase({ cases, onRunAll, onRunCase }: TestCasePanelProps) {
           align-items: center;
           justify-content: space-between;
           padding: ${theme.spacing[2]} ${theme.spacing[3]};
-          border-bottom: 1px solid ${theme.color.borderSecondary};
+          ${borderSeparator(theme)}
         `}
       >
         <div

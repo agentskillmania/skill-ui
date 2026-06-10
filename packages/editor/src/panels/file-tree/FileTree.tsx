@@ -4,7 +4,7 @@
  */
 import { css } from '@emotion/react';
 import { ChevronRight, ChevronDown, FileCode, Book, FolderOpen } from 'lucide-react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTheme, interactiveItem } from '@agentskillmania/skill-ui-theme';
 import { useCallback } from 'react';
 import { useToggle } from '@agentskillmania/skill-ui-shared';
 import type { FileTreeProps, ProjectFile } from '../../types.js';
@@ -57,10 +57,7 @@ function TreeNode({
           color: ${isActive ? theme.color.primary : theme.color.text};
           font-size: ${theme.font.size.sm};
           transition: background ${theme.motion.duration.fast};
-
-          &:hover {
-            background: ${isActive ? theme.color.primaryBg : theme.color.fillSubtle};
-          }
+          ${interactiveItem(theme, isActive ? theme.color.primaryBg : theme.color.fillSubtle)}
         `}
       >
         {file.isDirectory && (

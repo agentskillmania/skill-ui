@@ -7,9 +7,9 @@
 import { css } from '@emotion/react';
 import { useRef, useEffect } from 'react';
 import { AlertTriangle, Info, XCircle, ClipboardCheck } from 'lucide-react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTheme, interactiveItem } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
-import { useToggle, EmptyState } from '@agentskillmania/skill-ui-shared';
+import { EmptyState, ExpandableItem } from '@agentskillmania/skill-ui-shared';
 import { NAMESPACE } from '../../locales/index.js';
 import type { ReviewPanelProps, ReviewItem, ReviewSeverity } from '../../types.js';
 
@@ -21,70 +21,72 @@ const SEVERITY_CONFIG: Record<ReviewSeverity, { icon: typeof Info; color: string
 
 function ReviewItemRow({ item }: { item: ReviewItem }) {
   const theme = useTheme();
-  const expandedToggle = useToggle(item.severity === 'error' && !!item.detail);
   const cfg = SEVERITY_CONFIG[item.severity];
   const Icon = cfg.icon;
 
   return (
-    <div
-      css={css`
-        padding: ${theme.spacing[1]} ${theme.spacing[2]};
-        border-bottom: 1px solid ${theme.color.borderSecondary};
-        cursor: ${item.detail ? 'pointer' : 'default'};
-        font-size: ${theme.font.size.sm};
-
-        &:hover {
-          background: ${theme.color.fillSubtle};
-        }
-      `}
-      onClick={() => item.detail && expandedToggle.toggle()}
-    >
-      <div
-        css={css`
-          display: flex;
-          align-items: flex-start;
-          gap: ${theme.spacing[2]};
-        `}
-      >
-        <span
-          css={css`
-            flex-shrink: 0;
-            margin-top: 2px;
-            color: ${theme.color[cfg.color]};
-          `}
-        >
-          <Icon size={14} />
-        </span>
+    <ExpandableItem
+      expandable={!!item.detail}
+      defaultExpanded={item.severity === 'error' && !!item.detail}
+      renderSummary={({ expanded, toggle }) => (
         <div
           css={css`
-            flex: 1;
-            min-width: 0;
+            padding: ${theme.spacing[1]} ${theme.spacing[2]};
+            border-bottom: 1px solid ${theme.color.borderSecondary};
+            font-size: ${theme.font.size.sm};
+            cursor: ${item.detail ? 'pointer' : 'default'};
+            ${item.detail ? interactiveItem(theme, theme.color.fillSubtle) : ''}
           `}
+          onClick={() => item.detail && toggle()}
         >
           <div
             css={css`
               display: flex;
-              align-items: center;
-              gap: ${theme.spacing[1]};
-              color: ${theme.color.text};
+              align-items: flex-start;
+              gap: ${theme.spacing[2]};
             `}
           >
-            <span>{item.message}</span>
-          </div>
-          {item.filePath && (
-            <div
+            <span
               css={css`
-                font-size: ${theme.font.size.xs};
-                color: ${theme.color.textTertiary};
-                margin-top: ${theme.spacing['0.5']};
+                flex-shrink: 0;
+                margin-top: 2px;
+                color: ${theme.color[cfg.color]};
               `}
             >
-              {item.filePath}
+              <Icon size={14} />
+            </span>
+            <div
+              css={css`
+                flex: 1;
+                min-width: 0;
+              `}
+            >
+              <div
+                css={css`
+                  display: flex;
+                  align-items: center;
+                  gap: ${theme.spacing[1]};
+                  color: ${theme.color.text};
+                `}
+              >
+                <span>{item.message}</span>
+              </div>
+              {item.filePath && (
+                <div
+                  css={css`
+                    font-size: ${theme.font.size.xs};
+                    color: ${theme.color.textTertiary};
+                    margin-top: ${theme.spacing['0.5']};
+                  `}
+                >
+                  {item.filePath}
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
-      </div>
-      {expandedToggle.value && item.detail && (
+      )}
+      renderDetail={() => (
         <div
           css={css`
             margin-top: ${theme.spacing[1]};
@@ -99,7 +101,7 @@ function ReviewItemRow({ item }: { item: ReviewItem }) {
           {item.detail}
         </div>
       )}
-    </div>
+    />
   );
 }
 

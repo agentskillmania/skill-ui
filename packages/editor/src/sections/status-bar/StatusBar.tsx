@@ -4,7 +4,7 @@
  */
 import { css } from '@emotion/react';
 import { Code, Eye } from 'lucide-react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTheme, interactiveItem, borderSeparator } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../../locales/index.js';
 import type { StatusBarProps } from '../../types.js';
@@ -27,7 +27,7 @@ export function StatusBar({
         justify-content: space-between;
         padding: 0 ${theme.spacing[2]};
         height: 28px;
-        border-top: 1px solid ${theme.color.borderSecondary};
+        ${borderSeparator(theme, 'top')}
         background: ${theme.color.bgLayout};
         font-size: ${theme.font.size.xs};
         color: ${theme.color.textTertiary};
@@ -93,10 +93,8 @@ export function StatusBar({
             font-size: ${theme.font.size.xs};
             transition: all ${theme.motion.duration.fast};
 
-            &:hover {
-              background: ${theme.color.fillSubtle};
-              color: ${theme.color.text};
-            }
+            ${interactiveItem(theme, theme.color.fillSubtle)}
+            &:hover { color: ${theme.color.text}; }
           `}
           type="button"
         >

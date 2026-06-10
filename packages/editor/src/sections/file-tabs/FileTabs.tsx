@@ -7,7 +7,7 @@
  */
 import { css } from '@emotion/react';
 import { X, FileCode, Book, File } from 'lucide-react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTheme, interactiveItem, borderSeparator } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../../locales/index.js';
 import type { FileTabsProps, FileTab } from '../../types.js';
@@ -81,12 +81,8 @@ function TabItem({
         flex-shrink: 1;
         overflow: hidden;
 
-        &:hover {
-          background: ${theme.color.primaryBg};
-          button {
-            opacity: 0.6;
-          }
-        }
+        ${interactiveItem(theme, theme.color.primaryBg)}
+        &:hover button { opacity: 0.6; }
       `}
     >
       <span
@@ -169,7 +165,7 @@ export function FileTabs({ tabs, activePath, onTabChange, onTabClose }: FileTabs
         min-width: 0;
         overflow: hidden;
         padding: ${theme.spacing['0.5']} ${theme.spacing[1]};
-        border-bottom: 1px solid ${theme.color.borderSecondary};
+        ${borderSeparator(theme)}
       `}
     >
       {tabs.map((tab) => (
