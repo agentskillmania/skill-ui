@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../locales/index.js';
 import { useCockpitLayout } from '../hooks/useCockpitLayout.js';
 import type { CockpitProps } from '../types.js';
+import type { PanelId } from '../panels/types.js';
 
 export function Cockpit(props: CockpitProps) {
   const theme = useTheme();
@@ -143,7 +144,7 @@ export function Cockpit(props: CockpitProps) {
         activePanel={layout.activePanel}
         items={sidebarItems}
         onToggleCollapse={layout.toggleCollapse}
-        onSwitchPanel={(panel) => layout.switchPanel(panel as any)}
+        onSwitchPanel={(panel) => layout.switchPanel(panel as PanelId)}
       >
         {renderPanel()}
       </Sidebar>

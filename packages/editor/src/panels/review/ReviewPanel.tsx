@@ -104,7 +104,6 @@ function ReviewItemRow({ item }: { item: ReviewItem }) {
 }
 
 export function ReviewPanel({ items }: ReviewPanelProps) {
-  const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const containerRef = useRef<HTMLDivElement>(null);
 
