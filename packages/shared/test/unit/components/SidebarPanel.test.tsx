@@ -9,14 +9,14 @@ function wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe('SidebarPanel', () => {
-  it('renders title in uppercase', () => {
+  it('renders title as-is (CSS handles uppercase)', () => {
     render(
       <SidebarPanel title="Event Log" icon={ClipboardList}>
         <span>Panel Content</span>
       </SidebarPanel>,
       { wrapper },
     );
-    expect(screen.getByText('EVENT LOG')).toBeInTheDocument();
+    expect(screen.getByText('Event Log')).toBeInTheDocument();
   });
 
   it('renders children content', () => {
@@ -36,20 +36,29 @@ describe('SidebarPanel', () => {
       </SidebarPanel>,
       { wrapper },
     );
-    // ClipboardList renders an SVG element
     const svg = container.querySelector('svg');
     expect(svg).toBeInTheDocument();
   });
 
-  it('has a scrollable body area', () => {
+  it('has a scrollable body area with overflow auto', () => {
     render(
       <SidebarPanel title="Test" icon={ClipboardList}>
         <span>Content</span>
       </SidebarPanel>,
       { wrapper },
     );
-    // The scrollable body is the second inner div (after the header)
     const contentArea = screen.getByText('Content').parentElement;
-    expect(contentArea).toHaveStyle({ overflowY: 'auto' });
+    expect(contentArea).toHaveStyle({ overflow: 'auto' });
+  });
+
+  it('uses height 100% on outer container', () => {
+    const { container } = render(
+      <SidebarPanel title="Test" icon={ClipboardList}>
+        <div />
+      </SidebarPanel>,
+      { wrapper },
+    );
+    const outer = container.firstChild as HTMLElement;
+    expect(outer).toHaveStyle({ height: '100%' });
   });
 });
