@@ -131,7 +131,7 @@ export function MessageActions({
         title="重新发送"
         onClick={() => onResend?.(message)}
         variant={variant}
-      />,
+      />
     );
   } else if (message.status === 'completed') {
     actions.push(
@@ -155,7 +155,7 @@ export function MessageActions({
         title="在当前位置 Fork"
         onClick={() => onFork?.(message)}
         variant={variant}
-      />,
+      />
     );
   }
 

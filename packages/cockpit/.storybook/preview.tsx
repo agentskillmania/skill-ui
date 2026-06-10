@@ -6,14 +6,8 @@ import { I18nextProvider } from 'react-i18next';
 import { createInstance } from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { lightTheme, lightAntdConfig, GlobalStyles } from '@agentskillmania/skill-ui-theme';
-import {
-  NAMESPACE as cockpitNS,
-  resources as cockpitResources,
-} from '../src/locales/index.js';
-import {
-  NAMESPACE as chatNS,
-  resources as chatResources,
-} from '@agentskillmania/skill-ui-chat';
+import { NAMESPACE as cockpitNS, resources as cockpitResources } from '../src/locales/index.js';
+import { NAMESPACE as chatNS, resources as chatResources } from '@agentskillmania/skill-ui-chat';
 
 // Merge cockpit and chat namespace resources
 const mergedResources = {
