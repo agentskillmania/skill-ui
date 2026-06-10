@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTheme, interactiveRow } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Tabs, Typography } from 'antd';
 import { useMemo, useState } from 'react';
@@ -10,13 +10,12 @@ import {
   emptyTextStyle,
   titleRowStyle,
   toolRowTopStyle,
-  statusDotStyle,
   toolNameStyle,
   toolDescStyle,
   tabCountStyle,
 } from './styles.js';
 import type { RunnerToolInfo } from './types.js';
-import { CollapsibleCard, useToggle } from '@agentskillmania/skill-ui-shared';
+import { CollapsibleCard, useToggle, StatusDot } from '@agentskillmania/skill-ui-shared';
 
 /** Props for ToolsCard. */
 export interface ToolsCardProps {
@@ -73,8 +72,8 @@ function groupByCategory(tools: RunnerToolInfo[]): Map<ToolCategory, RunnerToolI
  * ToolsCard displays available tools with tab-based category filtering.
  * Three tabs: Builtin / MCP / Custom. No "All" tab.
  * Each tool is a two-line row: name with status dot on top,
- * description truncated below. Click a row to expand full description
- * with a primary border highlight (same pattern as EventLog).
+ * description truncated below. Uses shared interactiveRow for hover
+ * and StatusDot for the enabled indicator.
  * Uses antd Tabs with size="small" for compact layout.
  */
 export function ToolsCard({ tools }: ToolsCardProps) {
@@ -82,7 +81,6 @@ export function ToolsCard({ tools }: ToolsCardProps) {
   const theme = useTheme();
   const collapsedToggle = useToggle(false);
   const [activeTab, setActiveTab] = useState<string>('builtin');
-  const [expandedTools, setExpandedTools] = useState<Set<string>>(new Set());
 
   const isEmpty = !tools || tools.length === 0;
 
@@ -90,18 +88,6 @@ export function ToolsCard({ tools }: ToolsCardProps) {
     () => (isEmpty ? new Map<ToolCategory, RunnerToolInfo[]>() : groupByCategory(tools!)),
     [tools, isEmpty],
   );
-
-  const toggleExpand = (name: string) => {
-    setExpandedTools((prev) => {
-      const next = new Set(prev);
-      if (next.has(name)) {
-        next.delete(name);
-      } else {
-        next.add(name);
-      }
-      return next;
-    });
-  };
 
   /** Filtered tools based on active tab. */
   const filteredTools = useMemo(() => {
@@ -156,36 +142,14 @@ export function ToolsCard({ tools }: ToolsCardProps) {
           <div css={css`padding: ${theme.spacing[1]} 0;`}>
             {(effectiveTab === activeTab ? filteredTools : (groups.get(effectiveTab as ToolCategory) ?? [])).map((tool) => {
               const isEnabled = tool.enabled !== false;
-              const isExpanded = expandedTools.has(tool.name);
               return (
                 <div
                   key={tool.name}
-                  css={css`
-                    padding: ${theme.spacing[1]} ${theme.spacing[2]};
-                    cursor: pointer;
-                    border: 1px solid ${isExpanded ? theme.color.primary : 'transparent'};
-                    border-radius: ${theme.radius.md};
-                    transition: border-color 0.15s, background 0.12s;
-                    &:hover {
-                      background: ${theme.color.fillSecondary};
-                    }
-                  `}
-                  onClick={() => toggleExpand(tool.name)}
+                  css={interactiveRow(theme)}
                   data-testid={`tool-item-${tool.name}`}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      toggleExpand(tool.name);
-                    }
-                  }}
                 >
                   <div css={toolRowTopStyle(theme)}>
-                    <div
-                      css={statusDotStyle(theme, isEnabled)}
-                      data-testid={`tool-status-${tool.name}`}
-                    />
+                    <StatusDot enabled={isEnabled} />
                     <span
                       css={toolNameStyle(theme, isEnabled)}
                       data-testid={`tool-name-${tool.name}`}
@@ -195,7 +159,7 @@ export function ToolsCard({ tools }: ToolsCardProps) {
                   </div>
                   {tool.description && (
                     <div
-                      css={toolDescStyle(theme, isExpanded)}
+                      css={toolDescStyle(theme, false)}
                       data-testid={`tool-desc-${tool.name}`}
                     >
                       {tool.description}

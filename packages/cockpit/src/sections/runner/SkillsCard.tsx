@@ -2,7 +2,6 @@
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { Typography } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../../locales/index.js';
@@ -16,7 +15,7 @@ import {
   descriptionStyle,
 } from './styles.js';
 import type { RunnerSkillInfo } from './types.js';
-import { CollapsibleCard, useToggle } from '@agentskillmania/skill-ui-shared';
+import { CollapsibleCard, useToggle, ExpandableItem } from '@agentskillmania/skill-ui-shared';
 
 /** Props for SkillsCard. */
 export interface SkillsCardProps {
@@ -27,27 +26,14 @@ export interface SkillsCardProps {
 /**
  * SkillsCard displays loaded skills as a flat collapsible list.
  * The entire card body can be collapsed via the top-right toggle.
- * Expanded items also show description.
+ * Uses ExpandableItem for per-skill expand/collapse with description.
  */
 export function SkillsCard({ skills }: SkillsCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
   const collapsedToggle = useToggle(false);
-  const [expandedSkills, setExpandedSkills] = useState<Set<string>>(new Set());
 
   const isEmpty = !skills || skills.length === 0;
-
-  const toggleSkill = (name: string) => {
-    setExpandedSkills((prev) => {
-      const next = new Set(prev);
-      if (next.has(name)) {
-        next.delete(name);
-      } else {
-        next.add(name);
-      }
-      return next;
-    });
-  };
 
   return (
     <CollapsibleCard
@@ -67,36 +53,34 @@ export function SkillsCard({ skills }: SkillsCardProps) {
         </div>
       ) : (
         <div>
-          {skills!.map((skill) => {
-            const isExpanded = expandedSkills.has(skill.name);
-            return (
-              <div key={skill.name}>
-                <div
-                  css={toolItemStyle(theme)}
-                  data-testid={`skill-item-${skill.name}`}
-                >
-                  <div
-                    css={collapseHeaderStyle(theme)}
-                    onClick={() => toggleSkill(skill.name)}
-                    data-testid={`skill-toggle-${skill.name}`}
-                  >
-                    {isExpanded ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
-                    <span css={itemNameStyle(theme)}>{skill.name}</span>
-                  </div>
-                  {skill.source && (
-                    <span css={sourcePathStyle(theme)} title={skill.source}>
-                      {skill.source}
-                    </span>
-                  )}
-                </div>
-                {isExpanded && skill.description && (
-                  <div css={descriptionStyle(theme)}>
-                    {skill.description}
+          {skills!.map((skill) => (
+            <div key={skill.name}>
+              <ExpandableItem
+                expandable={!!skill.description}
+                defaultExpanded={false}
+                renderSummary={({ expanded, toggle }) => (
+                  <div css={toolItemStyle(theme)} data-testid={`skill-item-${skill.name}`}>
+                    <div
+                      css={collapseHeaderStyle(theme)}
+                      onClick={toggle}
+                      data-testid={`skill-toggle-${skill.name}`}
+                    >
+                      {expanded ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
+                      <span css={itemNameStyle(theme)}>{skill.name}</span>
+                    </div>
+                    {skill.source && (
+                      <span css={sourcePathStyle(theme)} title={skill.source}>
+                        {skill.source}
+                      </span>
+                    )}
                   </div>
                 )}
-              </div>
-            );
-          })}
+                renderDetail={() => (
+                  skill.description ? <div css={descriptionStyle(theme)}>{skill.description}</div> : null
+                )}
+              />
+            </div>
+          ))}
         </div>
       )}
     </CollapsibleCard>

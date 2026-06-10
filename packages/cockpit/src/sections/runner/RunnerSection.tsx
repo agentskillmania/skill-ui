@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import { css } from '@emotion/react';
 import { Settings } from 'lucide-react';
 
 import { SectionHeader } from '@agentskillmania/skill-ui-shared';
@@ -6,9 +7,8 @@ import { SectionHeader } from '@agentskillmania/skill-ui-shared';
 import { FeatureTagsCard } from './FeatureTagsCard.js';
 import { SkillsCard } from './SkillsCard.js';
 import { ToolsCard } from './ToolsCard.js';
-import { sectionStyle } from './styles.js';
 import type { RunnerSectionProps } from './types.js';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTheme, flexColumn } from '@agentskillmania/skill-ui-theme';
 
 /**
  * RunnerSection renders a section header followed by three cards:
@@ -19,7 +19,7 @@ export function RunnerSection({ runner }: RunnerSectionProps) {
   const theme = useTheme();
 
   return (
-    <div css={sectionStyle(theme)}>
+    <div css={css`${flexColumn(theme, '2')}`}>
       <SectionHeader icon={Settings} title="Runner" />
 
       <FeatureTagsCard features={runner?.features} />

@@ -4,12 +4,7 @@
  * so content only needs the distinguishing detail.
  */
 import type { CockpitEvent } from './types.js';
-
-/** Truncate text with ellipsis */
-function truncate(text: string, max: number): string {
-  if (text.length <= max) return text;
-  return text.slice(0, max) + '...';
-}
+import { truncate } from '@agentskillmania/skill-ui-shared';
 
 /** Render event content text based on event type */
 export function renderEventContent(event: CockpitEvent, expanded: boolean): string {

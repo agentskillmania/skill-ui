@@ -1,19 +1,20 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import { Progress, Statistic, Tag, Typography } from 'antd';
+import { Progress, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 import type { Theme } from '@agentskillmania/skill-ui-theme';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTheme, flexColumn, flexRow } from '@agentskillmania/skill-ui-theme';
+
 import { NAMESPACE } from '../../locales/index.js';
 import type { SessionOverviewData, SessionStatus } from './types.js';
 import {
-  cardBodyStyle,
-  footerStyle,
-  metricGrid3ColStyle,
-  metricGridStyle,
-  titleRowStyle,
-} from './styles.js';
-import { CollapsibleCard, useToggle } from '@agentskillmania/skill-ui-shared';
+  CollapsibleCard,
+  useToggle,
+  MetricTile,
+  formatTokens,
+  formatTimestamp,
+  metricGrid,
+} from '@agentskillmania/skill-ui-shared';
 
 /** Props for SessionOverviewCard. */
 export interface SessionOverviewCardProps {
@@ -21,22 +22,6 @@ export interface SessionOverviewCardProps {
   data: SessionOverviewData;
   /** Whether the card starts collapsed. Defaults to false. */
   defaultCollapsed?: boolean;
-}
-
-/** Format token counts into human-readable strings. */
-function formatTokens(value: number | undefined): string {
-  if (value === undefined) return '-';
-  if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `${(value / 1_000).toFixed(1)}k`;
-  return value.toLocaleString();
-}
-
-/** Format ISO timestamp to locale string, e.g. '6/5 14:32'. */
-function formatTimestamp(iso: string | undefined): string {
-  if (!iso) return '-';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return iso;
-  return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
 /** Resolve i18n key for session status. */
@@ -74,26 +59,6 @@ const timestampStyle = (theme: Theme) => css`
   font-size: ${theme.font.size.xs};
 `;
 
-/** Metric tile — small card with background for a single statistic. */
-const metricTileStyle = (theme: Theme) => css`
-  background: ${theme.color.fillSecondary};
-  border-radius: ${theme.radius.base};
-  padding: ${theme.spacing['2']};
-  text-align: center;
-
-  .ant-statistic-title {
-    font-size: 10px;
-    color: ${theme.color.textSecondary};
-    margin-bottom: 2px;
-  }
-
-  .ant-statistic-content {
-    font-size: ${theme.font.size.base};
-    font-weight: ${theme.font.weight.bold};
-    color: ${theme.color.text};
-  }
-`;
-
 /**
  * SessionOverviewCard renders a collapsible card summarizing a session's
  * title, status, metrics, token usage, context window, and timestamps.
@@ -117,7 +82,7 @@ export function SessionOverviewCard({ data, defaultCollapsed = false }: SessionO
   return (
     <CollapsibleCard
       title={
-        <div css={titleRowStyle(theme)}>
+        <div css={css`${flexRow(theme, '1')}; align-items: center;`}>
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
             {displayTitle}
           </Typography.Text>
@@ -132,33 +97,23 @@ export function SessionOverviewCard({ data, defaultCollapsed = false }: SessionO
       collapsed={collapsedToggle.value}
       onCollapseChange={(v) => collapsedToggle.set(v)}
     >
-      <div css={cardBodyStyle(theme)}>
+      <div css={css`${flexColumn(theme, '2')}`}>
         {/* Agent · Model subtitle */}
         <div css={subtitleStyle(theme)}>
           {data.agentName} · {data.model}
         </div>
 
         {/* Steps & Messages — 2-col grid */}
-        <div css={metricGridStyle(theme)}>
-          <div css={metricTileStyle(theme)}>
-            <Statistic title={t('session.overview.steps')} value={data.stepCount} />
-          </div>
-          <div css={metricTileStyle(theme)}>
-            <Statistic title={t('session.overview.messages')} value={data.messageCount} />
-          </div>
+        <div css={metricGrid(theme, 2)}>
+          <MetricTile title={t('session.overview.steps')} value={data.stepCount} />
+          <MetricTile title={t('session.overview.messages')} value={data.messageCount} />
         </div>
 
         {/* Token metrics — 3-col grid */}
-        <div css={metricGrid3ColStyle(theme)}>
-          <div css={metricTileStyle(theme)}>
-            <Statistic title={t('session.overview.tokensIn')} value={formatTokens(data.tokensIn)} />
-          </div>
-          <div css={metricTileStyle(theme)}>
-            <Statistic title={t('session.overview.tokensOut')} value={formatTokens(data.tokensOut)} />
-          </div>
-          <div css={metricTileStyle(theme)}>
-            <Statistic title={t('session.overview.tokensTotal')} value={formatTokens(data.tokensTotal)} />
-          </div>
+        <div css={metricGrid(theme, 3)}>
+          <MetricTile title={t('session.overview.tokensIn')} value={formatTokens(data.tokensIn)} />
+          <MetricTile title={t('session.overview.tokensOut')} value={formatTokens(data.tokensOut)} />
+          <MetricTile title={t('session.overview.tokensTotal')} value={formatTokens(data.tokensTotal)} />
         </div>
 
         {/* Context usage progress bar */}
@@ -177,7 +132,7 @@ export function SessionOverviewCard({ data, defaultCollapsed = false }: SessionO
         )}
 
         {/* Timestamps footer */}
-        <div css={footerStyle(theme)}>
+        <div css={css`${flexRow(theme, '1')}; justify-content: space-between;`}>
           <span css={timestampStyle(theme)}>
             {t('session.overview.created', { time: formatTimestamp(data.createdAt) })}
           </span>

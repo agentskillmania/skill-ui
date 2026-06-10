@@ -13,6 +13,11 @@ export {
   Sidebar,
   SidebarPanel,
   SidebarIcons,
+  MetricTile,
+  SectionLabel,
+  StatusDot,
+  CopyValue,
+  InfoRow,
 } from './components/index.js';
 
 // Component types
@@ -27,6 +32,11 @@ export type {
   SidebarPanelProps,
   SidebarIconsProps,
   SidebarIconItem,
+  MetricTileProps,
+  SectionLabelProps,
+  StatusDotProps,
+  CopyValueProps,
+  InfoRowProps,
 } from './components/index.js';
 
 // Hooks

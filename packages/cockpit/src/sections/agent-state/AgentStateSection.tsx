@@ -1,14 +1,14 @@
 /** @jsxImportSource @emotion/react */
+import { css } from '@emotion/react';
 import { Cpu } from 'lucide-react';
 
+import { useTheme, flexColumn } from '@agentskillmania/skill-ui-theme';
 import { SectionHeader } from '@agentskillmania/skill-ui-shared';
 
 import { ActiveSkillCard } from './ActiveSkillCard.js';
 import { CompressionCard } from './CompressionCard.js';
 import { LLMContextCard } from './LLMContextCard.js';
-import { sectionStyle } from './styles.js';
 import type { AgentStateSectionProps } from './types.js';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
 
 /**
  * AgentStateSection renders a section header followed by three cards:
@@ -23,7 +23,7 @@ export function AgentStateSection({
   const theme = useTheme();
 
   return (
-    <div css={sectionStyle(theme)}>
+    <div css={css`${flexColumn(theme, '2')}`}>
       <SectionHeader icon={Cpu} title="Agent State" />
 
       <ActiveSkillCard skillState={skillState} />

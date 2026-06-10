@@ -1,12 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import type { Theme } from '@agentskillmania/skill-ui-theme';
-import { flexColumn, flexRow } from '@agentskillmania/skill-ui-theme';
+import { flexRow } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
-
-/** Section container — vertical stack of cards. Reuses session/agent-state pattern. */
-export const sectionStyle = (theme: Theme) => css`
-  ${flexColumn(theme, '2')}
-`;
 
 /** Empty state text — muted, centered. */
 export const emptyTextStyle = (theme: Theme) => css`
@@ -20,37 +15,6 @@ export const tagRowStyle = (theme: Theme) => css`
   display: flex;
   flex-wrap: wrap;
   gap: ${theme.spacing[1]};
-`;
-
-/** Tool group header — type label + count badge (used by SkillsCard). */
-export const toolGroupHeaderStyle = (theme: Theme) => css`
-  ${flexRow(theme, '1')};
-  align-items: center;
-  margin-top: ${theme.spacing[2]};
-  margin-bottom: ${theme.spacing[1]};
-
-  &:first-child {
-    margin-top: 0;
-  }
-`;
-
-/** Group label — type name (used by SkillsCard). */
-export const groupLabelStyle = (theme: Theme) => css`
-  font-size: ${theme.font.size.xs};
-  font-weight: ${theme.font.weight.bold};
-  color: ${theme.color.textSecondary};
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-`;
-
-/** Count badge — small muted pill. */
-export const countBadgeStyle = (theme: Theme) => css`
-  font-size: 10px;
-  color: ${theme.color.textTertiary};
-  background: ${theme.color.fillSecondary};
-  border-radius: ${theme.radius.base};
-  padding: 0 ${theme.spacing[1]};
-  line-height: 18px;
 `;
 
 /** Tool item row — name + enabled badge + description toggle (used by SkillsCard). */
@@ -115,38 +79,11 @@ export const titleRowStyle = (theme: Theme) => css`
   gap: ${theme.spacing[1]};
 `;
 
-// ===== ToolsCard V2 styles (tab + two-line rows) =====
-
-/**
- * Tool row style — two-line layout with click-to-expand description.
- * Line 1: status dot + tool name (monospace).
- * Line 2: description text, truncated by default, full on expand.
- */
-export const toolRowStyle = (theme: Theme) => css`
-  padding: ${theme.spacing[1]} ${theme.spacing[2]};
-  cursor: pointer;
-  border-radius: ${theme.radius.base};
-  transition: background 0.12s;
-
-  &:hover {
-    background: ${theme.color.fillSecondary};
-  }
-`;
-
 /** Tool row top line — dot + name. */
 export const toolRowTopStyle = (theme: Theme) => css`
   display: flex;
   align-items: center;
   gap: ${theme.spacing[1]};
-`;
-
-/** Status dot — green for enabled, gray for disabled. */
-export const statusDotStyle = (theme: Theme, enabled: boolean) => css`
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  background: ${enabled ? theme.color.success : theme.color.textQuaternary};
 `;
 
 /** Tool name — monospace, strikethrough when disabled. */

@@ -1,9 +1,8 @@
 /** @jsxImportSource @emotion/react */
-import type { Theme } from '@agentskillmania/skill-ui-theme';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { useTheme, flexRow } from '@agentskillmania/skill-ui-theme';
 
 import { NAMESPACE } from '../../locales/index.js';
 import type { SkillStateData } from './types.js';
@@ -12,9 +11,13 @@ import {
   codeBlockStyle,
   stackFrameStyle,
   stackContainerStyle,
-  sectionLabelStyle,
 } from './styles.js';
-import { CollapsibleCard, useToggle } from '@agentskillmania/skill-ui-shared';
+import {
+  CollapsibleCard,
+  useToggle,
+  SectionLabel,
+  formatRelativeTime,
+} from '@agentskillmania/skill-ui-shared';
 
 /** Props for ActiveSkillCard. */
 export interface ActiveSkillCardProps {
@@ -22,34 +25,12 @@ export interface ActiveSkillCardProps {
   skillState?: SkillStateData | null;
 }
 
-/** Title row style. */
-const titleRowStyle = (theme: Theme) => css`
-  display: flex;
-  align-items: center;
-  gap: ${theme.spacing[1]};
-`;
-
 /** Current skill name — highlighted. */
-const skillNameStyle = (theme: Theme) => css`
+const skillNameStyle = (theme: ReturnType<typeof useTheme>) => css`
   color: ${theme.color.primary};
   font-size: ${theme.font.size.base};
   font-weight: ${theme.font.weight.bold};
 `;
-
-/**
- * Format a unix timestamp (ms) to relative time string.
- * Returns "Xs", "Xm", "Xh" relative to now.
- */
-function formatRelativeTime(timestamp: number | undefined): string {
-  if (timestamp == null) return '';
-  const diff = Date.now() - timestamp;
-  const seconds = Math.floor(diff / 1000);
-  if (seconds < 60) return `${seconds}s ago`;
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m ago`;
-  const hours = Math.floor(minutes / 60);
-  return `${hours}h ago`;
-}
 
 /**
  * ActiveSkillCard displays the current active skill name, call stack depth,
@@ -70,7 +51,7 @@ export function ActiveSkillCard({ skillState }: ActiveSkillCardProps) {
   return (
     <CollapsibleCard
       title={
-        <div css={titleRowStyle(theme)}>
+        <div css={css`${flexRow(theme, '1')}; align-items: center;`}>
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
             {t('agentState.activeSkill.title')}
           </Typography.Text>
@@ -86,7 +67,7 @@ export function ActiveSkillCard({ skillState }: ActiveSkillCardProps) {
       ) : (
         <div>
           {/* Current skill + depth badge */}
-          <div css={titleRowStyle(theme)} style={{ marginBottom: theme.spacing[2] }}>
+          <div css={css`${flexRow(theme, '1')}; align-items: center;`} style={{ marginBottom: theme.spacing[2] }}>
             <span css={skillNameStyle(theme)} data-testid="active-skill-name">
               {skillState!.current}
             </span>
@@ -107,7 +88,7 @@ export function ActiveSkillCard({ skillState }: ActiveSkillCardProps) {
           {/* Stack frames — shown directly, no collapse */}
           {stack.length > 0 && (
             <div>
-              <div css={sectionLabelStyle(theme)}>Stack</div>
+              <SectionLabel>Stack</SectionLabel>
               <div css={stackContainerStyle(theme)}>
                 {stack.map((frame, i) => (
                   <div key={i} css={stackFrameStyle(theme)}>
@@ -126,9 +107,9 @@ export function ActiveSkillCard({ skillState }: ActiveSkillCardProps) {
           {/* Loaded instructions — truncated, click to expand */}
           {skillState!.loadedInstructions && (
             <div>
-              <div css={sectionLabelStyle(theme)}>
+              <SectionLabel>
                 {t('agentState.activeSkill.instructions')}
-              </div>
+              </SectionLabel>
               <div
                 css={codeBlockStyle(theme, instructionsToggle.value)}
                 onClick={instructionsToggle.toggle}

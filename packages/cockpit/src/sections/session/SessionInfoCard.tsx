@@ -1,12 +1,17 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import { Typography, Tooltip, message } from 'antd';
+import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTheme, flexColumn, flexRow } from '@agentskillmania/skill-ui-theme';
 import { NAMESPACE } from '../../locales/index.js';
 import type { SessionInfoData } from './types.js';
-import { cardBodyStyle, titleRowStyle } from './styles.js';
-import { CollapsibleCard, useToggle } from '@agentskillmania/skill-ui-shared';
+import {
+  CollapsibleCard,
+  useToggle,
+  InfoRow,
+  SectionLabel,
+  formatNumber,
+} from '@agentskillmania/skill-ui-shared';
 
 /** Props for the SessionInfoCard component. */
 export interface SessionInfoCardProps {
@@ -35,96 +40,6 @@ const PathList = ({ items }: { items: string[] }) => {
   );
 };
 
-/** Group header styled as secondary uppercase label. */
-const GroupHeader = ({ children }: { children: React.ReactNode }) => {
-  const theme = useTheme();
-  return (
-    <div
-      css={css`
-        font-size: 10px;
-        font-weight: ${theme.font.weight.semibold};
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: ${theme.color.textSecondary};
-        margin-bottom: ${theme.spacing['1']};
-        margin-top: ${theme.spacing['2']};
-        &:first-of-type { margin-top: 0; }
-      `}
-    >
-      {children}
-    </div>
-  );
-};
-
-/** Click-to-copy value with ellipsis, antd tooltip, and message feedback. */
-const CopyValue = ({ text, children }: { text: string; children: React.ReactNode }) => {
-  const theme = useTheme();
-  const { t } = useTranslation(NAMESPACE);
-  const [messageApi, contextHolder] = message.useMessage();
-
-  const handleClick = async () => {
-    try {
-      await navigator.clipboard.writeText(text);
-      messageApi.success(t('session.info.copied'), 1.2);
-    } catch {
-      messageApi.error(t('session.info.copyFailed'));
-    }
-  };
-
-  return (
-    <>
-      {contextHolder}
-      <Tooltip title={text} placement="topRight">
-        <span
-          onClick={handleClick}
-          css={css`
-            color: ${theme.color.text};
-            text-align: right;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 60%;
-            cursor: pointer;
-            user-select: none;
-            transition: color 0.15s;
-            &:hover {
-              color: ${theme.color.primary};
-            }
-          `}
-        >
-          {children}
-        </span>
-      </Tooltip>
-    </>
-  );
-};
-
-/** Single key-value row. */
-const InfoRow = ({ label, text, children }: { label: string; text: string; children: React.ReactNode }) => {
-  const theme = useTheme();
-  return (
-    <div
-      css={css`
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        gap: ${theme.spacing['2']};
-        padding: 2px 0;
-        font-size: ${theme.font.size.sm};
-      `}
-    >
-      <span css={css`color: ${theme.color.textSecondary}; flex-shrink: 0;`}>{label}</span>
-      <CopyValue text={text}>{children}</CopyValue>
-    </div>
-  );
-};
-
-/** Format a number with locale, or return '-' for undefined. */
-const formatNumber = (value: number | undefined): string => {
-  if (value == null) return '-';
-  return value.toLocaleString();
-};
-
 /** Card content with three info groups. */
 const CardContent: React.FC<{ data: SessionInfoData }> = ({ data }) => {
   const { t } = useTranslation(NAMESPACE);
@@ -132,7 +47,7 @@ const CardContent: React.FC<{ data: SessionInfoData }> = ({ data }) => {
   return (
     <div css={css`padding: ${useTheme().spacing['1']} 0;`}>
       {/* Identity group */}
-      <GroupHeader>{t('session.info.identity')}</GroupHeader>
+      <SectionLabel>{t('session.info.identity')}</SectionLabel>
       <InfoRow label={t('session.info.sessionId')} text={data.sessionId}>
         <CodeValue>{data.sessionId}</CodeValue>
       </InfoRow>
@@ -147,7 +62,7 @@ const CardContent: React.FC<{ data: SessionInfoData }> = ({ data }) => {
       </InfoRow>
 
       {/* Tokens group */}
-      <GroupHeader>{t('session.info.tokens')}</GroupHeader>
+      <SectionLabel>{t('session.info.tokens')}</SectionLabel>
       <InfoRow label={t('session.info.input')} text={formatNumber(data.tokensIn)}>
         <CodeValue>{formatNumber(data.tokensIn)}</CodeValue>
       </InfoRow>
@@ -159,7 +74,7 @@ const CardContent: React.FC<{ data: SessionInfoData }> = ({ data }) => {
       </InfoRow>
 
       {/* Paths group */}
-      <GroupHeader>{t('session.info.paths')}</GroupHeader>
+      <SectionLabel>{t('session.info.paths')}</SectionLabel>
       <InfoRow label={t('session.info.workspace')} text={data.workspacePath}>
         <CodeValue>{data.workspacePath}</CodeValue>
       </InfoRow>
@@ -193,7 +108,7 @@ export const SessionInfoCard: React.FC<SessionInfoCardProps> = ({
   return (
     <CollapsibleCard
       title={
-        <div css={titleRowStyle(theme)}>
+        <div css={css`${flexRow(theme, '1')}; align-items: center;`}>
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
             {t('session.info.title')}
           </Typography.Text>
@@ -202,7 +117,7 @@ export const SessionInfoCard: React.FC<SessionInfoCardProps> = ({
       collapsed={collapsedToggle.value}
       onCollapseChange={(v) => collapsedToggle.set(v)}
     >
-      <div css={cardBodyStyle(theme)}>
+      <div css={css`${flexColumn(theme, '2')}`}>
         <CardContent data={data} />
       </div>
     </CollapsibleCard>

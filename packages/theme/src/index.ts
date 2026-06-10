@@ -64,6 +64,7 @@ export {
   absoluteFill,
   interactiveItem,
   subtleBackground,
+  interactiveRow,
   borderSeparator,
   scrollContainer,
   media,

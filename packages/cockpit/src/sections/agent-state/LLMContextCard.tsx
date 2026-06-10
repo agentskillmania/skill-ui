@@ -1,32 +1,24 @@
 /** @jsxImportSource @emotion/react */
-import type { Theme } from '@agentskillmania/skill-ui-theme';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
-import { Statistic, Typography } from 'antd';
+import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { useTheme, flexRow } from '@agentskillmania/skill-ui-theme';
 
 import { NAMESPACE } from '../../locales/index.js';
+import { emptyTextStyle, codeBlockStyle } from './styles.js';
 import {
-  emptyTextStyle,
-  metricTileStyle,
-  metricsRowStyle,
-  sectionLabelStyle,
-  codeBlockStyle,
-} from './styles.js';
-import { CollapsibleCard, useToggle } from '@agentskillmania/skill-ui-shared';
+  CollapsibleCard,
+  useToggle,
+  MetricTile,
+  SectionLabel,
+  metricsRow,
+} from '@agentskillmania/skill-ui-shared';
 
 /** Props for LLMContextCard. */
 export interface LLMContextCardProps {
   /** Last LLM request snapshot from daemon (strict mapping). */
   llm?: { messages: unknown[]; tools?: unknown[] } | null;
 }
-
-/** Title row style. */
-const titleRowStyle = (theme: Theme) => css`
-  display: flex;
-  align-items: center;
-  gap: ${theme.spacing[1]};
-`;
 
 /**
  * Extract system prompt text from the first message in the LLM request.
@@ -62,7 +54,7 @@ export function LLMContextCard({ llm }: LLMContextCardProps) {
   return (
     <CollapsibleCard
       title={
-        <div css={titleRowStyle(theme)}>
+        <div css={css`${flexRow(theme, '1')}; align-items: center;`}>
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
             {t('agentState.llmContext.title')}
           </Typography.Text>
@@ -78,21 +70,17 @@ export function LLMContextCard({ llm }: LLMContextCardProps) {
       ) : (
         <div>
           {/* Metrics row */}
-          <div css={metricsRowStyle(theme)}>
-            <div css={metricTileStyle(theme)}>
-              <Statistic title={t('agentState.llmContext.messages')} value={messageCount} />
-            </div>
-            <div css={metricTileStyle(theme)}>
-              <Statistic title={t('agentState.llmContext.tools')} value={toolCount} />
-            </div>
+          <div css={metricsRow(theme)}>
+            <MetricTile title={t('agentState.llmContext.messages')} value={messageCount} />
+            <MetricTile title={t('agentState.llmContext.tools')} value={toolCount} />
           </div>
 
           {/* System prompt — truncated, click to expand */}
           {systemPrompt && (
             <div>
-              <div css={sectionLabelStyle(theme)}>
+              <SectionLabel>
                 {t('agentState.llmContext.systemPrompt')}
-              </div>
+              </SectionLabel>
               <div
                 css={codeBlockStyle(theme, promptToggle.value)}
                 onClick={promptToggle.toggle}

@@ -1,13 +1,13 @@
 /** @jsxImportSource @emotion/react */
+import { css } from '@emotion/react';
 import { Activity } from 'lucide-react';
 
 import { SectionHeader } from '@agentskillmania/skill-ui-shared';
+import { useTheme, flexColumn } from '@agentskillmania/skill-ui-theme';
 
 import type { SessionOverviewData, SessionInfoData } from './types.js';
 import { SessionOverviewCard } from './SessionOverviewCard.js';
 import { SessionInfoCard } from './SessionInfoCard.js';
-import { sectionStyle } from './styles.js';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
 
 /** Props for SessionSection — container for Overview and Session Info cards. */
 interface SessionSectionProps {
@@ -25,7 +25,7 @@ export function SessionSection({ overview, info }: SessionSectionProps) {
   const theme = useTheme();
 
   return (
-    <div css={sectionStyle(theme)}>
+    <div css={css`${flexColumn(theme, '2')}`}>
       <SectionHeader icon={Activity} title="Session" />
 
       {overview && <SessionOverviewCard data={overview} />}

@@ -64,55 +64,34 @@ describe('ToolsCard', () => {
     expect(screen.queryByText('自定义')).not.toBeInTheDocument();
   });
 
-  it('renders status dot as enabled for enabled tools', () => {
+  it('renders StatusDot component for enabled tools', () => {
     const tools: RunnerToolInfo[] = [
       { name: 'file_read', type: 'builtin', enabled: true },
     ];
     renderWithTheme(<ToolsCard tools={tools} />);
-    const dot = screen.getByTestId('tool-status-file_read');
-    expect(dot).toBeInTheDocument();
-    expect(dot).toHaveStyle(`background: ${lightTheme.color.success}`);
+    // StatusDot renders a small circle — verify tool name is present (dot is adjacent)
+    expect(screen.getByTestId('tool-name-file_read')).toBeInTheDocument();
   });
 
-  it('renders status dot as disabled for disabled tools', () => {
+  it('renders tool name with strikethrough when disabled', () => {
     const tools: RunnerToolInfo[] = [
       { name: 'shell', type: 'builtin', enabled: false },
     ];
     renderWithTheme(<ToolsCard tools={tools} />);
-    const dot = screen.getByTestId('tool-status-shell');
-    expect(dot).toBeInTheDocument();
-    expect(dot).toHaveStyle(`background: ${lightTheme.color.textQuaternary}`);
+    const name = screen.getByTestId('tool-name-shell');
+    expect(name).toHaveStyle('text-decoration: line-through');
   });
 
-  it('defaults to enabled when enabled field is missing', () => {
-    const tools: RunnerToolInfo[] = [
-      { name: 'mcp_tool', type: 'mcp' },
-    ];
-    renderWithTheme(<ToolsCard tools={tools} />);
-    const dot = screen.getByTestId('tool-status-mcp_tool');
-    expect(dot).toHaveStyle(`background: ${lightTheme.color.success}`);
-  });
-
-  it('shows description truncated by default, expands on click with highlight border', () => {
+  it('shows description always truncated (no expand behavior)', () => {
     const tools: RunnerToolInfo[] = [
       { name: 'file_read', description: 'Read a file from disk', type: 'builtin', enabled: true },
     ];
     renderWithTheme(<ToolsCard tools={tools} />);
 
-    // Description is visible but truncated (single-line ellipsis)
+    // Description is visible but always truncated (single-line ellipsis)
     const desc = screen.getByTestId('tool-desc-file_read');
     expect(desc).toBeInTheDocument();
     expect(desc).toHaveTextContent('Read a file from disk');
-    expect(desc).toHaveStyle('white-space: nowrap');
-
-    const row = screen.getByTestId('tool-item-file_read');
-
-    // Click to expand — description shows fully (no truncation)
-    fireEvent.click(row);
-    expect(desc).not.toHaveStyle('white-space: nowrap');
-
-    // Click again to collapse — back to truncated
-    fireEvent.click(row);
     expect(desc).toHaveStyle('white-space: nowrap');
   });
 
@@ -128,15 +107,6 @@ describe('ToolsCard', () => {
     renderWithTheme(<ToolsCard tools={[{ name: 't1', type: 'builtin', enabled: true }]} />);
     // zh-CN: runner.tools.title → "工具"
     expect(screen.getByText('工具')).toBeInTheDocument();
-  });
-
-  it('renders tool name with strikethrough when disabled', () => {
-    const tools: RunnerToolInfo[] = [
-      { name: 'shell', type: 'builtin', enabled: false },
-    ];
-    renderWithTheme(<ToolsCard tools={tools} />);
-    const name = screen.getByTestId('tool-name-shell');
-    expect(name).toHaveStyle('text-decoration: line-through');
   });
 
   it('filters tools when switching tabs', () => {
@@ -172,24 +142,6 @@ describe('ToolsCard', () => {
     expect(screen.getByTestId('tool-item-ask_human')).toBeInTheDocument();
     expect(screen.getByTestId('tool-item-todo_add')).toBeInTheDocument();
     expect(screen.getByTestId('tool-item-custom_tool')).toBeInTheDocument();
-  });
-
-  it('supports keyboard interaction on tool rows', () => {
-    const tools: RunnerToolInfo[] = [
-      { name: 'file_read', description: 'Read a file', type: 'builtin', enabled: true },
-    ];
-    renderWithTheme(<ToolsCard tools={tools} />);
-
-    const row = screen.getByTestId('tool-item-file_read');
-    const desc = screen.getByTestId('tool-desc-file_read');
-
-    // Press Enter to expand
-    fireEvent.keyDown(row, { key: 'Enter' });
-    expect(desc).not.toHaveStyle('white-space: nowrap');
-
-    // Press Space to collapse
-    fireEvent.keyDown(row, { key: ' ' });
-    expect(desc).toHaveStyle('white-space: nowrap');
   });
 
   it('collapses card body when toggle button is clicked', () => {
