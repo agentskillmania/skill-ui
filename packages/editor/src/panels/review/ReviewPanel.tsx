@@ -4,12 +4,11 @@
  *
  * Displays lint results and AI review feedback as an auto-scrolling log.
  */
-import { css } from '@emotion/react';
 import { useRef, useEffect } from 'react';
 import { AlertTriangle, Info, XCircle, ClipboardCheck } from 'lucide-react';
-import { useTheme, interactiveItem } from '@agentskillmania/skill-ui-theme';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
-import { EmptyState, ExpandableItem } from '@agentskillmania/skill-ui-shared';
+import { EmptyState, ExpandableRow } from '@agentskillmania/skill-ui-shared';
 import { NAMESPACE } from '../../locales/index.js';
 import type { ReviewPanelProps, ReviewItem, ReviewSeverity } from '../../types.js';
 
@@ -25,82 +24,48 @@ function ReviewItemRow({ item }: { item: ReviewItem }) {
   const Icon = cfg.icon;
 
   return (
-    <ExpandableItem
+    <ExpandableRow
       expandable={!!item.detail}
       defaultExpanded={item.severity === 'error' && !!item.detail}
-      renderSummary={({ expanded, toggle }) => (
+      renderSummary={() => (
         <div
-          css={css`
-            padding: ${theme.spacing[1]} ${theme.spacing[2]};
-            border-bottom: 1px solid ${theme.color.borderSecondary};
-            font-size: ${theme.font.size.sm};
-            cursor: ${item.detail ? 'pointer' : 'default'};
-            ${item.detail ? interactiveItem(theme, theme.color.fillSubtle) : ''}
-          `}
-          onClick={() => item.detail && toggle()}
+          css={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: theme.spacing[2],
+            fontSize: theme.font.size.sm,
+          }}
         >
-          <div
-            css={css`
-              display: flex;
-              align-items: flex-start;
-              gap: ${theme.spacing[2]};
-            `}
+          <span
+            css={{
+              flexShrink: 0,
+              marginTop: 2,
+              color: theme.color[cfg.color],
+              display: 'flex',
+              alignItems: 'center',
+            }}
           >
-            <span
-              css={css`
-                flex-shrink: 0;
-                margin-top: 2px;
-                color: ${theme.color[cfg.color]};
-              `}
-            >
-              <Icon size={14} />
-            </span>
-            <div
-              css={css`
-                flex: 1;
-                min-width: 0;
-              `}
-            >
-              <div
-                css={css`
-                  display: flex;
-                  align-items: center;
-                  gap: ${theme.spacing[1]};
-                  color: ${theme.color.text};
-                `}
-              >
-                <span>{item.message}</span>
-              </div>
-              {item.filePath && (
-                <div
-                  css={css`
-                    font-size: ${theme.font.size.xs};
-                    color: ${theme.color.textTertiary};
-                    margin-top: ${theme.spacing['0.5']};
-                  `}
-                >
-                  {item.filePath}
-                </div>
-              )}
+            <Icon size={14} />
+          </span>
+          <div css={{ flex: 1, minWidth: 0 }}>
+            <div css={{ display: 'flex', alignItems: 'center', gap: theme.spacing[1], color: theme.color.text }}>
+              <span>{item.message}</span>
             </div>
+            {item.filePath && (
+              <div
+                css={{
+                  fontSize: theme.font.size.xs,
+                  color: theme.color.textTertiary,
+                  marginTop: theme.spacing['0.5'],
+                }}
+              >
+                {item.filePath}
+              </div>
+            )}
           </div>
         </div>
       )}
-      renderDetail={() => (
-        <div
-          css={css`
-            margin-top: ${theme.spacing[1]};
-            margin-left: 22px;
-            font-size: ${theme.font.size.xs};
-            color: ${theme.color.textSecondary};
-            padding: ${theme.spacing[1]};
-            background: ${theme.color.fillSubtle};
-            border-radius: ${theme.radius.xs};
-          `}
-        >
-          {item.detail}
-        </div>
-      )}
+      renderDetail={item.detail ? () => <div>{item.detail}</div> : undefined}
     />
   );
 }
@@ -126,10 +91,7 @@ export function ReviewPanel({ items }: ReviewPanelProps) {
   return (
     <div
       ref={containerRef}
-      css={css`
-        height: 100%;
-        overflow-y: auto;
-      `}
+      css={{ height: '100%', overflowY: 'auto' }}
     >
       {items.map((item) => (
         <ReviewItemRow key={item.id} item={item} />
