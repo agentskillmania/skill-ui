@@ -9,9 +9,10 @@ function wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe('SectionHeader', () => {
-  it('renders icon and title', () => {
+  it('renders icon and title as plain text', () => {
     render(<SectionHeader icon={Cpu} title="Agent State" />, { wrapper });
-    expect(screen.getByText('AGENT STATE')).toBeInTheDocument();
+    // Title rendered as-is; CSS text-transform handles uppercase
+    expect(screen.getByText('Agent State')).toBeInTheDocument();
   });
 
   it('renders extra content when provided', () => {
@@ -22,5 +23,17 @@ describe('SectionHeader', () => {
   it('does not render extra element when not provided', () => {
     const { container } = render(<SectionHeader icon={Cpu} title="Tools" />, { wrapper });
     expect(container.querySelector('[data-testid="section-extra"]')).toBeNull();
+  });
+
+  it('renders a divider line extending right from the title', () => {
+    const { container } = render(<SectionHeader icon={Cpu} title="Test" />, { wrapper });
+    // Find the divider: a div inside the header that has height: 1px and flex: 1
+    const headerDiv = container.firstChild as HTMLElement;
+    const children = Array.from(headerDiv.children);
+    // The divider is the div with flex: 1 (not the icon SVG, not the text node, not the span)
+    const divider = children.find(
+      (el) => el.tagName === 'DIV' && el.textContent === '',
+    );
+    expect(divider).toBeTruthy();
   });
 });

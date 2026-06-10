@@ -6,7 +6,7 @@ import type { ReactNode } from 'react';
 export interface SectionHeaderProps {
   /** Section icon (rendered at 14px). */
   icon: LucideIcon;
-  /** Section label (rendered uppercase, 11px, semibold, letter-spacing: 0.3px). */
+  /** Section label (rendered uppercase via CSS). */
   title: string;
   /** Right-aligned extra content. */
   extra?: ReactNode;
@@ -21,29 +21,24 @@ export function SectionHeader({ icon: Icon, title, extra }: SectionHeaderProps) 
       css={css`
         display: flex;
         align-items: center;
-        gap: ${theme.spacing[2]};
-        padding-bottom: ${theme.spacing[2]};
-        border-bottom: 1px solid ${theme.color.border};
+        gap: ${theme.spacing[1]};
+        padding: ${theme.spacing[1]} 0;
+        font-size: ${theme.font.size.xs};
+        font-weight: ${theme.font.weight.bold};
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: ${theme.color.textSecondary};
       `}
     >
-      <Icon
-        size={14}
+      <Icon size={14} />
+      {title}
+      <div
         css={css`
-          color: ${theme.color.primary};
-          flex-shrink: 0;
+          flex: 1;
+          height: 1px;
+          background: ${theme.color.borderSecondary};
         `}
       />
-      <span
-        css={css`
-          font-size: ${theme.font.size.xs};
-          font-weight: ${theme.font.weight.semibold};
-          text-transform: uppercase;
-          letter-spacing: 0.3px;
-          color: ${theme.color.textSecondary};
-        `}
-      >
-        {title.toUpperCase()}
-      </span>
       {extra && (
         <span
           data-testid="section-extra"
