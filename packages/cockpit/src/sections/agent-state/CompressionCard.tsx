@@ -39,7 +39,12 @@ export function CompressionCard({ compression }: CompressionCardProps) {
   return (
     <CollapsibleCard
       title={
-        <div css={css`${flexRow(theme, '1')}; align-items: center;`}>
+        <div
+          css={css`
+            ${flexRow(theme, '1')};
+            align-items: center;
+          `}
+        >
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
             {t('agentState.compression.title')}
           </Typography.Text>
@@ -49,9 +54,7 @@ export function CompressionCard({ compression }: CompressionCardProps) {
       onCollapseChange={(v) => collapsedToggle.set(v)}
     >
       {isEmpty ? (
-        <div css={emptyTextStyle(theme)}>
-          {t('agentState.compression.none')}
-        </div>
+        <div css={emptyTextStyle(theme)}>{t('agentState.compression.none')}</div>
       ) : (
         <div>
           {/* Metrics row */}
@@ -76,9 +79,7 @@ export function CompressionCard({ compression }: CompressionCardProps) {
           {/* Summary text — shown directly, truncated, click to expand */}
           {compression!.summary && (
             <div>
-              <SectionLabel>
-                {t('agentState.compression.summaryPreview')}
-              </SectionLabel>
+              <SectionLabel>{t('agentState.compression.summaryPreview')}</SectionLabel>
               <div
                 css={textBlockStyle(theme, summaryToggle.value)}
                 onClick={summaryToggle.toggle}

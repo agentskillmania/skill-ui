@@ -18,9 +18,7 @@ export interface UseCockpitLayoutReturn {
 const DEFAULT_WIDTH = 440;
 const MIN_WIDTH = 160;
 
-export function useCockpitLayout(
-  defaultPanel: PanelId = 'event-log'
-): UseCockpitLayoutReturn {
+export function useCockpitLayout(defaultPanel: PanelId = 'event-log'): UseCockpitLayoutReturn {
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_WIDTH);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [activePanel, setActivePanel] = useState<PanelId>(defaultPanel);

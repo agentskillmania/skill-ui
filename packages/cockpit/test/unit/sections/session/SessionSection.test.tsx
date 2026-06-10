@@ -3,7 +3,10 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@agentskillmania/skill-ui-theme';
 import { SessionSection } from '../../../../src/sections/session/SessionSection.js';
-import type { SessionOverviewData, SessionInfoData } from '../../../../src/sections/session/types.js';
+import type {
+  SessionOverviewData,
+  SessionInfoData,
+} from '../../../../src/sections/session/types.js';
 
 /** Helper: wrap component with ThemeProvider. */
 function renderWithTheme(ui: React.ReactElement) {
@@ -41,7 +44,7 @@ function createInfo(overrides: Partial<SessionInfoData> = {}): SessionInfoData {
 describe('SessionSection', () => {
   it('renders both Overview and Info cards', () => {
     const { container } = renderWithTheme(
-      <SessionSection overview={createOverview()} info={createInfo()} />,
+      <SessionSection overview={createOverview()} info={createInfo()} />
     );
     // Title from overview card
     expect(screen.getByText('Fix auth bug')).toBeInTheDocument();
@@ -56,24 +59,20 @@ describe('SessionSection', () => {
   });
 
   it('renders section header with "Session" text', () => {
-    renderWithTheme(
-      <SessionSection overview={createOverview()} info={createInfo()} />,
-    );
+    renderWithTheme(<SessionSection overview={createOverview()} info={createInfo()} />);
     expect(screen.getByText('Session')).toBeInTheDocument();
   });
 
   it('renders overview status badge', () => {
     renderWithTheme(
-      <SessionSection overview={createOverview({ status: 'running' })} info={createInfo()} />,
+      <SessionSection overview={createOverview({ status: 'running' })} info={createInfo()} />
     );
     // zh-CN mock returns '运行中' for session.overview.statusRunning
     expect(screen.getByText('运行中')).toBeInTheDocument();
   });
 
   it('renders agent and model from overview', () => {
-    renderWithTheme(
-      <SessionSection overview={createOverview()} info={createInfo()} />,
-    );
+    renderWithTheme(<SessionSection overview={createOverview()} info={createInfo()} />);
     expect(screen.getByText('debug-agent · claude-sonnet-4-6')).toBeInTheDocument();
   });
 
@@ -82,7 +81,7 @@ describe('SessionSection', () => {
       <SessionSection
         overview={createOverview({ stepCount: 5, messageCount: 10 })}
         info={createInfo()}
-      />,
+      />
     );
     expect(screen.getByText('5')).toBeInTheDocument();
     expect(screen.getByText('10')).toBeInTheDocument();

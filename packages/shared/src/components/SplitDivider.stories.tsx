@@ -41,10 +41,20 @@ export const Default: Story = {
             gap: ${theme.spacing[2]};
           `}
         >
-          <span css={css`font-size: ${theme.font.size.base}; font-weight: ${theme.font.weight.semibold};`}>
+          <span
+            css={css`
+              font-size: ${theme.font.size.base};
+              font-weight: ${theme.font.weight.semibold};
+            `}
+          >
             Left Panel
           </span>
-          <span css={css`font-size: ${theme.font.size.sm}; color: ${theme.color.textSecondary};`}>
+          <span
+            css={css`
+              font-size: ${theme.font.size.sm};
+              color: ${theme.color.textSecondary};
+            `}
+          >
             This panel takes remaining space. Drag the divider to resize.
           </span>
         </div>
@@ -60,10 +70,20 @@ export const Default: Story = {
             overflow: hidden;
           `}
         >
-          <span css={css`font-size: ${theme.font.size.base}; font-weight: ${theme.font.weight.semibold};`}>
+          <span
+            css={css`
+              font-size: ${theme.font.size.base};
+              font-weight: ${theme.font.weight.semibold};
+            `}
+          >
             Right Panel
           </span>
-          <span css={css`font-size: ${theme.font.size.sm}; color: ${theme.color.textSecondary};`}>
+          <span
+            css={css`
+              font-size: ${theme.font.size.sm};
+              color: ${theme.color.textSecondary};
+            `}
+          >
             Width: {rightWidth}px
           </span>
         </div>
@@ -94,7 +114,13 @@ export const Disabled: Story = {
             padding: ${theme.spacing[4]};
           `}
         >
-          <span css={css`font-size: ${theme.font.size.base};`}>Left Panel</span>
+          <span
+            css={css`
+              font-size: ${theme.font.size.base};
+            `}
+          >
+            Left Panel
+          </span>
         </div>
         <SplitDivider onResize={() => {}} disabled />
         <div
@@ -104,7 +130,13 @@ export const Disabled: Story = {
             padding: ${theme.spacing[4]};
           `}
         >
-          <span css={css`font-size: ${theme.font.size.base};`}>Right Panel</span>
+          <span
+            css={css`
+              font-size: ${theme.font.size.base};
+            `}
+          >
+            Right Panel
+          </span>
         </div>
       </div>
     );

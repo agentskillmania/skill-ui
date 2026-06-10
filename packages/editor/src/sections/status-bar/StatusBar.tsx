@@ -94,7 +94,9 @@ export function StatusBar({
             transition: all ${theme.motion.duration.fast};
 
             ${interactiveItem(theme, theme.color.fillSubtle)}
-            &:hover { color: ${theme.color.text}; }
+            &:hover {
+              color: ${theme.color.text};
+            }
           `}
           type="button"
         >

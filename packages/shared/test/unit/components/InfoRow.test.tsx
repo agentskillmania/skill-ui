@@ -13,7 +13,7 @@ describe('InfoRow', () => {
       <InfoRow label="Session ID" text="abc-123">
         abc-123
       </InfoRow>,
-      { wrapper },
+      { wrapper }
     );
     expect(screen.getByText('Session ID')).toBeInTheDocument();
     expect(screen.getByText('abc-123')).toBeInTheDocument();
@@ -21,8 +21,10 @@ describe('InfoRow', () => {
 
   it('renders as flex row with justify-between', () => {
     const { container } = render(
-      <InfoRow label="Model" text="gpt-4">gpt-4</InfoRow>,
-      { wrapper },
+      <InfoRow label="Model" text="gpt-4">
+        gpt-4
+      </InfoRow>,
+      { wrapper }
     );
     const row = container.firstChild as HTMLElement;
     expect(row).toHaveStyle({ display: 'flex' });

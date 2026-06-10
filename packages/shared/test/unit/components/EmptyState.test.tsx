@@ -9,7 +9,9 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 describe('EmptyState', () => {
   it('renders title and description', () => {
-    render(<EmptyState title="No Files" description="Upload a file to get started." />, { wrapper });
+    render(<EmptyState title="No Files" description="Upload a file to get started." />, {
+      wrapper,
+    });
     expect(screen.getByText('No Files')).toBeInTheDocument();
     expect(screen.getByText('Upload a file to get started.')).toBeInTheDocument();
   });
@@ -20,7 +22,9 @@ describe('EmptyState', () => {
   });
 
   it('renders custom icon', () => {
-    render(<EmptyState title="No Results" icon={<span data-testid="custom-icon">🔍</span>} />, { wrapper });
+    render(<EmptyState title="No Results" icon={<span data-testid="custom-icon">🔍</span>} />, {
+      wrapper,
+    });
     expect(screen.getByTestId('custom-icon')).toBeInTheDocument();
   });
 

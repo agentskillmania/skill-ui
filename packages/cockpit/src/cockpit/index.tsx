@@ -77,15 +77,9 @@ export function Cockpit(props: CockpitProps) {
           />
         );
       case 'event-log':
-        return (
-          <EventLogPanel events={eventLogEvents ?? []} />
-        );
+        return <EventLogPanel events={eventLogEvents ?? []} />;
       case 'session-board':
-        return (
-          <SessionBoardPanel
-            state={sessionBoardState}
-          />
-        );
+        return <SessionBoardPanel state={sessionBoardState} />;
       default:
         return null;
     }
@@ -132,10 +126,7 @@ export function Cockpit(props: CockpitProps) {
       />
 
       {/* Middle: SplitDivider */}
-      <SplitDivider
-        onResize={layout.setSidebarWidth}
-        disabled={layout.isCollapsed}
-      />
+      <SplitDivider onResize={layout.setSidebarWidth} disabled={layout.isCollapsed} />
 
       {/* Right: Sidebar */}
       <Sidebar

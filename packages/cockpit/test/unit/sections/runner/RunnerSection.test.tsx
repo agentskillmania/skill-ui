@@ -23,12 +23,8 @@ function createRunner(overrides: Partial<RunnerDiagnosticsData> = {}): RunnerDia
       enableTodolist: true,
       enableCommands: true,
     },
-    tools: [
-      { name: 'file_read', description: 'Read files', type: 'builtin', enabled: true },
-    ],
-    skills: [
-      { name: 'spec-plan', description: 'Plan specs', source: '/skills/spec-plan' },
-    ],
+    tools: [{ name: 'file_read', description: 'Read files', type: 'builtin', enabled: true }],
+    skills: [{ name: 'spec-plan', description: 'Plan specs', source: '/skills/spec-plan' }],
     ...overrides,
   };
 }
@@ -86,7 +82,7 @@ describe('RunnerSection', () => {
           tools: null,
           skills: null,
         }}
-      />,
+      />
     );
     expect(screen.getByTestId('feature-tag-sandbox')).toBeInTheDocument();
     expect(screen.getByText('暂无工具')).toBeInTheDocument();

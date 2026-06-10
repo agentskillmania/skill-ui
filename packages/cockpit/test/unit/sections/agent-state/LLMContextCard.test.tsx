@@ -64,7 +64,7 @@ describe('LLMContextCard', () => {
 
   it('does not render system prompt block when first message has no content', () => {
     renderWithTheme(
-      <LLMContextCard llm={createLLMContext({ messages: [{ role: 'user', content: null }] })} />,
+      <LLMContextCard llm={createLLMContext({ messages: [{ role: 'user', content: null }] })} />
     );
     expect(screen.queryByTestId('system-prompt-toggle')).not.toBeInTheDocument();
   });
@@ -76,7 +76,7 @@ describe('LLMContextCard', () => {
 
   it('does not render system prompt block when content is empty string', () => {
     renderWithTheme(
-      <LLMContextCard llm={createLLMContext({ messages: [{ role: 'system', content: '' }] })} />,
+      <LLMContextCard llm={createLLMContext({ messages: [{ role: 'system', content: '' }] })} />
     );
     expect(screen.queryByTestId('system-prompt-toggle')).not.toBeInTheDocument();
   });
@@ -84,9 +84,7 @@ describe('LLMContextCard', () => {
   it('renders system prompt text directly, click to expand', () => {
     const prompt = 'You are a code reviewer.';
     renderWithTheme(
-      <LLMContextCard
-        llm={createLLMContext({ messages: [{ role: 'system', content: prompt }] })}
-      />,
+      <LLMContextCard llm={createLLMContext({ messages: [{ role: 'system', content: prompt }] })} />
     );
 
     // Prompt visible immediately (truncated by default)
@@ -106,9 +104,7 @@ describe('LLMContextCard', () => {
   it('supports keyboard interaction on system prompt', () => {
     const prompt = 'System prompt text.';
     renderWithTheme(
-      <LLMContextCard
-        llm={createLLMContext({ messages: [{ role: 'system', content: prompt }] })}
-      />,
+      <LLMContextCard llm={createLLMContext({ messages: [{ role: 'system', content: prompt }] })} />
     );
 
     const toggle = screen.getByTestId('system-prompt-toggle');

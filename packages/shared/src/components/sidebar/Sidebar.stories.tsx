@@ -70,13 +70,25 @@ function MockEventLogContent() {
                 ? theme.color.success
                 : event.status === 'warn'
                   ? theme.color.warning
-                  : theme.color.error
-              };
+                  : theme.color.error};
               flex-shrink: 0;
             `}
           />
-          <span css={css`flex: 1; color: ${theme.color.text};`}>{event.label}</span>
-          <span css={css`color: ${theme.color.textTertiary};`}>{event.time}</span>
+          <span
+            css={css`
+              flex: 1;
+              color: ${theme.color.text};
+            `}
+          >
+            {event.label}
+          </span>
+          <span
+            css={css`
+              color: ${theme.color.textTertiary};
+            `}
+          >
+            {event.time}
+          </span>
         </div>
       ))}
     </div>
@@ -154,21 +166,34 @@ export const Interactive: Story = {
             gap: ${theme.spacing[2]};
           `}
         >
-          <span css={css`font-size: ${theme.font.size.base}; font-weight: ${theme.font.weight.semibold};`}>
+          <span
+            css={css`
+              font-size: ${theme.font.size.base};
+              font-weight: ${theme.font.weight.semibold};
+            `}
+          >
             Main Content
           </span>
-          <span css={css`font-size: ${theme.font.size.sm}; color: ${theme.color.textSecondary};`}>
+          <span
+            css={css`
+              font-size: ${theme.font.size.sm};
+              color: ${theme.color.textSecondary};
+            `}
+          >
             Use the divider to resize. Click icons to switch panels.
           </span>
-          <span css={css`font-size: ${theme.font.size.xs}; color: ${theme.color.textTertiary};`}>
-            Active panel: {activePanel} | Sidebar width: {sidebarWidth}px | Collapsed: {isCollapsed ? 'yes' : 'no'}
+          <span
+            css={css`
+              font-size: ${theme.font.size.xs};
+              color: ${theme.color.textTertiary};
+            `}
+          >
+            Active panel: {activePanel} | Sidebar width: {sidebarWidth}px | Collapsed:{' '}
+            {isCollapsed ? 'yes' : 'no'}
           </span>
         </div>
 
-        <SplitDivider
-          onResize={setSidebarWidth}
-          disabled={isCollapsed}
-        />
+        <SplitDivider onResize={setSidebarWidth} disabled={isCollapsed} />
 
         <Sidebar
           width={sidebarWidth}

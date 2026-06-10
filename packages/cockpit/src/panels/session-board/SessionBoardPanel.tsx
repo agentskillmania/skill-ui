@@ -19,10 +19,7 @@ export function SessionBoardPanel({ state }: SessionBoardPanelProps) {
 
   return (
     <SidebarPanel title={t('sessionBoardPanel.title')} icon={Activity}>
-      <SessionSection
-        overview={state?.session?.overview}
-        info={state?.session?.info}
-      />
+      <SessionSection overview={state?.session?.overview} info={state?.session?.info} />
       <AgentStateSection
         skillState={state?.agent?.context?.skillState}
         compression={state?.agent?.context?.compression}

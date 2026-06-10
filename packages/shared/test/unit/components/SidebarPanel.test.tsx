@@ -14,7 +14,7 @@ describe('SidebarPanel', () => {
       <SidebarPanel title="Event Log" icon={ClipboardList}>
         <span>Panel Content</span>
       </SidebarPanel>,
-      { wrapper },
+      { wrapper }
     );
     expect(screen.getByText('Event Log')).toBeInTheDocument();
   });
@@ -24,7 +24,7 @@ describe('SidebarPanel', () => {
       <SidebarPanel title="Test" icon={ClipboardList}>
         <span>Panel Content</span>
       </SidebarPanel>,
-      { wrapper },
+      { wrapper }
     );
     expect(screen.getByText('Panel Content')).toBeInTheDocument();
   });
@@ -34,7 +34,7 @@ describe('SidebarPanel', () => {
       <SidebarPanel title="Test" icon={ClipboardList}>
         <div />
       </SidebarPanel>,
-      { wrapper },
+      { wrapper }
     );
     const svg = container.querySelector('svg');
     expect(svg).toBeInTheDocument();
@@ -45,7 +45,7 @@ describe('SidebarPanel', () => {
       <SidebarPanel title="Test" icon={ClipboardList}>
         <span>Content</span>
       </SidebarPanel>,
-      { wrapper },
+      { wrapper }
     );
     const contentArea = screen.getByText('Content').parentElement;
     expect(contentArea).toHaveStyle({ overflow: 'auto' });
@@ -56,7 +56,7 @@ describe('SidebarPanel', () => {
       <SidebarPanel title="Test" icon={ClipboardList}>
         <div />
       </SidebarPanel>,
-      { wrapper },
+      { wrapper }
     );
     const outer = container.firstChild as HTMLElement;
     expect(outer).toHaveStyle({ height: '100%' });

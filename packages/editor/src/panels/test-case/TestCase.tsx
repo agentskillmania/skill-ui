@@ -218,11 +218,7 @@ export function TestCase({ cases, onRunAll, onRunCase }: TestCasePanelProps) {
           padding: ${theme.spacing[1]};
         `}
       >
-        {(!cases || cases.length === 0) && (
-          <EmptyState
-            description={t('testCase.emptyHint')}
-          />
-        )}
+        {(!cases || cases.length === 0) && <EmptyState description={t('testCase.emptyHint')} />}
         {cases?.map((tc) => (
           <TestCaseRow key={tc.id} tc={tc} onRunCase={onRunCase} />
         ))}

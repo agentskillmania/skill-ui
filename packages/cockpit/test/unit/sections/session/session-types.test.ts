@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest';
-import type { SessionOverviewData, SessionInfoData } from '../../../../src/sections/session/types.js';
+import type {
+  SessionOverviewData,
+  SessionInfoData,
+} from '../../../../src/sections/session/types.js';
 
 describe('Session Frontend Types', () => {
   it('SessionOverviewData accepts minimal required fields', () => {

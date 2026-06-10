@@ -9,12 +9,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 describe('ExpandableItem', () => {
   it('renders summary via renderSummary', () => {
-    render(
-      <ExpandableItem
-        renderSummary={() => <span>Item Title</span>}
-      />,
-      { wrapper },
-    );
+    render(<ExpandableItem renderSummary={() => <span>Item Title</span>} />, { wrapper });
     expect(screen.getByText('Item Title')).toBeInTheDocument();
   });
 
@@ -22,12 +17,10 @@ describe('ExpandableItem', () => {
     render(
       <ExpandableItem
         expandable
-        renderSummary={({ toggle }) => (
-          <button onClick={toggle}>Summary</button>
-        )}
+        renderSummary={({ toggle }) => <button onClick={toggle}>Summary</button>}
         renderDetail={() => <span>Detail Content</span>}
       />,
-      { wrapper },
+      { wrapper }
     );
     expect(screen.queryByText('Detail Content')).toBeNull();
 
@@ -42,12 +35,10 @@ describe('ExpandableItem', () => {
     render(
       <ExpandableItem
         expandable={false}
-        renderSummary={({ toggle }) => (
-          <button onClick={toggle}>Summary</button>
-        )}
+        renderSummary={({ toggle }) => <button onClick={toggle}>Summary</button>}
         renderDetail={() => <span>Hidden Detail</span>}
       />,
-      { wrapper },
+      { wrapper }
     );
     fireEvent.click(screen.getByText('Summary'));
     expect(screen.queryByText('Hidden Detail')).toBeNull();
@@ -62,7 +53,7 @@ describe('ExpandableItem', () => {
         renderSummary={() => <span>Summary</span>}
         renderDetail={() => <span>Always Visible</span>}
       />,
-      { wrapper },
+      { wrapper }
     );
     expect(screen.getByText('Always Visible')).toBeInTheDocument();
   });
@@ -75,7 +66,7 @@ describe('ExpandableItem', () => {
         renderSummary={() => <span>Summary</span>}
         renderDetail={() => <span>Default Open</span>}
       />,
-      { wrapper },
+      { wrapper }
     );
     expect(screen.getByText('Default Open')).toBeInTheDocument();
   });
@@ -84,11 +75,9 @@ describe('ExpandableItem', () => {
     render(
       <ExpandableItem
         expandable
-        renderSummary={({ toggle }) => (
-          <button onClick={toggle}>Summary</button>
-        )}
+        renderSummary={({ toggle }) => <button onClick={toggle}>Summary</button>}
       />,
-      { wrapper },
+      { wrapper }
     );
     fireEvent.click(screen.getByText('Summary'));
     expect(screen.getByText('Summary')).toBeInTheDocument();
@@ -100,12 +89,10 @@ describe('ExpandableItem', () => {
       <ExpandableItem
         expandable
         onToggle={onToggle}
-        renderSummary={({ toggle }) => (
-          <button onClick={toggle}>Summary</button>
-        )}
+        renderSummary={({ toggle }) => <button onClick={toggle}>Summary</button>}
         renderDetail={() => <span>Detail</span>}
       />,
-      { wrapper },
+      { wrapper }
     );
     fireEvent.click(screen.getByText('Summary'));
     expect(onToggle).toHaveBeenCalledWith(true);
@@ -116,12 +103,10 @@ describe('ExpandableItem', () => {
       <ExpandableItem
         defaultExpanded
         expandable
-        renderSummary={({ expanded }) => (
-          <span>{expanded ? 'open' : 'closed'}</span>
-        )}
+        renderSummary={({ expanded }) => <span>{expanded ? 'open' : 'closed'}</span>}
         renderDetail={() => <span>Detail</span>}
       />,
-      { wrapper },
+      { wrapper }
     );
     expect(screen.getByText('open')).toBeInTheDocument();
   });

@@ -77,7 +77,7 @@ export const LLMContext: Story = {
         {
           role: 'system',
           content:
-            'You are code-reviewer, an expert code review agent.\n\n## Available skills:\n- code-review: Automated code review\n- execute-plan: Execute an approved plan\n- test-gen: Generate unit tests\n\nYou are currently executing the \'execute-plan\' skill.\n\nWhen you COMPLETE your task, you MUST call the return_skill tool.',
+            "You are code-reviewer, an expert code review agent.\n\n## Available skills:\n- code-review: Automated code review\n- execute-plan: Execute an approved plan\n- test-gen: Generate unit tests\n\nYou are currently executing the 'execute-plan' skill.\n\nWhen you COMPLETE your task, you MUST call the return_skill tool.",
         },
         { role: 'user', content: 'Help me debug the test failure' },
         { role: 'assistant', content: 'I see the issue.' },
@@ -107,8 +107,7 @@ export const Full: Story = {
         'You are code-reviewer, an expert code review agent.\n\n## Available skills:\n- code-review\n- execute-plan\n\nWhen you COMPLETE your task, you MUST call the return_skill tool.',
     },
     compression: {
-      summary:
-        'Fixed 2 unused imports and 1 any type in types.ts and eventRows.tsx.',
+      summary: 'Fixed 2 unused imports and 1 any type in types.ts and eventRows.tsx.',
       anchor: 42,
       removedTokenCount: 8200,
       summaryTokenCount: 320,
@@ -119,7 +118,7 @@ export const Full: Story = {
         {
           role: 'system',
           content:
-            'You are code-reviewer.\n\n## Skills:\n- code-review\n- execute-plan\n\nExecuting \'execute-plan\'.',
+            "You are code-reviewer.\n\n## Skills:\n- code-review\n- execute-plan\n\nExecuting 'execute-plan'.",
         },
         { role: 'user', content: 'Fix the test' },
         { role: 'assistant', content: 'Done.' },

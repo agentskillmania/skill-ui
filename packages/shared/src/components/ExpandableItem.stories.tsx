@@ -153,9 +153,7 @@ export const EventLogItems: Story = {
         renderSummary={(ctx) => (
           <EventLogRow type="agent" label="Agent started" time="10:01:23" ctx={ctx} />
         )}
-        renderDetail={() => (
-          <JsonDetail data={{ pid: 8492, runtime: 'colts', version: '0.3.0' }} />
-        )}
+        renderDetail={() => <JsonDetail data={{ pid: 8492, runtime: 'colts', version: '0.3.0' }} />}
       />
       <ExpandableItem
         renderSummary={(ctx) => (
@@ -169,7 +167,12 @@ export const EventLogItems: Story = {
       />
       <ExpandableItem
         renderSummary={(ctx) => (
-          <EventLogRow type="context" label="Context compressed 12.4k → 3.2k" time="10:01:30" ctx={ctx} />
+          <EventLogRow
+            type="context"
+            label="Context compressed 12.4k → 3.2k"
+            time="10:01:30"
+            ctx={ctx}
+          />
         )}
         renderDetail={() => (
           <JsonDetail
@@ -186,9 +189,7 @@ export const EventLogItems: Story = {
           <EventLogRow type="error" label="Tool execution failed" time="10:01:35" ctx={ctx} />
         )}
         renderDetail={() => (
-          <JsonDetail
-            data={{ tool: 'runCommand', exitCode: 1, stderr: 'Permission denied' }}
-          />
+          <JsonDetail data={{ tool: 'runCommand', exitCode: 1, stderr: 'Permission denied' }} />
         )}
       />
       <ExpandableItem
@@ -249,7 +250,12 @@ export const TestCaseItems: Story = {
                 >
                   {test.passed ? '✓' : '✗'}
                 </span>
-                <span css={css`flex: 1; color: ${test.passed ? theme.color.text : theme.color.error};`}>
+                <span
+                  css={css`
+                    flex: 1;
+                    color: ${test.passed ? theme.color.text : theme.color.error};
+                  `}
+                >
                   {test.name}
                 </span>
               </div>
@@ -315,13 +321,34 @@ export const SingleItem: Story = {
               `}
               onClick={ctx.toggle}
             >
-              <div css={css`display: flex; align-items: center; gap: ${theme.spacing[2]};`}>
+              <div
+                css={css`
+                  display: flex;
+                  align-items: center;
+                  gap: ${theme.spacing[2]};
+                `}
+              >
                 {ctx.expanded ? (
-                  <ChevronDown size={14} css={css`color: ${theme.color.textTertiary};`} />
+                  <ChevronDown
+                    size={14}
+                    css={css`
+                      color: ${theme.color.textTertiary};
+                    `}
+                  />
                 ) : (
-                  <ChevronRight size={14} css={css`color: ${theme.color.textTertiary};`} />
+                  <ChevronRight
+                    size={14}
+                    css={css`
+                      color: ${theme.color.textTertiary};
+                    `}
+                  />
                 )}
-                <span css={css`font-size: ${theme.font.size.sm}; color: ${theme.color.text};`}>
+                <span
+                  css={css`
+                    font-size: ${theme.font.size.sm};
+                    color: ${theme.color.text};
+                  `}
+                >
                   Click to {ctx.expanded ? 'collapse' : 'expand'}
                 </span>
               </div>

@@ -82,7 +82,9 @@ function TabItem({
         overflow: hidden;
 
         ${interactiveItem(theme, theme.color.primaryBg)}
-        &:hover button { opacity: 0.6; }
+        &:hover button {
+          opacity: 0.6;
+        }
       `}
     >
       <span

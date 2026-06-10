@@ -3,8 +3,22 @@ import { SessionsPanel } from './SessionsPanel.js';
 import type { SessionInfo } from '../../types.js';
 
 const mockSessions: SessionInfo[] = [
-  { id: '1', name: 'debug-session-7', model: 'Claude', status: 'running', stepCount: 3, tokenCount: 9500 },
-  { id: '2', name: 'code-review-3', model: 'GPT-4', status: 'paused', stepCount: 12, tokenCount: 23000 },
+  {
+    id: '1',
+    name: 'debug-session-7',
+    model: 'Claude',
+    status: 'running',
+    stepCount: 3,
+    tokenCount: 9500,
+  },
+  {
+    id: '2',
+    name: 'code-review-3',
+    model: 'GPT-4',
+    status: 'paused',
+    stepCount: 12,
+    tokenCount: 23000,
+  },
   { id: '3', name: 'data-pipeline', model: 'Claude', status: 'idle', stepCount: 0, tokenCount: 0 },
 ];
 

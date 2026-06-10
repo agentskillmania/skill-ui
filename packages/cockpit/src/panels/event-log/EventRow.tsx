@@ -23,10 +23,7 @@ export function EventRow({ event }: EventRowProps) {
       expandable={hasDetail}
       defaultExpanded={false}
       renderSummary={({ expanded, toggle }) => (
-        <div
-          css={interactiveRow(theme, { active: expanded })}
-          onClick={toggle}
-        >
+        <div css={interactiveRow(theme, { active: expanded })} onClick={toggle}>
           {/* Header line: tag + content */}
           <div
             css={css`

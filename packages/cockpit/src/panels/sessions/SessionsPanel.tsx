@@ -68,7 +68,9 @@ export function SessionsPanel({ sessions = [], activeSessionId, onSelect }: Sess
                     css={css`
                       font-size: ${theme.font.size.sm};
                       color: ${theme.color.text};
-                      font-weight: ${isActive ? theme.font.weight.semibold : theme.font.weight.normal};
+                      font-weight: ${isActive
+                        ? theme.font.weight.semibold
+                        : theme.font.weight.normal};
                       white-space: nowrap;
                       overflow: hidden;
                       text-overflow: ellipsis;

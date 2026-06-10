@@ -20,9 +20,7 @@ describe('useResize', () => {
   });
 
   it('starts resizing on mousedown', () => {
-    const { result } = renderHook(() =>
-      useResize({ initialWidth: 380 }),
-    );
+    const { result } = renderHook(() => useResize({ initialWidth: 380 }));
 
     act(() => result.current.dividerProps.onMouseDown());
     expect(result.current.isResizing).toBe(true);
@@ -30,7 +28,7 @@ describe('useResize', () => {
 
   it('updates width on mousemove and stops on mouseup', () => {
     const { result } = renderHook(() =>
-      useResize({ initialWidth: 380, minWidth: 100, maxWidth: 800 }),
+      useResize({ initialWidth: 380, minWidth: 100, maxWidth: 800 })
     );
 
     // Start drag
@@ -58,9 +56,7 @@ describe('useResize', () => {
   });
 
   it('clamps width to minWidth on drag', () => {
-    const { result } = renderHook(() =>
-      useResize({ initialWidth: 380, minWidth: 200 }),
-    );
+    const { result } = renderHook(() => useResize({ initialWidth: 380, minWidth: 200 }));
 
     act(() => result.current.dividerProps.onMouseDown());
 
@@ -78,9 +74,7 @@ describe('useResize', () => {
   });
 
   it('clamps width to maxWidth on drag', () => {
-    const { result } = renderHook(() =>
-      useResize({ initialWidth: 380, maxWidth: 500 }),
-    );
+    const { result } = renderHook(() => useResize({ initialWidth: 380, maxWidth: 500 }));
 
     act(() => result.current.dividerProps.onMouseDown());
 
@@ -98,9 +92,7 @@ describe('useResize', () => {
   });
 
   it('does not start drag when disabled', () => {
-    const { result } = renderHook(() =>
-      useResize({ initialWidth: 380, disabled: true }),
-    );
+    const { result } = renderHook(() => useResize({ initialWidth: 380, disabled: true }));
 
     act(() => result.current.dividerProps.onMouseDown());
     expect(result.current.isResizing).toBe(false);

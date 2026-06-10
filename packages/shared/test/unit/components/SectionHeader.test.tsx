@@ -31,17 +31,14 @@ describe('SectionHeader', () => {
     const headerDiv = container.firstChild as HTMLElement;
     const children = Array.from(headerDiv.children);
     // The divider is the div with flex: 1 (not the icon SVG, not the text node, not the span)
-    const divider = children.find(
-      (el) => el.tagName === 'DIV' && el.textContent === '',
-    );
+    const divider = children.find((el) => el.tagName === 'DIV' && el.textContent === '');
     expect(divider).toBeTruthy();
   });
 
   it('applies custom iconColor when provided', () => {
-    const { container } = render(
-      <SectionHeader icon={Cpu} title="Test" iconColor="purple" />,
-      { wrapper },
-    );
+    const { container } = render(<SectionHeader icon={Cpu} title="Test" iconColor="purple" />, {
+      wrapper,
+    });
     // Emotion applies color via CSS class; verify the icon wrapper element exists
     // and has the emotion-generated class (color is applied through CSS, not inline style)
     const svg = container.querySelector('svg');

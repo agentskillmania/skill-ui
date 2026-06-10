@@ -48,9 +48,7 @@ export function SkillsCard({ skills }: SkillsCardProps) {
       onCollapseChange={(v) => collapsedToggle.set(v)}
     >
       {isEmpty ? (
-        <div css={emptyTextStyle(theme)}>
-          {t('runner.skills.empty')}
-        </div>
+        <div css={emptyTextStyle(theme)}>{t('runner.skills.empty')}</div>
       ) : (
         <div>
           {skills!.map((skill) => (
@@ -75,9 +73,11 @@ export function SkillsCard({ skills }: SkillsCardProps) {
                     )}
                   </div>
                 )}
-                renderDetail={() => (
-                  skill.description ? <div css={descriptionStyle(theme)}>{skill.description}</div> : null
-                )}
+                renderDetail={() =>
+                  skill.description ? (
+                    <div css={descriptionStyle(theme)}>{skill.description}</div>
+                  ) : null
+                }
               />
             </div>
           ))}

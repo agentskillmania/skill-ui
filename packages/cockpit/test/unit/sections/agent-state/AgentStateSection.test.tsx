@@ -3,7 +3,10 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@agentskillmania/skill-ui-theme';
 import { AgentStateSection } from '../../../../src/sections/agent-state/AgentStateSection.js';
-import type { SkillStateData, CompressionData } from '../../../../src/sections/agent-state/types.js';
+import type {
+  SkillStateData,
+  CompressionData,
+} from '../../../../src/sections/agent-state/types.js';
 
 /** Helper: wrap component with ThemeProvider. */
 function renderWithTheme(ui: React.ReactElement) {
@@ -63,21 +66,21 @@ describe('AgentStateSection', () => {
 
   it('renders ActiveSkillCard with populated data', () => {
     renderWithTheme(
-      <AgentStateSection skillState={createSkillState({ current: 'code-review' })} />,
+      <AgentStateSection skillState={createSkillState({ current: 'code-review' })} />
     );
     expect(screen.getByTestId('active-skill-name')).toHaveTextContent('code-review');
   });
 
   it('renders CompressionCard with populated data', () => {
-    renderWithTheme(
-      <AgentStateSection compression={createCompression({ anchor: 42 })} />,
-    );
+    renderWithTheme(<AgentStateSection compression={createCompression({ anchor: 42 })} />);
     expect(screen.getByText('42')).toBeInTheDocument();
   });
 
   it('renders LLMContextCard with populated data', () => {
     renderWithTheme(
-      <AgentStateSection llm={createLLMContext({ messages: [{ role: 'system', content: 'Hi' }] })} />,
+      <AgentStateSection
+        llm={createLLMContext({ messages: [{ role: 'system', content: 'Hi' }] })}
+      />
     );
     // Should show message count = 1
     expect(screen.getByText('1')).toBeInTheDocument();
@@ -89,7 +92,7 @@ describe('AgentStateSection', () => {
         skillState={createSkillState({ current: 'plan' })}
         compression={createCompression({ anchor: 5 })}
         llm={createLLMContext({ messages: [{ role: 'system', content: 'Test' }] })}
-      />,
+      />
     );
     expect(screen.getByTestId('active-skill-name')).toHaveTextContent('plan');
     expect(screen.getByText('5')).toBeInTheDocument();

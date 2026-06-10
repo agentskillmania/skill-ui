@@ -23,7 +23,7 @@ describe('SidebarIcons', () => {
         onToggleCollapse={vi.fn()}
         onSwitchPanel={vi.fn()}
       />,
-      { wrapper },
+      { wrapper }
     );
     // 1 collapse button + 2 panel buttons = 3 total
     const buttons = screen.getAllByRole('button');
@@ -40,7 +40,7 @@ describe('SidebarIcons', () => {
         onToggleCollapse={onToggleCollapse}
         onSwitchPanel={vi.fn()}
       />,
-      { wrapper },
+      { wrapper }
     );
     // First button is the collapse toggle
     fireEvent.click(screen.getAllByRole('button')[0]);
@@ -57,7 +57,7 @@ describe('SidebarIcons', () => {
         onToggleCollapse={vi.fn()}
         onSwitchPanel={onSwitchPanel}
       />,
-      { wrapper },
+      { wrapper }
     );
     // Second button is the first panel item (event-log)
     fireEvent.click(screen.getAllByRole('button')[1]);
@@ -74,7 +74,7 @@ describe('SidebarIcons', () => {
         onToggleCollapse={vi.fn()}
         onSwitchPanel={onSwitchPanel}
       />,
-      { wrapper },
+      { wrapper }
     );
     // Third button is the second panel item (board)
     fireEvent.click(screen.getAllByRole('button')[2]);
@@ -90,7 +90,7 @@ describe('SidebarIcons', () => {
         onToggleCollapse={vi.fn()}
         onSwitchPanel={vi.fn()}
       />,
-      { wrapper },
+      { wrapper }
     );
     // Only the collapse button should be present
     const buttons = screen.getAllByRole('button');
@@ -106,7 +106,7 @@ describe('SidebarIcons', () => {
         onToggleCollapse={vi.fn()}
         onSwitchPanel={vi.fn()}
       />,
-      { wrapper },
+      { wrapper }
     );
     // 1 collapse icon + 2 panel icons = 3 SVGs
     const svgs = container.querySelectorAll('svg');

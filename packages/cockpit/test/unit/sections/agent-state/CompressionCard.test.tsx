@@ -46,23 +46,21 @@ describe('CompressionCard', () => {
 
   it('renders removed token count with compact formatting', () => {
     renderWithTheme(
-      <CompressionCard compression={createCompression({ removedTokenCount: 8200 })} />,
+      <CompressionCard compression={createCompression({ removedTokenCount: 8200 })} />
     );
     expect(screen.getByText('8.2k')).toBeInTheDocument();
   });
 
   it('renders summary token count with compact formatting', () => {
     renderWithTheme(
-      <CompressionCard compression={createCompression({ summaryTokenCount: 320 })} />,
+      <CompressionCard compression={createCompression({ summaryTokenCount: 320 })} />
     );
     expect(screen.getByText('320')).toBeInTheDocument();
   });
 
   it('renders relative time for compressedAt', () => {
     renderWithTheme(
-      <CompressionCard
-        compression={createCompression({ compressedAt: Date.now() - 180_000 })}
-      />,
+      <CompressionCard compression={createCompression({ compressedAt: Date.now() - 180_000 })} />
     );
     expect(screen.getByText('3m ago')).toBeInTheDocument();
   });
@@ -75,7 +73,7 @@ describe('CompressionCard', () => {
           summaryTokenCount: undefined,
           compressedAt: undefined,
         })}
-      />,
+      />
     );
     const dashes = screen.getAllByText('-');
     expect(dashes.length).toBeGreaterThanOrEqual(2);
@@ -101,9 +99,7 @@ describe('CompressionCard', () => {
 
   it('formats large token counts in millions', () => {
     renderWithTheme(
-      <CompressionCard
-        compression={createCompression({ removedTokenCount: 2_500_000 })}
-      />,
+      <CompressionCard compression={createCompression({ removedTokenCount: 2_500_000 })} />
     );
     expect(screen.getByText('2.5M')).toBeInTheDocument();
   });

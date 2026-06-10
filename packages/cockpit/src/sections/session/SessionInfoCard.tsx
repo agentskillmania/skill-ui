@@ -23,14 +23,22 @@ export interface SessionInfoCardProps {
 
 /** Renders a code-styled text span for monospace values. */
 const CodeValue = ({ children }: { children: React.ReactNode }) => (
-  <Typography.Text code style={{ fontSize: '11px' }}>{children}</Typography.Text>
+  <Typography.Text code style={{ fontSize: '11px' }}>
+    {children}
+  </Typography.Text>
 );
 
 /** Renders a list of code-styled text spans for path arrays. */
 const PathList = ({ items }: { items: string[] }) => {
   if (items.length === 0) return <span>-</span>;
   return (
-    <span css={css`display: flex; flex-wrap: wrap; gap: 4px;`}>
+    <span
+      css={css`
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+      `}
+    >
       {items.map((item, i) => (
         <Typography.Text code key={i} style={{ fontSize: '11px' }}>
           {item}
@@ -45,7 +53,11 @@ const CardContent: React.FC<{ data: SessionInfoData }> = ({ data }) => {
   const { t } = useTranslation(NAMESPACE);
 
   return (
-    <div css={css`padding: ${useTheme().spacing['1']} 0;`}>
+    <div
+      css={css`
+        padding: ${useTheme().spacing['1']} 0;
+      `}
+    >
       {/* Identity group */}
       <SectionLabel>{t('session.info.identity')}</SectionLabel>
       <InfoRow label={t('session.info.sessionId')} text={data.sessionId}>
@@ -108,7 +120,12 @@ export const SessionInfoCard: React.FC<SessionInfoCardProps> = ({
   return (
     <CollapsibleCard
       title={
-        <div css={css`${flexRow(theme, '1')}; align-items: center;`}>
+        <div
+          css={css`
+            ${flexRow(theme, '1')};
+            align-items: center;
+          `}
+        >
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
             {t('session.info.title')}
           </Typography.Text>
@@ -117,7 +134,11 @@ export const SessionInfoCard: React.FC<SessionInfoCardProps> = ({
       collapsed={collapsedToggle.value}
       onCollapseChange={(v) => collapsedToggle.set(v)}
     >
-      <div css={css`${flexColumn(theme, '2')}`}>
+      <div
+        css={css`
+          ${flexColumn(theme, '2')}
+        `}
+      >
         <CardContent data={data} />
       </div>
     </CollapsibleCard>

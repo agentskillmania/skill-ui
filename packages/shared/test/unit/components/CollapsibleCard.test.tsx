@@ -18,7 +18,7 @@ describe('CollapsibleCard', () => {
       <CollapsibleCard title={<strong data-testid="custom-title">Custom</strong>}>
         Content
       </CollapsibleCard>,
-      { wrapper },
+      { wrapper }
     );
     expect(screen.getByTestId('custom-title')).toBeInTheDocument();
   });
@@ -33,7 +33,7 @@ describe('CollapsibleCard', () => {
       <CollapsibleCard title="Card" defaultCollapsed>
         Hidden Content
       </CollapsibleCard>,
-      { wrapper },
+      { wrapper }
     );
     expect(screen.queryByText('Hidden Content')).toBeNull();
   });
@@ -43,7 +43,7 @@ describe('CollapsibleCard', () => {
       <CollapsibleCard title="Card" defaultCollapsed>
         Toggle Content
       </CollapsibleCard>,
-      { wrapper },
+      { wrapper }
     );
     expect(screen.queryByText('Toggle Content')).toBeNull();
 
@@ -59,7 +59,7 @@ describe('CollapsibleCard', () => {
       <CollapsibleCard title="Card" collapsed={true}>
         Controlled Content
       </CollapsibleCard>,
-      { wrapper },
+      { wrapper }
     );
     expect(screen.queryByText('Controlled Content')).toBeNull();
 
@@ -68,7 +68,7 @@ describe('CollapsibleCard', () => {
         <CollapsibleCard title="Card" collapsed={false}>
           Controlled Content
         </CollapsibleCard>
-      </ThemeProvider>,
+      </ThemeProvider>
     );
     expect(screen.getByText('Controlled Content')).toBeInTheDocument();
   });
@@ -79,7 +79,7 @@ describe('CollapsibleCard', () => {
       <CollapsibleCard title="Card" defaultCollapsed onCollapseChange={onCollapseChange}>
         Content
       </CollapsibleCard>,
-      { wrapper },
+      { wrapper }
     );
     fireEvent.click(screen.getByTestId('collapse-toggle'));
     expect(onCollapseChange).toHaveBeenCalledWith(false);
@@ -90,7 +90,7 @@ describe('CollapsibleCard', () => {
       <CollapsibleCard title="Card" badge={<span>Running</span>}>
         Content
       </CollapsibleCard>,
-      { wrapper },
+      { wrapper }
     );
     expect(screen.getByText('Running')).toBeInTheDocument();
   });

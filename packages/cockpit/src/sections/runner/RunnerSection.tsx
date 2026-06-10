@@ -19,7 +19,11 @@ export function RunnerSection({ runner }: RunnerSectionProps) {
   const theme = useTheme();
 
   return (
-    <div css={css`${flexColumn(theme, '2')}`}>
+    <div
+      css={css`
+        ${flexColumn(theme, '2')}
+      `}
+    >
       <SectionHeader icon={Settings} title="Runner" iconColor={theme.color.primary} />
 
       <FeatureTagsCard features={runner?.features} />

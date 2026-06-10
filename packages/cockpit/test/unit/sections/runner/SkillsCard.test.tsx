@@ -37,26 +37,19 @@ describe('SkillsCard', () => {
   });
 
   it('renders source path for each skill', () => {
-    const skills: RunnerSkillInfo[] = [
-      { name: 'spec-plan', source: '/skills/spec-plan' },
-    ];
+    const skills: RunnerSkillInfo[] = [{ name: 'spec-plan', source: '/skills/spec-plan' }];
     renderWithTheme(<SkillsCard skills={skills} />);
     expect(screen.getByText('/skills/spec-plan')).toBeInTheDocument();
   });
 
   it('renders collapse toggle in card header', () => {
-    const skills: RunnerSkillInfo[] = [
-      { name: 'skill-a' },
-      { name: 'skill-b' },
-    ];
+    const skills: RunnerSkillInfo[] = [{ name: 'skill-a' }, { name: 'skill-b' }];
     renderWithTheme(<SkillsCard skills={skills} />);
     expect(screen.getByTestId('collapse-toggle')).toBeInTheDocument();
   });
 
   it('collapses card body when toggle is clicked', () => {
-    const skills: RunnerSkillInfo[] = [
-      { name: 'skill-a' },
-    ];
+    const skills: RunnerSkillInfo[] = [{ name: 'skill-a' }];
     renderWithTheme(<SkillsCard skills={skills} />);
     expect(screen.getByTestId('skill-item-skill-a')).toBeInTheDocument();
 
@@ -67,7 +60,11 @@ describe('SkillsCard', () => {
 
   it('toggles skill description on click', () => {
     const skills: RunnerSkillInfo[] = [
-      { name: 'spec-plan', description: 'Plan and execute specifications', source: '/skills/spec-plan' },
+      {
+        name: 'spec-plan',
+        description: 'Plan and execute specifications',
+        source: '/skills/spec-plan',
+      },
     ];
     renderWithTheme(<SkillsCard skills={skills} />);
 
@@ -84,9 +81,7 @@ describe('SkillsCard', () => {
   });
 
   it('does not render description area when description is missing', () => {
-    const skills: RunnerSkillInfo[] = [
-      { name: 'no-desc-skill', source: '/skills/no-desc' },
-    ];
+    const skills: RunnerSkillInfo[] = [{ name: 'no-desc-skill', source: '/skills/no-desc' }];
     renderWithTheme(<SkillsCard skills={skills} />);
     fireEvent.click(screen.getByTestId('skill-toggle-no-desc-skill'));
     // Item should exist, no crash, but no description text
@@ -100,9 +95,7 @@ describe('SkillsCard', () => {
   });
 
   it('handles skill without source gracefully', () => {
-    const skills: RunnerSkillInfo[] = [
-      { name: 'no-source-skill', description: 'A skill' },
-    ];
+    const skills: RunnerSkillInfo[] = [{ name: 'no-source-skill', description: 'A skill' }];
     renderWithTheme(<SkillsCard skills={skills} />);
     expect(screen.getByTestId('skill-item-no-source-skill')).toBeInTheDocument();
   });

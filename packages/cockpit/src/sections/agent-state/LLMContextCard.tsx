@@ -54,7 +54,12 @@ export function LLMContextCard({ llm }: LLMContextCardProps) {
   return (
     <CollapsibleCard
       title={
-        <div css={css`${flexRow(theme, '1')}; align-items: center;`}>
+        <div
+          css={css`
+            ${flexRow(theme, '1')};
+            align-items: center;
+          `}
+        >
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
             {t('agentState.llmContext.title')}
           </Typography.Text>
@@ -64,9 +69,7 @@ export function LLMContextCard({ llm }: LLMContextCardProps) {
       onCollapseChange={(v) => collapsedToggle.set(v)}
     >
       {isEmpty ? (
-        <div css={emptyTextStyle(theme)}>
-          {t('agentState.llmContext.none')}
-        </div>
+        <div css={emptyTextStyle(theme)}>{t('agentState.llmContext.none')}</div>
       ) : (
         <div>
           {/* Metrics row */}
@@ -78,9 +81,7 @@ export function LLMContextCard({ llm }: LLMContextCardProps) {
           {/* System prompt — truncated, click to expand */}
           {systemPrompt && (
             <div>
-              <SectionLabel>
-                {t('agentState.llmContext.systemPrompt')}
-              </SectionLabel>
+              <SectionLabel>{t('agentState.llmContext.systemPrompt')}</SectionLabel>
               <div
                 css={codeBlockStyle(theme, promptToggle.value)}
                 onClick={promptToggle.toggle}

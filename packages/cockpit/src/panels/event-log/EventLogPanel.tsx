@@ -30,10 +30,13 @@ function mergeStreamingEvents(events: CockpitEvent[]): CockpitEvent[] {
 
     if (last && last.type === event.type && MERGEABLE_TYPES.has(event.type)) {
       // Append to the previous merged event
-      const prevText = String(last.payload?.text ?? last.payload?.content ?? last.payload?.token ?? '');
-      const currText = event.type === 'token'
-        ? String(event.payload?.token ?? '')
-        : String(event.payload?.content ?? '');
+      const prevText = String(
+        last.payload?.text ?? last.payload?.content ?? last.payload?.token ?? ''
+      );
+      const currText =
+        event.type === 'token'
+          ? String(event.payload?.token ?? '')
+          : String(event.payload?.content ?? '');
       last.payload = {
         ...last.payload,
         text: prevText + currText,
@@ -54,7 +57,7 @@ export function EventLogPanel({ events = [] }: EventLogPanelProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const [activeCategories, setActiveCategories] = useState<Set<EventCategory>>(
-    () => new Set(ALL_CATEGORIES),
+    () => new Set(ALL_CATEGORIES)
   );
 
   // Merge streaming events, then filter by category
@@ -98,10 +101,7 @@ export function EventLogPanel({ events = [] }: EventLogPanelProps) {
           `}
         >
           {/* Fixed filter bar */}
-          <EventFilterBar
-            activeCategories={activeCategories}
-            onToggle={handleToggleCategory}
-          />
+          <EventFilterBar activeCategories={activeCategories} onToggle={handleToggleCategory} />
           {/* Scrollable event list */}
           <div
             css={css`

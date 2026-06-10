@@ -19,7 +19,11 @@ const mockState: SessionBoardData = {
       { name: 'file_write', description: 'Write to a file', type: 'builtin', enabled: true },
     ],
     skills: [
-      { name: 'spec-plan', description: 'Plan and execute specifications', source: '/skills/spec-plan' },
+      {
+        name: 'spec-plan',
+        description: 'Plan and execute specifications',
+        source: '/skills/spec-plan',
+      },
     ],
   },
   agent: {

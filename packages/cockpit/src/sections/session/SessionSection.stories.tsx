@@ -30,10 +30,7 @@ const infoData: SessionInfoData = {
   workspacePath: '/Users/dev/project',
   sessionPath: '~/.agentskillmania/sessions/abc/a3f2b1',
   skillDirs: ['/Users/dev/project/.skills', '/Users/dev/.agentskillmania/skills'],
-  mcpConfigPaths: [
-    '/Users/dev/project/.mcp/github.json',
-    '/Users/dev/project/.mcp/postgres.json',
-  ],
+  mcpConfigPaths: ['/Users/dev/project/.mcp/github.json', '/Users/dev/project/.mcp/postgres.json'],
 };
 
 const meta: Meta<typeof SessionSection> = {

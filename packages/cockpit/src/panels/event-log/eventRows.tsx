@@ -20,9 +20,7 @@ export function renderEventContent(event: CockpitEvent, expanded: boolean): stri
     case 'phase-change':
       return `${p.from ?? '?'} → ${p.to ?? '?'}`;
     case 'thinking':
-      return expanded
-        ? String(p.content ?? '...')
-        : truncate(String(p.content ?? '...'), 60);
+      return expanded ? String(p.content ?? '...') : truncate(String(p.content ?? '...'), 60);
     case 'token': {
       // After merging, payload.text holds accumulated text
       const text = String(p.text ?? p.token ?? '');
@@ -30,7 +28,9 @@ export function renderEventContent(event: CockpitEvent, expanded: boolean): stri
     }
     case 'llm:request': {
       const skill = p.skill as { current: string | null } | null;
-      return skill?.current ? `${skill.current} · ${Array.isArray(p.messages) ? p.messages.length : '?'} msgs` : `${Array.isArray(p.messages) ? p.messages.length : '?'} messages`;
+      return skill?.current
+        ? `${skill.current} · ${Array.isArray(p.messages) ? p.messages.length : '?'} msgs`
+        : `${Array.isArray(p.messages) ? p.messages.length : '?'} messages`;
     }
     case 'llm:response': {
       const text = String(p.text ?? '');

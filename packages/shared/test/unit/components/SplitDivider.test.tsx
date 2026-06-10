@@ -14,7 +14,7 @@ function renderWithSidebar(onResize: ReturnType<typeof vi.fn>, disabled = false)
       <SplitDivider onResize={onResize} disabled={disabled} minWidth={100} maxWidth={600} />
       <div data-testid="sidebar" style={{ width: '380px' }} />
     </div>,
-    { wrapper },
+    { wrapper }
   );
 }
 

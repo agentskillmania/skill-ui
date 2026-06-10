@@ -53,9 +53,7 @@ describe('ToolsCard', () => {
   });
 
   it('does not render tab for category with no tools', () => {
-    const tools: RunnerToolInfo[] = [
-      { name: 'file_read', type: 'builtin', enabled: true },
-    ];
+    const tools: RunnerToolInfo[] = [{ name: 'file_read', type: 'builtin', enabled: true }];
     renderWithTheme(<ToolsCard tools={tools} />);
 
     // Only builtin tab should exist
@@ -65,18 +63,14 @@ describe('ToolsCard', () => {
   });
 
   it('renders StatusDot component for enabled tools', () => {
-    const tools: RunnerToolInfo[] = [
-      { name: 'file_read', type: 'builtin', enabled: true },
-    ];
+    const tools: RunnerToolInfo[] = [{ name: 'file_read', type: 'builtin', enabled: true }];
     renderWithTheme(<ToolsCard tools={tools} />);
     // StatusDot renders a small circle — verify tool name is present (dot is adjacent)
     expect(screen.getByTestId('tool-name-file_read')).toBeInTheDocument();
   });
 
   it('renders tool name with strikethrough when disabled', () => {
-    const tools: RunnerToolInfo[] = [
-      { name: 'shell', type: 'builtin', enabled: false },
-    ];
+    const tools: RunnerToolInfo[] = [{ name: 'shell', type: 'builtin', enabled: false }];
     renderWithTheme(<ToolsCard tools={tools} />);
     const name = screen.getByTestId('tool-name-shell');
     expect(name).toHaveStyle('text-decoration: line-through');
@@ -96,9 +90,7 @@ describe('ToolsCard', () => {
   });
 
   it('does not render description element when tool has no description', () => {
-    const tools: RunnerToolInfo[] = [
-      { name: 'file_read', type: 'builtin', enabled: true },
-    ];
+    const tools: RunnerToolInfo[] = [{ name: 'file_read', type: 'builtin', enabled: true }];
     renderWithTheme(<ToolsCard tools={tools} />);
     expect(screen.queryByTestId('tool-desc-file_read')).not.toBeInTheDocument();
   });
@@ -145,9 +137,7 @@ describe('ToolsCard', () => {
   });
 
   it('collapses card body when toggle button is clicked', () => {
-    const tools: RunnerToolInfo[] = [
-      { name: 'file_read', type: 'builtin', enabled: true },
-    ];
+    const tools: RunnerToolInfo[] = [{ name: 'file_read', type: 'builtin', enabled: true }];
     renderWithTheme(<ToolsCard tools={tools} />);
 
     // Tool is visible

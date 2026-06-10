@@ -11,14 +11,16 @@ export function cardBodyTransition(theme: Theme, collapsed: boolean) {
       max-height: 0;
       padding: 0 ${theme.spacing[3]};
       overflow: hidden;
-      transition: max-height ${theme.motion.duration.normal} ${theme.motion.easing.out},
+      transition:
+        max-height ${theme.motion.duration.normal} ${theme.motion.easing.out},
         padding ${theme.motion.duration.normal} ${theme.motion.easing.out};
     `;
   }
   return css`
     max-height: 500px;
     overflow-y: auto;
-    transition: max-height ${theme.motion.duration.normal} ${theme.motion.easing.out},
+    transition:
+      max-height ${theme.motion.duration.normal} ${theme.motion.easing.out},
       padding ${theme.motion.duration.normal} ${theme.motion.easing.out};
   `;
 }

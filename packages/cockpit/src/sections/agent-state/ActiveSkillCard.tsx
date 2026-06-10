@@ -6,12 +6,7 @@ import { useTheme, flexRow } from '@agentskillmania/skill-ui-theme';
 
 import { NAMESPACE } from '../../locales/index.js';
 import type { SkillStateData } from './types.js';
-import {
-  emptyTextStyle,
-  codeBlockStyle,
-  stackFrameStyle,
-  stackContainerStyle,
-} from './styles.js';
+import { emptyTextStyle, codeBlockStyle, stackFrameStyle, stackContainerStyle } from './styles.js';
 import {
   CollapsibleCard,
   useToggle,
@@ -51,7 +46,12 @@ export function ActiveSkillCard({ skillState }: ActiveSkillCardProps) {
   return (
     <CollapsibleCard
       title={
-        <div css={css`${flexRow(theme, '1')}; align-items: center;`}>
+        <div
+          css={css`
+            ${flexRow(theme, '1')};
+            align-items: center;
+          `}
+        >
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
             {t('agentState.activeSkill.title')}
           </Typography.Text>
@@ -61,13 +61,17 @@ export function ActiveSkillCard({ skillState }: ActiveSkillCardProps) {
       onCollapseChange={(v) => collapsedToggle.set(v)}
     >
       {isEmpty ? (
-        <div css={emptyTextStyle(theme)}>
-          {t('agentState.activeSkill.none')}
-        </div>
+        <div css={emptyTextStyle(theme)}>{t('agentState.activeSkill.none')}</div>
       ) : (
         <div>
           {/* Current skill + depth badge */}
-          <div css={css`${flexRow(theme, '1')}; align-items: center;`} style={{ marginBottom: theme.spacing[2] }}>
+          <div
+            css={css`
+              ${flexRow(theme, '1')};
+              align-items: center;
+            `}
+            style={{ marginBottom: theme.spacing[2] }}
+          >
             <span css={skillNameStyle(theme)} data-testid="active-skill-name">
               {skillState!.current}
             </span>
@@ -107,9 +111,7 @@ export function ActiveSkillCard({ skillState }: ActiveSkillCardProps) {
           {/* Loaded instructions — truncated, click to expand */}
           {skillState!.loadedInstructions && (
             <div>
-              <SectionLabel>
-                {t('agentState.activeSkill.instructions')}
-              </SectionLabel>
+              <SectionLabel>{t('agentState.activeSkill.instructions')}</SectionLabel>
               <div
                 css={codeBlockStyle(theme, instructionsToggle.value)}
                 onClick={instructionsToggle.toggle}

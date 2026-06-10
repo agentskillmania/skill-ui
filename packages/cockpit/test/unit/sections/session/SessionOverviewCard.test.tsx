@@ -58,7 +58,7 @@ describe('SessionOverviewCard', () => {
     renderWithTheme(
       <SessionOverviewCard
         data={createData({ tokensIn: 9768, tokensOut: 1200, tokensTotal: 10968 })}
-      />,
+      />
     );
     // formatTokens: 9768 → "9.8k", 1200 → "1.2k", 10968 → "11.0k"
     expect(screen.getByText('9.8k')).toBeInTheDocument();
@@ -70,7 +70,7 @@ describe('SessionOverviewCard', () => {
     const { container } = renderWithTheme(
       <SessionOverviewCard
         data={createData({ estimatedContextSize: 64000, contextWindow: 128000 })}
-      />,
+      />
     );
     // Ant Design Progress renders a .ant-progress element
     const progressEl = container.querySelector('.ant-progress');
@@ -79,7 +79,7 @@ describe('SessionOverviewCard', () => {
 
   it('hides progress bar when contextWindow is undefined', () => {
     const { container } = renderWithTheme(
-      <SessionOverviewCard data={createData({ contextWindow: undefined })} />,
+      <SessionOverviewCard data={createData({ contextWindow: undefined })} />
     );
     const progressEl = container.querySelector('.ant-progress');
     expect(progressEl).not.toBeInTheDocument();

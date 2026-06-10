@@ -6,7 +6,13 @@ import type { CockpitEvent } from '../panels/event-log/types.js';
 const mockEvents: CockpitEvent[] = [
   { id: '1', timestamp: 1000, type: 'lifecycle', subtype: 'start', label: 'Agent started' },
   { id: '2', timestamp: 2500, type: 'tool', subtype: 'execute', label: 'Executed ReadFile' },
-  { id: '3', timestamp: 4000, type: 'thinking', subtype: 'reasoning', label: 'Analyzing test output' },
+  {
+    id: '3',
+    timestamp: 4000,
+    type: 'thinking',
+    subtype: 'reasoning',
+    label: 'Analyzing test output',
+  },
 ];
 
 const meta: Meta<typeof Sidebar> = {

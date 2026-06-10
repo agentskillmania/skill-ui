@@ -120,12 +120,7 @@ export function ReviewPanel({ items }: ReviewPanelProps) {
   }, [items?.length]);
 
   if (!items || items.length === 0) {
-    return (
-      <EmptyState
-        icon={<ClipboardCheck size={32} />}
-        description={t('review.emptyHint')}
-      />
-    );
+    return <EmptyState icon={<ClipboardCheck size={32} />} description={t('review.emptyHint')} />;
   }
 
   return (

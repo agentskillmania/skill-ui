@@ -58,7 +58,7 @@ describe('ActiveSkillCard', () => {
             { skillName: 'inner', loadedAt: Date.now() - 2000 },
           ],
         })}
-      />,
+      />
     );
     expect(screen.getByText('深度 2')).toBeInTheDocument();
   });
@@ -77,7 +77,7 @@ describe('ActiveSkillCard', () => {
             { skillName: 'review', loadedAt: Date.now() - 5000 },
           ],
         })}
-      />,
+      />
     );
 
     // Stack frames visible immediately, no toggle needed
@@ -93,7 +93,7 @@ describe('ActiveSkillCard', () => {
         skillState={createSkillState({
           loadedInstructions: 'You are a code reviewer.',
         })}
-      />,
+      />
     );
 
     // Instructions visible immediately (truncated by default)
@@ -112,9 +112,7 @@ describe('ActiveSkillCard', () => {
 
   it('does not render instructions section when loadedInstructions is empty', () => {
     renderWithTheme(
-      <ActiveSkillCard
-        skillState={createSkillState({ loadedInstructions: undefined })}
-      />,
+      <ActiveSkillCard skillState={createSkillState({ loadedInstructions: undefined })} />
     );
     expect(screen.queryByTestId('instructions-toggle')).not.toBeInTheDocument();
   });
@@ -125,7 +123,7 @@ describe('ActiveSkillCard', () => {
         skillState={createSkillState({
           loadedInstructions: 'Review code.',
         })}
-      />,
+      />
     );
 
     const toggle = screen.getByTestId('instructions-toggle');
@@ -135,11 +133,7 @@ describe('ActiveSkillCard', () => {
   });
 
   it('collapses card body when toggle button is clicked', () => {
-    renderWithTheme(
-      <ActiveSkillCard
-        skillState={createSkillState({ current: 'test-skill' })}
-      />,
-    );
+    renderWithTheme(<ActiveSkillCard skillState={createSkillState({ current: 'test-skill' })} />);
 
     expect(screen.getByTestId('active-skill-name')).toBeInTheDocument();
 

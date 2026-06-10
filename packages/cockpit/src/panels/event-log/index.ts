@@ -5,9 +5,4 @@ export { EventTypeTag } from './EventTypeTag.js';
 export { getEventCategory, ALL_CATEGORIES, getCategoryIcon } from './eventCategory.js';
 export { renderEventContent } from './eventRows.js';
 
-export type {
-  CockpitEvent,
-  CockpitEventType,
-  EventCategory,
-  EventLogPanelProps,
-} from './types.js';
+export type { CockpitEvent, CockpitEventType, EventCategory, EventLogPanelProps } from './types.js';

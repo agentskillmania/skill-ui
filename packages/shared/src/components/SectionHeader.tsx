@@ -34,7 +34,16 @@ export function SectionHeader({ icon: Icon, title, extra, iconColor }: SectionHe
     >
       <Icon
         size={14}
-        css={iconColor ? css`color: ${iconColor}; flex-shrink: 0;` : css`flex-shrink: 0;`}
+        css={
+          iconColor
+            ? css`
+                color: ${iconColor};
+                flex-shrink: 0;
+              `
+            : css`
+                flex-shrink: 0;
+              `
+        }
       />
       {title}
       <div

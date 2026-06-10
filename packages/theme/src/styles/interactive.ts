@@ -45,7 +45,9 @@ export function interactiveRow(theme: Theme, options?: InteractiveRowOptions) {
     border: 1px solid ${active ? theme.color.primary : 'transparent'};
     border-radius: ${theme.radius.md};
     cursor: pointer;
-    transition: border-color 0.15s, background 0.12s;
+    transition:
+      border-color 0.15s,
+      background 0.12s;
     &:hover {
       background: ${theme.color.fillSecondary};
     }

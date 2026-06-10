@@ -82,13 +82,23 @@ export function SessionOverviewCard({ data, defaultCollapsed = false }: SessionO
   return (
     <CollapsibleCard
       title={
-        <div css={css`${flexRow(theme, '1')}; align-items: center;`}>
+        <div
+          css={css`
+            ${flexRow(theme, '1')};
+            align-items: center;
+          `}
+        >
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
             {displayTitle}
           </Typography.Text>
           <Tag
             color={statusTagColor(data.status, theme)}
-            style={{ fontSize: theme.font.size.xs, padding: '0 4px', lineHeight: '16px', margin: 0 }}
+            style={{
+              fontSize: theme.font.size.xs,
+              padding: '0 4px',
+              lineHeight: '16px',
+              margin: 0,
+            }}
           >
             {t(statusI18nKey(data.status))}
           </Tag>
@@ -97,7 +107,11 @@ export function SessionOverviewCard({ data, defaultCollapsed = false }: SessionO
       collapsed={collapsedToggle.value}
       onCollapseChange={(v) => collapsedToggle.set(v)}
     >
-      <div css={css`${flexColumn(theme, '2')}`}>
+      <div
+        css={css`
+          ${flexColumn(theme, '2')}
+        `}
+      >
         {/* Agent · Model subtitle */}
         <div css={subtitleStyle(theme)}>
           {data.agentName} · {data.model}
@@ -112,8 +126,14 @@ export function SessionOverviewCard({ data, defaultCollapsed = false }: SessionO
         {/* Token metrics — 3-col grid */}
         <div css={metricGrid(theme, 3)}>
           <MetricTile title={t('session.overview.tokensIn')} value={formatTokens(data.tokensIn)} />
-          <MetricTile title={t('session.overview.tokensOut')} value={formatTokens(data.tokensOut)} />
-          <MetricTile title={t('session.overview.tokensTotal')} value={formatTokens(data.tokensTotal)} />
+          <MetricTile
+            title={t('session.overview.tokensOut')}
+            value={formatTokens(data.tokensOut)}
+          />
+          <MetricTile
+            title={t('session.overview.tokensTotal')}
+            value={formatTokens(data.tokensTotal)}
+          />
         </div>
 
         {/* Context usage progress bar */}
@@ -132,7 +152,12 @@ export function SessionOverviewCard({ data, defaultCollapsed = false }: SessionO
         )}
 
         {/* Timestamps footer */}
-        <div css={css`${flexRow(theme, '1')}; justify-content: space-between;`}>
+        <div
+          css={css`
+            ${flexRow(theme, '1')};
+            justify-content: space-between;
+          `}
+        >
           <span css={timestampStyle(theme)}>
             {t('session.overview.created', { time: formatTimestamp(data.createdAt) })}
           </span>

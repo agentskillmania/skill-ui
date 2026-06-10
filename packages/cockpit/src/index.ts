@@ -57,7 +57,6 @@ export { EventLogPanel } from './panels/event-log/index.js';
 export { SessionBoardPanel } from './panels/session-board/index.js';
 export { SessionsPanel } from './panels/sessions/index.js';
 
-
 // Event log sub-components
 export { EventFilterBar } from './panels/event-log/EventFilterBar.js';
 export type { EventFilterBarProps } from './panels/event-log/EventFilterBar.js';
@@ -68,7 +67,12 @@ export type { EventRowProps } from './panels/event-log/EventRow.js';
 export { SessionSection, SessionOverviewCard, SessionInfoCard } from './sections/session/index.js';
 
 // Agent state sub-components
-export { AgentStateSection, ActiveSkillCard, CompressionCard, LLMContextCard } from './sections/agent-state/index.js';
+export {
+  AgentStateSection,
+  ActiveSkillCard,
+  CompressionCard,
+  LLMContextCard,
+} from './sections/agent-state/index.js';
 
 // Runner sub-components
 export { RunnerSection, FeatureTagsCard, ToolsCard, SkillsCard } from './sections/runner/index.js';

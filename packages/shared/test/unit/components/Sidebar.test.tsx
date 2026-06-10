@@ -26,7 +26,7 @@ describe('Sidebar', () => {
       >
         <span>Panel Content</span>
       </Sidebar>,
-      { wrapper },
+      { wrapper }
     );
     expect(screen.getByText('Panel Content')).toBeInTheDocument();
   });
@@ -43,7 +43,7 @@ describe('Sidebar', () => {
       >
         <span>Hidden Content</span>
       </Sidebar>,
-      { wrapper },
+      { wrapper }
     );
     // Content is rendered in DOM but hidden via opacity/pointer-events
     expect(screen.queryByText('Hidden Content')).toBeInTheDocument();
@@ -60,7 +60,7 @@ describe('Sidebar', () => {
       >
         <span>Content</span>
       </Sidebar>,
-      { wrapper },
+      { wrapper }
     );
     const sidebar = container.firstChild as HTMLElement;
     expect(sidebar).toHaveStyle({ width: '380px' });
@@ -77,7 +77,7 @@ describe('Sidebar', () => {
       >
         <span>Content</span>
       </Sidebar>,
-      { wrapper },
+      { wrapper }
     );
     const sidebar = container.firstChild as HTMLElement;
     expect(sidebar).toHaveStyle({ width: '42px' });
@@ -94,7 +94,7 @@ describe('Sidebar', () => {
       >
         <span>Content</span>
       </Sidebar>,
-      { wrapper },
+      { wrapper }
     );
     const sidebar = container.firstChild as HTMLElement;
     expect(sidebar.classList.contains('collapsed')).toBe(true);
@@ -111,7 +111,7 @@ describe('Sidebar', () => {
       >
         <span>Content</span>
       </Sidebar>,
-      { wrapper },
+      { wrapper }
     );
     const sidebar = container.firstChild as HTMLElement;
     expect(sidebar.classList.contains('collapsed')).toBe(false);
@@ -129,7 +129,7 @@ describe('Sidebar', () => {
       >
         <span>Content</span>
       </Sidebar>,
-      { wrapper },
+      { wrapper }
     );
     // Collapse button + 2 panel buttons = 3
     const buttons = screen.getAllByRole('button');
@@ -147,7 +147,7 @@ describe('Sidebar', () => {
       >
         <span>Content</span>
       </Sidebar>,
-      { wrapper },
+      { wrapper }
     );
     // Only the collapse button, no panel items
     const buttons = screen.getAllByRole('button');

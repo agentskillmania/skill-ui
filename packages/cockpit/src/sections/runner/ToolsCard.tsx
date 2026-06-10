@@ -86,7 +86,7 @@ export function ToolsCard({ tools }: ToolsCardProps) {
 
   const groups = useMemo(
     () => (isEmpty ? new Map<ToolCategory, RunnerToolInfo[]>() : groupByCategory(tools!)),
-    [tools, isEmpty],
+    [tools, isEmpty]
   );
 
   /** Filtered tools based on active tab. */
@@ -96,17 +96,15 @@ export function ToolsCard({ tools }: ToolsCardProps) {
 
   /** Build tab items: one per category, no "All". */
   const tabItems = useMemo(() => {
-    return CATEGORY_ORDER
-      .filter((cat) => groups.has(cat))
-      .map((cat) => ({
-        key: cat,
-        label: (
-          <span>
-            {t(CATEGORY_I18N_KEYS[cat])}
-            <span css={tabCountStyle(theme)}>{groups.get(cat)!.length}</span>
-          </span>
-        ),
-      }));
+    return CATEGORY_ORDER.filter((cat) => groups.has(cat)).map((cat) => ({
+      key: cat,
+      label: (
+        <span>
+          {t(CATEGORY_I18N_KEYS[cat])}
+          <span css={tabCountStyle(theme)}>{groups.get(cat)!.length}</span>
+        </span>
+      ),
+    }));
   }, [groups, t, theme]);
 
   /** Default to first available category tab. */
@@ -127,9 +125,7 @@ export function ToolsCard({ tools }: ToolsCardProps) {
       onCollapseChange={(v) => collapsedToggle.set(v)}
     >
       {isEmpty ? (
-        <div css={emptyTextStyle(theme)}>
-          {t('runner.tools.empty')}
-        </div>
+        <div css={emptyTextStyle(theme)}>{t('runner.tools.empty')}</div>
       ) : (
         <>
           <Tabs
@@ -139,8 +135,15 @@ export function ToolsCard({ tools }: ToolsCardProps) {
             items={tabItems}
             data-testid="tools-type-tabs"
           />
-          <div css={css`padding: ${theme.spacing[1]} 0;`}>
-            {(effectiveTab === activeTab ? filteredTools : (groups.get(effectiveTab as ToolCategory) ?? [])).map((tool) => {
+          <div
+            css={css`
+              padding: ${theme.spacing[1]} 0;
+            `}
+          >
+            {(effectiveTab === activeTab
+              ? filteredTools
+              : (groups.get(effectiveTab as ToolCategory) ?? [])
+            ).map((tool) => {
               const isEnabled = tool.enabled !== false;
               return (
                 <div
@@ -158,10 +161,7 @@ export function ToolsCard({ tools }: ToolsCardProps) {
                     </span>
                   </div>
                   {tool.description && (
-                    <div
-                      css={toolDescStyle(theme, false)}
-                      data-testid={`tool-desc-${tool.name}`}
-                    >
+                    <div css={toolDescStyle(theme, false)} data-testid={`tool-desc-${tool.name}`}>
                       {tool.description}
                     </div>
                   )}

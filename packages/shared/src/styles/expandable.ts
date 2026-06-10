@@ -8,7 +8,7 @@ import type { Theme } from '@agentskillmania/skill-ui-theme';
 export function expandableDetailTransition(
   theme: Theme,
   expanded: boolean,
-  duration: number = 150,
+  duration: number = 150
 ) {
   const ms = `${duration}ms`;
   if (expanded) {

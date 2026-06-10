@@ -4,7 +4,12 @@ import type { Message } from '@agentskillmania/skill-ui-chat';
 
 const mockMessages: Message[] = [
   { id: '1', role: 'user', content: 'Help me debug the test failure', status: 'completed' },
-  { id: '2', role: 'assistant', content: 'I see the issue. The test expects antd Progress.', status: 'completed' },
+  {
+    id: '2',
+    role: 'assistant',
+    content: 'I see the issue. The test expects antd Progress.',
+    status: 'completed',
+  },
   { id: '3', role: 'user', content: 'Can you fix it?', status: 'completed' },
 ];
 

@@ -25,7 +25,11 @@ export function SessionSection({ overview, info }: SessionSectionProps) {
   const theme = useTheme();
 
   return (
-    <div css={css`${flexColumn(theme, '2')}`}>
+    <div
+      css={css`
+        ${flexColumn(theme, '2')}
+      `}
+    >
       <SectionHeader icon={Activity} title="Session" iconColor={theme.color.primary} />
 
       {overview && <SessionOverviewCard data={overview} />}

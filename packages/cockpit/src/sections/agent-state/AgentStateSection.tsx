@@ -15,15 +15,15 @@ import type { AgentStateSectionProps } from './types.js';
  * ActiveSkillCard, CompressionCard, and LLMContextCard.
  * Follows the same section pattern as SessionSection.
  */
-export function AgentStateSection({
-  skillState,
-  compression,
-  llm,
-}: AgentStateSectionProps) {
+export function AgentStateSection({ skillState, compression, llm }: AgentStateSectionProps) {
   const theme = useTheme();
 
   return (
-    <div css={css`${flexColumn(theme, '2')}`}>
+    <div
+      css={css`
+        ${flexColumn(theme, '2')}
+      `}
+    >
       <SectionHeader icon={Cpu} title="Agent State" iconColor={theme.color.primary} />
 
       <ActiveSkillCard skillState={skillState} />

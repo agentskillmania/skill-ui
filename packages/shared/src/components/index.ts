@@ -9,7 +9,12 @@ export type { CollapsibleCardProps } from './CollapsibleCard.js';
 export { SplitDivider } from './SplitDivider.js';
 export type { SplitDividerProps } from './SplitDivider.js';
 export { Sidebar, SidebarPanel, SidebarIcons } from './sidebar/index.js';
-export type { SidebarProps, SidebarPanelProps, SidebarIconsProps, SidebarIconItem } from './sidebar/index.js';
+export type {
+  SidebarProps,
+  SidebarPanelProps,
+  SidebarIconsProps,
+  SidebarIconItem,
+} from './sidebar/index.js';
 export { MetricTile } from './MetricTile.js';
 export type { MetricTileProps } from './MetricTile.js';
 export { SectionLabel } from './SectionLabel.js';
