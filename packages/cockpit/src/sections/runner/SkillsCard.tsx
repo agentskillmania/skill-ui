@@ -17,6 +17,7 @@ import {
   descriptionStyle,
 } from './styles.js';
 import type { RunnerSkillInfo } from './types.js';
+import { useToggle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for SkillsCard. */
 export interface SkillsCardProps {
@@ -41,7 +42,7 @@ const toggleBtnStyle = (theme: import('@agentskillmania/skill-ui-theme').Theme) 
 export function SkillsCard({ skills }: SkillsCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
-  const [collapsed, setCollapsed] = useState(false);
+  const collapsedToggle = useToggle(false);
   const [expandedSkills, setExpandedSkills] = useState<Set<string>>(new Set());
 
   const isEmpty = !skills || skills.length === 0;
@@ -72,11 +73,11 @@ export function SkillsCard({ skills }: SkillsCardProps) {
         <Button
           type="text"
           css={toggleBtnStyle(theme)}
-          onClick={() => setCollapsed((prev) => !prev)}
+          onClick={collapsedToggle.toggle}
           data-testid="skills-collapse-toggle"
           size="small"
         >
-          {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+          {collapsedToggle.value ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
         </Button>
       }
     >
@@ -84,7 +85,7 @@ export function SkillsCard({ skills }: SkillsCardProps) {
         <div css={emptyTextStyle(theme)}>
           {t('runner.skills.empty')}
         </div>
-      ) : !collapsed ? (
+      ) : !collapsedToggle.value ? (
         <div>
           {skills!.map((skill) => {
             const isExpanded = expandedSkills.has(skill.name);

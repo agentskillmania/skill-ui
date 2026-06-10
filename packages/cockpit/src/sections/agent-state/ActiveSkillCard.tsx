@@ -4,7 +4,6 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Button, Card, Tag, Typography } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../../locales/index.js';
@@ -16,6 +15,7 @@ import {
   stackContainerStyle,
   sectionLabelStyle,
 } from './styles.js';
+import { useToggle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for ActiveSkillCard. */
 export interface ActiveSkillCardProps {
@@ -70,8 +70,8 @@ function formatRelativeTime(timestamp: number | undefined): string {
 export function ActiveSkillCard({ skillState }: ActiveSkillCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
-  const [collapsed, setCollapsed] = useState(false);
-  const [instructionsExpanded, setInstructionsExpanded] = useState(false);
+  const collapsedToggle = useToggle(false);
+  const instructionsToggle = useToggle(false);
 
   const isEmpty = !skillState || skillState.current == null;
   const stack = skillState?.stack ?? [];
@@ -92,11 +92,11 @@ export function ActiveSkillCard({ skillState }: ActiveSkillCardProps) {
           <Button
             type="text"
             css={toggleBtnStyle(theme)}
-            onClick={() => setCollapsed((prev) => !prev)}
+            onClick={collapsedToggle.toggle}
             data-testid="active-skill-collapse"
             size="small"
           >
-            {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+            {collapsedToggle.value ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
           </Button>
         ) : undefined
       }
@@ -105,7 +105,7 @@ export function ActiveSkillCard({ skillState }: ActiveSkillCardProps) {
         <div css={emptyTextStyle(theme)}>
           {t('agentState.activeSkill.none')}
         </div>
-      ) : !collapsed ? (
+      ) : !collapsedToggle.value ? (
         <div>
           {/* Current skill + depth badge */}
           <div css={titleRowStyle(theme)} style={{ marginBottom: theme.spacing[2] }}>
@@ -152,15 +152,15 @@ export function ActiveSkillCard({ skillState }: ActiveSkillCardProps) {
                 {t('agentState.activeSkill.instructions')}
               </div>
               <div
-                css={codeBlockStyle(theme, instructionsExpanded)}
-                onClick={() => setInstructionsExpanded((prev) => !prev)}
+                css={codeBlockStyle(theme, instructionsToggle.value)}
+                onClick={instructionsToggle.toggle}
                 data-testid="instructions-toggle"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    setInstructionsExpanded((prev) => !prev);
+                    instructionsToggle.toggle();
                   }
                 }}
               >

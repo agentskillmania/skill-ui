@@ -4,7 +4,6 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Button, Card, Statistic, Typography } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../../locales/index.js';
@@ -15,6 +14,7 @@ import {
   sectionLabelStyle,
   codeBlockStyle,
 } from './styles.js';
+import { useToggle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for LLMContextCard. */
 export interface LLMContextCardProps {
@@ -61,8 +61,8 @@ function extractSystemPrompt(messages: unknown[]): string | undefined {
 export function LLMContextCard({ llm }: LLMContextCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
-  const [collapsed, setCollapsed] = useState(false);
-  const [promptExpanded, setPromptExpanded] = useState(false);
+  const collapsedToggle = useToggle(false);
+  const promptToggle = useToggle(false);
 
   const isEmpty = !llm;
   const messageCount = llm?.messages?.length ?? 0;
@@ -84,11 +84,11 @@ export function LLMContextCard({ llm }: LLMContextCardProps) {
           <Button
             type="text"
             css={toggleBtnStyle(theme)}
-            onClick={() => setCollapsed((prev) => !prev)}
+            onClick={collapsedToggle.toggle}
             size="small"
             data-testid="llm-context-collapse"
           >
-            {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+            {collapsedToggle.value ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
           </Button>
         ) : undefined
       }
@@ -97,7 +97,7 @@ export function LLMContextCard({ llm }: LLMContextCardProps) {
         <div css={emptyTextStyle(theme)}>
           {t('agentState.llmContext.none')}
         </div>
-      ) : !collapsed ? (
+      ) : !collapsedToggle.value ? (
         <div>
           {/* Metrics row */}
           <div css={metricsRowStyle(theme)}>
@@ -116,15 +116,15 @@ export function LLMContextCard({ llm }: LLMContextCardProps) {
                 {t('agentState.llmContext.systemPrompt')}
               </div>
               <div
-                css={codeBlockStyle(theme, promptExpanded)}
-                onClick={() => setPromptExpanded((prev) => !prev)}
+                css={codeBlockStyle(theme, promptToggle.value)}
+                onClick={promptToggle.toggle}
                 data-testid="system-prompt-toggle"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    setPromptExpanded((prev) => !prev);
+                    promptToggle.toggle();
                   }
                 }}
               >

@@ -4,11 +4,11 @@
  * Displays type tag, content text, and expandable payload detail
  */
 import { css } from '@emotion/react';
-import { useState } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { CockpitEvent } from './types.js';
 import { renderEventContent } from './eventRows.js';
 import { EventTypeTag } from './EventTypeTag.js';
+import { useToggle } from '@agentskillmania/skill-ui-shared';
 
 export interface EventRowProps {
   event: CockpitEvent;
@@ -16,16 +16,16 @@ export interface EventRowProps {
 
 export function EventRow({ event }: EventRowProps) {
   const theme = useTheme();
-  const [expanded, setExpanded] = useState(false);
+  const expandedToggle = useToggle(false);
 
   const hasDetail = event.payload && Object.keys(event.payload).length > 0;
 
   return (
     <div
-      onClick={() => hasDetail && setExpanded((prev) => !prev)}
+      onClick={() => hasDetail && expandedToggle.toggle()}
       css={css`
         padding: ${theme.spacing[0.5]};
-        border: 1px solid ${expanded && hasDetail ? theme.color.primary : 'transparent'};
+        border: 1px solid ${expandedToggle.value && hasDetail ? theme.color.primary : 'transparent'};
         border-radius: ${theme.radius.md};
         cursor: ${hasDetail ? 'pointer' : 'default'};
         &:hover {
@@ -52,12 +52,12 @@ export function EventRow({ event }: EventRowProps) {
             flex: 1;
           `}
         >
-          {renderEventContent(event, expanded)}
+          {renderEventContent(event, expandedToggle.value)}
         </span>
       </div>
 
       {/* Expanded detail */}
-      {expanded && hasDetail && (
+      {expandedToggle.value && hasDetail && (
         <div
           css={css`
             margin-top: ${theme.spacing[1]};

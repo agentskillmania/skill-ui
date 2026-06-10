@@ -4,7 +4,6 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Button, Card, Statistic, Typography } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../../locales/index.js';
@@ -16,6 +15,7 @@ import {
   sectionLabelStyle,
   textBlockStyle,
 } from './styles.js';
+import { useToggle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for CompressionCard. */
 export interface CompressionCardProps {
@@ -67,8 +67,8 @@ function formatRelativeTime(timestamp: number | undefined): string {
 export function CompressionCard({ compression }: CompressionCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
-  const [collapsed, setCollapsed] = useState(false);
-  const [summaryExpanded, setSummaryExpanded] = useState(false);
+  const collapsedToggle = useToggle(false);
+  const summaryToggle = useToggle(false);
 
   const isEmpty = !compression;
 
@@ -87,11 +87,11 @@ export function CompressionCard({ compression }: CompressionCardProps) {
           <Button
             type="text"
             css={toggleBtnStyle(theme)}
-            onClick={() => setCollapsed((prev) => !prev)}
+            onClick={collapsedToggle.toggle}
             size="small"
             data-testid="compression-collapse"
           >
-            {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+            {collapsedToggle.value ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
           </Button>
         ) : undefined
       }
@@ -100,7 +100,7 @@ export function CompressionCard({ compression }: CompressionCardProps) {
         <div css={emptyTextStyle(theme)}>
           {t('agentState.compression.none')}
         </div>
-      ) : !collapsed ? (
+      ) : !collapsedToggle.value ? (
         <div>
           {/* Metrics row */}
           <div css={metricsRowStyle(theme)}>
@@ -136,15 +136,15 @@ export function CompressionCard({ compression }: CompressionCardProps) {
                 {t('agentState.compression.summaryPreview')}
               </div>
               <div
-                css={textBlockStyle(theme, summaryExpanded)}
-                onClick={() => setSummaryExpanded((prev) => !prev)}
+                css={textBlockStyle(theme, summaryToggle.value)}
+                onClick={summaryToggle.toggle}
                 data-testid="summary-toggle"
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    setSummaryExpanded((prev) => !prev);
+                    summaryToggle.toggle();
                   }
                 }}
               >

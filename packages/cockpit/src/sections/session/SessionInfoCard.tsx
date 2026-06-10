@@ -1,6 +1,5 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import { useState } from 'react';
 import { Button, Card, Typography, Tooltip, message } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +8,7 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { NAMESPACE } from '../../locales/index.js';
 import type { SessionInfoData } from './types.js';
 import { cardBodyStyle, titleRowStyle } from './styles.js';
+import { useToggle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for the SessionInfoCard component. */
 export interface SessionInfoCardProps {
@@ -199,7 +199,7 @@ export const SessionInfoCard: React.FC<SessionInfoCardProps> = ({
 }) => {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
-  const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const collapsedToggle = useToggle(defaultCollapsed);
 
   return (
     <Card
@@ -215,15 +215,15 @@ export const SessionInfoCard: React.FC<SessionInfoCardProps> = ({
         <Button
           type="text"
           css={toggleBtnStyle(theme)}
-          onClick={() => setCollapsed((prev) => !prev)}
+          onClick={collapsedToggle.toggle}
           data-testid="collapse-toggle"
           size="small"
         >
-          {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+          {collapsedToggle.value ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
         </Button>
       }
     >
-      {!collapsed && (
+      {!collapsedToggle.value && (
         <div css={cardBodyStyle(theme)}>
           <CardContent data={data} />
         </div>

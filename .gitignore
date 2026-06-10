@@ -56,3 +56,4 @@ tmp/
 .storybook-static/
 storybook-static/
 workspace/
+.superpowers/

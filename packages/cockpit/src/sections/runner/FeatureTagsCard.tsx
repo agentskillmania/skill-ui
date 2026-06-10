@@ -4,12 +4,12 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Button, Card, Tag, Typography } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../../locales/index.js';
 import { emptyTextStyle, tagRowStyle, titleRowStyle } from './styles.js';
 import type { RunnerFeatureFlags } from './types.js';
+import { useToggle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for FeatureTagsCard. */
 export interface FeatureTagsCardProps {
@@ -45,7 +45,7 @@ const FEATURE_KEYS: Array<{ key: keyof RunnerFeatureFlags; labelKey: string }> =
 export function FeatureTagsCard({ features }: FeatureTagsCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
-  const [collapsed, setCollapsed] = useState(false);
+  const collapsedToggle = useToggle(false);
 
   const isEmpty = !features;
 
@@ -63,15 +63,15 @@ export function FeatureTagsCard({ features }: FeatureTagsCardProps) {
         <Button
           type="text"
           css={toggleBtnStyle(theme)}
-          onClick={() => setCollapsed((prev) => !prev)}
+          onClick={collapsedToggle.toggle}
           data-testid="features-collapse-toggle"
           size="small"
         >
-          {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+          {collapsedToggle.value ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
         </Button>
       }
     >
-      {!collapsed && (
+      {!collapsedToggle.value && (
         isEmpty ? (
           <div css={emptyTextStyle(theme)}>—</div>
         ) : (

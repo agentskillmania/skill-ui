@@ -1,6 +1,5 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import { useState } from 'react';
 import { Button, Card, Progress, Statistic, Tag, Typography } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +14,7 @@ import {
   metricGridStyle,
   titleRowStyle,
 } from './styles.js';
+import { useToggle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for SessionOverviewCard. */
 export interface SessionOverviewCardProps {
@@ -111,7 +111,7 @@ const metricTileStyle = (theme: Theme) => css`
 export function SessionOverviewCard({ data, defaultCollapsed = false }: SessionOverviewCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
-  const [collapsed, setCollapsed] = useState(defaultCollapsed);
+  const collapsedToggle = useToggle(defaultCollapsed);
 
   const displayTitle = data.title || t('session.overview.titleFallback');
   const contextPercent =
@@ -144,15 +144,15 @@ export function SessionOverviewCard({ data, defaultCollapsed = false }: SessionO
         <Button
           type="text"
           css={toggleBtnStyle(theme)}
-          onClick={() => setCollapsed((prev) => !prev)}
+          onClick={collapsedToggle.toggle}
           data-testid="collapse-toggle"
           size="small"
         >
-          {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+          {collapsedToggle.value ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
         </Button>
       }
     >
-      {!collapsed && (
+      {!collapsedToggle.value && (
         <div css={cardBodyStyle(theme)}>
           {/* Agent · Model subtitle */}
           <div css={subtitleStyle(theme)}>

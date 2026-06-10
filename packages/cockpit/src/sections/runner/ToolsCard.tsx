@@ -17,6 +17,7 @@ import {
   tabCountStyle,
 } from './styles.js';
 import type { RunnerToolInfo } from './types.js';
+import { useToggle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for ToolsCard. */
 export interface ToolsCardProps {
@@ -89,7 +90,7 @@ function groupByCategory(tools: RunnerToolInfo[]): Map<ToolCategory, RunnerToolI
 export function ToolsCard({ tools }: ToolsCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
-  const [collapsed, setCollapsed] = useState(false);
+  const collapsedToggle = useToggle(false);
   const [activeTab, setActiveTab] = useState<string>('builtin');
   const [expandedTools, setExpandedTools] = useState<Set<string>>(new Set());
 
@@ -152,11 +153,11 @@ export function ToolsCard({ tools }: ToolsCardProps) {
           <Button
             type="text"
             css={toggleBtnStyle(theme)}
-            onClick={() => setCollapsed((prev) => !prev)}
+            onClick={collapsedToggle.toggle}
             data-testid="tools-collapse-toggle"
             size="small"
           >
-            {collapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
+            {collapsedToggle.value ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
           </Button>
         ) : undefined
       }
@@ -165,7 +166,7 @@ export function ToolsCard({ tools }: ToolsCardProps) {
         <div css={emptyTextStyle(theme)}>
           {t('runner.tools.empty')}
         </div>
-      ) : !collapsed ? (
+      ) : !collapsedToggle.value ? (
         <>
           <Tabs
             size="small"
