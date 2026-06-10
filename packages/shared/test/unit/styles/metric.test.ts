@@ -22,4 +22,9 @@ describe('metricGrid', () => {
     const s = metricGrid(lightTheme, 3);
     expect(s.styles).toContain('grid-template-columns: 1fr 1fr 1fr');
   });
+
+  it('returns 4-column grid', () => {
+    const s = metricGrid(lightTheme, 4);
+    expect(s.styles).toContain('grid-template-columns: 1fr 1fr 1fr 1fr');
+  });
 });

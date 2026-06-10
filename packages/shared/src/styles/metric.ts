@@ -16,9 +16,9 @@ export function metricsRow(theme: Theme) {
 
 /**
  * CSS grid container for metric tiles (equal-width columns).
- * @param columns - Number of columns (2 or 3).
+ * @param columns - Number of columns.
  */
-export function metricGrid(theme: Theme, columns: 2 | 3) {
+export function metricGrid(theme: Theme, columns: number) {
   const cols = Array(columns).fill('1fr').join(' ');
   return css`
     display: grid;

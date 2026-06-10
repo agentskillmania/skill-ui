@@ -11,7 +11,7 @@ import {
   useToggle,
   MetricTile,
   SectionLabel,
-  metricsRow,
+  metricGrid,
 } from '@agentskillmania/skill-ui-shared';
 
 /** Props for LLMContextCard. */
@@ -72,8 +72,8 @@ export function LLMContextCard({ llm }: LLMContextCardProps) {
         <div css={emptyTextStyle(theme)}>{t('agentState.llmContext.none')}</div>
       ) : (
         <div>
-          {/* Metrics row */}
-          <div css={metricsRow(theme)}>
+          {/* Metrics — 2-column grid */}
+          <div css={metricGrid(theme, 2)}>
             <MetricTile title={t('agentState.llmContext.messages')} value={messageCount} />
             <MetricTile title={t('agentState.llmContext.tools')} value={toolCount} />
           </div>

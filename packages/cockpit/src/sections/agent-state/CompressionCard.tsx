@@ -14,7 +14,7 @@ import {
   SectionLabel,
   formatRelativeTime,
   formatTokens,
-  metricsRow,
+  metricGrid,
 } from '@agentskillmania/skill-ui-shared';
 
 /** Props for CompressionCard. */
@@ -57,8 +57,8 @@ export function CompressionCard({ compression }: CompressionCardProps) {
         <div css={emptyTextStyle(theme)}>{t('agentState.compression.none')}</div>
       ) : (
         <div>
-          {/* Metrics row */}
-          <div css={metricsRow(theme)}>
+          {/* Metrics — 4-column grid */}
+          <div css={metricGrid(theme, 4)}>
             <MetricTile title={t('agentState.compression.anchor')} value={compression!.anchor} />
             <MetricTile
               title={t('agentState.compression.removed')}
