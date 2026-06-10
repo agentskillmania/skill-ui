@@ -5,10 +5,11 @@
  * Displays lint results and AI review feedback as an auto-scrolling log.
  */
 import { css } from '@emotion/react';
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { AlertTriangle, Info, XCircle, ClipboardCheck } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
+import { useToggle, EmptyState } from '@agentskillmania/skill-ui-shared';
 import { NAMESPACE } from '../../locales/index.js';
 import type { ReviewPanelProps, ReviewItem, ReviewSeverity } from '../../types.js';
 
@@ -20,7 +21,7 @@ const SEVERITY_CONFIG: Record<ReviewSeverity, { icon: typeof Info; color: string
 
 function ReviewItemRow({ item }: { item: ReviewItem }) {
   const theme = useTheme();
-  const [expanded, setExpanded] = useState(item.severity === 'error' && !!item.detail);
+  const expandedToggle = useToggle(item.severity === 'error' && !!item.detail);
   const cfg = SEVERITY_CONFIG[item.severity];
   const Icon = cfg.icon;
 
@@ -36,7 +37,7 @@ function ReviewItemRow({ item }: { item: ReviewItem }) {
           background: ${theme.color.fillSubtle};
         }
       `}
-      onClick={() => item.detail && setExpanded(!expanded)}
+      onClick={() => item.detail && expandedToggle.toggle()}
     >
       <div
         css={css`
@@ -83,7 +84,7 @@ function ReviewItemRow({ item }: { item: ReviewItem }) {
           )}
         </div>
       </div>
-      {expanded && item.detail && (
+      {expandedToggle.value && item.detail && (
         <div
           css={css`
             margin-top: ${theme.spacing[1]};
@@ -119,26 +120,10 @@ export function ReviewPanel({ items }: ReviewPanelProps) {
 
   if (!items || items.length === 0) {
     return (
-      <div
-        css={css`
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
-          gap: ${theme.spacing[2]};
-          color: ${theme.color.textTertiary};
-          font-size: ${theme.font.size.sm};
-        `}
-      >
-        <ClipboardCheck
-          size={32}
-          css={css`
-            color: ${theme.color.textTertiary};
-          `}
-        />
-        <span>{t('review.emptyHint')}</span>
-      </div>
+      <EmptyState
+        icon={<ClipboardCheck size={32} />}
+        description={t('review.emptyHint')}
+      />
     );
   }
 

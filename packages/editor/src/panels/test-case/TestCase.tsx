@@ -3,10 +3,10 @@
  * TestCase panel — test case management
  */
 import { css } from '@emotion/react';
-import { useState } from 'react';
 import { TestTube2, Play, Circle, Loader, CheckCircle2, XCircle } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
+import { useToggle, EmptyState } from '@agentskillmania/skill-ui-shared';
 import { NAMESPACE } from '../../locales/index.js';
 import type { TestCasePanelProps, TestCaseStatus } from '../../types.js';
 import type { TestCase as TestCaseType } from '../../types.js';
@@ -24,7 +24,7 @@ function formatDuration(ms: number): string {
 
 function TestCaseRow({ tc, onRunCase }: { tc: TestCaseType; onRunCase?: (id: string) => void }) {
   const theme = useTheme();
-  const [expanded, setExpanded] = useState(tc.status === 'failed' && !!tc.error);
+  const expandedToggle = useToggle(tc.status === 'failed' && !!tc.error);
   const cfg = STATUS_ICON[tc.status];
   const Icon = cfg.icon;
 
@@ -102,7 +102,7 @@ function TestCaseRow({ tc, onRunCase }: { tc: TestCaseType; onRunCase?: (id: str
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setExpanded(!expanded);
+                expandedToggle.toggle();
               }}
               css={css`
                 border: none;
@@ -114,7 +114,7 @@ function TestCaseRow({ tc, onRunCase }: { tc: TestCaseType; onRunCase?: (id: str
               `}
               type="button"
             >
-              {expanded ? '▲' : '▼'}
+              {expandedToggle.value ? '▲' : '▼'}
             </button>
           )}
           <button
@@ -136,7 +136,7 @@ function TestCaseRow({ tc, onRunCase }: { tc: TestCaseType; onRunCase?: (id: str
           </button>
         </div>
       </div>
-      {expanded && tc.error && (
+      {expandedToggle.value && tc.error && (
         <div
           css={css`
             margin-top: ${theme.spacing[1]};
@@ -221,18 +221,9 @@ export function TestCase({ cases, onRunAll, onRunCase }: TestCasePanelProps) {
         `}
       >
         {(!cases || cases.length === 0) && (
-          <div
-            css={css`
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              height: 100px;
-              color: ${theme.color.textTertiary};
-              font-size: ${theme.font.size.xs};
-            `}
-          >
-            {t('testCase.emptyHint')}
-          </div>
+          <EmptyState
+            description={t('testCase.emptyHint')}
+          />
         )}
         {cases?.map((tc) => (
           <TestCaseRow key={tc.id} tc={tc} onRunCase={onRunCase} />

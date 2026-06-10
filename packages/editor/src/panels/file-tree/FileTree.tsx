@@ -5,7 +5,8 @@
 import { css } from '@emotion/react';
 import { ChevronRight, ChevronDown, FileCode, Book, FolderOpen } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { useState, useCallback } from 'react';
+import { useCallback } from 'react';
+import { useToggle } from '@agentskillmania/skill-ui-shared';
 import type { FileTreeProps, ProjectFile } from '../../types.js';
 
 /** Get file icon by extension */
@@ -29,16 +30,16 @@ function TreeNode({
   onSelect: (path: string) => void;
 }) {
   const theme = useTheme();
-  const [expanded, setExpanded] = useState(true);
+  const expandedToggle = useToggle(true);
   const isActive = file.path === activeFilePath;
 
   const handleClick = useCallback(() => {
     if (file.isDirectory) {
-      setExpanded((prev) => !prev);
+      expandedToggle.toggle();
     } else {
       onSelect(file.path);
     }
-  }, [file, onSelect]);
+  }, [file, onSelect, expandedToggle]);
 
   return (
     <div>
@@ -69,7 +70,7 @@ function TreeNode({
               color: ${theme.color.textTertiary};
             `}
           >
-            {expanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            {expandedToggle.value ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
           </span>
         )}
         <span
@@ -90,7 +91,7 @@ function TreeNode({
           {file.path.split('/').pop()}
         </span>
       </div>
-      {file.isDirectory && expanded && file.children && (
+      {file.isDirectory && expandedToggle.value && file.children && (
         <div>
           {file.children.map((child) => (
             <TreeNode

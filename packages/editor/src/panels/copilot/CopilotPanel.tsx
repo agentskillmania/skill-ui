@@ -8,6 +8,7 @@ import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { MessageList, ChatInput } from '@agentskillmania/skill-ui-chat';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@agentskillmania/skill-ui-shared';
 import { NAMESPACE } from '../../locales/index.js';
 import type { CopilotPanelProps } from '../../types.js';
 
@@ -37,57 +38,47 @@ export function CopilotPanel({
         `}
       >
         {messages.length === 0 ? (
-          <div
-            css={css`
-              height: 100%;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              flex-direction: column;
-              gap: ${theme.spacing[2]};
-              color: ${theme.color.textTertiary};
-              font-size: ${theme.font.size.sm};
-              padding: ${theme.spacing[3]};
-            `}
-          >
-            <span>{t('copilot.emptyHint')}</span>
-            {commands && commands.length > 0 && (
-              <div
-                css={css`
-                  display: flex;
-                  flex-wrap: wrap;
-                  gap: ${theme.spacing[1]};
-                  justify-content: center;
-                `}
-              >
-                {commands.map((cmd) => (
-                  <button
-                    key={cmd.id}
-                    onClick={() => onSend?.(cmd.command)}
-                    css={css`
-                      padding: ${theme.spacing['0.5']} ${theme.spacing[2]};
-                      border: 1px solid ${theme.color.borderSecondary};
-                      border-radius: ${theme.radius.sm};
-                      background: transparent;
-                      cursor: pointer;
-                      font-size: ${theme.font.size.xs};
-                      color: ${theme.color.textSecondary};
-                      transition: all ${theme.motion.duration.fast};
+          <EmptyState
+            description={t('copilot.emptyHint')}
+            action={
+              commands && commands.length > 0 ? (
+                <div
+                  css={css`
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: ${theme.spacing[1]};
+                    justify-content: center;
+                  `}
+                >
+                  {commands.map((cmd) => (
+                    <button
+                      key={cmd.id}
+                      onClick={() => onSend?.(cmd.command)}
+                      css={css`
+                        padding: ${theme.spacing['0.5']} ${theme.spacing[2]};
+                        border: 1px solid ${theme.color.borderSecondary};
+                        border-radius: ${theme.radius.sm};
+                        background: transparent;
+                        cursor: pointer;
+                        font-size: ${theme.font.size.xs};
+                        color: ${theme.color.textSecondary};
+                        transition: all ${theme.motion.duration.fast};
 
-                      &:hover {
-                        border-color: ${theme.color.primary};
-                        color: ${theme.color.primary};
-                        background: ${theme.color.primaryBg};
-                      }
-                    `}
-                    type="button"
-                  >
-                    {cmd.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+                        &:hover {
+                          border-color: ${theme.color.primary};
+                          color: ${theme.color.primary};
+                          background: ${theme.color.primaryBg};
+                        }
+                      `}
+                      type="button"
+                    >
+                      {cmd.label}
+                    </button>
+                  ))}
+                </div>
+              ) : null
+            }
+          />
         ) : (
           <MessageList messages={messages} />
         )}

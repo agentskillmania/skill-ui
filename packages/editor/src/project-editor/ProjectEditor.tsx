@@ -4,11 +4,12 @@
  *
  * Two-column layout: editor area (FileTabs + EditorArea + StatusBar) | Sidebar
  */
-import { Modal, Empty } from 'antd';
+import { Modal } from 'antd';
 import { css } from '@emotion/react';
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
+import { EmptyState } from '@agentskillmania/skill-ui-shared';
 import { NAMESPACE } from '../locales/index.js';
 import type { ProjectEditorProps, FileTab, CursorPosition } from '../types.js';
 import { EditorContext } from '../context/EditorContext.js';
@@ -185,18 +186,9 @@ export function ProjectEditor({
                 onCursorChange={setCursorPosition}
               />
             ) : (
-              <div
-                css={css`
-                  height: 100%;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                `}
-              >
-                <Empty
-                  description={activeFilePath ? t('editor.isDirectory') : t('editor.emptyHint')}
-                />
-              </div>
+              <EmptyState
+                description={activeFilePath ? t('editor.isDirectory') : t('editor.emptyHint')}
+              />
             )}
           </div>
 

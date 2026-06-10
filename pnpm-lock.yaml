@@ -338,6 +338,9 @@ importers:
       '@agentskillmania/skill-ui-chat':
         specifier: workspace:*
         version: link:../chat
+      '@agentskillmania/skill-ui-shared':
+        specifier: workspace:*
+        version: link:../shared
       '@agentskillmania/skill-ui-theme':
         specifier: workspace:*
         version: link:../theme
