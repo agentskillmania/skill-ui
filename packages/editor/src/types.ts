@@ -18,8 +18,8 @@ export interface ProjectFile {
 /** Edit mode */
 export type EditMode = 'code' | 'wysiwyg';
 
-/** Sidebar panel identifier */
-export type SidebarPanel = 'files' | 'copilot' | 'review' | 'test' | null;
+/** Editor sidebar panel identifier */
+export type EditorPanel = 'files' | 'copilot' | 'review' | 'test' | null;
 
 /** Editor cursor position */
 export interface CursorPosition {
@@ -88,12 +88,12 @@ export interface ProjectEditorProps {
   files: ProjectFile[];
   activeFilePath: string | null;
   editMode: EditMode;
-  activePanel: SidebarPanel;
+  activePanel: EditorPanel;
 
   onFileChange: (path: string, content: string) => void;
   onActiveFileChange: (path: string | null) => void;
   onEditModeChange: (mode: EditMode) => void;
-  onPanelChange: (panel: SidebarPanel) => void;
+  onPanelChange: (panel: EditorPanel) => void;
   onSave?: (path: string, content: string) => void;
 
   copilotMessages?: Message[];
@@ -131,24 +131,6 @@ export interface StatusBarProps {
   cursorPosition: CursorPosition | null;
   isDirty?: boolean;
   onEditModeChange: (mode: EditMode) => void;
-}
-
-export interface SidebarProps {
-  activePanel: SidebarPanel;
-  files: ProjectFile[];
-  activeFilePath: string | null;
-  copilotMessages?: Message[];
-  copilotStatus?: 'idle' | 'streaming' | 'error';
-  copilotCommands?: ChatCommand[];
-  reviewItems?: ReviewItem[];
-  testCases?: TestCase[];
-
-  onPanelChange: (panel: SidebarPanel) => void;
-  onFileSelect: (path: string | null) => void;
-  onCopilotSend?: (content: string) => void;
-  onCopilotStop?: () => void;
-  onRunAllTests?: () => void;
-  onRunTest?: (id: string) => void;
 }
 
 export interface CopilotPanelProps {

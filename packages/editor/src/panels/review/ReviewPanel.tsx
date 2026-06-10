@@ -8,7 +8,7 @@ import { useRef, useEffect } from 'react';
 import { AlertTriangle, Info, XCircle, ClipboardCheck } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
-import { EmptyState, ExpandableRow } from '@agentskillmania/skill-ui-shared';
+import { EmptyState, ExpandableRow, InfoRow } from '@agentskillmania/skill-ui-shared';
 import { NAMESPACE } from '../../locales/index.js';
 import type { ReviewPanelProps, ReviewItem, ReviewSeverity } from '../../types.js';
 
@@ -59,14 +59,17 @@ function ReviewItemRow({ item }: { item: ReviewItem }) {
               <span>{item.message}</span>
             </div>
             {item.filePath && (
-              <div
-                css={{
-                  fontSize: theme.font.size.xs,
-                  color: theme.color.textTertiary,
-                  marginTop: theme.spacing['0.5'],
-                }}
-              >
-                {item.filePath}
+              <div css={{ marginTop: theme.spacing['0.5'] }}>
+                <InfoRow label="" text={item.filePath}>
+                  <span
+                    css={{
+                      fontSize: theme.font.size.xs,
+                      color: theme.color.textTertiary,
+                    }}
+                  >
+                    {item.filePath}
+                  </span>
+                </InfoRow>
               </div>
             )}
           </div>

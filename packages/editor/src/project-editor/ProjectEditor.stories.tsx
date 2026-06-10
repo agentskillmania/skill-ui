@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState, useCallback } from 'react';
 import { ProjectEditor } from './ProjectEditor.js';
-import type { ProjectFile, EditMode, SidebarPanel, TestCase, ReviewItem } from '../types.js';
+import type { ProjectFile, EditMode, EditorPanel, TestCase, ReviewItem } from '../types.js';
 
 const sampleFiles: ProjectFile[] = [
   {
@@ -69,7 +69,7 @@ export const Interactive: Story = {
     const [activeFile, setActiveFile] = useState<string | null>('SKILL.md');
 
     const [mode, setMode] = useState<EditMode>('code');
-    const [panel, setPanel] = useState<SidebarPanel>(null);
+    const [panel, setPanel] = useState<EditorPanel>(null);
 
     const [fileContents, setFileContents] = useState<Record<string, string>>(() => {
       const map: Record<string, string> = {};

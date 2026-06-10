@@ -51,11 +51,9 @@ describe('FileTree', () => {
     expect(screen.getByText('index.ts')).toBeTruthy();
   });
 
-  it('renders empty file list correctly', () => {
-    const { container } = renderWithProviders(
-      <FileTree files={[]} activeFilePath={null} onSelect={vi.fn()} />
-    );
-    expect(container).toBeTruthy();
+  it('shows empty state when file list is empty', () => {
+    renderWithProviders(<FileTree files={[]} activeFilePath={null} onSelect={vi.fn()} />);
+    expect(screen.getByText('暂无文件')).toBeTruthy();
   });
 
   it('highlights currently selected file', () => {

@@ -7,7 +7,7 @@
 export type {
   ProjectFile,
   EditMode,
-  SidebarPanel,
+  EditorPanel,
   CursorPosition,
   FileInfo,
   FileTab,
@@ -21,7 +21,6 @@ export type {
   FileTabsProps,
   EditorAreaProps,
   StatusBarProps,
-  SidebarProps,
   CopilotPanelProps,
   ReviewPanelProps,
   TestCasePanelProps,
@@ -37,9 +36,6 @@ export { EditorArea, CodeEditor, VisualEditor } from './editor-area/index.js';
 // Sections
 export { FileTabs } from './sections/file-tabs/index.js';
 export { StatusBar } from './sections/status-bar/index.js';
-
-// Sidebar
-export { Sidebar } from './sidebar/index.js';
 
 // Panels
 export { FileTree } from './panels/file-tree/index.js';

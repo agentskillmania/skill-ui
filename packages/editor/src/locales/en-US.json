@@ -32,6 +32,9 @@
   "review": {
     "emptyHint": "Review items will appear here"
   },
+  "fileTree": {
+    "emptyHint": "No files found"
+  },
   "testCase": {
     "title": "Test Cases",
     "runAll": "Run All",

@@ -50,10 +50,10 @@ describe('StatusBar', () => {
     expect(screen.getByText(/列 12/)).toBeTruthy();
   });
 
-  it('shows "预览" button in code mode', () => {
+  it('shows "预览" button for markdown files in code mode', () => {
     renderWithProviders(
       <StatusBar
-        filePath="src/index.ts"
+        filePath="SKILL.md"
         editMode="code"
         cursorPosition={null}
         onEditModeChange={vi.fn()}
@@ -62,10 +62,22 @@ describe('StatusBar', () => {
     expect(screen.getByText('预览')).toBeTruthy();
   });
 
-  it('shows "代码" button in wysiwyg mode', () => {
+  it('does not show "预览" button for non-markdown files', () => {
     renderWithProviders(
       <StatusBar
         filePath="src/index.ts"
+        editMode="code"
+        cursorPosition={null}
+        onEditModeChange={vi.fn()}
+      />
+    );
+    expect(screen.queryByText('预览')).toBeNull();
+  });
+
+  it('shows "代码" button for markdown files in wysiwyg mode', () => {
+    renderWithProviders(
+      <StatusBar
+        filePath="SKILL.md"
         editMode="wysiwyg"
         cursorPosition={null}
         onEditModeChange={vi.fn()}
@@ -74,11 +86,23 @@ describe('StatusBar', () => {
     expect(screen.getByText('代码')).toBeTruthy();
   });
 
+  it('does not show mode button for non-markdown files in wysiwyg mode', () => {
+    renderWithProviders(
+      <StatusBar
+        filePath="src/index.ts"
+        editMode="wysiwyg"
+        cursorPosition={null}
+        onEditModeChange={vi.fn()}
+      />
+    );
+    expect(screen.queryByText('代码')).toBeNull();
+  });
+
   it('clicking mode switch button triggers callback', () => {
     const onChange = vi.fn();
     renderWithProviders(
       <StatusBar
-        filePath="src/index.ts"
+        filePath="SKILL.md"
         editMode="code"
         cursorPosition={null}
         onEditModeChange={onChange}
@@ -92,7 +116,7 @@ describe('StatusBar', () => {
     const onChange = vi.fn();
     renderWithProviders(
       <StatusBar
-        filePath="src/index.ts"
+        filePath="SKILL.md"
         editMode="wysiwyg"
         cursorPosition={null}
         onEditModeChange={onChange}
@@ -102,7 +126,7 @@ describe('StatusBar', () => {
     expect(onChange).toHaveBeenCalledWith('code');
   });
 
-  it('does not display when cursor position is null', () => {
+  it('does not display cursor position when null', () => {
     renderWithProviders(
       <StatusBar
         filePath="src/index.ts"

@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
 import { ProjectEditor } from '../../src/project-editor/ProjectEditor.js';
-import type { ProjectFile, SidebarPanel } from '../../src/types.js';
+import type { ProjectFile, EditorPanel } from '../../src/types.js';
 
 // Mock Monaco Editor
 vi.mock('@monaco-editor/react', () => ({
@@ -43,7 +43,7 @@ const defaultProps = {
   files: sampleFiles,
   activeFilePath: 'SKILL.md' as string | null,
   editMode: 'code' as const,
-  activePanel: null as SidebarPanel,
+  activePanel: null as EditorPanel,
   onFileChange: vi.fn(),
   onActiveFileChange: vi.fn(),
   onEditModeChange: vi.fn(),
@@ -59,7 +59,7 @@ describe('ProjectEditor', () => {
   it('renders editor area and sidebar', () => {
     renderWithProviders(<ProjectEditor {...defaultProps} />);
     expect(screen.getByText('预览')).toBeTruthy();
-    // Check that SidebarIcons is rendered by looking for buttons
+    // Shared Sidebar renders SidebarIcons buttons
     const buttons = screen.getAllByRole('button');
     expect(buttons.length).toBeGreaterThan(0);
   });
@@ -80,14 +80,13 @@ describe('ProjectEditor', () => {
     expect(screen.getByText('此文件为目录')).toBeTruthy();
   });
 
-  it('clicking SidebarIcons icon expands panel', () => {
+  it('clicking SidebarIcons icon triggers onPanelChange', () => {
     const onPanel = vi.fn();
     renderWithProviders(<ProjectEditor {...defaultProps} onPanelChange={onPanel} />);
-    // Find the button with FolderOpen icon (files panel)
-    // The SidebarIcons component uses lucide icons, we can find by SVG class
-    const folderIconButtons = screen.getAllByRole('button').filter(btn =>
-      btn.innerHTML.includes('lucide-folder-open')
-    );
+    // The shared SidebarIcons component uses lucide icons rendered with SVG class names
+    const folderIconButtons = screen
+      .getAllByRole('button')
+      .filter((btn) => btn.innerHTML.includes('lucide-folder-open'));
     expect(folderIconButtons.length).toBeGreaterThan(0);
     fireEvent.click(folderIconButtons[0]);
     expect(onPanel).toHaveBeenCalledWith('files');

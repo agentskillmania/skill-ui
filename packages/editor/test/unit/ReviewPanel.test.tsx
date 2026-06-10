@@ -138,6 +138,14 @@ describe('ReviewPanel', () => {
     Element.prototype.scrollTo = original;
   });
 
+  // ─── File path with copy support ───
+
+  it('renders file path inside InfoRow with copy support', () => {
+    renderWithProviders(<ReviewPanel items={sampleItems} />);
+    expect(screen.getByText('mcp.json')).toBeTruthy();
+    expect(screen.getByText('AGENT.md')).toBeTruthy();
+  });
+
   // ─── No score display ───
 
   it('does not render any score element', () => {

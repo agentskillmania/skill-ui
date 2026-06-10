@@ -5,8 +5,10 @@
 import { css } from '@emotion/react';
 import { ChevronRight, ChevronDown, FileCode, Book, FolderOpen } from 'lucide-react';
 import { useTheme, interactiveItem } from '@agentskillmania/skill-ui-theme';
+import { useTranslation } from 'react-i18next';
+import { NAMESPACE } from '../../locales/index.js';
 import { useCallback } from 'react';
-import { useToggle } from '@agentskillmania/skill-ui-shared';
+import { useToggle, EmptyState } from '@agentskillmania/skill-ui-shared';
 import type { FileTreeProps, ProjectFile } from '../../types.js';
 
 /** Get file icon by extension */
@@ -107,6 +109,11 @@ function TreeNode({
 
 export function FileTree({ files, activeFilePath, onSelect }: FileTreeProps) {
   const theme = useTheme();
+  const { t } = useTranslation(NAMESPACE);
+
+  if (!files || files.length === 0) {
+    return <EmptyState description={t('fileTree.emptyHint')} />;
+  }
 
   return (
     <div

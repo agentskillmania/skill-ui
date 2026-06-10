@@ -32,6 +32,9 @@
   "review": {
     "emptyHint": "审核项将在此显示"
   },
+  "fileTree": {
+    "emptyHint": "暂无文件"
+  },
   "testCase": {
     "title": "测试用例",
     "runAll": "全部运行",

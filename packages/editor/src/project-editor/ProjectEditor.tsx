@@ -2,28 +2,34 @@
 /**
  * ProjectEditor top-level container component
  *
- * Two-column layout: editor area (FileTabs + EditorArea + StatusBar) | Sidebar
+ * Three-column layout: EditorArea (flex:1) | SplitDivider | shared Sidebar
  */
 import { Modal } from 'antd';
 import { css } from '@emotion/react';
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
-import { EmptyState } from '@agentskillmania/skill-ui-shared';
+import { EmptyState, Sidebar, SidebarPanel, SplitDivider } from '@agentskillmania/skill-ui-shared';
+import type { SidebarIconItem } from '@agentskillmania/skill-ui-shared';
+import { FolderOpen, Bot, ClipboardCheck, TestTube2 } from 'lucide-react';
 import { NAMESPACE } from '../locales/index.js';
-import type { ProjectEditorProps, FileTab, CursorPosition } from '../types.js';
+import type { ProjectEditorProps, FileTab, CursorPosition, EditorPanel } from '../types.js';
 import { EditorContext } from '../context/EditorContext.js';
 import { getFileLabel } from '../shared/file-utils.js';
 import { FileTabs } from '../sections/file-tabs/index.js';
 import { EditorArea } from '../editor-area/index.js';
 import { StatusBar } from '../sections/status-bar/index.js';
-import { Sidebar } from '../sidebar/index.js';
+import { FileTree } from '../panels/file-tree/index.js';
+import { CopilotPanel } from '../panels/copilot/index.js';
+import { ReviewPanel } from '../panels/review/index.js';
+import { TestCase } from '../panels/test-case/index.js';
+import { useEditorLayout } from '../hooks/useEditorLayout.js';
 
 export function ProjectEditor({
   files,
   activeFilePath,
   editMode,
-  activePanel,
+  activePanel: externalActivePanel,
   onSave,
   onFileChange,
   onActiveFileChange,
@@ -41,15 +47,30 @@ export function ProjectEditor({
 }: ProjectEditorProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
+  const layout = useEditorLayout();
   const [isDirty, setIsDirty] = useState(false);
   const [cursorPosition, setCursorPosition] = useState<CursorPosition | null>(null);
   const [openTabs, setOpenTabs] = useState<FileTab[]>([]);
   const dirtyFiles = useRef<Set<string>>(new Set());
 
+  const sidebarItems: SidebarIconItem[] = [
+    { id: 'files', icon: FolderOpen, label: t('activityBar.files') },
+    { id: 'copilot', icon: Bot, label: t('activityBar.copilot') },
+    { id: 'review', icon: ClipboardCheck, label: t('activityBar.review') },
+    { id: 'test', icon: TestTube2, label: t('activityBar.test') },
+  ];
+
+  // Sync external activePanel prop to internal layout state
+  useEffect(() => {
+    if (externalActivePanel && externalActivePanel !== layout.activePanel) {
+      layout.switchPanel(externalActivePanel);
+    }
+  }, [externalActivePanel]);
+
   useEffect(() => {
     if (!activeFilePath) return;
     setOpenTabs((prev) => {
-      const exists = prev.some((t) => t.path === activeFilePath);
+      const exists = prev.some((tab) => tab.path === activeFilePath);
       if (exists) return prev;
       return [
         ...prev,
@@ -77,7 +98,7 @@ export function ProjectEditor({
       setIsDirty(true);
       dirtyFiles.current.add(activeFilePath);
       setOpenTabs((prev) =>
-        prev.map((t) => (t.path === activeFilePath ? { ...t, modified: true } : t))
+        prev.map((tab) => (tab.path === activeFilePath ? { ...tab, modified: true } : tab))
       );
       onFileChange(activeFilePath, content);
     },
@@ -90,7 +111,7 @@ export function ProjectEditor({
       setIsDirty(false);
       dirtyFiles.current.delete(activeFilePath);
       setOpenTabs((prev) =>
-        prev.map((t) => (t.path === activeFilePath ? { ...t, modified: false } : t))
+        prev.map((tab) => (tab.path === activeFilePath ? { ...tab, modified: false } : tab))
       );
       onSave?.(activeFilePath, content);
     },
@@ -101,7 +122,7 @@ export function ProjectEditor({
     (path: string) => {
       const doClose = () => {
         setOpenTabs((prev) => {
-          const remaining = prev.filter((t) => t.path !== path);
+          const remaining = prev.filter((tab) => tab.path !== path);
           dirtyFiles.current.delete(path);
           if (activeFilePath === path) {
             if (remaining.length > 0) {
@@ -141,6 +162,46 @@ export function ProjectEditor({
     }),
     [editMode, activeFilePath, isDirty, cursorPosition, onEditModeChange]
   );
+
+  const renderPanel = () => {
+    const panel = layout.activePanel;
+    if (!panel || layout.isCollapsed) return null;
+
+    switch (panel) {
+      case 'files':
+        return (
+          <SidebarPanel title={t('activityBar.files')} icon={FolderOpen}>
+            <FileTree files={files} activeFilePath={activeFilePath} onSelect={onActiveFileChange} />
+          </SidebarPanel>
+        );
+      case 'copilot':
+        return (
+          <SidebarPanel title={t('activityBar.copilot')} icon={Bot}>
+            <CopilotPanel
+              messages={copilotMessages}
+              status={copilotStatus}
+              commands={copilotCommands}
+              onSend={onCopilotSend}
+              onStop={onCopilotStop}
+            />
+          </SidebarPanel>
+        );
+      case 'review':
+        return (
+          <SidebarPanel title={t('activityBar.review')} icon={ClipboardCheck}>
+            <ReviewPanel items={reviewItems} />
+          </SidebarPanel>
+        );
+      case 'test':
+        return (
+          <SidebarPanel title={t('activityBar.test')} icon={TestTube2}>
+            <TestCase cases={testCases} onRunAll={onRunAllTests} onRunCase={onRunTest} />
+          </SidebarPanel>
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <EditorContext.Provider value={contextValue}>
@@ -201,29 +262,32 @@ export function ProjectEditor({
           />
         </div>
 
-        {/* Right Sidebar */}
+        {/* SplitDivider */}
+        <SplitDivider onResize={layout.setSidebarWidth} disabled={layout.isCollapsed} />
+
+        {/* Shared Sidebar */}
         <Sidebar
-          activePanel={activePanel}
-          files={files}
-          activeFilePath={activeFilePath}
-          copilotMessages={copilotMessages}
-          copilotStatus={copilotStatus}
-          copilotCommands={copilotCommands}
-          reviewItems={reviewItems}
-          testCases={testCases}
-          onPanelChange={onPanelChange}
-          onFileSelect={onActiveFileChange}
-          onCopilotSend={onCopilotSend}
-          onCopilotStop={onCopilotStop}
-          onRunAllTests={onRunAllTests}
-          onRunTest={onRunTest}
-        />
+          width={layout.sidebarWidth}
+          isCollapsed={layout.isCollapsed}
+          activePanel={layout.activePanel ?? ''}
+          items={sidebarItems}
+          onToggleCollapse={() => {
+            layout.toggleCollapse();
+            onPanelChange(layout.isCollapsed ? layout.activePanel : null);
+          }}
+          onSwitchPanel={(panel) => {
+            layout.switchPanel(panel as Exclude<EditorPanel, null>);
+            onPanelChange(panel as EditorPanel);
+          }}
+        >
+          {renderPanel()}
+        </Sidebar>
       </div>
     </EditorContext.Provider>
   );
 }
 
-/** Recursively find file */
+/** Recursively find file by path */
 function findFile(
   files: import('../types.js').ProjectFile[],
   path: string

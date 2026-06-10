@@ -7,7 +7,17 @@ import { Code, Eye } from 'lucide-react';
 import { useTheme, interactiveItem, borderSeparator } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../../locales/index.js';
-import type { StatusBarProps } from '../../types.js';
+import type { StatusBarProps, EditMode } from '../../types.js';
+
+/** File extensions supported by the visual (wysiwyg) editor */
+const VISUAL_EDITOR_EXTENSIONS = ['md', 'mdx'];
+
+/** Check whether a file path is supported by the visual editor */
+function isVisualEditable(filePath: string | null): boolean {
+  if (!filePath) return false;
+  const ext = filePath.split('.').pop()?.toLowerCase() ?? '';
+  return VISUAL_EDITOR_EXTENSIONS.includes(ext);
+}
 
 export function StatusBar({
   filePath,
@@ -78,38 +88,41 @@ export function StatusBar({
             })}
           </span>
         )}
-        <button
-          onClick={() => onEditModeChange(editMode === 'code' ? 'wysiwyg' : 'code')}
-          css={css`
-            display: flex;
-            align-items: center;
-            gap: ${theme.spacing['0.5']};
-            padding: ${theme.spacing['0.5']} ${theme.spacing[1]};
-            border: 1px solid ${theme.color.borderSecondary};
-            border-radius: ${theme.radius.xs};
-            background: transparent;
-            cursor: pointer;
-            color: ${theme.color.textSecondary};
-            font-size: ${theme.font.size.xs};
-            transition: all ${theme.motion.duration.fast};
+        {/* Mode switch — only show preview toggle for markdown files */}
+        {isVisualEditable(filePath) && (
+          <button
+            onClick={() => onEditModeChange(editMode === 'code' ? 'wysiwyg' : 'code')}
+            css={css`
+              display: flex;
+              align-items: center;
+              gap: ${theme.spacing['0.5']};
+              padding: ${theme.spacing['0.5']} ${theme.spacing[1]};
+              border: 1px solid ${theme.color.borderSecondary};
+              border-radius: ${theme.radius.xs};
+              background: transparent;
+              cursor: pointer;
+              color: ${theme.color.textSecondary};
+              font-size: ${theme.font.size.xs};
+              transition: all ${theme.motion.duration.fast};
 
-            ${interactiveItem(theme, theme.color.fillSubtle)}
-            &:hover {
-              color: ${theme.color.text};
-            }
-          `}
-          type="button"
-        >
-          {editMode === 'code' ? (
-            <>
-              <Eye size={12} /> {t('statusBar.preview')}
-            </>
-          ) : (
-            <>
-              <Code size={12} /> {t('statusBar.code')}
-            </>
-          )}
-        </button>
+              ${interactiveItem(theme, theme.color.fillSubtle)}
+              &:hover {
+                color: ${theme.color.text};
+              }
+            `}
+            type="button"
+          >
+            {editMode === 'code' ? (
+              <>
+                <Eye size={12} /> {t('statusBar.preview')}
+              </>
+            ) : (
+              <>
+                <Code size={12} /> {t('statusBar.code')}
+              </>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );
