@@ -8,9 +8,12 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useChatContext } from '../context.js';
 import { MessageActions } from './MessageActions.js';
 
+import type { MessageActionsVariant } from './MessageActions.js';
+
 export interface MessageWrapperProps {
   message: Message;
   children: ReactNode;
+  actionsVariant?: MessageActionsVariant;
   onCopy?: (message: Message) => void;
   onResend?: (message: Message) => void;
   onRegenerate?: (message: Message) => void;
@@ -21,6 +24,7 @@ export interface MessageWrapperProps {
 export function MessageWrapper({
   message,
   children,
+  actionsVariant,
   onCopy,
   onResend,
   onRegenerate,
@@ -76,6 +80,7 @@ export function MessageWrapper({
         >
           <MessageActions
             message={message}
+            variant={actionsVariant}
             onCopy={handleCopy}
             onResend={handleResend}
             onRegenerate={handleRegenerate}

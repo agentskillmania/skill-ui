@@ -246,3 +246,74 @@ export const ConversationWithActions: Story = {
     );
   },
 };
+
+// ---- UI Variant Mockups ----
+
+export const PillVariantAssistant: Story = {
+  render: () => {
+    const msg: Message = {
+      id: 'p1',
+      role: 'assistant',
+      content: 'Pill（默认）：圆角背景 + 细边框 + 微阴影，有外轮廓。',
+      status: 'completed',
+    };
+    return (
+      <Wrapper>
+        <MessageWrapper message={msg} {...actionHandlers} actionsVariant="pill">
+          <AssistantMessage message={msg} />
+        </MessageWrapper>
+      </Wrapper>
+    );
+  },
+};
+
+export const GhostVariantAssistant: Story = {
+  render: () => {
+    const msg: Message = {
+      id: 'g1',
+      role: 'assistant',
+      content: 'Ghost：无容器背景，纯图标，无外轮廓。',
+      status: 'completed',
+    };
+    return (
+      <Wrapper>
+        <MessageWrapper message={msg} {...actionHandlers} actionsVariant="ghost">
+          <AssistantMessage message={msg} />
+        </MessageWrapper>
+      </Wrapper>
+    );
+  },
+};
+
+export const BothVariantsSideBySide: Story = {
+  render: () => {
+    const msg: Message = {
+      id: 'both',
+      role: 'assistant',
+      content: 'hover 查看两种操作栏样式的对比。',
+      status: 'completed',
+    };
+    return (
+      <Wrapper>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
+          <div>
+            <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 8, fontWeight: 600 }}>
+              Pill（默认 — 有外轮廓）
+            </div>
+            <MessageWrapper message={msg} {...actionHandlers} actionsVariant="pill">
+              <AssistantMessage message={msg} />
+            </MessageWrapper>
+          </div>
+          <div>
+            <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 8, fontWeight: 600 }}>
+              Ghost（无外轮廓）
+            </div>
+            <MessageWrapper message={msg} {...actionHandlers} actionsVariant="ghost">
+              <AssistantMessage message={msg} />
+            </MessageWrapper>
+          </div>
+        </div>
+      </Wrapper>
+    );
+  },
+};
