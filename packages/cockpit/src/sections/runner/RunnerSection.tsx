@@ -20,7 +20,7 @@ export function RunnerSection({ runner }: RunnerSectionProps) {
 
   return (
     <div css={css`${flexColumn(theme, '2')}`}>
-      <SectionHeader icon={Settings} title="Runner" />
+      <SectionHeader icon={Settings} title="Runner" iconColor={theme.color.primary} />
 
       <FeatureTagsCard features={runner?.features} />
       <ToolsCard tools={runner?.tools} />

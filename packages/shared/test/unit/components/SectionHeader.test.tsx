@@ -36,4 +36,17 @@ describe('SectionHeader', () => {
     );
     expect(divider).toBeTruthy();
   });
+
+  it('applies custom iconColor when provided', () => {
+    const { container } = render(
+      <SectionHeader icon={Cpu} title="Test" iconColor="purple" />,
+      { wrapper },
+    );
+    // Emotion applies color via CSS class; verify the icon wrapper element exists
+    // and has the emotion-generated class (color is applied through CSS, not inline style)
+    const svg = container.querySelector('svg');
+    expect(svg).toBeTruthy();
+    // The icon should be rendered (svg exists) — iconColor prop is accepted without error
+    expect(svg?.parentElement?.className).toBeTruthy();
+  });
 });

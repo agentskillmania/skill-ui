@@ -10,10 +10,12 @@ export interface SectionHeaderProps {
   title: string;
   /** Right-aligned extra content. */
   extra?: ReactNode;
+  /** Optional explicit icon color. Defaults to inheriting from container (textSecondary). */
+  iconColor?: string;
 }
 
 /** Renders a section header with icon, uppercase title, and optional extra content. */
-export function SectionHeader({ icon: Icon, title, extra }: SectionHeaderProps) {
+export function SectionHeader({ icon: Icon, title, extra, iconColor }: SectionHeaderProps) {
   const theme = useTheme();
 
   return (
@@ -30,7 +32,10 @@ export function SectionHeader({ icon: Icon, title, extra }: SectionHeaderProps) 
         color: ${theme.color.textSecondary};
       `}
     >
-      <Icon size={14} />
+      <Icon
+        size={14}
+        css={iconColor ? css`color: ${iconColor}; flex-shrink: 0;` : css`flex-shrink: 0;`}
+      />
       {title}
       <div
         css={css`

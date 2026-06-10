@@ -24,7 +24,7 @@ export function AgentStateSection({
 
   return (
     <div css={css`${flexColumn(theme, '2')}`}>
-      <SectionHeader icon={Cpu} title="Agent State" />
+      <SectionHeader icon={Cpu} title="Agent State" iconColor={theme.color.primary} />
 
       <ActiveSkillCard skillState={skillState} />
       <CompressionCard compression={compression} />

@@ -26,7 +26,7 @@ export function SessionSection({ overview, info }: SessionSectionProps) {
 
   return (
     <div css={css`${flexColumn(theme, '2')}`}>
-      <SectionHeader icon={Activity} title="Session" />
+      <SectionHeader icon={Activity} title="Session" iconColor={theme.color.primary} />
 
       {overview && <SessionOverviewCard data={overview} />}
       {info && <SessionInfoCard data={info} defaultCollapsed />}
