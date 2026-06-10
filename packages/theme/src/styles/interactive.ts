@@ -28,3 +28,26 @@ export function subtleBackground(theme: Theme) {
     transition: background ${theme.motion.duration.fast} ${theme.motion.easing.out};
   `;
 }
+
+/** Options for interactiveRow. */
+export interface InteractiveRowOptions {
+  /** Whether the row is in active/expanded state. Shows primary border. */
+  active?: boolean;
+}
+
+/**
+ * Interactive row: transparent border -> primary on active, hover background.
+ * For expandable list items like EventRow and ToolsCard items.
+ */
+export function interactiveRow(theme: Theme, options?: InteractiveRowOptions) {
+  const { active = false } = options ?? {};
+  return css`
+    border: 1px solid ${active ? theme.color.primary : 'transparent'};
+    border-radius: ${theme.radius.md};
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.12s;
+    &:hover {
+      background: ${theme.color.fillSecondary};
+    }
+  `;
+}

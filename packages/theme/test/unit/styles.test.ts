@@ -14,7 +14,7 @@ import { textTruncate, textSecondary } from '../../src/styles/text.js';
 import { iconBox, scrollable, absoluteFill } from '../../src/styles/containers.js';
 import { media, container } from '../../src/styles/media.js';
 import { borderSeparator } from '../../src/styles/separator.js';
-import { interactiveItem } from '../../src/styles/interactive.js';
+import { interactiveItem, interactiveRow } from '../../src/styles/interactive.js';
 import { scrollContainer } from '../../src/styles/scroll.js';
 
 /**
@@ -229,5 +229,25 @@ describe('scrollContainer', () => {
   it('supports padding option', () => {
     const s = scrollContainer(lightTheme, { padding: '12px' });
     expect(s.styles).toContain('padding: 12px');
+  });
+});
+
+describe('interactiveRow', () => {
+  it('returns border-radius and hover styles', () => {
+    const s = interactiveRow(lightTheme);
+    expect(s.styles).toContain('border: 1px solid transparent');
+    expect(s.styles).toContain(lightTheme.radius.md);
+    expect(s.styles).toContain('cursor: pointer');
+    expect(s.styles).toContain(lightTheme.color.fillSecondary);
+  });
+
+  it('shows primary border when active', () => {
+    const s = interactiveRow(lightTheme, { active: true });
+    expect(s.styles).toContain(lightTheme.color.primary);
+  });
+
+  it('shows transparent border when inactive', () => {
+    const s = interactiveRow(lightTheme, { active: false });
+    expect(s.styles).toContain('transparent');
   });
 });

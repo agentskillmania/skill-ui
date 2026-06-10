@@ -21,7 +21,8 @@ export { textTruncate, textSecondary } from './text.js';
 export { iconBox, scrollable, absoluteFill } from './containers.js';
 
 // Interactive styles
-export { interactiveItem, subtleBackground } from './interactive.js';
+export { interactiveItem, subtleBackground, interactiveRow } from './interactive.js';
+export type { InteractiveRowOptions } from './interactive.js';
 
 // Separator
 export { borderSeparator } from './separator.js';
