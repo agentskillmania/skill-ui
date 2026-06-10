@@ -2,7 +2,7 @@
 import type { Theme } from '@agentskillmania/skill-ui-theme';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
-import { Button, Card, Statistic, Typography } from 'antd';
+import { Card, Statistic, Typography } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -14,22 +14,13 @@ import {
   sectionLabelStyle,
   codeBlockStyle,
 } from './styles.js';
-import { useToggle } from '@agentskillmania/skill-ui-shared';
+import { CollapsibleCard, useToggle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for LLMContextCard. */
 export interface LLMContextCardProps {
   /** Last LLM request snapshot from daemon (strict mapping). */
   llm?: { messages: unknown[]; tools?: unknown[] } | null;
 }
-
-/** Toggle button style — minimal ghost button. */
-const toggleBtnStyle = (theme: Theme) => css`
-  font-size: ${theme.font.size.xs};
-  color: ${theme.color.textTertiary};
-  padding: 0 ${theme.spacing[1]};
-  height: auto;
-  line-height: 1;
-`;
 
 /** Title row style. */
 const titleRowStyle = (theme: Theme) => css`
@@ -70,8 +61,7 @@ export function LLMContextCard({ llm }: LLMContextCardProps) {
   const systemPrompt = llm ? extractSystemPrompt(llm.messages) : undefined;
 
   return (
-    <Card
-      size="small"
+    <CollapsibleCard
       title={
         <div css={titleRowStyle(theme)}>
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
@@ -79,25 +69,14 @@ export function LLMContextCard({ llm }: LLMContextCardProps) {
           </Typography.Text>
         </div>
       }
-      extra={
-        !isEmpty ? (
-          <Button
-            type="text"
-            css={toggleBtnStyle(theme)}
-            onClick={collapsedToggle.toggle}
-            size="small"
-            data-testid="llm-context-collapse"
-          >
-            {collapsedToggle.value ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-          </Button>
-        ) : undefined
-      }
+      collapsed={collapsedToggle.value}
+      onCollapseChange={(v) => collapsedToggle.set(v)}
     >
       {isEmpty ? (
         <div css={emptyTextStyle(theme)}>
           {t('agentState.llmContext.none')}
         </div>
-      ) : !collapsedToggle.value ? (
+      ) : (
         <div>
           {/* Metrics row */}
           <div css={metricsRowStyle(theme)}>
@@ -133,7 +112,7 @@ export function LLMContextCard({ llm }: LLMContextCardProps) {
             </div>
           )}
         </div>
-      ) : null}
-    </Card>
+      )}
+    </CollapsibleCard>
   );
 }

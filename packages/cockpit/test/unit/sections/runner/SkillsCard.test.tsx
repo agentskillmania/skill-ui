@@ -50,7 +50,7 @@ describe('SkillsCard', () => {
       { name: 'skill-b' },
     ];
     renderWithTheme(<SkillsCard skills={skills} />);
-    expect(screen.getByTestId('skills-collapse-toggle')).toBeInTheDocument();
+    expect(screen.getByTestId('collapse-toggle')).toBeInTheDocument();
   });
 
   it('collapses card body when toggle is clicked', () => {
@@ -61,7 +61,7 @@ describe('SkillsCard', () => {
     expect(screen.getByTestId('skill-item-skill-a')).toBeInTheDocument();
 
     // Click collapse toggle
-    fireEvent.click(screen.getByTestId('skills-collapse-toggle'));
+    fireEvent.click(screen.getByTestId('collapse-toggle'));
     expect(screen.queryByTestId('skill-item-skill-a')).not.toBeInTheDocument();
   });
 

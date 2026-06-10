@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import { Button, Card, Typography, Tooltip, message } from 'antd';
+import { Card, Typography, Tooltip, message } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Theme } from '@agentskillmania/skill-ui-theme';
@@ -8,7 +8,7 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { NAMESPACE } from '../../locales/index.js';
 import type { SessionInfoData } from './types.js';
 import { cardBodyStyle, titleRowStyle } from './styles.js';
-import { useToggle } from '@agentskillmania/skill-ui-shared';
+import { CollapsibleCard, useToggle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for the SessionInfoCard component. */
 export interface SessionInfoCardProps {
@@ -127,15 +127,6 @@ const formatNumber = (value: number | undefined): string => {
   return value.toLocaleString();
 };
 
-/** Toggle button style — minimal ghost button. */
-const toggleBtnStyle = (theme: Theme) => css`
-  font-size: ${theme.font.size.xs};
-  color: ${theme.color.textTertiary};
-  padding: 0 ${theme.spacing['1']};
-  height: auto;
-  line-height: 1;
-`;
-
 /** Card content with three info groups. */
 const CardContent: React.FC<{ data: SessionInfoData }> = ({ data }) => {
   const { t } = useTranslation(NAMESPACE);
@@ -202,8 +193,7 @@ export const SessionInfoCard: React.FC<SessionInfoCardProps> = ({
   const collapsedToggle = useToggle(defaultCollapsed);
 
   return (
-    <Card
-      size="small"
+    <CollapsibleCard
       title={
         <div css={titleRowStyle(theme)}>
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
@@ -211,23 +201,12 @@ export const SessionInfoCard: React.FC<SessionInfoCardProps> = ({
           </Typography.Text>
         </div>
       }
-      extra={
-        <Button
-          type="text"
-          css={toggleBtnStyle(theme)}
-          onClick={collapsedToggle.toggle}
-          data-testid="collapse-toggle"
-          size="small"
-        >
-          {collapsedToggle.value ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-        </Button>
-      }
+      collapsed={collapsedToggle.value}
+      onCollapseChange={(v) => collapsedToggle.set(v)}
     >
-      {!collapsedToggle.value && (
-        <div css={cardBodyStyle(theme)}>
-          <CardContent data={data} />
-        </div>
-      )}
-    </Card>
+      <div css={cardBodyStyle(theme)}>
+        <CardContent data={data} />
+      </div>
+    </CollapsibleCard>
   );
 };

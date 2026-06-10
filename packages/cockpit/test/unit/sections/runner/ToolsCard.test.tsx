@@ -202,7 +202,7 @@ describe('ToolsCard', () => {
     expect(screen.getByTestId('tool-item-file_read')).toBeInTheDocument();
 
     // Click collapse toggle
-    fireEvent.click(screen.getByTestId('tools-collapse-toggle'));
+    fireEvent.click(screen.getByTestId('collapse-toggle'));
     expect(screen.queryByTestId('tool-item-file_read')).not.toBeInTheDocument();
     expect(screen.queryByTestId('tools-type-tabs')).not.toBeInTheDocument();
   });

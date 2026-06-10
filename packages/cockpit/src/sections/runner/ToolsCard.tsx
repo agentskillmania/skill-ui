@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
-import { Button, Card, Tabs, Typography } from 'antd';
+import { Card, Tabs, Typography } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,22 +17,13 @@ import {
   tabCountStyle,
 } from './styles.js';
 import type { RunnerToolInfo } from './types.js';
-import { useToggle } from '@agentskillmania/skill-ui-shared';
+import { CollapsibleCard, useToggle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for ToolsCard. */
 export interface ToolsCardProps {
   /** Tool list from runner diagnostics. */
   tools?: RunnerToolInfo[] | null;
 }
-
-/** Toggle button style — minimal ghost button. */
-const toggleBtnStyle = (theme: import('@agentskillmania/skill-ui-theme').Theme) => css`
-  font-size: ${theme.font.size.xs};
-  color: ${theme.color.textTertiary};
-  padding: 0 ${theme.spacing[1]};
-  height: auto;
-  line-height: 1;
-`;
 
 /**
  * Three simplified tool categories.
@@ -139,8 +130,7 @@ export function ToolsCard({ tools }: ToolsCardProps) {
     : (tabItems[0]?.key ?? 'builtin');
 
   return (
-    <Card
-      size="small"
+    <CollapsibleCard
       title={
         <div css={titleRowStyle(theme)}>
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
@@ -148,25 +138,14 @@ export function ToolsCard({ tools }: ToolsCardProps) {
           </Typography.Text>
         </div>
       }
-      extra={
-        !isEmpty ? (
-          <Button
-            type="text"
-            css={toggleBtnStyle(theme)}
-            onClick={collapsedToggle.toggle}
-            data-testid="tools-collapse-toggle"
-            size="small"
-          >
-            {collapsedToggle.value ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-          </Button>
-        ) : undefined
-      }
+      collapsed={collapsedToggle.value}
+      onCollapseChange={(v) => collapsedToggle.set(v)}
     >
       {isEmpty ? (
         <div css={emptyTextStyle(theme)}>
           {t('runner.tools.empty')}
         </div>
-      ) : !collapsedToggle.value ? (
+      ) : (
         <>
           <Tabs
             size="small"
@@ -228,7 +207,7 @@ export function ToolsCard({ tools }: ToolsCardProps) {
             })}
           </div>
         </>
-      ) : null}
-    </Card>
+      )}
+    </CollapsibleCard>
   );
 }

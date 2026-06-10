@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
-import { Button, Card, Typography } from 'antd';
+import { Card, Typography } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -17,22 +17,13 @@ import {
   descriptionStyle,
 } from './styles.js';
 import type { RunnerSkillInfo } from './types.js';
-import { useToggle } from '@agentskillmania/skill-ui-shared';
+import { CollapsibleCard, useToggle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for SkillsCard. */
 export interface SkillsCardProps {
   /** Skill list from runner diagnostics. */
   skills?: RunnerSkillInfo[] | null;
 }
-
-/** Toggle button style — minimal ghost button. */
-const toggleBtnStyle = (theme: import('@agentskillmania/skill-ui-theme').Theme) => css`
-  font-size: ${theme.font.size.xs};
-  color: ${theme.color.textTertiary};
-  padding: 0 ${theme.spacing['1']};
-  height: auto;
-  line-height: 1;
-`;
 
 /**
  * SkillsCard displays loaded skills as a flat collapsible list.
@@ -60,8 +51,7 @@ export function SkillsCard({ skills }: SkillsCardProps) {
   };
 
   return (
-    <Card
-      size="small"
+    <CollapsibleCard
       title={
         <div css={titleRowStyle(theme)}>
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
@@ -69,23 +59,14 @@ export function SkillsCard({ skills }: SkillsCardProps) {
           </Typography.Text>
         </div>
       }
-      extra={
-        <Button
-          type="text"
-          css={toggleBtnStyle(theme)}
-          onClick={collapsedToggle.toggle}
-          data-testid="skills-collapse-toggle"
-          size="small"
-        >
-          {collapsedToggle.value ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-        </Button>
-      }
+      collapsed={collapsedToggle.value}
+      onCollapseChange={(v) => collapsedToggle.set(v)}
     >
       {isEmpty ? (
         <div css={emptyTextStyle(theme)}>
           {t('runner.skills.empty')}
         </div>
-      ) : !collapsedToggle.value ? (
+      ) : (
         <div>
           {skills!.map((skill) => {
             const isExpanded = expandedSkills.has(skill.name);
@@ -118,7 +99,7 @@ export function SkillsCard({ skills }: SkillsCardProps) {
             );
           })}
         </div>
-      ) : null}
-    </Card>
+      )}
+    </CollapsibleCard>
   );
 }

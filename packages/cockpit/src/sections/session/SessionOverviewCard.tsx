@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import { Button, Card, Progress, Statistic, Tag, Typography } from 'antd';
+import { Card, Progress, Statistic, Tag, Typography } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { Theme } from '@agentskillmania/skill-ui-theme';
@@ -14,7 +14,7 @@ import {
   metricGridStyle,
   titleRowStyle,
 } from './styles.js';
-import { useToggle } from '@agentskillmania/skill-ui-shared';
+import { CollapsibleCard, useToggle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for SessionOverviewCard. */
 export interface SessionOverviewCardProps {
@@ -75,15 +75,6 @@ const timestampStyle = (theme: Theme) => css`
   font-size: ${theme.font.size.xs};
 `;
 
-/** Toggle button style — minimal ghost button. */
-const toggleBtnStyle = (theme: Theme) => css`
-  font-size: ${theme.font.size.xs};
-  color: ${theme.color.textTertiary};
-  padding: 0 ${theme.spacing['1']};
-  height: auto;
-  line-height: 1;
-`;
-
 /** Metric tile — small card with background for a single statistic. */
 const metricTileStyle = (theme: Theme) => css`
   background: ${theme.color.fillSecondary};
@@ -125,8 +116,7 @@ export function SessionOverviewCard({ data, defaultCollapsed = false }: SessionO
   });
 
   return (
-    <Card
-      size="small"
+    <CollapsibleCard
       title={
         <div css={titleRowStyle(theme)}>
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
@@ -140,74 +130,63 @@ export function SessionOverviewCard({ data, defaultCollapsed = false }: SessionO
           </Tag>
         </div>
       }
-      extra={
-        <Button
-          type="text"
-          css={toggleBtnStyle(theme)}
-          onClick={collapsedToggle.toggle}
-          data-testid="collapse-toggle"
-          size="small"
-        >
-          {collapsedToggle.value ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-        </Button>
-      }
+      collapsed={collapsedToggle.value}
+      onCollapseChange={(v) => collapsedToggle.set(v)}
     >
-      {!collapsedToggle.value && (
-        <div css={cardBodyStyle(theme)}>
-          {/* Agent · Model subtitle */}
-          <div css={subtitleStyle(theme)}>
-            {data.agentName} · {data.model}
+      <div css={cardBodyStyle(theme)}>
+        {/* Agent · Model subtitle */}
+        <div css={subtitleStyle(theme)}>
+          {data.agentName} · {data.model}
+        </div>
+
+        {/* Steps & Messages — 2-col grid */}
+        <div css={metricGridStyle(theme)}>
+          <div css={metricTileStyle(theme)}>
+            <Statistic title={t('session.overview.steps')} value={data.stepCount} />
           </div>
-
-          {/* Steps & Messages — 2-col grid */}
-          <div css={metricGridStyle(theme)}>
-            <div css={metricTileStyle(theme)}>
-              <Statistic title={t('session.overview.steps')} value={data.stepCount} />
-            </div>
-            <div css={metricTileStyle(theme)}>
-              <Statistic title={t('session.overview.messages')} value={data.messageCount} />
-            </div>
-          </div>
-
-          {/* Token metrics — 3-col grid */}
-          <div css={metricGrid3ColStyle(theme)}>
-            <div css={metricTileStyle(theme)}>
-              <Statistic title={t('session.overview.tokensIn')} value={formatTokens(data.tokensIn)} />
-            </div>
-            <div css={metricTileStyle(theme)}>
-              <Statistic title={t('session.overview.tokensOut')} value={formatTokens(data.tokensOut)} />
-            </div>
-            <div css={metricTileStyle(theme)}>
-              <Statistic title={t('session.overview.tokensTotal')} value={formatTokens(data.tokensTotal)} />
-            </div>
-          </div>
-
-          {/* Context usage progress bar */}
-          {contextPercent !== undefined && (
-            <div css={contextSectionStyle(theme)}>
-              <div style={{ marginBottom: theme.spacing['1'], fontSize: theme.font.size.sm }}>
-                {contextLabel}
-              </div>
-              <Progress
-                percent={contextPercent}
-                showInfo={false}
-                strokeColor={theme.color.purple}
-                size="small"
-              />
-            </div>
-          )}
-
-          {/* Timestamps footer */}
-          <div css={footerStyle(theme)}>
-            <span css={timestampStyle(theme)}>
-              {t('session.overview.created', { time: formatTimestamp(data.createdAt) })}
-            </span>
-            <span css={timestampStyle(theme)}>
-              {t('session.overview.updated', { time: formatTimestamp(data.updatedAt) })}
-            </span>
+          <div css={metricTileStyle(theme)}>
+            <Statistic title={t('session.overview.messages')} value={data.messageCount} />
           </div>
         </div>
-      )}
-    </Card>
+
+        {/* Token metrics — 3-col grid */}
+        <div css={metricGrid3ColStyle(theme)}>
+          <div css={metricTileStyle(theme)}>
+            <Statistic title={t('session.overview.tokensIn')} value={formatTokens(data.tokensIn)} />
+          </div>
+          <div css={metricTileStyle(theme)}>
+            <Statistic title={t('session.overview.tokensOut')} value={formatTokens(data.tokensOut)} />
+          </div>
+          <div css={metricTileStyle(theme)}>
+            <Statistic title={t('session.overview.tokensTotal')} value={formatTokens(data.tokensTotal)} />
+          </div>
+        </div>
+
+        {/* Context usage progress bar */}
+        {contextPercent !== undefined && (
+          <div css={contextSectionStyle(theme)}>
+            <div style={{ marginBottom: theme.spacing['1'], fontSize: theme.font.size.sm }}>
+              {contextLabel}
+            </div>
+            <Progress
+              percent={contextPercent}
+              showInfo={false}
+              strokeColor={theme.color.purple}
+              size="small"
+            />
+          </div>
+        )}
+
+        {/* Timestamps footer */}
+        <div css={footerStyle(theme)}>
+          <span css={timestampStyle(theme)}>
+            {t('session.overview.created', { time: formatTimestamp(data.createdAt) })}
+          </span>
+          <span css={timestampStyle(theme)}>
+            {t('session.overview.updated', { time: formatTimestamp(data.updatedAt) })}
+          </span>
+        </div>
+      </div>
+    </CollapsibleCard>
   );
 }

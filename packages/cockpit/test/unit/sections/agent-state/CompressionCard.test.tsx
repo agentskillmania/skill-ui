@@ -115,7 +115,7 @@ describe('CompressionCard', () => {
     expect(screen.getByText('42')).toBeInTheDocument();
 
     // Click collapse toggle
-    fireEvent.click(screen.getByTestId('compression-collapse'));
+    fireEvent.click(screen.getByTestId('collapse-toggle'));
     expect(screen.queryByText('42')).not.toBeInTheDocument();
   });
 });

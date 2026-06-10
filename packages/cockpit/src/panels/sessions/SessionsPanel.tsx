@@ -5,10 +5,10 @@
  */
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { List, Empty } from 'antd';
+import { List } from 'antd';
 import { LayoutList } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { SidebarPanel } from '@agentskillmania/skill-ui-shared';
+import { EmptyState, SidebarPanel } from '@agentskillmania/skill-ui-shared';
 import type { SessionsPanelProps } from './types.js';
 import { NAMESPACE } from '../../locales/index.js';
 
@@ -33,7 +33,7 @@ export function SessionsPanel({ sessions = [], activeSessionId, onSelect }: Sess
   return (
     <SidebarPanel title={t('sessionsPanel.title')} icon={LayoutList}>
       {sessions.length === 0 ? (
-        <Empty description={t('sessionsPanel.noSessions')} image={Empty.PRESENTED_IMAGE_SIMPLE} />
+        <EmptyState description={t('sessionsPanel.noSessions')} />
       ) : (
         <List
           size="small"

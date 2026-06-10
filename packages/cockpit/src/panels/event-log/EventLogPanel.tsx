@@ -6,10 +6,9 @@
 import { css } from '@emotion/react';
 import { useState, useMemo } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { Empty } from 'antd';
 import { ClipboardList } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { SidebarPanel } from '@agentskillmania/skill-ui-shared';
+import { EmptyState, SidebarPanel } from '@agentskillmania/skill-ui-shared';
 import type { CockpitEvent, EventLogPanelProps, EventCategory } from './types.js';
 import { getEventCategory, ALL_CATEGORIES } from './eventCategory.js';
 import { EventFilterBar } from './EventFilterBar.js';
@@ -85,10 +84,7 @@ export function EventLogPanel({ events = [] }: EventLogPanelProps) {
   return (
     <SidebarPanel title={t('eventLogPanel.title')} icon={ClipboardList}>
       {events.length === 0 ? (
-        <Empty
-          description={t('eventLogPanel.noEvents')}
-          image={Empty.PRESENTED_IMAGE_SIMPLE}
-        />
+        <EmptyState description={t('eventLogPanel.noEvents')} />
       ) : (
         <div
           css={css`

@@ -143,7 +143,7 @@ describe('ActiveSkillCard', () => {
 
     expect(screen.getByTestId('active-skill-name')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('active-skill-collapse'));
+    fireEvent.click(screen.getByTestId('collapse-toggle'));
     expect(screen.queryByTestId('active-skill-name')).not.toBeInTheDocument();
   });
 });

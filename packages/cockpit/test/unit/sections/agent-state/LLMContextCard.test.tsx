@@ -124,7 +124,7 @@ describe('LLMContextCard', () => {
     expect(twos.length).toBe(2);
 
     // Click collapse toggle
-    fireEvent.click(screen.getByTestId('llm-context-collapse'));
+    fireEvent.click(screen.getByTestId('collapse-toggle'));
     expect(screen.queryByTestId('system-prompt-toggle')).not.toBeInTheDocument();
   });
 });

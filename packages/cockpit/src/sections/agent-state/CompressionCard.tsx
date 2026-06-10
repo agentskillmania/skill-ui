@@ -2,7 +2,7 @@
 import type { Theme } from '@agentskillmania/skill-ui-theme';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
-import { Button, Card, Statistic, Typography } from 'antd';
+import { Card, Statistic, Typography } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -15,22 +15,13 @@ import {
   sectionLabelStyle,
   textBlockStyle,
 } from './styles.js';
-import { useToggle } from '@agentskillmania/skill-ui-shared';
+import { CollapsibleCard, useToggle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for CompressionCard. */
 export interface CompressionCardProps {
   /** Compression state from colts AgentContext. */
   compression?: CompressionData | null;
 }
-
-/** Toggle button style — minimal ghost button. */
-const toggleBtnStyle = (theme: Theme) => css`
-  font-size: ${theme.font.size.xs};
-  color: ${theme.color.textTertiary};
-  padding: 0 ${theme.spacing[1]};
-  height: auto;
-  line-height: 1;
-`;
 
 /** Title row style. */
 const titleRowStyle = (theme: Theme) => css`
@@ -73,8 +64,7 @@ export function CompressionCard({ compression }: CompressionCardProps) {
   const isEmpty = !compression;
 
   return (
-    <Card
-      size="small"
+    <CollapsibleCard
       title={
         <div css={titleRowStyle(theme)}>
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
@@ -82,25 +72,14 @@ export function CompressionCard({ compression }: CompressionCardProps) {
           </Typography.Text>
         </div>
       }
-      extra={
-        !isEmpty ? (
-          <Button
-            type="text"
-            css={toggleBtnStyle(theme)}
-            onClick={collapsedToggle.toggle}
-            size="small"
-            data-testid="compression-collapse"
-          >
-            {collapsedToggle.value ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-          </Button>
-        ) : undefined
-      }
+      collapsed={collapsedToggle.value}
+      onCollapseChange={(v) => collapsedToggle.set(v)}
     >
       {isEmpty ? (
         <div css={emptyTextStyle(theme)}>
           {t('agentState.compression.none')}
         </div>
-      ) : !collapsedToggle.value ? (
+      ) : (
         <div>
           {/* Metrics row */}
           <div css={metricsRowStyle(theme)}>
@@ -153,7 +132,7 @@ export function CompressionCard({ compression }: CompressionCardProps) {
             </div>
           )}
         </div>
-      ) : null}
-    </Card>
+      )}
+    </CollapsibleCard>
   );
 }

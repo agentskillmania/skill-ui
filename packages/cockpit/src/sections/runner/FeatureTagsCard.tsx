@@ -2,29 +2,20 @@
 import type { Theme } from '@agentskillmania/skill-ui-theme';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
-import { Button, Card, Tag, Typography } from 'antd';
+import { Card, Tag, Typography } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../../locales/index.js';
 import { emptyTextStyle, tagRowStyle, titleRowStyle } from './styles.js';
 import type { RunnerFeatureFlags } from './types.js';
-import { useToggle } from '@agentskillmania/skill-ui-shared';
+import { CollapsibleCard, useToggle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for FeatureTagsCard. */
 export interface FeatureTagsCardProps {
   /** Feature flags from runner config. */
   features?: RunnerFeatureFlags | null;
 }
-
-/** Toggle button style — minimal ghost button. */
-const toggleBtnStyle = (theme: Theme) => css`
-  font-size: ${theme.font.size.xs};
-  color: ${theme.color.textTertiary};
-  padding: 0 ${theme.spacing['1']};
-  height: auto;
-  line-height: 1;
-`;
 
 /** Feature key → i18n label key mapping. */
 const FEATURE_KEYS: Array<{ key: keyof RunnerFeatureFlags; labelKey: string }> = [
@@ -50,8 +41,7 @@ export function FeatureTagsCard({ features }: FeatureTagsCardProps) {
   const isEmpty = !features;
 
   return (
-    <Card
-      size="small"
+    <CollapsibleCard
       title={
         <div css={titleRowStyle(theme)}>
           <Typography.Text strong style={{ fontSize: theme.font.size.sm }}>
@@ -59,35 +49,24 @@ export function FeatureTagsCard({ features }: FeatureTagsCardProps) {
           </Typography.Text>
         </div>
       }
-      extra={
-        <Button
-          type="text"
-          css={toggleBtnStyle(theme)}
-          onClick={collapsedToggle.toggle}
-          data-testid="features-collapse-toggle"
-          size="small"
-        >
-          {collapsedToggle.value ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-        </Button>
-      }
+      collapsed={collapsedToggle.value}
+      onCollapseChange={(v) => collapsedToggle.set(v)}
     >
-      {!collapsedToggle.value && (
-        isEmpty ? (
-          <div css={emptyTextStyle(theme)}>—</div>
-        ) : (
-          <div css={tagRowStyle(theme)}>
-            {FEATURE_KEYS.map(({ key, labelKey }) => (
-              <Tag
-                key={key}
-                color={features[key] ? 'success' : 'default'}
-                data-testid={`feature-tag-${key}`}
-              >
-                {t(labelKey)}
-              </Tag>
-            ))}
-          </div>
-        )
+      {isEmpty ? (
+        <div css={emptyTextStyle(theme)}>—</div>
+      ) : (
+        <div css={tagRowStyle(theme)}>
+          {FEATURE_KEYS.map(({ key, labelKey }) => (
+            <Tag
+              key={key}
+              color={features[key] ? 'success' : 'default'}
+              data-testid={`feature-tag-${key}`}
+            >
+              {t(labelKey)}
+            </Tag>
+          ))}
+        </div>
       )}
-    </Card>
+    </CollapsibleCard>
   );
 }
