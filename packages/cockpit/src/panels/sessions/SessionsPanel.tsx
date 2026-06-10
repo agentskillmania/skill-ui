@@ -8,7 +8,7 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { List, Empty } from 'antd';
 import { LayoutList } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { SidebarPanel } from '../../sidebar/SidebarPanel.js';
+import { SidebarPanel } from '@agentskillmania/skill-ui-shared';
 import type { SessionsPanelProps } from './types.js';
 import { NAMESPACE } from '../../locales/index.js';
 

@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { AgentStateSection } from '../../sections/agent-state/index.js';
 import { NAMESPACE } from '../../locales/index.js';
 import { RunnerSection } from '../../sections/runner/index.js';
-import { SidebarPanel } from '../../sidebar/SidebarPanel.js';
+import { SidebarPanel } from '@agentskillmania/skill-ui-shared';
 import { SessionSection } from '../../sections/session/index.js';
 import type { SessionBoardPanelProps } from './types.js';
 

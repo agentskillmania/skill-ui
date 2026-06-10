@@ -9,14 +9,24 @@ import { ChatPanel } from '../panels/chat/ChatPanel.js';
 import { EventLogPanel } from '../panels/event-log/EventLogPanel.js';
 import { SessionBoardPanel } from '../panels/session-board/SessionBoardPanel.js';
 import { SessionsPanel } from '../panels/sessions/SessionsPanel.js';
-import { SplitDivider } from '../shared/SplitDivider.js';
-import { Sidebar } from '../sidebar/index.js';
+import { Sidebar, SplitDivider } from '@agentskillmania/skill-ui-shared';
+import type { SidebarIconItem } from '@agentskillmania/skill-ui-shared';
+import { LayoutList, ClipboardList, BarChart3 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { NAMESPACE } from '../locales/index.js';
 import { useCockpitLayout } from '../hooks/useCockpitLayout.js';
 import type { CockpitProps } from '../types.js';
 
 export function Cockpit(props: CockpitProps) {
   const theme = useTheme();
   const layout = useCockpitLayout('event-log');
+  const { t } = useTranslation(NAMESPACE);
+
+  const sidebarItems: SidebarIconItem[] = [
+    { id: 'sessions', icon: LayoutList, label: t('sidebar.sessions') },
+    { id: 'event-log', icon: ClipboardList, label: t('sidebar.eventLog') },
+    { id: 'session-board', icon: BarChart3, label: t('sidebar.sessionBoard') },
+  ];
 
   const {
     // Chat props (prefixed)
@@ -131,8 +141,9 @@ export function Cockpit(props: CockpitProps) {
         width={layout.sidebarWidth}
         isCollapsed={layout.isCollapsed}
         activePanel={layout.activePanel}
+        items={sidebarItems}
         onToggleCollapse={layout.toggleCollapse}
-        onSwitchPanel={layout.switchPanel}
+        onSwitchPanel={(panel) => layout.switchPanel(panel as any)}
       >
         {renderPanel()}
       </Sidebar>

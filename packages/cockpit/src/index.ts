@@ -51,19 +51,12 @@ export { Cockpit } from './cockpit/index.js';
 // Hooks
 export { useCockpitLayout } from './hooks/index.js';
 
-// Sidebar components
-export { Sidebar } from './sidebar/index.js';
-export { SidebarPanel } from './sidebar/SidebarPanel.js';
-export { SidebarIcons } from './sidebar/SidebarIcons.js';
-
 // Panels
 export { ChatPanel } from './panels/chat/index.js';
 export { EventLogPanel } from './panels/event-log/index.js';
 export { SessionBoardPanel } from './panels/session-board/index.js';
 export { SessionsPanel } from './panels/sessions/index.js';
 
-// Shared components
-export { SplitDivider } from './shared/index.js';
 
 // Event log sub-components
 export { EventFilterBar } from './panels/event-log/EventFilterBar.js';

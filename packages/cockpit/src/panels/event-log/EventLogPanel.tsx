@@ -9,7 +9,7 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { Empty } from 'antd';
 import { ClipboardList } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { SidebarPanel } from '../../sidebar/SidebarPanel.js';
+import { SidebarPanel } from '@agentskillmania/skill-ui-shared';
 import type { CockpitEvent, EventLogPanelProps, EventCategory } from './types.js';
 import { getEventCategory, ALL_CATEGORIES } from './eventCategory.js';
 import { EventFilterBar } from './EventFilterBar.js';

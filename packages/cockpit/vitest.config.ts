@@ -6,6 +6,7 @@ export default defineConfig({
     alias: {
       '@agentskillmania/skill-ui-theme': path.resolve(__dirname, '../theme/src'),
       '@agentskillmania/skill-ui-chat': path.resolve(__dirname, '../chat/src'),
+      '@agentskillmania/skill-ui-shared': path.resolve(__dirname, '../shared/src/index.ts'),
     },
   },
   test: {

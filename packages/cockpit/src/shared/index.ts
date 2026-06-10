@@ -1,3 +1,3 @@
-export { SplitDivider } from './SplitDivider.js';
-
-export type { SplitDividerProps } from './SplitDivider.js';
+// Re-export from shared package
+export { SplitDivider } from '@agentskillmania/skill-ui-shared';
+export type { SplitDividerProps } from '@agentskillmania/skill-ui-shared';
