@@ -8,9 +8,19 @@ function wrapper({ children }: { children: React.ReactNode }) {
 }
 
 describe('CollapsibleCard', () => {
-  it('renders title', () => {
+  it('renders string title', () => {
     render(<CollapsibleCard title="Session">Content</CollapsibleCard>, { wrapper });
     expect(screen.getByText('Session')).toBeInTheDocument();
+  });
+
+  it('renders ReactNode title', () => {
+    render(
+      <CollapsibleCard title={<strong data-testid="custom-title">Custom</strong>}>
+        Content
+      </CollapsibleCard>,
+      { wrapper },
+    );
+    expect(screen.getByTestId('custom-title')).toBeInTheDocument();
   });
 
   it('shows children when expanded (default)', () => {
@@ -71,7 +81,6 @@ describe('CollapsibleCard', () => {
       </CollapsibleCard>,
       { wrapper },
     );
-    // defaultCollapsed=true, so first toggle flips to false (expanded)
     fireEvent.click(screen.getByTestId('collapse-toggle'));
     expect(onCollapseChange).toHaveBeenCalledWith(false);
   });

@@ -1,13 +1,13 @@
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { Card } from 'antd';
+import { Button, Card } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useCallback, type CSSProperties, type ReactNode } from 'react';
 import { useToggle } from '../hooks/index.js';
 
 export interface CollapsibleCardProps {
-  /** Card title text. */
-  title: string;
+  /** Card title — string or custom JSX (e.g. i18n text). */
+  title: ReactNode;
   /** Uncontrolled initial collapse state. */
   defaultCollapsed?: boolean;
   /** Controlled collapse state. */
@@ -51,22 +51,7 @@ export function CollapsibleCard({
       size="small"
       className={className}
       style={style}
-      css={css`
-        overflow: hidden;
-        .ant-card-head {
-          ${isCollapsed ? '' : `border-bottom: 1px solid ${theme.color.borderSecondary};`}
-        }
-      `}
-      title={
-        <span
-          css={css`
-            font-size: ${theme.font.size.sm};
-            font-weight: ${theme.font.weight.semibold};
-          `}
-        >
-          {title}
-        </span>
-      }
+      title={title}
       extra={
         <div
           css={css`
@@ -76,22 +61,21 @@ export function CollapsibleCard({
           `}
         >
           {badge}
-          <button
+          <Button
+            type="text"
+            size="small"
             data-testid="collapse-toggle"
             onClick={handleToggle}
             css={css`
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              background: none;
-              border: none;
-              cursor: pointer;
+              font-size: ${theme.font.size.xs};
               color: ${theme.color.textTertiary};
-              padding: ${theme.spacing[1]};
+              padding: 0 ${theme.spacing[1]};
+              height: auto;
+              line-height: 1;
             `}
           >
             {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}
-          </button>
+          </Button>
         </div>
       }
     >
