@@ -151,11 +151,6 @@ export interface SidebarProps {
   onRunTest?: (id: string) => void;
 }
 
-export interface ActivityBarProps {
-  activePanel: SidebarPanel;
-  onPanelChange: (panel: SidebarPanel) => void;
-}
-
 export interface CopilotPanelProps {
   messages?: Message[];
   status?: 'idle' | 'streaming' | 'error';

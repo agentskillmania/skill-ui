@@ -2,12 +2,16 @@
 /**
  * Sidebar — right-side panel container
  *
- * ActivityBar (icon bar) + panel content area, switch between files/copilot/review/test.
+ * SidebarIcons (icon bar) + panel content area, switch between files/copilot/review/test.
  */
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import type { SidebarProps } from '../types.js';
-import { ActivityBar } from './ActivityBar.js';
+import { SidebarIcons } from '@agentskillmania/skill-ui-shared';
+import type { SidebarIconItem } from '@agentskillmania/skill-ui-shared';
+import { FolderOpen, Bot, ClipboardCheck, TestTube2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { NAMESPACE } from '../locales/index.js';
+import type { SidebarProps, SidebarPanel } from '../types.js';
 import { FileTree } from '../panels/file-tree/index.js';
 import { CopilotPanel } from '../panels/copilot/index.js';
 import { ReviewPanel } from '../panels/review/index.js';
@@ -30,6 +34,14 @@ export function Sidebar({
   onRunTest,
 }: SidebarProps) {
   const theme = useTheme();
+  const { t } = useTranslation(NAMESPACE);
+
+  const panelIcons: SidebarIconItem[] = [
+    { id: 'files', icon: FolderOpen, label: t('activityBar.files') },
+    { id: 'copilot', icon: Bot, label: t('activityBar.copilot') },
+    { id: 'review', icon: ClipboardCheck, label: t('activityBar.review') },
+    { id: 'test', icon: TestTube2, label: t('activityBar.test') },
+  ];
 
   const contentWidth = 280;
 
@@ -71,7 +83,13 @@ export function Sidebar({
       )}
 
       {/* Icon bar */}
-      <ActivityBar activePanel={activePanel} onPanelChange={onPanelChange} />
+      <SidebarIcons
+        items={panelIcons}
+        activeId={activePanel ?? ''}
+        isCollapsed={false}
+        onToggleCollapse={() => {}}
+        onSwitchPanel={(id) => onPanelChange(activePanel === id ? null : (id as SidebarPanel))}
+      />
     </div>
   );
 }

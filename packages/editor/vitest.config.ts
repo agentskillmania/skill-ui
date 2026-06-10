@@ -22,6 +22,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@agentskillmania/agenui': path.resolve(__dirname, '../chat/test/__mocks__/agenui.tsx'),
+      '@agentskillmania/skill-ui-shared': path.resolve(__dirname, '../shared/src/index.ts'),
     },
   },
 });

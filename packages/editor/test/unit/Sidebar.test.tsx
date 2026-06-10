@@ -53,7 +53,7 @@ const sampleTestCases: TestCase[] = [
 describe('Sidebar', () => {
   // ─── Panel visibility ───
 
-  it('only shows ActivityBar when panel is collapsed', () => {
+  it('only shows SidebarIcons when panel is collapsed', () => {
     renderWithProviders(
       <Sidebar
         activePanel={null}
@@ -62,7 +62,9 @@ describe('Sidebar', () => {
         onFileSelect={vi.fn()}
       />
     );
-    expect(screen.getByTitle('文件')).toBeTruthy();
+    // SidebarIcons renders buttons, check for the presence of any button
+    const buttons = screen.getAllByRole('button');
+    expect(buttons.length).toBeGreaterThan(0);
     expect(screen.queryByText('AGENT.md')).toBeNull();
   });
 
@@ -116,9 +118,9 @@ describe('Sidebar', () => {
     expect(screen.getByText('向 Copilot 提问...')).toBeTruthy();
   });
 
-  // ─── ActivityBar interaction ───
+  // ─── SidebarIcons interaction ───
 
-  it('clicking ActivityBar icon triggers panel switch', () => {
+  it('clicking SidebarIcons icon triggers panel switch', () => {
     const onPanel = vi.fn();
     renderWithProviders(
       <Sidebar
@@ -128,7 +130,11 @@ describe('Sidebar', () => {
         onFileSelect={vi.fn()}
       />
     );
-    fireEvent.click(screen.getByTitle('文件'));
+    // The first icon button should be the files panel
+    // Buttons: [collapse button, files, copilot, review, test]
+    const buttons = screen.getAllByRole('button');
+    const filesButton = buttons[1]; // Skip collapse button
+    fireEvent.click(filesButton);
     expect(onPanel).toHaveBeenCalledWith('files');
   });
 

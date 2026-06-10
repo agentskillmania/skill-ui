@@ -37,6 +37,7 @@
   },
   "dependencies": {
     "@agentskillmania/skill-ui-chat": "workspace:*",
+    "@agentskillmania/skill-ui-shared": "workspace:*",
     "@agentskillmania/skill-ui-theme": "workspace:*",
     "@emotion/react": "^11.14.0",
     "@milkdown/crepe": "^7.20.0",

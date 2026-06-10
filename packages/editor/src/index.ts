@@ -22,7 +22,6 @@ export type {
   EditorAreaProps,
   StatusBarProps,
   SidebarProps,
-  ActivityBarProps,
   CopilotPanelProps,
   ReviewPanelProps,
   TestCasePanelProps,
@@ -40,7 +39,7 @@ export { FileTabs } from './sections/file-tabs/index.js';
 export { StatusBar } from './sections/status-bar/index.js';
 
 // Sidebar
-export { Sidebar, ActivityBar } from './sidebar/index.js';
+export { Sidebar } from './sidebar/index.js';
 
 // Panels
 export { FileTree } from './panels/file-tree/index.js';
