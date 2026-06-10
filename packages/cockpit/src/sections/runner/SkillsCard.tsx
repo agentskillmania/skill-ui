@@ -1,8 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import { useTheme, interactiveRow } from '@agentskillmania/skill-ui-theme';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { Typography } from 'antd';
-import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../../locales/index.js';
@@ -11,10 +10,9 @@ import {
   titleRowStyle,
   itemNameStyle,
   sourcePathStyle,
-  descriptionStyle,
 } from './styles.js';
 import type { RunnerSkillInfo } from './types.js';
-import { CollapsibleCard, useToggle, ExpandableItem } from '@agentskillmania/skill-ui-shared';
+import { CollapsibleCard, useToggle, ExpandableRow } from '@agentskillmania/skill-ui-shared';
 
 /** Props for SkillsCard. */
 export interface SkillsCardProps {
@@ -24,8 +22,7 @@ export interface SkillsCardProps {
 
 /**
  * SkillsCard displays loaded skills as a flat collapsible list.
- * The entire card body can be collapsed via the top-right toggle.
- * Uses ExpandableItem for per-skill expand/collapse with description.
+ * Uses ExpandableRow for per-skill expand/collapse with chevron indicator.
  */
 export function SkillsCard({ skills }: SkillsCardProps) {
   const { t } = useTranslation(NAMESPACE);
@@ -51,40 +48,31 @@ export function SkillsCard({ skills }: SkillsCardProps) {
       ) : (
         <div>
           {skills!.map((skill) => (
-            <div key={skill.name}>
-              <ExpandableItem
-                expandable={!!skill.description}
-                defaultExpanded={false}
-                renderSummary={({ expanded, toggle }) => (
-                  <div
-                    css={interactiveRow(theme, { active: expanded })}
-                    onClick={toggle}
-                    data-testid={`skill-item-${skill.name}`}
-                  >
-                    <div
-                      css={css`
-                        display: flex;
-                        align-items: center;
-                        gap: ${theme.spacing[1]};
-                      `}
-                    >
-                      {expanded ? <ChevronDown size={10} /> : <ChevronRight size={10} />}
-                      <span css={itemNameStyle(theme)}>{skill.name}</span>
-                    </div>
-                    {skill.source && (
-                      <span css={sourcePathStyle(theme)} title={skill.source}>
-                        {skill.source}
-                      </span>
-                    )}
-                  </div>
-                )}
-                renderDetail={() =>
-                  skill.description ? (
-                    <div css={descriptionStyle(theme)}>{skill.description}</div>
-                  ) : null
-                }
-              />
-            </div>
+            <ExpandableRow
+              key={skill.name}
+              expandable={!!skill.description}
+              defaultExpanded={false}
+              showChevron
+              renderSummary={() => (
+                <div
+                  css={css`
+                    display: flex;
+                    align-items: center;
+                  `}
+                  data-testid={`skill-item-${skill.name}`}
+                >
+                  <span css={itemNameStyle(theme)}>{skill.name}</span>
+                  {skill.source && (
+                    <span css={sourcePathStyle(theme)} title={skill.source}>
+                      {skill.source}
+                    </span>
+                  )}
+                </div>
+              )}
+              renderDetail={skill.description ? () => (
+                <div>{skill.description}</div>
+              ) : undefined}
+            />
           ))}
         </div>
       )}
