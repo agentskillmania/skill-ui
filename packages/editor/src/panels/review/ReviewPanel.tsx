@@ -48,7 +48,14 @@ function ReviewItemRow({ item }: { item: ReviewItem }) {
             <Icon size={14} />
           </span>
           <div css={{ flex: 1, minWidth: 0 }}>
-            <div css={{ display: 'flex', alignItems: 'center', gap: theme.spacing[1], color: theme.color.text }}>
+            <div
+              css={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: theme.spacing[1],
+                color: theme.color.text,
+              }}
+            >
               <span>{item.message}</span>
             </div>
             {item.filePath && (
@@ -89,10 +96,7 @@ export function ReviewPanel({ items }: ReviewPanelProps) {
   }
 
   return (
-    <div
-      ref={containerRef}
-      css={{ height: '100%', overflowY: 'auto' }}
-    >
+    <div ref={containerRef} css={{ height: '100%', overflowY: 'auto' }}>
       {items.map((item) => (
         <ReviewItemRow key={item.id} item={item} />
       ))}

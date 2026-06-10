@@ -23,9 +23,7 @@ describe('ExpandableRow', () => {
   it('toggles detail on click', () => {
     render(
       <ExpandableRow
-        renderSummary={({ toggle }) => (
-          <button onClick={toggle}>Summary</button>
-        )}
+        renderSummary={({ toggle }) => <button onClick={toggle}>Summary</button>}
         renderDetail={() => <span>Detail Content</span>}
       />,
       { wrapper }
@@ -41,9 +39,7 @@ describe('ExpandableRow', () => {
     render(
       <ExpandableRow
         expandable={false}
-        renderSummary={({ toggle }) => (
-          <button onClick={toggle}>Summary</button>
-        )}
+        renderSummary={({ toggle }) => <button onClick={toggle}>Summary</button>}
         renderDetail={() => <span>Hidden</span>}
       />,
       { wrapper }
@@ -69,9 +65,7 @@ describe('ExpandableRow', () => {
     render(
       <ExpandableRow
         onToggle={onToggle}
-        renderSummary={({ toggle }) => (
-          <button onClick={toggle}>Summary</button>
-        )}
+        renderSummary={({ toggle }) => <button onClick={toggle}>Summary</button>}
         renderDetail={() => <span>Detail</span>}
       />,
       { wrapper }
@@ -111,9 +105,7 @@ describe('ExpandableRow', () => {
     render(
       <ExpandableRow
         defaultExpanded
-        renderSummary={({ expanded }) => (
-          <span>{expanded ? 'open' : 'closed'}</span>
-        )}
+        renderSummary={({ expanded }) => <span>{expanded ? 'open' : 'closed'}</span>}
         renderDetail={() => <span>Detail</span>}
       />,
       { wrapper }
@@ -138,11 +130,7 @@ describe('ExpandableRow', () => {
 
   it('does not render detail when renderDetail is not provided', () => {
     render(
-      <ExpandableRow
-        renderSummary={({ toggle }) => (
-          <button onClick={toggle}>Summary</button>
-        )}
-      />,
+      <ExpandableRow renderSummary={({ toggle }) => <button onClick={toggle}>Summary</button>} />,
       { wrapper }
     );
     fireEvent.click(screen.getByText('Summary'));

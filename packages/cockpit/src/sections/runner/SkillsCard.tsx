@@ -5,12 +5,7 @@ import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../../locales/index.js';
-import {
-  emptyTextStyle,
-  titleRowStyle,
-  itemNameStyle,
-  sourcePathStyle,
-} from './styles.js';
+import { emptyTextStyle, titleRowStyle, itemNameStyle, sourcePathStyle } from './styles.js';
 import type { RunnerSkillInfo } from './types.js';
 import { CollapsibleCard, useToggle, ExpandableRow } from '@agentskillmania/skill-ui-shared';
 
@@ -69,9 +64,7 @@ export function SkillsCard({ skills }: SkillsCardProps) {
                   )}
                 </div>
               )}
-              renderDetail={skill.description ? () => (
-                <div>{skill.description}</div>
-              ) : undefined}
+              renderDetail={skill.description ? () => <div>{skill.description}</div> : undefined}
             />
           ))}
         </div>

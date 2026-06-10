@@ -47,9 +47,9 @@ export function EventRow({ event }: EventRowProps) {
           </span>
         </div>
       )}
-      renderDetail={hasDetail ? () => (
-        <pre>{JSON.stringify(event.payload, null, 2)}</pre>
-      ) : undefined}
+      renderDetail={
+        hasDetail ? () => <pre>{JSON.stringify(event.payload, null, 2)}</pre> : undefined
+      }
     />
   );
 }
