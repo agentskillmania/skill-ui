@@ -2,8 +2,7 @@
 import type { Theme } from '@agentskillmania/skill-ui-theme';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
-import { Card, Statistic, Typography } from 'antd';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { Statistic, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../../locales/index.js';

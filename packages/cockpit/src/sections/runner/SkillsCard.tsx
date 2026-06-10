@@ -1,7 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { css } from '@emotion/react';
-import { Card, Typography } from 'antd';
+import { Typography } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';

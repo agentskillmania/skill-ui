@@ -1,9 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { css } from '@emotion/react';
-import { Card, Typography, Tooltip, message } from 'antd';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { Typography, Tooltip, message } from 'antd';
 import { useTranslation } from 'react-i18next';
-import type { Theme } from '@agentskillmania/skill-ui-theme';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { NAMESPACE } from '../../locales/index.js';
 import type { SessionInfoData } from './types.js';
