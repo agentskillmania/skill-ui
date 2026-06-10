@@ -18,6 +18,7 @@ export {
   StatusDot,
   CopyValue,
   InfoRow,
+  ExpandableRow,
 } from './components/index.js';
 
 // Component types
@@ -37,6 +38,8 @@ export type {
   StatusDotProps,
   CopyValueProps,
   InfoRowProps,
+  ExpandableRowProps,
+  DetailVariant,
 } from './components/index.js';
 
 // Hooks
