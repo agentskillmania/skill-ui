@@ -10,6 +10,8 @@ import { css } from '@emotion/react';
 import { useEffect, useRef } from 'react';
 // @ts-expect-error — @milkdown/crepe's package.json exports do not correctly declare types
 import { Crepe } from '@milkdown/crepe';
+// @ts-expect-error — @milkdown/utils's package.json exports do not correctly declare types
+import { replaceAll } from '@milkdown/utils';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../locales/index.js';
@@ -99,10 +101,7 @@ export function VisualEditor({
     const currentMd = crepe.getMarkdown();
     if (currentMd !== content) {
       isInternalChange.current = true;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      import('@milkdown/utils').then((utils: any) => {
-        editor.action(utils.replaceAll(content));
-      });
+      editor.action(replaceAll(content));
     }
   }, [content]);
 

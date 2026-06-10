@@ -13,7 +13,7 @@ import { EmptyState, Sidebar, SidebarPanel, SplitDivider } from '@agentskillmani
 import type { SidebarIconItem } from '@agentskillmania/skill-ui-shared';
 import { FolderOpen, Bot, ClipboardCheck, TestTube2 } from 'lucide-react';
 import { NAMESPACE } from '../locales/index.js';
-import type { ProjectEditorProps, FileTab, CursorPosition, EditorPanel } from '../types.js';
+import type { ProjectEditorProps, FileTab, CursorPosition, EditorPanel, ProjectFile } from '../types.js';
 import { EditorContext } from '../context/EditorContext.js';
 import { getFileLabel } from '../shared/file-utils.js';
 import { FileTabs } from '../sections/file-tabs/index.js';
@@ -289,9 +289,9 @@ export function ProjectEditor({
 
 /** Recursively find file by path */
 function findFile(
-  files: import('../types.js').ProjectFile[],
+  files: ProjectFile[],
   path: string
-): import('../types.js').ProjectFile | null {
+): ProjectFile | null {
   for (const f of files) {
     if (f.path === path) return f;
     if (f.children) {
