@@ -13,6 +13,9 @@ import { transition, spin, scaleActive } from '../../src/styles/animations.js';
 import { textTruncate, textSecondary } from '../../src/styles/text.js';
 import { iconBox, scrollable, absoluteFill } from '../../src/styles/containers.js';
 import { media, container } from '../../src/styles/media.js';
+import { borderSeparator } from '../../src/styles/separator.js';
+import { interactiveItem } from '../../src/styles/interactive.js';
+import { scrollContainer } from '../../src/styles/scroll.js';
 
 /**
  * Verify style utility functions return SerializedStyles (non-null, serializable)
@@ -177,5 +180,54 @@ describe('media queries', () => {
   it('container contains compact and standard', () => {
     expect(container.compact).toContain('@container');
     expect(container.standard).toContain('@container');
+  });
+});
+
+describe('borderSeparator', () => {
+  it('defaults to border-bottom', () => {
+    const s = borderSeparator(lightTheme);
+    expect(s.styles).toContain('border-bottom');
+    expect(s.styles).toContain(lightTheme.color.borderSecondary);
+  });
+
+  it('supports border-left direction', () => {
+    const s = borderSeparator(lightTheme, 'left');
+    expect(s.styles).toContain('border-left');
+    expect(s.styles).toContain(lightTheme.color.borderSecondary);
+  });
+
+  it('supports border-top direction', () => {
+    const s = borderSeparator(lightTheme, 'top');
+    expect(s.styles).toContain('border-top');
+  });
+});
+
+describe('interactiveItem', () => {
+  it('uses fillSecondary as default hover bg', () => {
+    const s = interactiveItem(lightTheme);
+    expect(s.styles).toContain('cursor: pointer');
+    expect(s.styles).toContain(lightTheme.color.fillSecondary);
+  });
+
+  it('accepts custom hover bg color', () => {
+    const s = interactiveItem(lightTheme, lightTheme.color.fillTertiary);
+    expect(s.styles).toContain(lightTheme.color.fillTertiary);
+  });
+});
+
+describe('scrollContainer', () => {
+  it('returns overflow-y auto by default', () => {
+    const s = scrollContainer(lightTheme);
+    expect(s.styles).toContain('overflow-y: auto');
+  });
+
+  it('supports maxHeight option', () => {
+    const s = scrollContainer(lightTheme, { maxHeight: '200px' });
+    expect(s.styles).toContain('max-height: 200px');
+  });
+
+  it('supports padding option', () => {
+    const s = scrollContainer(lightTheme, { padding: '12px' });
+    expect(s.styles).toContain('padding: 12px');
   });
 });

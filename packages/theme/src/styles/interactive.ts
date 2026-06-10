@@ -4,13 +4,16 @@ import type { Theme } from '../types.js';
 /**
  * Interactive item: cursor pointer + hover background transition.
  * For clickable list items, rows, and cards.
+ * @param theme - Theme object
+ * @param hoverBg - Optional custom hover background color (defaults to fillSecondary)
  */
-export function interactiveItem(theme: Theme) {
+export function interactiveItem(theme: Theme, hoverBg?: string) {
+  const bg = hoverBg ?? theme.color.fillSecondary;
   return css`
     cursor: pointer;
     transition: background ${theme.motion.duration.fast} ${theme.motion.easing.out};
     &:hover {
-      background: ${theme.color.fillSecondary};
+      background: ${bg};
     }
   `;
 }
