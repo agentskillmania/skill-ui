@@ -2,6 +2,33 @@ import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
 import translations from '../src/locales/zh-CN.json' with { type: 'json' };
 
+// Mock @tanstack/react-virtual — jsdom has no real layout, so all items are "visible"
+vi.mock('@tanstack/react-virtual', () => ({
+  useVirtualizer: (opts: { count: number; estimateSize: (i: number) => number }) => {
+    const estimateSize = opts.estimateSize ?? (() => 48);
+    const count = opts.count;
+    const virtualItems = Array.from({ length: count }, (_, i) => {
+      const size = estimateSize(i);
+      const start = Array.from({ length: i }, (_, j) => estimateSize(j)).reduce((a, b) => a + b, 0);
+      return {
+        key: i,
+        index: i,
+        start,
+        end: start + size,
+        size,
+        lane: 0,
+      };
+    });
+    return {
+      getVirtualItems: () => virtualItems,
+      getTotalSize: () => virtualItems.reduce((sum, v) => sum + v.size, 0),
+      measureElement: vi.fn(),
+      scrollToIndex: vi.fn(),
+      scrollOffset: 0,
+    };
+  },
+}));
+
 // mock react-i18next — loads real zh-CN translations for testing
 function resolveTranslation(obj: Record<string, unknown>, path: string): string {
   const keys = path.split('.');

@@ -2,10 +2,12 @@
 /**
  * EventLogPanel — agent runtime event log with type filtering
  * Merges consecutive streaming events (token, thinking) into single rows
+ * Uses virtual scrolling (@tanstack/react-virtual) for performance with large lists.
  */
 import { css } from '@emotion/react';
-import { useState, useMemo } from 'react';
+import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { ClipboardList } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { EmptyState, SidebarPanel } from '@agentskillmania/skill-ui-shared';
@@ -53,12 +55,29 @@ function mergeStreamingEvents(events: CockpitEvent[]): CockpitEvent[] {
   return result;
 }
 
-export function EventLogPanel({ events = [] }: EventLogPanelProps) {
+export function EventLogPanel({
+  events = [],
+  activeCategories: controlledCategories,
+  defaultActiveCategories,
+  onActiveCategoriesChange,
+}: EventLogPanelProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
-  const [activeCategories, setActiveCategories] = useState<Set<EventCategory>>(
-    () => new Set(ALL_CATEGORIES)
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const shouldAutoScroll = useRef(true);
+
+  const [internalCategories, setInternalCategories] = useState<Set<EventCategory>>(
+    () => defaultActiveCategories ?? new Set(ALL_CATEGORIES)
   );
+
+  const activeCategories = controlledCategories ?? internalCategories;
+
+  const setActiveCategories = (next: Set<EventCategory>) => {
+    if (controlledCategories === undefined) {
+      setInternalCategories(next);
+    }
+    onActiveCategoriesChange?.(next);
+  };
 
   // Merge streaming events, then filter by category
   const displayEvents = useMemo(() => {
@@ -69,20 +88,60 @@ export function EventLogPanel({ events = [] }: EventLogPanelProps) {
     return merged.filter((e) => activeCategories.has(getEventCategory(e.type)));
   }, [events, activeCategories]);
 
-  const handleToggleCategory = (category: EventCategory) => {
-    setActiveCategories((prev) => {
-      const next = new Set(prev);
-      if (next.has(category)) {
-        // Don't allow deselecting all — keep at least 1 active
-        if (next.size > 1) {
-          next.delete(category);
-        }
-      } else {
-        next.add(category);
+  const virtualizer = useVirtualizer({
+    count: displayEvents.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 48,
+    overscan: 15,
+  });
+
+  const handleScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const totalSize = virtualizer.getTotalSize();
+    shouldAutoScroll.current =
+      (virtualizer.scrollOffset ?? 0) + el.clientHeight >= totalSize - 50;
+  }, [virtualizer]);
+
+  // Auto-scroll to bottom when new events arrive
+  useEffect(() => {
+    if (shouldAutoScroll.current && displayEvents.length > 0) {
+      virtualizer.scrollToIndex(displayEvents.length - 1, { align: 'end' });
+    }
+  }, [displayEvents.length, virtualizer]);
+
+  // Re-measure a specific row (used by expanded/streaming rows)
+  const handleRowHeightChange = useCallback(
+    (index: number) => {
+      const el = scrollRef.current?.querySelector(`[data-index="${index}"]`);
+      if (el instanceof HTMLElement) {
+        virtualizer.measureElement(el);
       }
-      return next;
-    });
+    },
+    [virtualizer]
+  );
+
+  // Re-measure last event when merged streaming content changes
+  const lastEvent = displayEvents[displayEvents.length - 1];
+  useEffect(() => {
+    if (displayEvents.length === 0) return;
+    handleRowHeightChange(displayEvents.length - 1);
+  }, [displayEvents.length, lastEvent?.payload?.text, handleRowHeightChange]);
+
+  const handleToggleCategory = (category: EventCategory) => {
+    const next = new Set(activeCategories);
+    if (next.has(category)) {
+      // Don't allow deselecting all — keep at least 1 active
+      if (next.size > 1) {
+        next.delete(category);
+      }
+    } else {
+      next.add(category);
+    }
+    setActiveCategories(next);
   };
+
+  const virtualItems = virtualizer.getVirtualItems();
 
   return (
     <SidebarPanel title={t('eventLogPanel.title')} icon={ClipboardList}>
@@ -102,17 +161,43 @@ export function EventLogPanel({ events = [] }: EventLogPanelProps) {
         >
           {/* Fixed filter bar */}
           <EventFilterBar activeCategories={activeCategories} onToggle={handleToggleCategory} />
-          {/* Scrollable event list */}
+          {/* Virtual scroll container */}
           <div
+            ref={scrollRef}
+            onScroll={handleScroll}
+            data-testid="event-log-scroll"
             css={css`
               flex: 1;
               min-height: 0;
               overflow-y: auto;
             `}
           >
-            {displayEvents.map((event) => (
-              <EventRow key={event.id} event={event} />
-            ))}
+            <div
+              css={css`
+                position: relative;
+                height: ${virtualizer.getTotalSize()}px;
+              `}
+            >
+              {virtualItems.map((vi) => (
+                <div
+                  key={vi.key}
+                  data-index={vi.index}
+                  ref={virtualizer.measureElement}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${vi.start}px)`,
+                  }}
+                >
+                  <EventRow
+                      event={displayEvents[vi.index]}
+                      onHeightChange={() => handleRowHeightChange(vi.index)}
+                    />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}

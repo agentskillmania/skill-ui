@@ -4,6 +4,7 @@
  * Displays type tag, content text, and expandable payload detail.
  * Uses shared ExpandableRow with code variant for JSON payloads.
  */
+import { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { CockpitEvent } from './types.js';
@@ -13,16 +14,22 @@ import { ExpandableRow } from '@agentskillmania/skill-ui-shared';
 
 export interface EventRowProps {
   event: CockpitEvent;
+  /** Called when the row's height changes (e.g., expand/collapse). Used by virtual scroll to re-measure. */
+  onHeightChange?: () => void;
 }
 
-export function EventRow({ event }: EventRowProps) {
+export const EventRow = memo(function EventRow({ event, onHeightChange }: EventRowProps) {
   const theme = useTheme();
   const hasDetail = event.payload && Object.keys(event.payload).length > 0;
+  const handleToggle = useCallback(() => {
+    onHeightChange?.();
+  }, [onHeightChange]);
 
   return (
     <ExpandableRow
       expandable={hasDetail}
       defaultExpanded={false}
+      onToggle={handleToggle}
       detailVariant="code"
       renderSummary={({ expanded }) => (
         <div
@@ -52,4 +59,4 @@ export function EventRow({ event }: EventRowProps) {
       }
     />
   );
-}
+});

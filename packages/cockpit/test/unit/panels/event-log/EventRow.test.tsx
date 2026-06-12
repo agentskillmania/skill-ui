@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@agentskillmania/skill-ui-theme';
 import { EventRow } from '../../../../src/panels/event-log/EventRow.js';
@@ -61,6 +61,17 @@ describe('EventRow', () => {
     expect(screen.getByText(/claude-sonnet-4-6/)).toBeInTheDocument();
     fireEvent.click(summary);
     expect(screen.queryByText(/claude-sonnet-4-6/)).toBeNull();
+  });
+
+  it('calls onHeightChange when toggling expand', () => {
+    const onHeightChange = vi.fn();
+    const event: CockpitEvent = {
+      ...baseEvent,
+      payload: { name: 'read_file', model: 'claude-sonnet-4-6' },
+    };
+    render(<EventRow event={event} onHeightChange={onHeightChange} />, { wrapper });
+    fireEvent.click(screen.getByTestId('expandable-summary'));
+    expect(onHeightChange).toHaveBeenCalledOnce();
   });
 
   it('is not expandable when payload is empty', () => {
