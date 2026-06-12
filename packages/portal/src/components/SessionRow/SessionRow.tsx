@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Button, Popconfirm, Space } from 'antd';
 import { Trash2, MessageCircle, GitBranch } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
@@ -15,7 +15,7 @@ interface SessionRowProps {
   isLast?: boolean;
 }
 
-export function SessionRow({ session, onResume, onDelete, onFork, isLast }: SessionRowProps) {
+export const SessionRow = memo(function SessionRow({ session, onResume, onDelete, onFork, isLast }: SessionRowProps) {
   const theme = useTheme();
   const { t } = useTranslation('skill-ui-portal');
   const [hovered, setHovered] = useState(false);
@@ -103,4 +103,4 @@ export function SessionRow({ session, onResume, onDelete, onFork, isLast }: Sess
       </div>
     </div>
   );
-}
+});

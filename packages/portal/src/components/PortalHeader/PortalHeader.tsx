@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { useState } from 'react';
+import { memo } from 'react';
 import { keyframes } from '@emotion/react';
 import { AutoComplete, Input, Button, Tooltip } from 'antd';
 import { Search, Github } from 'lucide-react';
@@ -9,6 +9,10 @@ import { SearchResultItem } from '../shared/SearchResultItem.js';
 import type { SearchResults, SearchResultType } from '../../types.js';
 
 interface PortalHeaderProps {
+  /** Controlled search query value */
+  query: string;
+  /** Callback when query changes */
+  onQueryChange: (query: string) => void;
   results: SearchResults;
   onSearch: (query: string) => void;
   onSelect: (type: SearchResultType, id: string) => void;
@@ -23,7 +27,9 @@ const gradientFlow = keyframes`
   100% { background-position: 200% 50%; }
 `;
 
-export function PortalHeader({
+export const PortalHeader = memo(function PortalHeader({
+  query,
+  onQueryChange,
   results,
   onSearch,
   onSelect,
@@ -32,7 +38,6 @@ export function PortalHeader({
 }: PortalHeaderProps) {
   const theme = useTheme();
   const { t } = useTranslation('skill-ui-portal');
-  const [query, setQuery] = useState('');
 
   const options = [
     ...(results.skills.length > 0
@@ -176,7 +181,8 @@ export function PortalHeader({
 
       <AutoComplete
         variant="borderless"
-        onChange={(v) => setQuery(v || '')}
+        value={query}
+        onChange={(v) => onQueryChange(v || '')}
         onSelect={(_, option) => {
           const opt = option as { data?: { type: SearchResultType; id: string } };
           if (opt?.data) {
@@ -196,4 +202,4 @@ export function PortalHeader({
       </AutoComplete>
     </div>
   );
-}
+});

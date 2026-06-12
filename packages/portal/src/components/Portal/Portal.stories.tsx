@@ -49,6 +49,8 @@ const mockSessions = Array.from({ length: 4 }, (_, i) => ({
 }));
 
 const baseArgs: PortalProps = {
+  searchQuery: '',
+  onSearchQueryChange: () => {},
   searchResults: { agents: [], skills: [], sessions: [] },
   onSearch: () => {},
   onSearchSelect: () => {},
@@ -65,6 +67,8 @@ const baseArgs: PortalProps = {
   sessionsPage: 1,
   sessionsTotal: mockSessions.length,
   onSessionsPageChange: () => {},
+  sessionFilterWorkspace: undefined,
+  onSessionFilterWorkspaceChange: () => {},
   onAgentChat: () => {},
   onAgentEdit: () => {},
   onAgentCreate: (_name: string) => {},

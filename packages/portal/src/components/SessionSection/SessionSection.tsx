@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Button, Empty, Pagination, Select, Popconfirm } from 'antd';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +18,10 @@ interface SessionSectionProps {
   onDelete: (id: string) => void;
   onFork?: (id: string) => void;
   onClear?: () => void;
+  /** Controlled workspace filter value */
+  filterWorkspace: string | undefined;
+  /** Callback when workspace filter changes */
+  onFilterWorkspaceChange: (workspace: string | undefined) => void;
 }
 
 export function SessionSection({
@@ -30,10 +34,11 @@ export function SessionSection({
   onDelete,
   onFork,
   onClear,
+  filterWorkspace,
+  onFilterWorkspaceChange,
 }: SessionSectionProps) {
   const theme = useTheme();
   const { t } = useTranslation('skill-ui-portal');
-  const [filterWorkspace, setFilterWorkspace] = useState<string | undefined>(undefined);
 
   const workspaceOptions = useMemo(() => {
     const paths = Array.from(new Set(sessions.map((s) => s.workspacePath))).sort();
@@ -59,7 +64,7 @@ export function SessionSection({
         <div css={{ display: 'flex', alignItems: 'center', gap: theme.spacing[3] }}>
           <Select<string | undefined>
             value={filterWorkspace}
-            onChange={(value) => setFilterWorkspace(value)}
+            onChange={(value) => onFilterWorkspaceChange(value)}
             options={workspaceOptions}
             allowClear
             showSearch

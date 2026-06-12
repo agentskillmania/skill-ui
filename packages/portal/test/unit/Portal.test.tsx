@@ -26,6 +26,8 @@ function wrapper({ children }: { children: React.ReactNode }) {
 const defaultProps = {
   activeTab: 'skills' as const,
   onTabChange: vi.fn(),
+  searchQuery: '',
+  onSearchQueryChange: vi.fn(),
   searchResults: { agents: [], skills: [], sessions: [] },
   onSearch: vi.fn(),
   onSearchSelect: vi.fn(),
@@ -41,6 +43,8 @@ const defaultProps = {
   sessionsPage: 1,
   sessionsTotal: 0,
   onSessionsPageChange: vi.fn(),
+  sessionFilterWorkspace: undefined,
+  onSessionFilterWorkspaceChange: vi.fn(),
   onAgentChat: vi.fn(),
   onAgentEdit: vi.fn(),
   onAgentCreate: vi.fn(),
@@ -69,9 +73,17 @@ describe('Portal', () => {
 
   it('calls onSearch when Enter pressed in search input', () => {
     const onSearch = vi.fn();
-    render(<Portal {...defaultProps} onSearch={onSearch} />, { wrapper });
+    const onSearchQueryChange = vi.fn();
+    render(
+      <Portal
+        {...defaultProps}
+        searchQuery="test"
+        onSearchQueryChange={onSearchQueryChange}
+        onSearch={onSearch}
+      />,
+      { wrapper }
+    );
     const input = screen.getByPlaceholderText('搜索技能、智能体或会话记录…');
-    fireEvent.change(input, { target: { value: 'test' } });
     fireEvent.keyDown(input, { key: 'Enter', code: 'Enter' });
     expect(onSearch).toHaveBeenCalledWith('test');
   });

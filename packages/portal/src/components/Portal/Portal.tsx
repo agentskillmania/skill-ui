@@ -69,6 +69,8 @@ export function Portal(props: PortalProps) {
           onDelete={props.onSessionDelete}
           onFork={props.onSessionFork}
           onClear={props.onSessionClear}
+          filterWorkspace={props.sessionFilterWorkspace}
+          onFilterWorkspaceChange={props.onSessionFilterWorkspaceChange}
         />
       ),
     },
@@ -84,6 +86,8 @@ export function Portal(props: PortalProps) {
       }}
     >
       <PortalHeader
+        query={props.searchQuery}
+        onQueryChange={props.onSearchQueryChange}
         results={props.searchResults}
         onSearch={props.onSearch}
         githubUrl={props.githubUrl}

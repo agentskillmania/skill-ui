@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import { memo } from 'react';
 import { Button, Tooltip } from 'antd';
 import { Pencil, Trash2 } from 'lucide-react';
 import { ResourceAvatar } from './ResourceAvatar.js';
@@ -11,7 +12,7 @@ interface SearchResultItemProps {
   onEdit?: () => void;
 }
 
-export function SearchResultItem({ item, query, onEdit }: SearchResultItemProps) {
+export const SearchResultItem = memo(function SearchResultItem({ item, query, onEdit }: SearchResultItemProps) {
   return (
     <div
       css={{
@@ -50,4 +51,4 @@ export function SearchResultItem({ item, query, onEdit }: SearchResultItemProps)
       )}
     </div>
   );
-}
+});

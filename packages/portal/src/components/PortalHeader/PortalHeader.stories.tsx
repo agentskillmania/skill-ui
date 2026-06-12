@@ -13,6 +13,8 @@ type Story = StoryObj<typeof PortalHeader>;
 export const Default: Story = {
   args: {
     results: { agents: [], skills: [], sessions: [] },
+    query: '',
+    onQueryChange: () => {},
     onSearch: () => {},
     onSelect: () => {},
     onEdit: () => {},
@@ -32,6 +34,8 @@ export const WithResults: Story = {
       ],
       sessions: [],
     },
+    query: 'web',
+    onQueryChange: () => {},
     onSearch: () => {},
     onSelect: () => {},
     onEdit: () => {},
@@ -40,6 +44,8 @@ export const WithResults: Story = {
 
 export const ManyResults: Story = {
   args: {
+    query: 'skill',
+    onQueryChange: () => {},
     results: {
       skills: Array.from({ length: 5 }, (_, i) => ({
         type: 'skill' as const,

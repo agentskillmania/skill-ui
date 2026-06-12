@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Card, Button, Tag, Popconfirm, Tooltip } from 'antd';
 import { Trash2, Pencil, MessageCircle } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
@@ -20,7 +20,7 @@ const ellipsisStyle = {
   whiteSpace: 'nowrap' as const,
 };
 
-export function AgentCard({ agent, onChat, onEdit, onDelete }: AgentCardProps) {
+export const AgentCard = memo(function AgentCard({ agent, onChat, onEdit, onDelete }: AgentCardProps) {
   const theme = useTheme();
   const { t } = useTranslation('skill-ui-portal');
   const [hovered, setHovered] = useState(false);
@@ -101,4 +101,4 @@ export function AgentCard({ agent, onChat, onEdit, onDelete }: AgentCardProps) {
       />
     </Card>
   );
-}
+});

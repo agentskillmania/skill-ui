@@ -57,6 +57,10 @@ export interface PortalProps {
   onTabChange?: (tab: PortalTab) => void;
   githubUrl?: string;
 
+  /** Controlled search query */
+  searchQuery: string;
+  /** Callback when search query changes */
+  onSearchQueryChange: (query: string) => void;
   searchResults: SearchResults;
   onSearch: (query: string) => void;
   onSearchSelect?: (type: SearchResultType, id: string) => void;
@@ -79,6 +83,10 @@ export interface PortalProps {
   sessionsTotal: number;
   sessionsPageSize?: number;
   onSessionsPageChange: (page: number) => void;
+  /** Controlled workspace filter for sessions */
+  sessionFilterWorkspace: string | undefined;
+  /** Callback when workspace filter changes */
+  onSessionFilterWorkspaceChange: (workspace: string | undefined) => void;
 
   onAgentChat: (id: string) => void;
   onAgentEdit: (id: string) => void;
