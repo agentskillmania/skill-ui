@@ -80,4 +80,21 @@ describe('FileTabs', () => {
     // Should not have any tab text
     expect(screen.queryByRole('tab')).toBeNull();
   });
+
+  it('shows fallback icon for unknown file extensions', () => {
+    const tabs: FileTab[] = [
+      ...sampleTabs,
+      { path: 'Dockerfile', label: 'Dockerfile' },
+    ];
+    renderWithProviders(
+      <FileTabs
+        tabs={tabs}
+        activePath="SKILL.md"
+        onTabChange={vi.fn()}
+        onTabClose={vi.fn()}
+      />
+    );
+    // File with unknown extension should still render
+    expect(screen.getByText('Dockerfile')).toBeInTheDocument();
+  });
 });

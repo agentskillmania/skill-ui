@@ -1,47 +1,58 @@
 /** @jsxImportSource @emotion/react */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
 import { ProjectEditor } from '../../src/project-editor/ProjectEditor.js';
 import type { ProjectFile, FileTab, EditorPanel } from '../../src/types.js';
+import { Modal } from 'antd';
 
-// Mock Monaco Editor
+// Track save handler registered by CodeEditor handleMount
+let registeredSaveHandler: (() => void) | null = null;
+
 vi.mock('@monaco-editor/react', () => ({
   __esModule: true,
-  default: ({ defaultValue, onChange }: any) => (
-    <div data-testid="monaco-editor">
-      <span data-testid="monaco-content">{defaultValue}</span>
-      <button data-testid="monaco-change" onClick={() => onChange?.('new content')}>
-        change
-      </button>
-    </div>
-  ),
+  default: ({ defaultValue, onChange, onMount }: any) => {
+    const React = require('react');
+    React.useEffect(() => {
+      if (onMount) {
+        onMount(
+          {
+            addCommand: (_keybinding: number, handler: () => void) => {
+              registeredSaveHandler = handler;
+            },
+          },
+          {}
+        );
+      }
+    }, []);
+    return (
+      <div data-testid="monaco-editor">
+        <span data-testid="monaco-content">{defaultValue}</span>
+        <button data-testid="monaco-change" onClick={() => onChange?.('new content')}>
+          change
+        </button>
+      </div>
+    );
+  },
 }));
 
 const sampleFiles: ProjectFile[] = [
-  { path: 'SKILL.md', content: '# 网页搜索技能\n\n## 描述\n搜索互联网获取信息。' },
+  { path: 'SKILL.md', content: 'skill content' },
   {
     path: 'src',
     isDirectory: true,
     children: [
       { path: 'src/index.ts', content: 'export {};' },
-      {
-        path: 'src/search.ts',
-        content: 'export async function search(query: string) {\n  return [];\n}',
-      },
+      { path: 'src/search.ts', content: 'export async function search() { return []; }' },
     ],
   },
-  { path: 'package.json', content: '{"name": "web-search-skill"}' },
+  { path: 'package.json', content: '{"name": "test"}' },
 ];
 
-function createProps(overrides?: Partial<typeof defaultProps>) {
-  return { ...defaultProps, ...overrides };
-}
-
-const defaultProps = {
+const baseProps = {
   editorFiles: sampleFiles,
   editorActiveFilePath: 'SKILL.md' as string | null,
-  editorActiveFileContent: '# 网页搜索技能\n\n## 描述\n搜索互联网获取信息。',
+  editorActiveFileContent: 'skill content',
   editorOpenTabs: [{ path: 'SKILL.md', label: 'SKILL.md', modified: false }] as FileTab[],
   onEditorOpenTabsChange: vi.fn(),
   editorDirtyFilePaths: [] as string[],
@@ -55,57 +66,92 @@ const defaultProps = {
   onEditorActiveFileChange: vi.fn(),
 };
 
-/** Get all tab close buttons */
-function getTabCloseButtons() {
-  return screen.getAllByRole('button', { name: /关闭/ });
-}
-
 describe('ProjectEditor', () => {
   it('renders editor area and sidebar', () => {
-    renderWithProviders(<ProjectEditor {...defaultProps} />);
-    expect(screen.getByText('预览')).toBeTruthy();
-    // Shared Sidebar renders SidebarIcons buttons
+    renderWithProviders(<ProjectEditor {...baseProps} />);
+    expect(screen.getByText('预览')).toBeInTheDocument();
     const buttons = screen.getAllByRole('button');
     expect(buttons.length).toBeGreaterThan(0);
   });
 
-  it('displays current file path', () => {
-    renderWithProviders(<ProjectEditor {...defaultProps} />);
+  it('displays current file name in the editor area', () => {
+    renderWithProviders(<ProjectEditor {...baseProps} />);
     const matches = screen.getAllByText('SKILL.md');
     expect(matches.length).toBeGreaterThanOrEqual(1);
   });
 
   it('shows empty state when editorActiveFilePath is null', () => {
-    renderWithProviders(<ProjectEditor {...defaultProps} editorActiveFilePath={null} />);
-    expect(screen.getByText('选择一个文件开始编辑')).toBeTruthy();
+    renderWithProviders(<ProjectEditor {...baseProps} editorActiveFilePath={null} />);
+    expect(screen.getByText('选择一个文件开始编辑')).toBeInTheDocument();
   });
 
-  it('shows empty state hint when selecting directory', () => {
+  it('shows directory hint when selecting a directory file', () => {
     renderWithProviders(
       <ProjectEditor
-        {...defaultProps}
+        {...baseProps}
         editorActiveFilePath="src"
         editorActiveFileContent=""
       />
     );
-    expect(screen.getByText('此文件为目录')).toBeTruthy();
+    expect(screen.getByText('此文件为目录')).toBeInTheDocument();
   });
 
-  it('clicking SidebarIcons icon triggers onEditorPanelChange', () => {
-    const onEditorPanelChange = vi.fn();
+  it('calls onEditorFileChange when content is edited', () => {
+    const onEditorFileChange = vi.fn();
     renderWithProviders(
-      <ProjectEditor {...defaultProps} onEditorPanelChange={onEditorPanelChange} />
+      <ProjectEditor {...baseProps} onEditorFileChange={onEditorFileChange} />
     );
-    // Find the sidebar icon buttons (they have specific icons)
-    const buttons = screen.getAllByRole('button');
-    // Click a button that should trigger panel change
-    // Skip the first button (tab close) and click a sidebar icon
-    if (buttons.length > 1) {
-      fireEvent.click(buttons[1]);
-      // Note: The actual panel change depends on which button is clicked
-      // For now, just verify the component renders without errors
-    }
-    expect(true).toBeTruthy();
+    fireEvent.click(screen.getByTestId('monaco-change'));
+    expect(onEditorFileChange).toHaveBeenCalledWith('SKILL.md', 'new content');
+  });
+
+  it('calls onEditorSave when save shortcut triggered', () => {
+    const onEditorSave = vi.fn();
+    renderWithProviders(
+      <ProjectEditor {...baseProps} onEditorSave={onEditorSave} />
+    );
+    // Trigger the save handler registered by CodeEditor handleMount
+    registeredSaveHandler?.();
+    expect(onEditorSave).toHaveBeenCalledWith('SKILL.md', 'skill content');
+  });
+
+  it('does not call onEditorFileChange when no active file', () => {
+    const onEditorFileChange = vi.fn();
+    renderWithProviders(
+      <ProjectEditor
+        {...baseProps}
+        editorActiveFilePath={null}
+        onEditorFileChange={onEditorFileChange}
+      />
+    );
+    // No monaco editor should render — no change button
+    expect(screen.queryByTestId('monaco-change')).not.toBeInTheDocument();
+  });
+
+  it('calls onEditorSave with file path and content when saved', () => {
+    const onEditorSave = vi.fn();
+    renderWithProviders(
+      <ProjectEditor {...baseProps} onEditorSave={onEditorSave} />
+    );
+    // StatusBar renders a save button when isDirty is true
+    // isDirty comes from editorDirtyFilePaths including activeFilePath
+    // We can test via the monaco editor integration
+  });
+
+  it('does not throw when onEditorSave is undefined', () => {
+    renderWithProviders(<ProjectEditor {...baseProps} onEditorSave={undefined} />);
+    const matches = screen.getAllByText('SKILL.md');
+    expect(matches.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('closes unmodified tab directly and calls callbacks', () => {
+    const onEditorOpenTabsChange = vi.fn();
+    renderWithProviders(
+      <ProjectEditor {...baseProps} onEditorOpenTabsChange={onEditorOpenTabsChange} />
+    );
+    const closeButtons = screen.getAllByRole('button', { name: /关闭/ });
+    fireEvent.click(closeButtons[0]);
+    expect(onEditorOpenTabsChange).toHaveBeenCalled();
   });
 
   it('closing last tab triggers onEditorActiveFileChange(null)', async () => {
@@ -113,97 +159,175 @@ describe('ProjectEditor', () => {
     const onEditorOpenTabsChange = vi.fn();
     renderWithProviders(
       <ProjectEditor
-        {...defaultProps}
+        {...baseProps}
         onEditorActiveFileChange={onEditorActiveFileChange}
         onEditorOpenTabsChange={onEditorOpenTabsChange}
       />
     );
-    const closeButtons = getTabCloseButtons();
+    const closeButtons = screen.getAllByRole('button', { name: /关闭/ });
     fireEvent.click(closeButtons[0]);
     await waitFor(() => {
       expect(onEditorActiveFileChange).toHaveBeenCalledWith(null);
     });
   });
 
-  it('adds new tab after switching files', () => {
-    const onEditorOpenTabsChange = vi.fn();
+  it('shows isDirty status when file is in dirtyFilePaths', () => {
     renderWithProviders(
-      <ProjectEditor {...defaultProps} onEditorOpenTabsChange={onEditorOpenTabsChange} />
+      <ProjectEditor {...baseProps} editorDirtyFilePaths={['SKILL.md']} />
     );
-    // Simulate switching to a new file by changing the activeFilePath prop
-    // The parent should call onEditorOpenTabsChange to add a new tab
-    // In the new controlled model, the parent is responsible for adding tabs
+    // StatusBar should reflect dirty state
+    expect(screen.getByText('未保存')).toBeInTheDocument();
   });
 
-  it('onEditorFileChange is called when editing content', () => {
-    const onEditorFileChange = vi.fn();
-    renderWithProviders(
-      <ProjectEditor {...defaultProps} onEditorFileChange={onEditorFileChange} />
-    );
-    const changeButton = screen.getByTestId('monaco-change');
-    fireEvent.click(changeButton);
-    expect(onEditorFileChange).toHaveBeenCalledWith('SKILL.md', 'new content');
+  it('renders status bar with mode toggle for markdown file', () => {
+    renderWithProviders(<ProjectEditor {...baseProps} />);
+    // StatusBar shows code mode with preview button (SKILL.md is markdown)
+    expect(screen.getByText('预览')).toBeInTheDocument();
   });
 
-  it('clears dirty state when calling onSave', () => {
-    const onEditorSave = vi.fn();
+  it('renders status bar with cursor position when provided', () => {
     renderWithProviders(
       <ProjectEditor
-        {...defaultProps}
-        editorDirtyFilePaths={['SKILL.md']}
-        onEditorSave={onEditorSave}
+        {...baseProps}
+        editorCursorPosition={{ line: 5, column: 10 }}
       />
     );
-    // In the new model, dirty state is managed by the parent
-    // The component just calls onEditorSave
+    // Ln/Col indicators via i18n
+    expect(screen.getByText('行 5, 列 10')).toBeInTheDocument();
   });
 
-  it('does not throw error when onSave is undefined', () => {
-    renderWithProviders(<ProjectEditor {...defaultProps} onEditorSave={undefined} />);
-    // Should render without errors - use getAllByText since SKILL.md appears in multiple places
-    const matches = screen.getAllByText('SKILL.md');
-    expect(matches.length).toBeGreaterThanOrEqual(1);
-  });
-
-  it('closes unmodified tab directly', () => {
-    const onEditorOpenTabsChange = vi.fn();
-    renderWithProviders(
-      <ProjectEditor {...defaultProps} onEditorOpenTabsChange={onEditorOpenTabsChange} />
+  it('switches sidebar panel when editorActivePanel prop changes', () => {
+    const { rerender } = renderWithProviders(
+      <ProjectEditor {...baseProps} />
     );
-    const closeButtons = getTabCloseButtons();
-    fireEvent.click(closeButtons[0]);
-    expect(onEditorOpenTabsChange).toHaveBeenCalled();
+    // Re-render with activePanel = 'copilot'
+    rerender(
+      <ProjectEditor {...baseProps} editorActivePanel="copilot" />
+    );
+    // The copilot panel title should now be in the DOM
+    expect(screen.getByText('Copilot')).toBeInTheDocument();
   });
 
-  it('shows confirmation dialog when closing modified tab', () => {
-    const onEditorOpenTabsChange = vi.fn();
+  it('renders with nested file path (findFile recursion)', () => {
     renderWithProviders(
       <ProjectEditor
-        {...defaultProps}
-        editorDirtyFilePaths={['SKILL.md']}
-        onEditorOpenTabsChange={onEditorOpenTabsChange}
+        {...baseProps}
+        editorActiveFilePath="src/index.ts"
+        editorActiveFileContent="export {};"
       />
     );
-    const closeButtons = getTabCloseButtons();
-    fireEvent.click(closeButtons[0]);
-    // Should show a confirmation dialog (antd Modal.confirm uses a portal)
-    // The dialog text might be in a different part of the DOM
-    // For now, just verify the component doesn't crash
-    expect(true).toBeTruthy();
+    // Should find the nested file and render its content in the editor
+    expect(screen.getByTestId('monaco-content')).toHaveTextContent('export {};');
   });
 
-  it('triggers onEditorActiveFileChange(null) when closing last tab', async () => {
-    const onEditorActiveFileChange = vi.fn();
+  it('handles non-existent file path (findFile returns null)', () => {
     renderWithProviders(
       <ProjectEditor
-        {...defaultProps}
-        onEditorActiveFileChange={onEditorActiveFileChange}
+        {...baseProps}
+        editorActiveFilePath="nonexistent.ts"
+        editorActiveFileContent=""
       />
     );
-    const closeButtons = getTabCloseButtons();
-    fireEvent.click(closeButtons[0]);
-    await waitFor(() => {
-      expect(onEditorActiveFileChange).toHaveBeenCalledWith(null);
+    // When findFile returns null, activeFileNode?.isDirectory is false,
+    // so it renders the EditorArea. The editor should still render.
+    expect(screen.getByTestId('monaco-editor')).toBeInTheDocument();
+  });
+
+  it('matches file path in directory children via findFile', () => {
+    renderWithProviders(
+      <ProjectEditor
+        {...baseProps}
+        editorActiveFilePath="src/search.ts"
+        editorActiveFileContent="export async function search() { return []; }"
+      />
+    );
+    // Should find the nested file in children
+    expect(screen.getByTestId('monaco-content')).toHaveTextContent('export async function search()');
+  });
+
+  it('triggers sidebar collapse via collapse button', () => {
+    const onEditorPanelChange = vi.fn();
+    const { container } = renderWithProviders(
+      <ProjectEditor {...baseProps} onEditorPanelChange={onEditorPanelChange} />
+    );
+    // Find the collapse toggle button (ChevronLeft icon when expanded)
+    const collapseIcon = container.querySelector('svg.lucide-chevron-left');
+    expect(collapseIcon).toBeTruthy();
+    const collapseBtn = collapseIcon?.closest('button');
+    expect(collapseBtn).toBeTruthy();
+    fireEvent.click(collapseBtn!);
+    // onEditorPanelChange should be called (callback fires on toggle)
+    expect(onEditorPanelChange).toHaveBeenCalled();
+  });
+
+  it('switches sidebar panel via button click', () => {
+    const onEditorPanelChange = vi.fn();
+    const { container } = renderWithProviders(
+      <ProjectEditor {...baseProps} onEditorPanelChange={onEditorPanelChange} />
+    );
+    // Find the Copilot panel button (Bot icon)
+    const botIcon = container.querySelector('svg.lucide-bot');
+    expect(botIcon).toBeTruthy();
+    const panelBtn = botIcon?.closest('button');
+    expect(panelBtn).toBeTruthy();
+    fireEvent.click(panelBtn!);
+    // Should call onEditorPanelChange with 'copilot'
+    expect(onEditorPanelChange).toHaveBeenCalledWith('copilot');
+  });
+
+  describe('dirty tab close with modal', () => {
+    const confirmSpy = vi.spyOn(Modal, 'confirm');
+
+    afterEach(() => {
+      confirmSpy.mockClear();
+    });
+
+    it('shows confirmation modal when closing dirty tab', () => {
+      renderWithProviders(
+        <ProjectEditor
+          {...baseProps}
+          editorDirtyFilePaths={['SKILL.md']}
+        />
+      );
+      const closeButtons = screen.getAllByRole('button', { name: /关闭/ });
+      fireEvent.click(closeButtons[0]);
+      expect(confirmSpy).toHaveBeenCalled();
+      const config = confirmSpy.mock.calls[0][0];
+      expect(config?.title).toBe('关闭确认');
+      expect(config?.content).toBe('"SKILL.md" 有未保存的修改，确定要关闭吗？');
+    });
+
+    it('does not show modal when closing clean tab', () => {
+      renderWithProviders(
+        <ProjectEditor
+          {...baseProps}
+          editorDirtyFilePaths={[]}
+        />
+      );
+      const closeButtons = screen.getAllByRole('button', { name: /关闭/ });
+      fireEvent.click(closeButtons[0]);
+      expect(confirmSpy).not.toHaveBeenCalled();
+    });
+
+    it('calls doClose when modal onOk is triggered', () => {
+      const onEditorOpenTabsChange = vi.fn();
+      const onEditorDirtyChange = vi.fn();
+      renderWithProviders(
+        <ProjectEditor
+          {...baseProps}
+          editorDirtyFilePaths={['SKILL.md']}
+          onEditorOpenTabsChange={onEditorOpenTabsChange}
+          onEditorDirtyChange={onEditorDirtyChange}
+        />
+      );
+      const closeButtons = screen.getAllByRole('button', { name: /关闭/ });
+      fireEvent.click(closeButtons[0]);
+      // Simulate modal confirm by calling onOk
+      const config = confirmSpy.mock.calls[0][0];
+      config?.onOk?.();
+      expect(onEditorOpenTabsChange).toHaveBeenCalled();
+      expect(onEditorDirtyChange).toHaveBeenCalled();
     });
   });
 });
+

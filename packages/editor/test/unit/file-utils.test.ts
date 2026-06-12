@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { getFileInfo, getFileLabel } from '../../src/shared/file-utils.js';
 
 describe('getFileInfo', () => {
@@ -50,6 +50,22 @@ describe('getFileInfo', () => {
     expect(getFileInfo('Makefile').language).toBe('plaintext');
     expect(getFileInfo('Makefile').extension).toBe('makefile');
   });
+
+  it('handles empty extension from trailing dot', () => {
+    const result = getFileInfo('file.');
+    expect(result.extension).toBe('');
+    expect(result.language).toBe('plaintext');
+  });
+
+  it('handles empty array from split via optional chaining bridge', () => {
+    const splitSpy = vi.spyOn(String.prototype, 'split');
+    // Make split return empty array so pop() returns undefined
+    splitSpy.mockReturnValueOnce([]);
+    const result = getFileInfo('test');
+    expect(result.extension).toBe('');
+    expect(result.language).toBe('plaintext');
+    splitSpy.mockRestore();
+  });
 });
 
 describe('getFileLabel', () => {
@@ -67,5 +83,14 @@ describe('getFileLabel', () => {
 
   it('returns empty string for empty path', () => {
     expect(getFileLabel('')).toBe('');
+  });
+
+  it('handles empty array from split via nullish coalescing bridge', () => {
+    const splitSpy = vi.spyOn(String.prototype, 'split');
+    // Make split return empty array so pop() returns undefined
+    splitSpy.mockReturnValueOnce([]);
+    const result = getFileLabel('some/path/file.ts');
+    expect(result).toBe('some/path/file.ts');
+    splitSpy.mockRestore();
   });
 });

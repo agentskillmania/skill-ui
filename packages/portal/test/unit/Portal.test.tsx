@@ -6,6 +6,28 @@ import { ConfigProvider } from 'antd';
 import { lightTheme, lightAntdConfig } from '@agentskillmania/skill-ui-theme';
 import { Portal } from '../../src/components/Portal/Portal.js';
 
+// Track onSelect/onEdit callbacks passed to PortalHeader for testing
+let capturedOnSelect: ((type: string, id: string) => void) | null = null;
+let capturedOnEdit: ((type: string, id: string) => void) | null = null;
+
+vi.mock('../../src/components/PortalHeader/PortalHeader.js', () => ({
+  PortalHeader: (props: any) => {
+    const React = require('react');
+    // Capture the callbacks for test triggering
+    React.useEffect(() => {
+      capturedOnSelect = props.onSelect;
+      capturedOnEdit = props.onEdit;
+    });
+    return React.createElement('div', { 'data-testid': 'mock-portal-header' },
+      React.createElement('input', {
+        'data-testid': 'search-input',
+        placeholder: '搜索技能、智能体或会话记录…',
+        onKeyDown: (e: any) => { if (e.key === 'Enter') props.onSearch?.(props.query); },
+      })
+    );
+  },
+}));
+
 beforeAll(() => {
   class ResizeObserverMock {
     observe() {}
@@ -97,7 +119,7 @@ describe('Portal', () => {
     // antd Modal renders buttons via portal; find by primary button class
     const primaryBtn = document.querySelector('.ant-modal-wrap .ant-btn-primary') as HTMLElement;
     expect(primaryBtn).toBeTruthy();
-    fireEvent.click(primaryBtn!);
+    primaryBtn.click();
     // wait for async form validation + callback
     await new Promise((r) => setTimeout(r, 50));
     expect(onSkillCreate).toHaveBeenCalledWith('My New Skill');
@@ -106,5 +128,63 @@ describe('Portal', () => {
   it('shows empty state when no skills', () => {
     render(<Portal {...defaultProps} skills={[]} skillsTotal={0} />, { wrapper });
     expect(screen.getByText('暂无技能')).toBeInTheDocument();
+  });
+
+  it('calls onSearchSelect when onSelect triggered', () => {
+    const onSearchSelect = vi.fn();
+    render(<Portal {...defaultProps} onSearchSelect={onSearchSelect} />, { wrapper });
+    capturedOnSelect?.('agent', 'a1');
+    expect(onSearchSelect).toHaveBeenCalledWith('agent', 'a1');
+  });
+
+  it('fallback calls onAgentChat when onSearchSelect is not provided', () => {
+    const onAgentChat = vi.fn();
+    const onSkillChat = vi.fn();
+    const onSessionResume = vi.fn();
+    render(
+      <Portal
+        {...defaultProps}
+        onSearchSelect={undefined}
+        onAgentChat={onAgentChat}
+        onSkillChat={onSkillChat}
+        onSessionResume={onSessionResume}
+      />,
+      { wrapper }
+    );
+    capturedOnSelect?.('agent', 'a1');
+    expect(onAgentChat).toHaveBeenCalledWith('a1');
+    capturedOnSelect?.('skill', 's1');
+    expect(onSkillChat).toHaveBeenCalledWith('s1');
+    capturedOnSelect?.('session', 'se1');
+    expect(onSessionResume).toHaveBeenCalledWith('se1');
+  });
+
+  it('calls onSearchEdit when onEdit triggered', () => {
+    const onSearchEdit = vi.fn();
+    render(<Portal {...defaultProps} onSearchEdit={onSearchEdit} />, { wrapper });
+    capturedOnEdit?.('agent', 'a1');
+    expect(onSearchEdit).toHaveBeenCalledWith('agent', 'a1');
+  });
+
+  it('fallback calls onAgentEdit when onSearchEdit is not provided', () => {
+    const onAgentEdit = vi.fn();
+    const onSkillEdit = vi.fn();
+    const onSessionDelete = vi.fn();
+    render(
+      <Portal
+        {...defaultProps}
+        onSearchEdit={undefined}
+        onAgentEdit={onAgentEdit}
+        onSkillEdit={onSkillEdit}
+        onSessionDelete={onSessionDelete}
+      />,
+      { wrapper }
+    );
+    capturedOnEdit?.('agent', 'a1');
+    expect(onAgentEdit).toHaveBeenCalledWith('a1');
+    capturedOnEdit?.('skill', 's1');
+    expect(onSkillEdit).toHaveBeenCalledWith('s1');
+    capturedOnEdit?.('session', 'se1');
+    expect(onSessionDelete).toHaveBeenCalledWith('se1');
   });
 });

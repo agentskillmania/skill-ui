@@ -13,13 +13,16 @@ vi.mock('@agentskillmania/skill-ui-chat', () => ({
   ChatInput: ({
     onSubmit,
     placeholder,
+    onChange,
   }: {
     onSubmit: (msg: string) => void;
     placeholder: string;
+    onChange?: (value: string) => void;
   }) => (
     <div>
       <span>{placeholder}</span>
       <button onClick={() => onSubmit('test message')}>发送</button>
+      <button onClick={() => onChange?.('changed value')}>change</button>
     </div>
   ),
 }));
@@ -66,5 +69,19 @@ describe('CopilotPanel', () => {
   it('does not show command buttons when no quick commands', () => {
     renderWithProviders(<CopilotPanel />);
     expect(screen.queryByText('生成技能')).toBeNull();
+  });
+
+  it('calls onInputChange when input value changes', () => {
+    const onInputChange = vi.fn();
+    renderWithProviders(<CopilotPanel onInputChange={onInputChange} />);
+    fireEvent.click(screen.getByText('change'));
+    expect(onInputChange).toHaveBeenCalledWith('changed value');
+  });
+
+  it('does not throw when onChange fallback is triggered (no onInputChange)', () => {
+    renderWithProviders(<CopilotPanel />);
+    expect(() => {
+      fireEvent.click(screen.getByText('change'));
+    }).not.toThrow();
   });
 });

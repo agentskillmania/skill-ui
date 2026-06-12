@@ -56,6 +56,14 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+// Mock Chat component to avoid lottie-web canvas dependency
+vi.mock('@agentskillmania/skill-ui-chat', () => ({
+  Chat: function MockChat({ children }: { children?: React.ReactNode }) {
+    const React = require('react');
+    return React.createElement('div', { 'data-testid': 'mock-chat' }, children);
+  },
+}));
+
 // antd depends on ResizeObserver
 class ResizeObserverMock {
   observe() {}

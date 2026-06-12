@@ -1,3 +1,4 @@
+/** @jsxImportSource @emotion/react */
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider } from '@emotion/react';
@@ -35,5 +36,55 @@ describe('SkillCard', () => {
     });
     fireEvent.click(screen.getByText('对话'));
     expect(onChat).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onEdit when edit button clicked', () => {
+    const onEdit = vi.fn();
+    render(<SkillCard skill={mockSkill} onChat={vi.fn()} onEdit={onEdit} onDelete={vi.fn()} />, {
+      wrapper,
+    });
+    fireEvent.click(screen.getByText('编辑'));
+    expect(onEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onDelete when delete is confirmed', async () => {
+    const onDelete = vi.fn();
+    render(<SkillCard skill={mockSkill} onChat={vi.fn()} onEdit={vi.fn()} onDelete={onDelete} />, {
+      wrapper,
+    });
+
+    // Use native click to trigger Popconfirm
+    const deleteBtn = document.querySelector('.ant-btn-dangerous') as HTMLElement;
+    expect(deleteBtn).toBeTruthy();
+    deleteBtn.click();
+
+    // Confirm the popconfirm with fuzzy text match
+    const confirmBtn = await screen.findByText((content) => content.replace(/\s+/g, '') === '删除');
+    confirmBtn.click();
+
+    expect(onDelete).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders with undefined description', () => {
+    const skillNoDesc = { ...mockSkill, description: undefined };
+    render(<SkillCard skill={skillNoDesc} onChat={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />, {
+      wrapper,
+    });
+    expect(screen.getByText('Web Search')).toBeInTheDocument();
+  });
+
+  it('handles mouse enter and leave events', () => {
+    const { container } = render(
+      <SkillCard skill={mockSkill} onChat={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />,
+      { wrapper },
+    );
+    const card = container.querySelector('.ant-card');
+    expect(card).toBeTruthy();
+
+    // Trigger mouse enter to set hovered state
+    fireEvent.mouseEnter(card!);
+
+    // Trigger mouse leave
+    fireEvent.mouseLeave(card!);
   });
 });

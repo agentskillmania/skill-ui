@@ -27,10 +27,22 @@ describe('layout styles', () => {
     expect(s.styles).toContain(lightTheme.spacing[4]);
   });
 
+  it('flexColumn works without gap', () => {
+    const s = flexColumn(lightTheme);
+    expect(s.styles).toContain('flex-direction: column');
+    expect(s.styles).not.toContain('gap');
+  });
+
   it('flexRow returns valid styles', () => {
     const s = flexRow(lightTheme, 2);
     expect(s.styles).toContain('display: flex');
     expect(s.styles).toContain('align-items: center');
+  });
+
+  it('flexRow works without gap', () => {
+    const s = flexRow(lightTheme);
+    expect(s.styles).toContain('display: flex');
+    expect(s.styles).not.toContain('gap');
   });
 
   it('flexCenter returns valid styles', () => {
@@ -41,6 +53,12 @@ describe('layout styles', () => {
   it('flexWrap returns valid styles', () => {
     const s = flexWrap(lightTheme, 3);
     expect(s.styles).toContain('flex-wrap: wrap');
+  });
+
+  it('flexWrap works without gap', () => {
+    const s = flexWrap(lightTheme);
+    expect(s.styles).toContain('flex-wrap: wrap');
+    expect(s.styles).not.toContain('gap');
   });
 
   it('gridAutoFill returns valid styles', () => {
@@ -61,10 +79,21 @@ describe('visual effects', () => {
     expect(s.styles).not.toContain('undefined');
   });
 
+  it('glassEffect supports strong strength', () => {
+    const s = glassEffect(lightTheme, 'strong');
+    expect(s.styles).toContain('backdrop-filter');
+  });
+
   it('card returns valid styles', () => {
     const s = card(lightTheme);
     expect(s.styles).toContain('border-radius');
     expect(s.styles).toContain('box-shadow');
+  });
+
+  it('card supports custom options', () => {
+    const s = card(lightTheme, { radius: 'sm', shadow: 'sm', background: 'bgElevated' });
+    expect(s.styles).toContain(lightTheme.radius.sm);
+    expect(s.styles).not.toContain(lightTheme.radius.lg);
   });
 
   it('borderDefault returns valid styles', () => {
@@ -91,9 +120,16 @@ describe('interaction states', () => {
     expect(s.styles).toContain(lightTheme.color.hoverOverlay);
   });
 
-  it('disabled returns valid styles', () => {
+  it('disabled returns valid styles when disabled', () => {
     const s = disabled(lightTheme, true);
     expect(s.styles).toContain('not-allowed');
+    expect(s.styles).toContain('opacity: 0.5');
+  });
+
+  it('disabled returns pointer cursor when not disabled', () => {
+    const s = disabled(lightTheme, false);
+    expect(s.styles).toContain('pointer');
+    expect(s.styles).toContain('opacity: 1');
   });
 
   it('focusVisible returns valid styles', () => {
@@ -106,6 +142,12 @@ describe('animations', () => {
   it('transition returns valid styles', () => {
     const s = transition(lightTheme);
     expect(s.styles).toContain('transition');
+  });
+
+  it('transition supports custom duration and timing strings', () => {
+    const s = transition(lightTheme, ['opacity'], '0.3s', 'ease');
+    expect(s.styles).toContain('0.3s');
+    expect(s.styles).toContain('ease');
   });
 
   it('spin returns valid styles', () => {
@@ -136,6 +178,12 @@ describe('text', () => {
     const s = textSecondary(lightTheme);
     expect(s.styles).toContain(lightTheme.color.textSecondary);
   });
+
+  it('textSecondary supports custom color key and opacity', () => {
+    const s = textSecondary(lightTheme, 'primary', 1);
+    expect(s.styles).toContain(lightTheme.color.primary);
+    expect(s.styles).toContain('opacity: 1');
+  });
 });
 
 describe('containers', () => {
@@ -154,6 +202,11 @@ describe('containers', () => {
     expect(s.styles).toContain('scrollbar-width: none');
   });
 
+  it('scrollable with height none', () => {
+    const s = scrollable(lightTheme, 'none');
+    expect(s.styles).not.toContain('height');
+  });
+
   it('absoluteFill returns valid styles', () => {
     const s = absoluteFill(lightTheme);
     expect(s.styles).toContain('position: absolute');
@@ -163,6 +216,15 @@ describe('containers', () => {
     const s = absoluteFill(lightTheme, { top: 10, zIndex: 100 });
     expect(s.styles).toContain('top: 10px');
     expect(s.styles).toContain('z-index: 100');
+  });
+
+  it('absoluteFill supports positional args with string values', () => {
+    const s = absoluteFill(lightTheme, '10%', '20%', '30%', '40%', 10);
+    expect(s.styles).toContain('top: 10%');
+    expect(s.styles).toContain('right: 20%');
+    expect(s.styles).toContain('bottom: 30%');
+    expect(s.styles).toContain('left: 40%');
+    expect(s.styles).toContain('z-index: 10');
   });
 
   it('absoluteFill does not crash when passed null', () => {

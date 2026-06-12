@@ -30,14 +30,24 @@ describe('Titlebar', () => {
     expect(screen.getByText('IDE')).toBeInTheDocument();
   });
 
-  it('renders center slot', () => {
+  it('renders center slot on macOS', () => {
     render(<Titlebar platform="macos" center={<span>workspace-1</span>} />, { wrapper });
     expect(screen.getByText('workspace-1')).toBeInTheDocument();
   });
 
-  it('renders end slot', () => {
+  it('renders center slot on Windows', () => {
+    render(<Titlebar platform="windows" center={<span>windows-center</span>} />, { wrapper });
+    expect(screen.getByText('windows-center')).toBeInTheDocument();
+  });
+
+  it('renders end slot on macOS', () => {
     render(<Titlebar platform="macos" end={<button>Settings</button>} />, { wrapper });
     expect(screen.getByText('Settings')).toBeInTheDocument();
+  });
+
+  it('renders end slot on Windows', () => {
+    render(<Titlebar platform="windows" end={<button>WinSettings</button>} />, { wrapper });
+    expect(screen.getByText('WinSettings')).toBeInTheDocument();
   });
 
   it('window control callbacks correctly passed on macOS', () => {

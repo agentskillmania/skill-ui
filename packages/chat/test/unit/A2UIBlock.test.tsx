@@ -371,6 +371,167 @@ describe('A2UIBlock', () => {
     });
   });
 
+  it('shows overflow gradient and expand button when content overflows', async () => {
+    const { rerender } = renderBlock();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('agenui-surface')).toBeInTheDocument();
+    });
+
+    // Simulate overflow by making scrollHeight > clientHeight on the content element
+    const surfaceEl = screen.getByTestId('agenui-surface');
+    const contentEl = surfaceEl.parentElement?.parentElement;
+    Object.defineProperty(contentEl!, 'scrollHeight', { configurable: true, value: 1000 });
+    Object.defineProperty(contentEl!, 'clientHeight', { configurable: true, value: 100 });
+
+    // Re-render with changed content to re-trigger the overflow detection effect
+    rerender(
+      <ChatWrapper>
+        <A2UIBlock
+          block={{
+            id: 'a2ui-1',
+            type: 'a2ui',
+            status: 'streaming',
+            content: 'updated-content\n',
+            metadata: { surfaceId: 'test-surface', title: 'Test UI' },
+          }}
+          onAction={vi.fn()}
+        />
+      </ChatWrapper>
+    );
+
+    // The overflow gradient section with expand button should now be visible
+    await waitFor(() => {
+      expect(screen.getByText('展开查看')).toBeInTheDocument();
+    });
+  });
+
+  it('opens full-view modal with AGenUI surface when header expand button is clicked', async () => {
+    renderBlock();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('agenui-surface')).toBeInTheDocument();
+    });
+
+    // Click the header expand button (has title attribute '展开查看')
+    const expandButton = screen.getByTitle('展开查看');
+    await userEvent.click(expandButton);
+
+    // Modal should now be open with a second AGenUISurface inside
+    await waitFor(() => {
+      const surfaces = screen.getAllByTestId('agenui-surface');
+      expect(surfaces).toHaveLength(2);
+    });
+  });
+
+  it('closes modal when close button is clicked', async () => {
+    renderBlock();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('agenui-surface')).toBeInTheDocument();
+    });
+
+    // Open modal first
+    await userEvent.click(screen.getByTitle('展开查看'));
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('agenui-surface')).toHaveLength(2);
+    });
+
+    // Click the modal close button (aria-label="Close")
+    const closeBtn = document.querySelector('.ant-modal-close') as HTMLElement | null;
+    expect(closeBtn).not.toBeNull();
+    await userEvent.click(closeBtn!);
+
+    // After close, the modal content may remain in DOM (no destroyOnClose),
+    // but the component is still rendered — the onCancel function was called
+    const surfaces = screen.getAllByTestId('agenui-surface');
+    expect(surfaces.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('overflow expand button opens the modal', async () => {
+    const { rerender } = renderBlock();
+
+    await waitFor(() => {
+      expect(screen.getByTestId('agenui-surface')).toBeInTheDocument();
+    });
+
+    // Simulate overflow
+    const surfaceEl = screen.getByTestId('agenui-surface');
+    const contentEl = surfaceEl.parentElement?.parentElement;
+    Object.defineProperty(contentEl!, 'scrollHeight', { configurable: true, value: 1000 });
+    Object.defineProperty(contentEl!, 'clientHeight', { configurable: true, value: 100 });
+
+    // Re-render to trigger overflow detection
+    rerender(
+      <ChatWrapper>
+        <A2UIBlock
+          block={{
+            id: 'a2ui-1',
+            type: 'a2ui',
+            status: 'streaming',
+            content: 'updated-content\n',
+            metadata: { surfaceId: 'test-surface', title: 'Test UI' },
+          }}
+          onAction={vi.fn()}
+        />
+      </ChatWrapper>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('展开查看')).toBeInTheDocument();
+    });
+
+    // Click the overflow expand button and verify modal opens
+    await userEvent.click(screen.getByText('展开查看'));
+
+    await waitFor(() => {
+      const surfaces = screen.getAllByTestId('agenui-surface');
+      expect(surfaces).toHaveLength(2);
+    });
+  });
+
+  it('cancels init early when unmounted during AGenUI initialization', async () => {
+    // Make AGenUI.isInitialized return false so init enters the initialize block
+    vi.mocked(AGenUI.isInitialized).mockReturnValueOnce(false);
+
+    // Make AGenUI.initialize return a controllable promise
+    let resolveAGenUIInit!: () => void;
+    vi.mocked(AGenUI.initialize).mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        resolveAGenUIInit = resolve;
+      })
+    );
+
+    const block: Block = {
+      id: 'a2ui-1',
+      type: 'a2ui',
+      status: 'streaming',
+      content: '',
+      metadata: { surfaceId: 'test-surface' },
+    };
+
+    const { unmount } = render(
+      <ChatWrapper>
+        <A2UIBlock block={block} />
+      </ChatWrapper>
+    );
+
+    // Unmount before AGenUI.initialize resolves
+    unmount();
+
+    // Now resolve — the cancelled check should prevent SurfaceManager creation
+    resolveAGenUIInit();
+
+    await waitFor(() => {
+      // SurfaceManager.initialize should NOT have been called
+      expect(mockSurfaceManager.initialize).not.toHaveBeenCalled();
+    });
+
+    // Restore default mock behavior for other tests
+    vi.mocked(AGenUI.isInitialized).mockReturnValue(true);
+  });
+
   it('destroys SurfaceManager if unmounted during init', async () => {
     // Make SurfaceManager.initialize() hang so we can unmount mid-init
     let resolveInit!: () => void;

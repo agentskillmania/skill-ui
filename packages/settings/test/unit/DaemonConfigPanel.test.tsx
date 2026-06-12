@@ -135,4 +135,71 @@ describe('DaemonConfigPanel', () => {
     const baseUrlInput = screen.getByTestId('daemon-llm-baseUrl') as HTMLInputElement;
     expect(baseUrlInput.value).toBe('');
   });
+
+  it('calls onChange when apiKey changes', async () => {
+    const onChange = vi.fn();
+    render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
+
+    const apiKeyInput = screen.getByTestId('daemon-llm-apiKey');
+    await userEvent.type(apiKeyInput, 'x');
+
+    expect(onChange).toHaveBeenCalled();
+    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+    expect(lastCall).toHaveProperty('llm');
+    expect(lastCall.llm.apiKey).toContain('x');
+  });
+
+  it('calls onChange when contextWindow changes', async () => {
+    const onChange = vi.fn();
+    render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
+
+    const contextWindowInput = screen.getByTestId('daemon-llm-contextWindow');
+    await userEvent.type(contextWindowInput, '8');
+    await userEvent.type(contextWindowInput, '000');
+
+    expect(onChange).toHaveBeenCalled();
+    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+    expect(lastCall.llm.contextWindow).toBe(8000);
+  });
+
+  it('calls onChange when maxTokens changes', async () => {
+    const onChange = vi.fn();
+    render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
+
+    const maxTokensInput = screen.getByTestId('daemon-llm-maxTokens');
+    await userEvent.type(maxTokensInput, '2');
+    await userEvent.type(maxTokensInput, '048');
+
+    expect(onChange).toHaveBeenCalled();
+    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+    expect(lastCall.llm.maxTokens).toBe(2048);
+  });
+
+  it('calls onChange with null when contextWindow is cleared', async () => {
+    const onChange = vi.fn();
+    // Set initial contextWindow to a non-null value so InputNumber shows a value
+    const withCtx = { ...defaultValue, llm: { ...defaultValue.llm, contextWindow: 4096 } };
+    render(<DaemonConfigPanel value={withCtx} onChange={onChange} />, { wrapper });
+
+    const contextWindowInput = screen.getByTestId('daemon-llm-contextWindow');
+    // Clear the input — InputNumber onChange fires null
+    await userEvent.clear(contextWindowInput);
+
+    expect(onChange).toHaveBeenCalled();
+    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+    expect(lastCall.llm.contextWindow).toBeNull();
+  });
+
+  it('calls onChange with null when maxTokens is cleared', async () => {
+    const onChange = vi.fn();
+    const withTokens = { ...defaultValue, llm: { ...defaultValue.llm, maxTokens: 2048 } };
+    render(<DaemonConfigPanel value={withTokens} onChange={onChange} />, { wrapper });
+
+    const maxTokensInput = screen.getByTestId('daemon-llm-maxTokens');
+    await userEvent.clear(maxTokensInput);
+
+    expect(onChange).toHaveBeenCalled();
+    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+    expect(lastCall.llm.maxTokens).toBeNull();
+  });
 });
