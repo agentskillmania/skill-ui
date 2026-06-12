@@ -1,0 +1,67 @@
+const enUS = {
+  daemon: {
+    tab: 'AI Connection',
+    llm: {
+      title: 'LLM Connection',
+      baseUrl: 'Base URL',
+      apiKey: 'API Key',
+      model: 'Default Model',
+      contextWindow: 'Context Window',
+      maxTokens: 'Max Tokens',
+      reasoning: 'Reasoning',
+    },
+    server: {
+      title: 'Server',
+      host: 'Host',
+      port: 'Port',
+    },
+  },
+  mcp: {
+    title: 'MCP Servers',
+    loadGlobal: 'Load global MCP servers',
+    loadGlobalDesc: 'Read from ~/.mcporter/mcporter.json',
+    availableServers: 'Available Servers',
+    hintBar: 'Global MCP servers are managed via mcporter',
+    emptyTitle: 'No Global MCP Servers',
+    emptyHint: 'Add MCP servers via mcporter, or edit ~/.mcporter/mcporter.json manually',
+    emptyInstall: 'npm install -g mcporter',
+    emptyCommand: 'mcporter add <server-name>',
+    emptyDocs: 'Visit mcporter.sh to learn more',
+    emptyStep1Title: 'Install mcporter',
+    emptyStep2Title: 'Add an MCP server',
+    emptyStep2Desc: 'Replace <server-name> with the server you want to add',
+    copyTooltip: 'Click to copy',
+    copiedTooltip: 'Copied',
+  },
+  prefs: {
+    title: 'Preferences',
+    appearance: {
+      title: 'Appearance',
+      theme: 'Theme',
+      language: 'Language',
+    },
+    workspace: {
+      title: 'Directories',
+      defaultWorkspacePath: 'Default Workspace',
+      defaultAgentsPath: 'Default Agents Directory',
+      defaultSkillsPath: 'Default Skills Directory',
+      browse: 'Browse',
+    },
+  },
+  theme: {
+    light: 'Light',
+    dark: 'Dark',
+    system: 'System',
+  },
+  reasoning: {
+    auto: 'Auto',
+    enabled: 'Enabled',
+    disabled: 'Disabled',
+  },
+  language: {
+    zhCN: 'Chinese (Simplified)',
+    enUS: 'English',
+  },
+} as const;
+
+export default enUS;

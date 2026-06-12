@@ -1,0 +1,67 @@
+const zhCN = {
+  daemon: {
+    tab: 'AI 连接',
+    llm: {
+      title: 'LLM 连接',
+      baseUrl: 'Base URL',
+      apiKey: 'API Key',
+      model: '默认模型',
+      contextWindow: 'Context Window',
+      maxTokens: 'Max Tokens',
+      reasoning: '推理能力',
+    },
+    server: {
+      title: '服务',
+      host: 'Host',
+      port: 'Port',
+    },
+  },
+  mcp: {
+    title: 'MCP 服务器',
+    loadGlobal: '加载全局 MCP 服务器',
+    loadGlobalDesc: '从 ~/.mcporter/mcporter.json 读取',
+    availableServers: '可用服务器',
+    hintBar: '全局 MCP 服务器通过 mcporter 管理',
+    emptyTitle: '暂无全局 MCP 服务器',
+    emptyHint: '通过 mcporter 添加 MCP 服务器，或手动编辑 ~/.mcporter/mcporter.json',
+    emptyInstall: 'npm install -g mcporter',
+    emptyCommand: 'mcporter add <server-name>',
+    emptyDocs: '访问 mcporter.sh 了解更多',
+    emptyStep1Title: '安装 mcporter',
+    emptyStep2Title: '添加 MCP 服务器',
+    emptyStep2Desc: '将 <server-name> 替换为你要添加的服务器名称',
+    copyTooltip: '点击复制',
+    copiedTooltip: '已复制',
+  },
+  prefs: {
+    title: '偏好',
+    appearance: {
+      title: '外观',
+      theme: '主题',
+      language: '语言',
+    },
+    workspace: {
+      title: '目录',
+      defaultWorkspacePath: '默认工作区',
+      defaultAgentsPath: '默认智能体目录',
+      defaultSkillsPath: '默认技能目录',
+      browse: '浏览',
+    },
+  },
+  theme: {
+    light: '浅色',
+    dark: '深色',
+    system: '跟随系统',
+  },
+  reasoning: {
+    auto: '自动',
+    enabled: '开启',
+    disabled: '关闭',
+  },
+  language: {
+    zhCN: '中文 (简体)',
+    enUS: 'English',
+  },
+} as const;
+
+export default zhCN;
