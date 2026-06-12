@@ -1,6 +1,7 @@
 /**
  * Chat input component
  */
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import { Sender } from '@ant-design/x';
 import type { ReactNode } from 'react';
@@ -11,8 +12,10 @@ import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../locales/index.js';
 
 export interface ChatInputProps {
-  value?: string;
-  onChange?: (value: string) => void;
+  /** Controlled input value */
+  value: string;
+  /** Callback when input value changes */
+  onChange: (value: string) => void;
   onSubmit?: (message: string) => void;
   onCancel?: () => void;
   loading?: boolean;
@@ -28,7 +31,7 @@ export interface ChatInputProps {
   commandTrigger?: string;
 }
 
-export function ChatInput({
+export const ChatInput = memo(function ChatInput({
   value,
   onChange,
   onSubmit,
@@ -118,4 +121,4 @@ export function ChatInput({
   }
 
   return senderElement;
-}
+});

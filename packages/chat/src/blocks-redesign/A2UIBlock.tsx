@@ -16,7 +16,10 @@ const spin = keyframes`
   to { transform: rotate(360deg); }
 `;
 
-export function A2UIBlock({ block, onAction }: BlockProps) {
+export function A2UIBlock({
+  block,
+  onAction,
+}: BlockProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const meta = block.metadata as A2UIBlockMetadata | undefined;

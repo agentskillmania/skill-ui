@@ -1,7 +1,7 @@
 /**
  * Tool call block — single-line rows with detail modal
  */
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { css } from '@emotion/react';
 import { Wrench } from 'lucide-react';
 import type { BlockProps, ToolCallMetadata } from '../types.js';
@@ -97,7 +97,9 @@ function CodeRow({
   );
 }
 
-export function ToolCallBlock({ block }: BlockProps) {
+export const ToolCallBlock = memo(function ToolCallBlock({
+  block,
+}: BlockProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const meta = block.metadata as ToolCallMetadata | undefined;
@@ -225,4 +227,4 @@ export function ToolCallBlock({ block }: BlockProps) {
       />
     </>
   );
-}
+});

@@ -257,6 +257,7 @@ describe('ToolCallBlock', () => {
     expect(dialog.textContent).toContain('search');
     expect(dialog.textContent).toContain('mcp');
   });
+
 });
 
 describe('PlanBlock', () => {

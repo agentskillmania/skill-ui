@@ -1,6 +1,7 @@
 /**
  * Error display block — alert style, not all-red
  */
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import { AlertTriangle, Info } from 'lucide-react';
 import type { BlockProps, ErrorMetadata } from '../types.js';
@@ -8,7 +9,7 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../locales/index.js';
 
-export function ErrorBlock({ block }: BlockProps) {
+export const ErrorBlock = memo(function ErrorBlock({ block }: BlockProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const meta = block.metadata as ErrorMetadata | undefined;
@@ -117,4 +118,4 @@ export function ErrorBlock({ block }: BlockProps) {
       )}
     </div>
   );
-}
+});

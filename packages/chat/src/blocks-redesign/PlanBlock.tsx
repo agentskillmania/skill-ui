@@ -1,6 +1,7 @@
 /**
  * Execution plan block — timeline/step list
  */
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import { FileText, Check, CircleDot, XCircle, Minus, Circle } from 'lucide-react';
 import type { BlockProps, PlanMetadata, PlanStep } from '../types.js';
@@ -56,7 +57,7 @@ function getStepIconBg(step: PlanStep, theme: Theme): string {
   }
 }
 
-export function PlanBlock({ block }: BlockProps) {
+export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const meta = block.metadata as PlanMetadata | undefined;
@@ -247,4 +248,4 @@ export function PlanBlock({ block }: BlockProps) {
       </div>
     </div>
   );
-}
+});

@@ -1,6 +1,7 @@
 /**
  * Quick command capsule tag component
  */
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import { Tag } from 'antd';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
@@ -17,7 +18,7 @@ export interface QuickCommandsProps {
   disabled?: boolean;
 }
 
-export function QuickCommands({
+export const QuickCommands = memo(function QuickCommands({
   commands,
   onCommand,
   maxCommands = 5,
@@ -70,4 +71,4 @@ export function QuickCommands({
       ))}
     </div>
   );
-}
+});

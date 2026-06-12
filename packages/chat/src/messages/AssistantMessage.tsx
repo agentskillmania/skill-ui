@@ -1,13 +1,14 @@
 /**
  * AI assistant message
  */
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import type { MessageProps } from '../types.js';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { MarkdownRenderer } from '../content/MarkdownRenderer.js';
 import { BlocksRenderer } from '../blocks-redesign/BlocksRenderer.js';
 
-export function AssistantMessage({ message }: MessageProps) {
+export const AssistantMessage = memo(function AssistantMessage({ message }: MessageProps) {
   const theme = useTheme();
 
   return (
@@ -35,4 +36,4 @@ export function AssistantMessage({ message }: MessageProps) {
       )}
     </div>
   );
-}
+});

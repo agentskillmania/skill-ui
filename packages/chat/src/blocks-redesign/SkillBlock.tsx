@@ -1,6 +1,7 @@
 /**
  * Skill execution block — phase card with timeline
  */
+import { memo } from 'react';
 import { css, keyframes } from '@emotion/react';
 import { Sparkles, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import type { BlockProps, SkillBlockMetadata } from '../types.js';
@@ -98,7 +99,7 @@ function getPhaseStatus(
   return 'pending';
 }
 
-export function SkillBlock({ block }: BlockProps) {
+export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const meta = block.metadata as SkillBlockMetadata | undefined;
@@ -297,4 +298,4 @@ export function SkillBlock({ block }: BlockProps) {
       )}
     </div>
   );
-}
+});

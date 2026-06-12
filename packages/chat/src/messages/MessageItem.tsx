@@ -1,6 +1,7 @@
 /**
  * Message routing component
  */
+import { memo } from 'react';
 import type { Message } from '../types.js';
 import { useChatContext } from '../context.js';
 import { MessageWrapper } from './MessageWrapper.js';
@@ -19,7 +20,7 @@ const builtinMessageRenderers: Record<string, React.ComponentType<{ message: Mes
   system: SystemMessage,
 };
 
-export function MessageItem({ message }: MessageItemProps) {
+export const MessageItem = memo(function MessageItem({ message }: MessageItemProps) {
   const { renderers, messageDecorator } = useChatContext();
 
   // Find renderer: custom first, then built-in, fallback to SystemMessage
@@ -39,4 +40,4 @@ export function MessageItem({ message }: MessageItemProps) {
   }
 
   return <>{element}</>;
-}
+});

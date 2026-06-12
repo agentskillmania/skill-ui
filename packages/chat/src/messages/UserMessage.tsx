@@ -1,11 +1,12 @@
 /**
  * User message
  */
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import type { MessageProps } from '../types.js';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 
-export function UserMessage({ message }: MessageProps) {
+export const UserMessage = memo(function UserMessage({ message }: MessageProps) {
   const theme = useTheme();
 
   return (
@@ -29,4 +30,4 @@ export function UserMessage({ message }: MessageProps) {
       {message.content}
     </div>
   );
-}
+});

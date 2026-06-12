@@ -53,6 +53,8 @@ export const Empty: Story = {
     messages: [],
     status: 'idle',
     placeholder: '输入消息...',
+    inputValue: '',
+    onInputChange: () => {},
   },
 };
 
@@ -128,6 +130,7 @@ const StreamingComponent = () => {
         messages={messages}
         status="streaming"
         inputValue=""
+        onInputChange={() => {}}
         onSendMessage={() => {}}
         onStop={() => alert('停止')}
       />
@@ -177,6 +180,7 @@ const WithBlocksComponent = () => {
         messages={messages}
         status="idle"
         inputValue=""
+        onInputChange={() => {}}
         onSendMessage={(msg) => alert(`发送: ${msg}`)}
       />
     </div>

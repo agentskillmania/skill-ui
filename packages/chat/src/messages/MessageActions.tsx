@@ -1,6 +1,7 @@
 /**
  * Message action bar — appears on hover, inside message bubble
  */
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import { Tooltip } from 'antd';
 import { Copy, RefreshCw, GitBranch, Send, Undo2 } from 'lucide-react';
@@ -79,7 +80,7 @@ function ActionButton({
   );
 }
 
-export function MessageActions({
+export const MessageActions = memo(function MessageActions({
   message,
   variant = 'pill',
   onCopy,
@@ -160,4 +161,4 @@ export function MessageActions({
   }
 
   return <div css={containerStyles[variant]}>{actions}</div>;
-}
+});

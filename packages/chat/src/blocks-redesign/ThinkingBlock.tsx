@@ -1,6 +1,7 @@
 /**
  * Thinking process block — lightweight, draft-like
  */
+import { memo } from 'react';
 import { css, keyframes } from '@emotion/react';
 import { Brain } from 'lucide-react';
 import type { BlockProps } from '../types.js';
@@ -19,7 +20,7 @@ const subtlePulse = keyframes`
   50% { opacity: 0.4; }
 `;
 
-export function ThinkingBlock({ block }: BlockProps) {
+export const ThinkingBlock = memo(function ThinkingBlock({ block }: BlockProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const isStreaming = block.status === 'streaming';
@@ -90,4 +91,4 @@ export function ThinkingBlock({ block }: BlockProps) {
       </div>
     </div>
   );
-}
+});

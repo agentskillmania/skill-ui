@@ -199,9 +199,9 @@ export interface ChatProps {
 
   // Controlled input
   /** Input value (controlled mode) */
-  inputValue?: string;
+  inputValue: string;
   /** Input value change callback */
-  onInputChange?: (value: string) => void;
+  onInputChange: (value: string) => void;
 
   // Status
   /** Chat overall status */

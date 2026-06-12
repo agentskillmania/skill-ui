@@ -168,4 +168,22 @@ describe('ChatInput', () => {
     fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter', shiftKey: true });
     expect(onSubmit).not.toHaveBeenCalled();
   });
+
+  it('value and onChange are required for controlled mode', () => {
+    const onChange = vi.fn();
+    const { rerender } = render(
+      <ChatWrapper>
+        <ChatInput value="initial" onChange={onChange} />
+      </ChatWrapper>
+    );
+    expect(screen.getByDisplayValue('initial')).toBeInTheDocument();
+
+    // Re-render with new value simulates controlled update
+    rerender(
+      <ChatWrapper>
+        <ChatInput value="updated" onChange={onChange} />
+      </ChatWrapper>
+    );
+    expect(screen.getByDisplayValue('updated')).toBeInTheDocument();
+  });
 });

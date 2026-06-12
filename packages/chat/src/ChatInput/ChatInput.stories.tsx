@@ -68,6 +68,8 @@ export const Loading: Story = {
 /** Disabled state */
 export const Disabled: Story = {
   args: {
+    value: '',
+    onChange: () => {},
     disabled: true,
     placeholder: '请先配置 LLM Provider',
   },

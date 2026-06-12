@@ -28,7 +28,11 @@ describe('chat package exports', () => {
 
   it.each(componentNames)('exports %s as a component', (name) => {
     expect(chatExports[name]).toBeDefined();
-    expect(typeof chatExports[name]).toBe('function');
+    // Components can be functions or memo-wrapped components (objects with $$typeof)
+    const isFunction = typeof chatExports[name] === 'function';
+    const isMemoComponent =
+      typeof chatExports[name] === 'object' && chatExports[name].$$typeof !== undefined;
+    expect(isFunction || isMemoComponent).toBe(true);
   });
 
   it('exports utility functions', () => {
