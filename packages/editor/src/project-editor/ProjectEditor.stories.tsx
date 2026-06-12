@@ -2,7 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState, useCallback } from 'react';
 import { ProjectEditor } from './ProjectEditor.js';
-import type { ProjectFile, EditMode, EditorPanel, TestCase, ReviewItem } from '../types.js';
+import type { ProjectFile, EditMode, EditorPanel, FileTab, TestCase, ReviewItem } from '../types.js';
 
 const sampleFiles: ProjectFile[] = [
   {
@@ -27,7 +27,7 @@ const sampleFiles: ProjectFile[] = [
       },
     ],
   },
-  { path: 'package.json', content: '{\n  "name": "web-search-skill",\n  "version": "1.0.0"\n}\n' },
+  { path: 'package.json', content: '{\n  "name": "web-search-skill",\n  "version": "1.0.0"}\n' },
 ];
 
 const sampleTestCases: TestCase[] = [
@@ -66,16 +66,20 @@ type Story = StoryObj<typeof ProjectEditor>;
 
 export const Interactive: Story = {
   render: () => {
-    const [activeFile, setActiveFile] = useState<string | null>('SKILL.md');
-
+    const [activeFilePath, setActiveFilePath] = useState<string | null>('SKILL.md');
     const [mode, setMode] = useState<EditMode>('code');
     const [panel, setPanel] = useState<EditorPanel>(null);
+    const [openTabs, setOpenTabs] = useState<FileTab[]>([
+      { path: 'SKILL.md', label: 'SKILL.md', modified: false },
+    ]);
+    const [dirtyFilePaths, setDirtyFilePaths] = useState<string[]>([]);
+    const [copilotInput, setCopilotInput] = useState('');
 
     const [fileContents, setFileContents] = useState<Record<string, string>>(() => {
       const map: Record<string, string> = {};
       function walk(files: ProjectFile[]) {
         for (const f of files) {
-          if (!f.isDirectory) map[f.path] = f.content;
+          if (!f.isDirectory && f.content) map[f.path] = f.content;
           if (f.children) walk(f.children);
         }
       }
@@ -83,15 +87,30 @@ export const Interactive: Story = {
       return map;
     });
 
-    const filesWithContent = useCallback((): ProjectFile[] => {
-      function walk(files: ProjectFile[]): ProjectFile[] {
-        return files.map((f) => {
-          if (f.isDirectory) return { ...f, children: f.children ? walk(f.children) : undefined };
-          return { ...f, content: fileContents[f.path] ?? f.content };
+    const handleFileChange = useCallback((path: string, content: string) => {
+      setFileContents((prev) => ({ ...prev, [path]: content }));
+      setDirtyFilePaths((prev) => (prev.includes(path) ? prev : [...prev, path]));
+    }, []);
+
+    const handleActiveFileChange = useCallback((path: string | null) => {
+      setActiveFilePath(path);
+      if (path) {
+        setOpenTabs((prev) => {
+          const exists = prev.some((tab) => tab.path === path);
+          if (exists) return prev;
+          return [...prev, { path, label: path.split('/').pop() ?? path, modified: false }];
         });
       }
-      return walk(sampleFiles);
-    }, [fileContents]);
+    }, []);
+
+    const handleSave = useCallback((path: string, _content: string) => {
+      setDirtyFilePaths((prev) => prev.filter((p) => p !== path));
+      setOpenTabs((prev) =>
+        prev.map((tab) => (tab.path === path ? { ...tab, modified: false } : tab))
+      );
+    }, []);
+
+    const activeFileContent = activeFilePath ? (fileContents[activeFilePath] ?? '') : '';
 
     return (
       <div
@@ -104,18 +123,24 @@ export const Interactive: Story = {
         }}
       >
         <ProjectEditor
-          files={filesWithContent()}
-          activeFilePath={activeFile}
-          editMode={mode}
-          activePanel={panel}
-          onFileChange={(path, content) =>
-            setFileContents((prev) => ({ ...prev, [path]: content }))
-          }
-          onActiveFileChange={setActiveFile}
-          onEditModeChange={setMode}
-          onPanelChange={setPanel}
+          editorFiles={sampleFiles}
+          editorActiveFilePath={activeFilePath}
+          editorActiveFileContent={activeFileContent}
+          editorOpenTabs={openTabs}
+          onEditorOpenTabsChange={setOpenTabs}
+          editorDirtyFilePaths={dirtyFilePaths}
+          onEditorDirtyChange={setDirtyFilePaths}
+          editorEditMode={mode}
+          onEditorEditModeChange={setMode}
+          editorActivePanel={panel}
+          onEditorPanelChange={setPanel}
+          onEditorFileChange={handleFileChange}
+          onEditorSave={handleSave}
+          onEditorActiveFileChange={handleActiveFileChange}
           testCases={sampleTestCases}
           reviewItems={sampleReviewItems}
+          copilotInputValue={copilotInput}
+          onCopilotInputChange={setCopilotInput}
           copilotCommands={[
             { id: 'generate', label: '生成技能', command: '帮我生成一个' },
             { id: 'search', label: '查找类似', command: '帮我查找类似的技能' },

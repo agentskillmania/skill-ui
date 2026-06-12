@@ -16,6 +16,8 @@ export function CopilotPanel({
   messages = [],
   status = 'idle',
   commands,
+  inputValue = '',
+  onInputChange,
   onSend,
   onStop,
 }: CopilotPanelProps) {
@@ -92,6 +94,8 @@ export function CopilotPanel({
         `}
       >
         <ChatInput
+          value={inputValue}
+          onChange={onInputChange ?? (() => {})}
           loading={status === 'streaming'}
           onSubmit={(msg) => onSend?.(msg)}
           onCancel={onStop}

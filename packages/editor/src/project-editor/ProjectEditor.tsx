@@ -6,7 +6,7 @@
  */
 import { Modal } from 'antd';
 import { css } from '@emotion/react';
-import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { useCallback, useMemo, useEffect } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
 import { EmptyState, Sidebar, SidebarPanel, SplitDivider } from '@agentskillmania/skill-ui-shared';
@@ -26,32 +26,44 @@ import { TestCase } from '../panels/test-case/index.js';
 import { useEditorLayout } from '../hooks/useEditorLayout.js';
 
 export function ProjectEditor({
-  files,
-  activeFilePath,
-  editMode,
-  activePanel: externalActivePanel,
-  onSave,
-  onFileChange,
-  onActiveFileChange,
-  onEditModeChange,
-  onPanelChange,
+  editorFiles,
+  editorActiveFilePath,
+  editorActiveFileContent,
+  editorOpenTabs,
+  onEditorOpenTabsChange,
+  editorDirtyFilePaths,
+  onEditorDirtyChange,
+  editorCursorPosition,
+  onEditorCursorChange,
+  editorEditMode,
+  onEditorEditModeChange,
+  editorActivePanel,
+  onEditorPanelChange,
+  onEditorFileChange,
+  onEditorSave,
+  onEditorActiveFileChange,
   copilotMessages,
   copilotStatus,
   copilotCommands,
+  copilotInputValue,
+  onCopilotInputChange,
   onCopilotSend,
   onCopilotStop,
   reviewItems,
   testCases,
-  onRunAllTests,
-  onRunTest,
+  onTestRunAll,
+  onTestRunCase,
+  className,
+  style,
 }: ProjectEditorProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const layout = useEditorLayout();
-  const [isDirty, setIsDirty] = useState(false);
-  const [cursorPosition, setCursorPosition] = useState<CursorPosition | null>(null);
-  const [openTabs, setOpenTabs] = useState<FileTab[]>([]);
-  const dirtyFiles = useRef<Set<string>>(new Set());
+
+  // Compute isDirty from props
+  const isDirty = editorActiveFilePath
+    ? (editorDirtyFilePaths ?? []).includes(editorActiveFilePath)
+    : false;
 
   const sidebarItems: SidebarIconItem[] = [
     { id: 'files', icon: FolderOpen, label: t('activityBar.files') },
@@ -60,82 +72,52 @@ export function ProjectEditor({
     { id: 'test', icon: TestTube2, label: t('activityBar.test') },
   ];
 
-  // Sync external activePanel prop to internal layout state
+  // Sync external editorActivePanel prop to internal layout state
   useEffect(() => {
-    if (externalActivePanel && externalActivePanel !== layout.activePanel) {
-      layout.switchPanel(externalActivePanel);
+    if (editorActivePanel && editorActivePanel !== layout.activePanel) {
+      layout.switchPanel(editorActivePanel);
     }
-  }, [externalActivePanel]);
+  }, [editorActivePanel]);
 
-  useEffect(() => {
-    if (!activeFilePath) return;
-    setOpenTabs((prev) => {
-      const exists = prev.some((tab) => tab.path === activeFilePath);
-      if (exists) return prev;
-      return [
-        ...prev,
-        {
-          path: activeFilePath,
-          label: getFileLabel(activeFilePath),
-          modified: dirtyFiles.current.has(activeFilePath),
-        },
-      ];
-    });
-  }, [activeFilePath]);
-
-  useEffect(() => {
-    setIsDirty(activeFilePath ? dirtyFiles.current.has(activeFilePath) : false);
-  }, [activeFilePath]);
-
-  const activeFile = useMemo(() => {
-    if (!activeFilePath) return null;
-    return findFile(files, activeFilePath);
-  }, [files, activeFilePath]);
+  const activeFileNode = useMemo(() => {
+    if (!editorActiveFilePath) return null;
+    return findFile(editorFiles, editorActiveFilePath);
+  }, [editorFiles, editorActiveFilePath]);
 
   const handleFileChange = useCallback(
     (content: string) => {
-      if (!activeFilePath) return;
-      setIsDirty(true);
-      dirtyFiles.current.add(activeFilePath);
-      setOpenTabs((prev) =>
-        prev.map((tab) => (tab.path === activeFilePath ? { ...tab, modified: true } : tab))
-      );
-      onFileChange(activeFilePath, content);
+      if (!editorActiveFilePath) return;
+      onEditorFileChange(editorActiveFilePath, content);
     },
-    [activeFilePath, onFileChange]
+    [editorActiveFilePath, onEditorFileChange]
   );
 
   const handleSave = useCallback(
     (content: string) => {
-      if (!activeFilePath) return;
-      setIsDirty(false);
-      dirtyFiles.current.delete(activeFilePath);
-      setOpenTabs((prev) =>
-        prev.map((tab) => (tab.path === activeFilePath ? { ...tab, modified: false } : tab))
-      );
-      onSave?.(activeFilePath, content);
+      if (!editorActiveFilePath) return;
+      onEditorSave?.(editorActiveFilePath, content);
     },
-    [activeFilePath, onSave]
+    [editorActiveFilePath, onEditorSave]
   );
 
   const handleTabClose = useCallback(
     (path: string) => {
       const doClose = () => {
-        setOpenTabs((prev) => {
-          const remaining = prev.filter((tab) => tab.path !== path);
-          dirtyFiles.current.delete(path);
-          if (activeFilePath === path) {
-            if (remaining.length > 0) {
-              onActiveFileChange(remaining[remaining.length - 1].path);
-            } else {
-              onActiveFileChange(null);
-            }
+        const newTabs = editorOpenTabs.filter((tab) => tab.path !== path);
+        onEditorOpenTabsChange(newTabs);
+        onEditorDirtyChange?.(
+          (editorDirtyFilePaths ?? []).filter((p) => p !== path)
+        );
+        if (editorActiveFilePath === path) {
+          if (newTabs.length > 0) {
+            onEditorActiveFileChange(newTabs[newTabs.length - 1].path);
+          } else {
+            onEditorActiveFileChange(null);
           }
-          return remaining;
-        });
+        }
       };
 
-      if (dirtyFiles.current.has(path)) {
+      if ((editorDirtyFilePaths ?? []).includes(path)) {
         Modal.confirm({
           title: t('editor.closeConfirm.title'),
           content: t('editor.closeConfirm.content', { label: getFileLabel(path) }),
@@ -147,20 +129,20 @@ export function ProjectEditor({
         doClose();
       }
     },
-    [activeFilePath, onActiveFileChange]
+    [editorOpenTabs, editorDirtyFilePaths, editorActiveFilePath, onEditorOpenTabsChange, onEditorDirtyChange, onEditorActiveFileChange]
   );
 
   const contextValue = useMemo(
     () => ({
-      editMode,
-      activeFilePath,
+      editMode: editorEditMode,
+      activeFilePath: editorActiveFilePath,
       isDirty,
-      cursorPosition,
-      setEditMode: onEditModeChange,
-      setCursorPosition,
-      setDirty: setIsDirty,
+      cursorPosition: editorCursorPosition ?? null,
+      setEditMode: onEditorEditModeChange,
+      setCursorPosition: onEditorCursorChange ?? (() => {}),
+      setDirty: () => {}, // No longer set dirty via context
     }),
-    [editMode, activeFilePath, isDirty, cursorPosition, onEditModeChange]
+    [editorEditMode, editorActiveFilePath, isDirty, editorCursorPosition, onEditorEditModeChange, onEditorCursorChange]
   );
 
   const renderPanel = () => {
@@ -171,7 +153,7 @@ export function ProjectEditor({
       case 'files':
         return (
           <SidebarPanel title={t('activityBar.files')} icon={FolderOpen}>
-            <FileTree files={files} activeFilePath={activeFilePath} onSelect={onActiveFileChange} />
+            <FileTree files={editorFiles} activeFilePath={editorActiveFilePath} onSelect={onEditorActiveFileChange} />
           </SidebarPanel>
         );
       case 'copilot':
@@ -181,6 +163,8 @@ export function ProjectEditor({
               messages={copilotMessages}
               status={copilotStatus}
               commands={copilotCommands}
+              inputValue={copilotInputValue}
+              onInputChange={onCopilotInputChange}
               onSend={onCopilotSend}
               onStop={onCopilotStop}
             />
@@ -195,7 +179,7 @@ export function ProjectEditor({
       case 'test':
         return (
           <SidebarPanel title={t('activityBar.test')} icon={TestTube2}>
-            <TestCase cases={testCases} onRunAll={onRunAllTests} onRunCase={onRunTest} />
+            <TestCase cases={testCases} onRunAll={onTestRunAll} onRunCase={onTestRunCase} />
           </SidebarPanel>
         );
       default:
@@ -206,6 +190,8 @@ export function ProjectEditor({
   return (
     <EditorContext.Provider value={contextValue}>
       <div
+        className={className}
+        style={style}
         css={css`
           display: flex;
           height: 100%;
@@ -225,9 +211,9 @@ export function ProjectEditor({
           `}
         >
           <FileTabs
-            tabs={openTabs}
-            activePath={activeFilePath}
-            onTabChange={onActiveFileChange}
+            tabs={editorOpenTabs}
+            activePath={editorActiveFilePath}
+            onTabChange={onEditorActiveFileChange}
             onTabClose={handleTabClose}
           />
 
@@ -237,28 +223,28 @@ export function ProjectEditor({
               overflow: hidden;
             `}
           >
-            {activeFile && !activeFile.isDirectory ? (
+            {editorActiveFilePath && !activeFileNode?.isDirectory ? (
               <EditorArea
-                content={activeFile.content}
-                filePath={activeFile.path}
-                mode={editMode}
+                content={editorActiveFileContent}
+                filePath={editorActiveFilePath}
+                mode={editorEditMode}
                 onChange={handleFileChange}
                 onSave={handleSave}
-                onCursorChange={setCursorPosition}
+                onCursorChange={(pos) => onEditorCursorChange?.(pos)}
               />
             ) : (
               <EmptyState
-                description={activeFilePath ? t('editor.isDirectory') : t('editor.emptyHint')}
+                description={editorActiveFilePath ? t('editor.isDirectory') : t('editor.emptyHint')}
               />
             )}
           </div>
 
           <StatusBar
-            filePath={activeFilePath}
-            editMode={editMode}
-            cursorPosition={cursorPosition}
+            filePath={editorActiveFilePath}
+            editMode={editorEditMode}
+            cursorPosition={editorCursorPosition ?? null}
             isDirty={isDirty}
-            onEditModeChange={onEditModeChange}
+            onEditModeChange={onEditorEditModeChange}
           />
         </div>
 
@@ -273,11 +259,11 @@ export function ProjectEditor({
           items={sidebarItems}
           onToggleCollapse={() => {
             layout.toggleCollapse();
-            onPanelChange(layout.isCollapsed ? layout.activePanel : null);
+            onEditorPanelChange(layout.isCollapsed ? layout.activePanel : null);
           }}
           onSwitchPanel={(panel) => {
             layout.switchPanel(panel as Exclude<EditorPanel, null>);
-            onPanelChange(panel as EditorPanel);
+            onEditorPanelChange(panel as EditorPanel);
           }}
         >
           {renderPanel()}

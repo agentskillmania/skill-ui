@@ -2,6 +2,7 @@
 /**
  * Status bar component — includes mode switch
  */
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import { Code, Eye } from 'lucide-react';
 import { useTheme, interactiveItem, borderSeparator } from '@agentskillmania/skill-ui-theme';
@@ -19,7 +20,7 @@ function isVisualEditable(filePath: string | null): boolean {
   return VISUAL_EDITOR_EXTENSIONS.includes(ext);
 }
 
-export function StatusBar({
+export const StatusBar = memo(function StatusBar({
   filePath,
   editMode,
   cursorPosition,
@@ -126,4 +127,4 @@ export function StatusBar({
       </div>
     </div>
   );
-}
+});

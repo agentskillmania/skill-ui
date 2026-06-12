@@ -7,8 +7,8 @@ import type { Message, ChatCommand } from '@agentskillmania/skill-ui-chat';
 export interface ProjectFile {
   /** File path (relative to project root, e.g. "README.md", "src/index.ts") */
   path: string;
-  /** File content */
-  content: string;
+  /** File content (optional — tree API typically doesn't return content) */
+  content?: string;
   /** Whether it's a directory */
   isDirectory?: boolean;
   /** Child files (used for directories) */
@@ -85,28 +85,58 @@ export interface FileTabsProps {
 
 /** ProjectEditor top-level component props */
 export interface ProjectEditorProps {
-  files: ProjectFile[];
-  activeFilePath: string | null;
-  editMode: EditMode;
-  activePanel: EditorPanel;
+  // ─── File tree (structure only, no content) ───
+  editorFiles: ProjectFile[];
 
-  onFileChange: (path: string, content: string) => void;
-  onActiveFileChange: (path: string | null) => void;
-  onEditModeChange: (mode: EditMode) => void;
-  onPanelChange: (panel: EditorPanel) => void;
-  onSave?: (path: string, content: string) => void;
+  // ─── Current file ───
+  editorActiveFilePath: string | null;
+  editorActiveFileContent: string;
 
+  // ─── Tab state (controlled) ───
+  editorOpenTabs: FileTab[];
+  onEditorOpenTabsChange: (tabs: FileTab[]) => void;
+
+  // ─── Dirty state (controlled) ───
+  editorDirtyFilePaths?: string[];
+  onEditorDirtyChange?: (paths: string[]) => void;
+
+  // ─── Cursor position (optional controlled) ───
+  editorCursorPosition?: CursorPosition | null;
+  onEditorCursorChange?: (pos: CursorPosition | null) => void;
+
+  // ─── Edit mode ───
+  editorEditMode: EditMode;
+  onEditorEditModeChange: (mode: EditMode) => void;
+
+  // ─── Sidebar panel ───
+  editorActivePanel: EditorPanel;
+  onEditorPanelChange: (panel: EditorPanel) => void;
+
+  // ─── File operation callbacks ───
+  onEditorFileChange: (path: string, content: string) => void;
+  onEditorSave?: (path: string, content: string) => void;
+  onEditorActiveFileChange: (path: string | null) => void;
+
+  // ─── Copilot ───
   copilotMessages?: Message[];
   copilotStatus?: 'idle' | 'streaming' | 'error';
   copilotCommands?: ChatCommand[];
+  copilotInputValue?: string;
+  onCopilotInputChange?: (value: string) => void;
   onCopilotSend?: (content: string) => void;
   onCopilotStop?: () => void;
 
+  // ─── Review ───
   reviewItems?: ReviewItem[];
 
+  // ─── Test ───
   testCases?: TestCase[];
-  onRunAllTests?: () => void;
-  onRunTest?: (id: string) => void;
+  onTestRunAll?: () => void;
+  onTestRunCase?: (id: string) => void;
+
+  // ─── Style ───
+  className?: string;
+  style?: React.CSSProperties;
 }
 
 export interface FileTreeProps {
@@ -137,6 +167,10 @@ export interface CopilotPanelProps {
   messages?: Message[];
   status?: 'idle' | 'streaming' | 'error';
   commands?: ChatCommand[];
+  /** Controlled input value for ChatInput */
+  inputValue?: string;
+  /** Callback when input value changes */
+  onInputChange?: (value: string) => void;
   onSend?: (content: string) => void;
   onStop?: () => void;
 }
