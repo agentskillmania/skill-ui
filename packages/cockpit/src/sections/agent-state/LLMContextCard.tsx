@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -40,7 +41,7 @@ function extractSystemPrompt(messages: unknown[]): string | undefined {
  * System prompt is truncated by default, click to expand with
  * scrollable max-height.
  */
-export function LLMContextCard({ llm }: LLMContextCardProps) {
+export const LLMContextCard = memo(function LLMContextCard({ llm }: LLMContextCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
   const collapsedToggle = useToggle(false);
@@ -103,4 +104,4 @@ export function LLMContextCard({ llm }: LLMContextCardProps) {
       )}
     </CollapsibleCard>
   );
-}
+});

@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import { Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -33,7 +34,7 @@ const skillNameStyle = (theme: ReturnType<typeof useTheme>) => css`
  * Stack frames are shown directly. Instructions are truncated by default,
  * click to expand with scrollable max-height.
  */
-export function ActiveSkillCard({ skillState }: ActiveSkillCardProps) {
+export const ActiveSkillCard = memo(function ActiveSkillCard({ skillState }: ActiveSkillCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
   const collapsedToggle = useToggle(false);
@@ -133,4 +134,4 @@ export function ActiveSkillCard({ skillState }: ActiveSkillCardProps) {
       )}
     </CollapsibleCard>
   );
-}
+});

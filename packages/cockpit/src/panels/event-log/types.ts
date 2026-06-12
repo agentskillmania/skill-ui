@@ -53,4 +53,10 @@ export interface CockpitEvent {
 
 export interface EventLogPanelProps {
   events: CockpitEvent[];
+  /** Controlled active categories filter */
+  activeCategories?: Set<EventCategory>;
+  /** Default active categories (uncontrolled) */
+  defaultActiveCategories?: Set<EventCategory>;
+  /** Callback when active categories change */
+  onActiveCategoriesChange?: (categories: Set<EventCategory>) => void;
 }

@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +29,7 @@ export interface CompressionCardProps {
  * removed token count, summary token count, and time since compression.
  * Summary text is shown directly, truncated by default, click to expand.
  */
-export function CompressionCard({ compression }: CompressionCardProps) {
+export const CompressionCard = memo(function CompressionCard({ compression }: CompressionCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
   const collapsedToggle = useToggle(false);
@@ -101,4 +102,4 @@ export function CompressionCard({ compression }: CompressionCardProps) {
       )}
     </CollapsibleCard>
   );
-}
+});

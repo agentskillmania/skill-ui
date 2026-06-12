@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import { memo } from 'react';
 import { useTheme, interactiveRow } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Tabs, Typography } from 'antd';
@@ -76,7 +77,7 @@ function groupByCategory(tools: RunnerToolInfo[]): Map<ToolCategory, RunnerToolI
  * and StatusDot for the enabled indicator.
  * Uses antd Tabs with size="small" for compact layout.
  */
-export function ToolsCard({ tools }: ToolsCardProps) {
+export const ToolsCard = memo(function ToolsCard({ tools }: ToolsCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
   const collapsedToggle = useToggle(false);
@@ -173,4 +174,4 @@ export function ToolsCard({ tools }: ToolsCardProps) {
       )}
     </CollapsibleCard>
   );
-}
+});

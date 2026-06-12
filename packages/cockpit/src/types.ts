@@ -12,7 +12,7 @@ import type {
 import type { SessionOverviewData, SessionInfoData } from './sections/session/types.js';
 import type { SkillStateData, CompressionData } from './sections/agent-state/types.js';
 import type { RunnerDiagnosticsData } from './sections/runner/types.js';
-import type { CockpitEvent } from './panels/event-log/types.js';
+import type { CockpitEvent, EventCategory } from './panels/event-log/types.js';
 
 // ---- Panel IDs ----
 
@@ -96,8 +96,8 @@ export interface CockpitProps {
   onChatRegenerateMessage?: (message: Message) => void;
   onChatRollbackMessage?: (message: Message) => void;
   onChatForkMessage?: (message: Message) => void;
-  chatInputValue?: string;
-  onChatInputChange?: (value: string) => void;
+  chatInputValue: string;
+  onChatInputChange: (value: string) => void;
   chatStatus?: 'idle' | 'streaming' | 'error';
   chatDisabled?: boolean;
   chatRenderers?: ChatRenderers;
@@ -115,6 +115,9 @@ export interface CockpitProps {
 
   // Event log
   eventLogEvents?: CockpitEvent[];
+  eventLogActiveCategories?: Set<EventCategory>;
+  defaultEventLogActiveCategories?: Set<EventCategory>;
+  onEventLogCategoriesChange?: (categories: Set<EventCategory>) => void;
 
   // Session board — strict mapping of daemon agent-diagnostics event
   sessionBoardState?: SessionBoardData;

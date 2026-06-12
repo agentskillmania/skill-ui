@@ -486,6 +486,8 @@ type Story = StoryObj<typeof Cockpit>;
 export const Default: Story = {
   args: {
     chatMessages: mockMessages,
+    chatInputValue: '',
+    onChatInputChange: () => {},
     chatStatus: 'streaming',
     eventLogEvents: mockEvents,
     sessionBoardState: mockSessionBoardState,
@@ -497,6 +499,8 @@ export const Default: Story = {
 export const CollapsedSidebar: Story = {
   args: {
     chatMessages: mockMessages,
+    chatInputValue: '',
+    onChatInputChange: () => {},
     chatStatus: 'idle',
     eventLogEvents: mockEvents,
     sessionBoardState: mockSessionBoardState,
@@ -515,6 +519,8 @@ export const CollapsedSidebar: Story = {
 export const NoData: Story = {
   args: {
     chatMessages: [],
+    chatInputValue: '',
+    onChatInputChange: () => {},
     chatStatus: 'idle',
     eventLogEvents: [],
     sessionsSessions: [],

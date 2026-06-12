@@ -33,6 +33,8 @@ export const Default: Story = {
   args: {
     messages: mockMessages,
     status: 'streaming',
+    inputValue: '',
+    onInputChange: () => {},
   },
 };
 
@@ -40,5 +42,7 @@ export const Empty: Story = {
   args: {
     messages: [],
     status: 'idle',
+    inputValue: '',
+    onInputChange: () => {},
   },
 };

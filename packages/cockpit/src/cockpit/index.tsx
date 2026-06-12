@@ -58,6 +58,9 @@ export function Cockpit(props: CockpitProps) {
 
     // Cockpit-specific props
     eventLogEvents,
+    eventLogActiveCategories,
+    defaultEventLogActiveCategories,
+    onEventLogCategoriesChange,
     sessionBoardState,
     sessionsSessions,
     sessionsActiveId,
@@ -77,7 +80,14 @@ export function Cockpit(props: CockpitProps) {
           />
         );
       case 'event-log':
-        return <EventLogPanel events={eventLogEvents ?? []} />;
+        return (
+          <EventLogPanel
+            events={eventLogEvents ?? []}
+            activeCategories={eventLogActiveCategories}
+            defaultActiveCategories={defaultEventLogActiveCategories}
+            onActiveCategoriesChange={onEventLogCategoriesChange}
+          />
+        );
       case 'session-board':
         return <SessionBoardPanel state={sessionBoardState} />;
       default:

@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { Typography } from 'antd';
@@ -19,7 +20,7 @@ export interface SkillsCardProps {
  * SkillsCard displays loaded skills as a flat collapsible list.
  * Uses ExpandableRow for per-skill expand/collapse with chevron indicator.
  */
-export function SkillsCard({ skills }: SkillsCardProps) {
+export const SkillsCard = memo(function SkillsCard({ skills }: SkillsCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
   const collapsedToggle = useToggle(false);
@@ -71,4 +72,4 @@ export function SkillsCard({ skills }: SkillsCardProps) {
       )}
     </CollapsibleCard>
   );
-}
+});

@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -109,7 +110,7 @@ const CardContent: React.FC<{ data: SessionInfoData }> = ({ data }) => {
  * SessionInfoCard displays detailed session information in a compact card
  * with three info groups: Identity, Tokens, and Paths.
  */
-export const SessionInfoCard: React.FC<SessionInfoCardProps> = ({
+export const SessionInfoCard: React.FC<SessionInfoCardProps> = memo(({
   data,
   defaultCollapsed = false,
 }) => {
@@ -143,4 +144,4 @@ export const SessionInfoCard: React.FC<SessionInfoCardProps> = ({
       </div>
     </CollapsibleCard>
   );
-};
+});

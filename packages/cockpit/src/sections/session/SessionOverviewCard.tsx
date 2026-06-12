@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import { Progress, Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -63,7 +64,7 @@ const timestampStyle = (theme: Theme) => css`
  * SessionOverviewCard renders a collapsible card summarizing a session's
  * title, status, metrics, token usage, context window, and timestamps.
  */
-export function SessionOverviewCard({ data, defaultCollapsed = false }: SessionOverviewCardProps) {
+export const SessionOverviewCard = memo(function SessionOverviewCard({ data, defaultCollapsed = false }: SessionOverviewCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
   const collapsedToggle = useToggle(defaultCollapsed);
@@ -168,4 +169,4 @@ export function SessionOverviewCard({ data, defaultCollapsed = false }: SessionO
       </div>
     </CollapsibleCard>
   );
-}
+});

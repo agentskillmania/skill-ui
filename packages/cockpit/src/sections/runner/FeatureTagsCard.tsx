@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import { memo } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
@@ -30,7 +31,7 @@ const FEATURE_KEYS: Array<{ key: keyof RunnerFeatureFlags; labelKey: string }> =
  * FeatureTagsCard displays runner feature toggles as a row of colored tags.
  * Green = enabled, Gray = disabled. Collapsible via top-right toggle.
  */
-export function FeatureTagsCard({ features }: FeatureTagsCardProps) {
+export const FeatureTagsCard = memo(function FeatureTagsCard({ features }: FeatureTagsCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
   const collapsedToggle = useToggle(false);
@@ -66,4 +67,4 @@ export function FeatureTagsCard({ features }: FeatureTagsCardProps) {
       )}
     </CollapsibleCard>
   );
-}
+});
