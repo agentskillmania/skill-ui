@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { Tooltip } from 'antd';
@@ -30,7 +31,7 @@ export interface SidebarIconsProps {
 }
 
 /** Renders a vertical icon bar with collapse toggle and panel switch buttons. */
-export function SidebarIcons({
+export const SidebarIcons = memo(function SidebarIcons({
   items,
   activeId,
   isCollapsed,
@@ -115,4 +116,4 @@ export function SidebarIcons({
       })}
     </div>
   );
-}
+});

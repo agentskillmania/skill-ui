@@ -94,4 +94,10 @@ describe('CollapsibleCard', () => {
     );
     expect(screen.getByText('Running')).toBeInTheDocument();
   });
+
+  it('exports CollapsibleCard as a memoized component', () => {
+    // Verify that CollapsibleCard is wrapped with React.memo
+    // A memoized component has $$typeof === Symbol.for(react.memo)
+    expect(CollapsibleCard).toHaveProperty('$$typeof', Symbol.for('react.memo'));
+  });
 });

@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { ReactNode } from 'react';
@@ -22,7 +23,7 @@ export interface SidebarProps {
 }
 
 /** Renders a right-side collapsible sidebar with panel content and icon bar. */
-export function Sidebar({
+export const Sidebar = memo(function Sidebar({
   width,
   isCollapsed,
   activePanel,
@@ -85,4 +86,4 @@ export function Sidebar({
       />
     </div>
   );
-}
+});

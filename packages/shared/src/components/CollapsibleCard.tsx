@@ -1,8 +1,8 @@
+import { memo, useCallback, type CSSProperties, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { Button, Card } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import { useCallback, type CSSProperties, type ReactNode } from 'react';
 import { useToggle } from '../hooks/index.js';
 
 export interface CollapsibleCardProps {
@@ -25,7 +25,7 @@ export interface CollapsibleCardProps {
 }
 
 /** Renders a collapsible antd Card with title, optional badge, and toggle button. */
-export function CollapsibleCard({
+export const CollapsibleCard = memo(function CollapsibleCard({
   title,
   defaultCollapsed = false,
   collapsed: controlledCollapsed,
@@ -82,4 +82,4 @@ export function CollapsibleCard({
       {!isCollapsed && children}
     </Card>
   );
-}
+});

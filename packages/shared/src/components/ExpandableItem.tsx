@@ -1,6 +1,6 @@
+import { memo, useCallback, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { useCallback, type ReactNode } from 'react';
 import { useToggle } from '../hooks/index.js';
 
 /** Context provided to renderSummary callback. */
@@ -31,7 +31,7 @@ export interface ExpandableItemProps {
 }
 
 /** Headless expandable list item — behavior only, no UI. */
-export function ExpandableItem({
+export const ExpandableItem = memo(function ExpandableItem({
   expanded: controlledExpanded,
   defaultExpanded = false,
   onToggle,
@@ -74,4 +74,4 @@ export function ExpandableItem({
       )}
     </div>
   );
-}
+});
