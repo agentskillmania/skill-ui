@@ -15,12 +15,12 @@ afterEach(() => {
 
 describe('ThemeProvider', () => {
   it('renders children with default light mode', () => {
-    render(
+    const { container } = render(
       <ThemeProvider>
         <div>hello</div>
       </ThemeProvider>
     );
-    expect(screen.getByText('hello')).toBeInTheDocument();
+    expect(container.textContent).toContain('hello');
   });
 
   it('sets data-theme attribute to light by default', () => {
@@ -58,6 +58,7 @@ describe('ThemeProvider', () => {
   });
 
   it('calls onModeChange when setMode is called', () => {
+    const onModeChange = vi.fn();
     let ctx: { mode: string; setMode: (m: 'light' | 'dark') => void } | null = null;
     render(
       <ThemeProvider mode="light" onModeChange={onModeChange}>
@@ -96,10 +97,10 @@ describe('ThemeProvider', () => {
     expect(screen.getByTestId('has-setmode').textContent).toBe('function');
   });
 
-  it('does not update internal state when controlled mode is set', () => {
+  it('does not update data-theme when setMode is called in controlled mode', () => {
     // setMode should NOT change data-theme because mode is controlled externally
-    let ctx: { mode: string; setMode: (m: 'light' | 'dark') => void } | null = null;
     const onModeChange = vi.fn();
+    let ctx: { mode: string; setMode: (m: 'light' | 'dark') => void } | null = null;
     render(
       <ThemeProvider mode="light" onModeChange={onModeChange}>
         {(c) => {
