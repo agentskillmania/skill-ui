@@ -7,7 +7,7 @@
 
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
-import { Button, Card, Form, Input, InputNumber, Select } from 'antd';
+import { Button, Card, Col, Form, Input, InputNumber, Row, Select } from 'antd';
 import { Plus, Trash2 } from 'lucide-react';
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -266,97 +266,97 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
                                   </Button>
                                 </div>
 
-                                <div
-                                  css={css`
-                                    display: grid;
-                                    grid-template-columns: 2fr 1fr 1fr 1fr auto;
-                                    gap: ${theme.spacing[2]};
-                                    margin-bottom: ${theme.spacing[1]};
-                                    padding-left: ${theme.spacing[2]};
-                                    color: ${theme.color.textSecondary};
-                                    font-size: 12px;
-                                  `}
-                                >
-                                  <span>{t('daemon.llm.modelId')}</span>
-                                  <span>{t('daemon.llm.contextWindow')}</span>
-                                  <span>{t('daemon.llm.maxTokens')}</span>
-                                  <span>{t('daemon.llm.reasoning')}</span>
-                                  <span aria-hidden />
-                                </div>
-
                                 {modelFields.map((modelField) => (
-                                  <div
+                                  <Row
                                     key={modelField.key}
+                                    gutter={[16, 0]}
+                                    align="bottom"
                                     css={css`
-                                      display: grid;
-                                      grid-template-columns: 2fr 1fr 1fr 1fr auto;
-                                      gap: ${theme.spacing[2]};
-                                      align-items: center;
                                       margin-bottom: ${theme.spacing[2]};
                                     `}
                                   >
-                                    <Form.Item
-                                      name={[modelField.name, 'modelId']}
-                                      labelCol={{ span: 0 }}
-                                      wrapperCol={{ span: 24 }}
-                                      style={{ marginBottom: 0 }}
-                                    >
-                                      <Input
-                                        placeholder="gpt-4o"
-                                        data-testid={`daemon-llm-provider-${providerField.name}-model-${modelField.name}-modelId`}
-                                      />
-                                    </Form.Item>
+                                    <Col span={8}>
+                                      <Form.Item
+                                        name={[modelField.name, 'modelId']}
+                                        label={t('daemon.llm.modelId')}
+                                        labelCol={{ span: 24 }}
+                                        wrapperCol={{ span: 24 }}
+                                      >
+                                        <Input
+                                          placeholder="gpt-4o"
+                                          data-testid={`daemon-llm-provider-${providerField.name}-model-${modelField.name}-modelId`}
+                                        />
+                                      </Form.Item>
+                                    </Col>
 
-                                    <Form.Item
-                                      name={[modelField.name, 'contextWindow']}
-                                      labelCol={{ span: 0 }}
-                                      wrapperCol={{ span: 24 }}
-                                      style={{ marginBottom: 0 }}
-                                    >
-                                      <InputNumber
-                                        placeholder="Auto"
-                                        style={{ width: '100%' }}
-                                        data-testid={`daemon-llm-provider-${providerField.name}-model-${modelField.name}-contextWindow`}
-                                      />
-                                    </Form.Item>
+                                    <Col span={4}>
+                                      <Form.Item
+                                        name={[modelField.name, 'contextWindow']}
+                                        label={t('daemon.llm.contextWindow')}
+                                        labelCol={{ span: 24 }}
+                                        wrapperCol={{ span: 24 }}
+                                      >
+                                        <InputNumber
+                                          placeholder="Auto"
+                                          style={{ width: '100%' }}
+                                          data-testid={`daemon-llm-provider-${providerField.name}-model-${modelField.name}-contextWindow`}
+                                        />
+                                      </Form.Item>
+                                    </Col>
 
-                                    <Form.Item
-                                      name={[modelField.name, 'maxTokens']}
-                                      labelCol={{ span: 0 }}
-                                      wrapperCol={{ span: 24 }}
-                                      style={{ marginBottom: 0 }}
-                                    >
-                                      <InputNumber
-                                        placeholder="Auto"
-                                        style={{ width: '100%' }}
-                                        data-testid={`daemon-llm-provider-${providerField.name}-model-${modelField.name}-maxTokens`}
-                                      />
-                                    </Form.Item>
+                                    <Col span={4}>
+                                      <Form.Item
+                                        name={[modelField.name, 'maxTokens']}
+                                        label={t('daemon.llm.maxTokens')}
+                                        labelCol={{ span: 24 }}
+                                        wrapperCol={{ span: 24 }}
+                                      >
+                                        <InputNumber
+                                          placeholder="Auto"
+                                          style={{ width: '100%' }}
+                                          data-testid={`daemon-llm-provider-${providerField.name}-model-${modelField.name}-maxTokens`}
+                                        />
+                                      </Form.Item>
+                                    </Col>
 
-                                    <Form.Item
-                                      name={[modelField.name, 'reasoning']}
-                                      labelCol={{ span: 0 }}
-                                      wrapperCol={{ span: 24 }}
-                                      style={{ marginBottom: 0 }}
-                                    >
-                                      <Select
-                                        options={REASONING_OPTIONS.map((opt) => ({
-                                          value: opt.value,
-                                          label: t(opt.labelKey),
-                                        }))}
-                                        style={{ width: '100%' }}
-                                        data-testid={`daemon-llm-provider-${providerField.name}-model-${modelField.name}-reasoning`}
-                                      />
-                                    </Form.Item>
+                                    <Col span={4}>
+                                      <Form.Item
+                                        name={[modelField.name, 'reasoning']}
+                                        label={t('daemon.llm.reasoning')}
+                                        labelCol={{ span: 24 }}
+                                        wrapperCol={{ span: 24 }}
+                                      >
+                                        <Select
+                                          options={REASONING_OPTIONS.map((opt) => ({
+                                            value: opt.value,
+                                            label: t(opt.labelKey),
+                                          }))}
+                                          data-testid={`daemon-llm-provider-${providerField.name}-model-${modelField.name}-reasoning`}
+                                        />
+                                      </Form.Item>
+                                    </Col>
 
-                                    <Button
-                                      type="text"
-                                      danger
-                                      icon={<Trash2 size={14} />}
-                                      onClick={() => removeModel(modelField.name)}
-                                      data-testid={`daemon-llm-provider-${providerField.name}-remove-model-${modelField.name}`}
-                                    />
-                                  </div>
+                                    <Col
+                                      span={4}
+                                      css={css`
+                                        text-align: right;
+                                      `}
+                                    >
+                                      <Form.Item
+                                        label=" "
+                                        labelCol={{ span: 24 }}
+                                        wrapperCol={{ span: 24 }}
+                                      >
+                                        <Button
+                                          type="text"
+                                          danger
+                                          icon={<Trash2 size={14} />}
+                                          onClick={() => removeModel(modelField.name)}
+                                          data-testid={`daemon-llm-provider-${providerField.name}-remove-model-${modelField.name}`}
+                                        />
+                                      </Form.Item>
+                                    </Col>
+                                  </Row>
                                 ))}
                               </>
                             )}
