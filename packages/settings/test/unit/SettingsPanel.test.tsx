@@ -47,11 +47,11 @@ describe('SettingsPanel', () => {
     render(
       <SettingsPanel
         daemonConfig={daemonConfig}
-        onDaemonConfigChange={() => {}}
+        onDaemonConfigSubmit={() => {}}
         mcpConfig={mcpConfig}
         onMcpConfigChange={() => {}}
         preferences={preferences}
-        onPreferencesChange={() => {}}
+        onPreferencesSubmit={() => {}}
       />,
       { wrapper }
     );
@@ -66,11 +66,11 @@ describe('SettingsPanel', () => {
     render(
       <SettingsPanel
         daemonConfig={daemonConfig}
-        onDaemonConfigChange={() => {}}
+        onDaemonConfigSubmit={() => {}}
         mcpConfig={mcpConfig}
         onMcpConfigChange={() => {}}
         preferences={preferences}
-        onPreferencesChange={() => {}}
+        onPreferencesSubmit={() => {}}
       />,
       { wrapper }
     );
@@ -83,11 +83,11 @@ describe('SettingsPanel', () => {
     render(
       <SettingsPanel
         daemonConfig={daemonConfig}
-        onDaemonConfigChange={() => {}}
+        onDaemonConfigSubmit={() => {}}
         mcpConfig={mcpConfig}
         onMcpConfigChange={() => {}}
         preferences={preferences}
-        onPreferencesChange={() => {}}
+        onPreferencesSubmit={() => {}}
       />,
       { wrapper }
     );
@@ -102,11 +102,11 @@ describe('SettingsPanel', () => {
     render(
       <SettingsPanel
         daemonConfig={daemonConfig}
-        onDaemonConfigChange={() => {}}
+        onDaemonConfigSubmit={() => {}}
         mcpConfig={mcpConfig}
         onMcpConfigChange={() => {}}
         preferences={preferences}
-        onPreferencesChange={() => {}}
+        onPreferencesSubmit={() => {}}
       />,
       { wrapper }
     );
@@ -121,11 +121,11 @@ describe('SettingsPanel', () => {
     const { container } = render(
       <SettingsPanel
         daemonConfig={daemonConfig}
-        onDaemonConfigChange={() => {}}
+        onDaemonConfigSubmit={() => {}}
         mcpConfig={mcpConfig}
         onMcpConfigChange={() => {}}
         preferences={preferences}
-        onPreferencesChange={() => {}}
+        onPreferencesSubmit={() => {}}
       />,
       { wrapper }
     );
@@ -133,5 +133,83 @@ describe('SettingsPanel', () => {
     // Each tab has an SVG icon
     const svgs = container.querySelectorAll('.ant-tabs-tab svg');
     expect(svgs.length).toBe(3);
+  });
+
+  it('calls onPreferencesSubmit when preferences submit button is clicked', () => {
+    const onSubmit = vi.fn();
+    render(
+      <SettingsPanel
+        daemonConfig={daemonConfig}
+        onDaemonConfigSubmit={() => {}}
+        mcpConfig={mcpConfig}
+        onMcpConfigChange={() => {}}
+        preferences={preferences}
+        onPreferencesSubmit={onSubmit}
+      />,
+      { wrapper }
+    );
+
+    fireEvent.click(screen.getByText('common.submit'));
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit).toHaveBeenCalledWith(preferences);
+  });
+
+  it('calls onPreferencesReset when preferences reset button is clicked', () => {
+    const onReset = vi.fn();
+    render(
+      <SettingsPanel
+        daemonConfig={daemonConfig}
+        onDaemonConfigSubmit={() => {}}
+        onPreferencesReset={onReset}
+        mcpConfig={mcpConfig}
+        onMcpConfigChange={() => {}}
+        preferences={preferences}
+        onPreferencesSubmit={() => {}}
+      />,
+      { wrapper }
+    );
+
+    fireEvent.click(screen.getByText('common.reset'));
+    expect(onReset).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls onDaemonConfigSubmit when daemon submit button is clicked', () => {
+    const onSubmit = vi.fn();
+    render(
+      <SettingsPanel
+        daemonConfig={daemonConfig}
+        onDaemonConfigSubmit={onSubmit}
+        mcpConfig={mcpConfig}
+        onMcpConfigChange={() => {}}
+        preferences={preferences}
+        onPreferencesSubmit={() => {}}
+      />,
+      { wrapper }
+    );
+
+    fireEvent.click(screen.getByText('daemon.tab'));
+    fireEvent.click(screen.getByText('common.submit'));
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    expect(onSubmit).toHaveBeenCalledWith(daemonConfig);
+  });
+
+  it('calls onDaemonConfigReset when daemon reset button is clicked', () => {
+    const onReset = vi.fn();
+    render(
+      <SettingsPanel
+        daemonConfig={daemonConfig}
+        onDaemonConfigSubmit={() => {}}
+        onDaemonConfigReset={onReset}
+        mcpConfig={mcpConfig}
+        onMcpConfigChange={() => {}}
+        preferences={preferences}
+        onPreferencesSubmit={() => {}}
+      />,
+      { wrapper }
+    );
+
+    fireEvent.click(screen.getByText('daemon.tab'));
+    fireEvent.click(screen.getByText('common.reset'));
+    expect(onReset).toHaveBeenCalledTimes(1);
   });
 });

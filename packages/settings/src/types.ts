@@ -183,20 +183,26 @@ export interface PreferencesPanelProps {
  *
  * @remarks
  * Combines all three sub-panel configs into a single component with tab navigation.
+ * MCP config is applied live; daemon config and preferences require an explicit
+ * submit and can be reset to the last prop snapshot.
  */
 export interface SettingsPanelProps {
-  /** Current daemon configuration */
+  /** Current daemon configuration (last saved / initial snapshot) */
   daemonConfig: DaemonConfig;
-  /** Callback when daemon config changes */
-  onDaemonConfigChange: (partial: Partial<DaemonConfig>) => void;
+  /** Callback when daemon config is submitted */
+  onDaemonConfigSubmit: (config: DaemonConfig) => void;
+  /** Callback when daemon config is reset (optional, e.g. for logging) */
+  onDaemonConfigReset?: () => void;
   /** Current MCP configuration */
   mcpConfig: McpConfig;
-  /** Callback when MCP configuration changes */
+  /** Callback when MCP configuration changes (live) */
   onMcpConfigChange: (config: McpConfig) => void;
-  /** Current application preferences */
+  /** Current application preferences (last saved / initial snapshot) */
   preferences: AppPreferences;
-  /** Callback when preferences change */
-  onPreferencesChange: (partial: Partial<AppPreferences>) => void;
+  /** Callback when preferences are submitted */
+  onPreferencesSubmit: (prefs: AppPreferences) => void;
+  /** Callback when preferences are reset (optional, e.g. for logging) */
+  onPreferencesReset?: () => void;
   /**
    * Callback to open a native directory picker dialog.
    * Forwarded to the inner PreferencesPanel. See PreferencesPanelProps for details.

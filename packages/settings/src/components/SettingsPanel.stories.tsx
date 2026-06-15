@@ -59,11 +59,11 @@ export const Default: Story = {
       <SettingsPanel
         {...args}
         daemonConfig={daemon}
-        onDaemonConfigChange={(partial) => setDaemon((prev) => ({ ...prev, ...partial }))}
+        onDaemonConfigSubmit={setDaemon}
         mcpConfig={mcp}
         onMcpConfigChange={setMcp}
         preferences={prefs}
-        onPreferencesChange={(partial) => setPrefs((prev) => ({ ...prev, ...partial }))}
+        onPreferencesSubmit={setPrefs}
       />
     );
   },
@@ -92,11 +92,11 @@ export const EmptySetup: Story = {
       <SettingsPanel
         {...args}
         daemonConfig={daemon}
-        onDaemonConfigChange={(partial) => setDaemon((prev) => ({ ...prev, ...partial }))}
+        onDaemonConfigSubmit={setDaemon}
         mcpConfig={mcp}
         onMcpConfigChange={setMcp}
         preferences={prefs}
-        onPreferencesChange={(partial) => setPrefs((prev) => ({ ...prev, ...partial }))}
+        onPreferencesSubmit={setPrefs}
       />
     );
   },
@@ -120,11 +120,11 @@ export const WithBrowseCallback: Story = {
       <SettingsPanel
         {...args}
         daemonConfig={daemon}
-        onDaemonConfigChange={(partial) => setDaemon((prev) => ({ ...prev, ...partial }))}
+        onDaemonConfigSubmit={setDaemon}
         mcpConfig={mcp}
         onMcpConfigChange={setMcp}
         preferences={prefs}
-        onPreferencesChange={(partial) => setPrefs((prev) => ({ ...prev, ...partial }))}
+        onPreferencesSubmit={setPrefs}
         onBrowseDirectory={onBrowseDirectory}
       />
     );

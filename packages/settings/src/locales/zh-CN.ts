@@ -1,4 +1,8 @@
 const zhCN = {
+  common: {
+    submit: '提交',
+    reset: '还原',
+  },
   daemon: {
     tab: 'AI 连接',
     llm: {

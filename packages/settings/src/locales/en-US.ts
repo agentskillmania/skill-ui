@@ -1,4 +1,8 @@
 const enUS = {
+  common: {
+    submit: 'Submit',
+    reset: 'Reset',
+  },
   daemon: {
     tab: 'AI Connection',
     llm: {

@@ -5,51 +5,102 @@
  * @module
  */
 
-import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { Tabs } from 'antd';
+import { css } from '@emotion/react';
+import { Button, Space, Tabs } from 'antd';
 import { Server, Puzzle, Palette } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NAMESPACE } from '../locales/index.js';
+
 import { DaemonConfigPanel } from './DaemonConfigPanel.js';
 import { McpConfigPanel } from './McpConfigPanel.js';
 import { PreferencesPanel } from './PreferencesPanel.js';
-import type {
-  SettingsPanelProps,
-} from '../types.js';
+import { NAMESPACE } from '../locales/index.js';
+import type { DaemonConfig, AppPreferences, SettingsPanelProps } from '../types.js';
 
 /**
  * Top-level settings panel with tabbed navigation.
  *
  * @remarks
- * Renders three tabs — Daemon, MCP Servers, Preferences — each backed by
- * its corresponding panel component. The panel is a pure controlled component:
- * all state flows in via props and out via callbacks.
+ * Renders three tabs — Daemon, MCP Servers, Preferences. MCP config is applied
+ * live; daemon config and preferences use a local draft that is only submitted
+ * when the user clicks the Submit button. Reset reverts the draft to the last
+ * prop snapshot.
  *
  * @example
  * ```tsx
  * <SettingsPanel
  *   daemonConfig={daemonConfig}
- *   onDaemonConfigChange={setDaemonConfig}
+ *   onDaemonConfigSubmit={saveDaemonConfig}
  *   mcpConfig={mcpConfig}
  *   onMcpConfigChange={setMcpConfig}
  *   preferences={preferences}
- *   onPreferencesChange={setPreferences}
+ *   onPreferencesSubmit={savePreferences}
  * />
  * ```
  */
 export function SettingsPanel({
   daemonConfig,
-  onDaemonConfigChange,
+  onDaemonConfigSubmit,
+  onDaemonConfigReset,
   mcpConfig,
   onMcpConfigChange,
   preferences,
-  onPreferencesChange,
+  onPreferencesSubmit,
+  onPreferencesReset,
   onBrowseDirectory,
   className,
 }: SettingsPanelProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
+
+  const [draftDaemonConfig, setDraftDaemonConfig] = useState<DaemonConfig>(daemonConfig);
+  const [draftPreferences, setDraftPreferences] = useState<AppPreferences>(preferences);
+
+  useEffect(() => {
+    setDraftDaemonConfig(daemonConfig);
+  }, [daemonConfig]);
+
+  useEffect(() => {
+    setDraftPreferences(preferences);
+  }, [preferences]);
+
+  const handleDaemonSubmit = () => {
+    onDaemonConfigSubmit(draftDaemonConfig);
+  };
+
+  const handleDaemonReset = () => {
+    setDraftDaemonConfig(daemonConfig);
+    onDaemonConfigReset?.();
+  };
+
+  const handlePreferencesSubmit = () => {
+    onPreferencesSubmit(draftPreferences);
+  };
+
+  const handlePreferencesReset = () => {
+    setDraftPreferences(preferences);
+    onPreferencesReset?.();
+  };
+
+  const actionFooter = (onSubmit: () => void, onReset: () => void) => (
+    <div
+      css={css`
+        display: flex;
+        justify-content: flex-end;
+        padding-top: ${theme.spacing[4]};
+        border-top: 1px solid ${theme.color.border};
+        margin-top: ${theme.spacing[4]};
+      `}
+    >
+      <Space>
+        <Button onClick={onReset}>{t('common.reset')}</Button>
+        <Button type="primary" onClick={onSubmit}>
+          {t('common.submit')}
+        </Button>
+      </Space>
+    </div>
+  );
 
   const tabItems = [
     {
@@ -67,11 +118,14 @@ export function SettingsPanel({
         </span>
       ),
       children: (
-        <PreferencesPanel
-          value={preferences}
-          onChange={onPreferencesChange}
-          onBrowseDirectory={onBrowseDirectory}
-        />
+        <>
+          <PreferencesPanel
+            value={draftPreferences}
+            onChange={(partial) => setDraftPreferences((prev) => ({ ...prev, ...partial }))}
+            onBrowseDirectory={onBrowseDirectory}
+          />
+          {actionFooter(handlePreferencesSubmit, handlePreferencesReset)}
+        </>
       ),
     },
     {
@@ -89,10 +143,13 @@ export function SettingsPanel({
         </span>
       ),
       children: (
-        <DaemonConfigPanel
-          value={daemonConfig}
-          onChange={onDaemonConfigChange}
-        />
+        <>
+          <DaemonConfigPanel
+            value={draftDaemonConfig}
+            onChange={(partial) => setDraftDaemonConfig((prev) => ({ ...prev, ...partial }))}
+          />
+          {actionFooter(handleDaemonSubmit, handleDaemonReset)}
+        </>
       ),
     },
     {
@@ -109,12 +166,7 @@ export function SettingsPanel({
           {t('mcp.title')}
         </span>
       ),
-      children: (
-        <McpConfigPanel
-          value={mcpConfig}
-          onChange={onMcpConfigChange}
-        />
-      ),
+      children: <McpConfigPanel value={mcpConfig} onChange={onMcpConfigChange} />,
     },
   ];
 
@@ -130,6 +182,7 @@ export function SettingsPanel({
     >
       <Tabs
         items={tabItems}
+        destroyOnHidden
         css={css`
           .ant-tabs-nav {
             padding: 0 ${theme.spacing['4']};
