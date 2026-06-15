@@ -129,7 +129,16 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
         {t('daemon.llm.title')}
       </div>
 
-      <Form form={form} onValuesChange={handleValuesChange} component={false}>
+      <Form
+        form={form}
+        onValuesChange={handleValuesChange}
+        component={false}
+        layout="horizontal"
+        labelAlign="right"
+        labelCol={{ flex: '96px' }}
+        wrapperCol={{ flex: 'auto' }}
+        colon={false}
+      >
         <Form.List name="providers">
           {(providerFields, { add: addProvider, remove: removeProvider }) => (
             <>
@@ -276,6 +285,8 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
                                       <Form.Item
                                         name={[modelField.name, 'modelId']}
                                         label={t('daemon.llm.modelId')}
+                                        labelCol={{ flex: '72px' }}
+                                        wrapperCol={{ flex: 'auto' }}
                                         style={{ marginBottom: 0 }}
                                       >
                                         <Input
@@ -294,6 +305,8 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
                                       <Form.Item
                                         name={[modelField.name, 'contextWindow']}
                                         label={t('daemon.llm.contextWindow')}
+                                        labelCol={{ flex: '72px' }}
+                                        wrapperCol={{ flex: 'auto' }}
                                         style={{ marginBottom: 0 }}
                                       >
                                         <InputNumber
@@ -313,6 +326,8 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
                                       <Form.Item
                                         name={[modelField.name, 'maxTokens']}
                                         label={t('daemon.llm.maxTokens')}
+                                        labelCol={{ flex: '72px' }}
+                                        wrapperCol={{ flex: 'auto' }}
                                         style={{ marginBottom: 0 }}
                                       >
                                         <InputNumber
@@ -332,6 +347,8 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
                                       <Form.Item
                                         name={[modelField.name, 'reasoning']}
                                         label={t('daemon.llm.reasoning')}
+                                        labelCol={{ flex: '72px' }}
+                                        wrapperCol={{ flex: 'auto' }}
                                         style={{ marginBottom: 0 }}
                                       >
                                         <Select
