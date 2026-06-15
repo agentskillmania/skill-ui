@@ -1,13 +1,13 @@
 /** @jsxImportSource @emotion/react */
 /**
- * @fileoverview Daemon configuration panel component.
+ * @fileoverview Compact daemon configuration panel for LLM connections.
  *
  * @module
  */
 
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
-import { Button, Card, Form, Input, InputNumber, Select } from 'antd';
+import { Button, Card, Input, InputNumber, Select } from 'antd';
 import { Plus, Trash2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
@@ -27,12 +27,12 @@ const emptyProvider = (): LlmProviderEntry => ({
 });
 
 /**
- * Daemon configuration panel.
+ * Compact controlled form for editing LLM connections.
  *
  * @remarks
- * Controlled form component for editing `~/.agentskillmania/skill-studio/config.yaml`.
- * Renders a list of LLM providers; each provider contains one or more models.
- * Fires `onChange` with partial updates on every field change.
+ * Presents each provider as a "connection" card. Internal terminology still
+ * maps to `providers`/`models`, but the UI shows friendlier labels like
+ * "Connection" and hides implementation jargon.
  */
 export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPanelProps) {
   const theme = useTheme();
@@ -96,17 +96,33 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
       <div
         css={css`
           font-weight: 500;
-          margin-bottom: ${theme.spacing[4]};
+          margin-bottom: ${theme.spacing[3]};
           color: ${theme.color.text};
         `}
       >
         {t('daemon.llm.title')}
       </div>
+
       {providers.map((provider, providerIndex) => (
         <Card
           key={providerIndex}
           size="small"
-          title={t('daemon.llm.providerTitle', { index: providerIndex + 1 })}
+          title={
+            <span>
+              {t('daemon.llm.providerTitle', { index: providerIndex + 1 })}
+              {provider.name && (
+                <span
+                  css={css`
+                    margin-left: ${theme.spacing[2]};
+                    color: ${theme.color.textSecondary};
+                    font-weight: 400;
+                  `}
+                >
+                  · {provider.name}
+                </span>
+              )}
+            </span>
+          }
           extra={
             <Button
               type="text"
@@ -115,34 +131,77 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
               icon={<Trash2 size={14} />}
               onClick={() => removeProvider(providerIndex)}
               data-testid={`daemon-llm-remove-provider-${providerIndex}`}
-            >
-              {t('daemon.llm.removeProvider')}
-            </Button>
+            />
           }
           css={css`
-            margin-bottom: ${theme.spacing[4]};
+            margin-bottom: ${theme.spacing[3]};
+            .ant-card-body {
+              padding: ${theme.spacing[3]};
+            }
           `}
         >
-          <Form layout="horizontal" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
-            <Form.Item label={t('daemon.llm.providerName')} required>
+          <div
+            css={css`
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: ${theme.spacing[3]};
+              margin-bottom: ${theme.spacing[3]};
+              @media (max-width: 600px) {
+                grid-template-columns: 1fr;
+              }
+            `}
+          >
+            <div>
+              <label
+                css={css`
+                  display: block;
+                  margin-bottom: ${theme.spacing[1]};
+                  font-size: 12px;
+                  color: ${theme.color.textSecondary};
+                `}
+              >
+                {t('daemon.llm.providerName')}
+              </label>
               <Input
                 value={provider.name}
                 onChange={(e) => updateProvider(providerIndex, { name: e.target.value })}
                 placeholder="openai"
+                size="small"
                 data-testid={`daemon-llm-provider-${providerIndex}-name`}
               />
-            </Form.Item>
+            </div>
 
-            <Form.Item label={t('daemon.llm.apiKey')} required>
+            <div>
+              <label
+                css={css`
+                  display: block;
+                  margin-bottom: ${theme.spacing[1]};
+                  font-size: 12px;
+                  color: ${theme.color.textSecondary};
+                `}
+              >
+                {t('daemon.llm.apiKey')}
+              </label>
               <Input.Password
                 value={provider.apiKey}
                 onChange={(e) => updateProvider(providerIndex, { apiKey: e.target.value })}
                 placeholder="sk-..."
+                size="small"
                 data-testid={`daemon-llm-provider-${providerIndex}-apiKey`}
               />
-            </Form.Item>
+            </div>
 
-            <Form.Item label={t('daemon.llm.baseUrl')}>
+            <div>
+              <label
+                css={css`
+                  display: block;
+                  margin-bottom: ${theme.spacing[1]};
+                  font-size: 12px;
+                  color: ${theme.color.textSecondary};
+                `}
+              >
+                {t('daemon.llm.baseUrl')}
+              </label>
               <Input
                 value={provider.baseUrl ?? ''}
                 onChange={(e) =>
@@ -151,128 +210,207 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
                   })
                 }
                 placeholder="https://api.openai.com/v1"
+                size="small"
                 data-testid={`daemon-llm-provider-${providerIndex}-baseUrl`}
               />
-            </Form.Item>
+            </div>
 
-            <Form.Item label={t('daemon.llm.maxConcurrency')}>
+            <div>
+              <label
+                css={css`
+                  display: block;
+                  margin-bottom: ${theme.spacing[1]};
+                  font-size: 12px;
+                  color: ${theme.color.textSecondary};
+                `}
+              >
+                {t('daemon.llm.maxConcurrency')}
+              </label>
               <InputNumber
                 value={provider.maxConcurrency ?? undefined}
                 onChange={(v) => updateProvider(providerIndex, { maxConcurrency: v ?? null })}
                 placeholder="Auto"
+                size="small"
                 style={{ width: '100%' }}
                 data-testid={`daemon-llm-provider-${providerIndex}-maxConcurrency`}
               />
-            </Form.Item>
-          </Form>
+            </div>
+          </div>
 
           <div
             css={css`
-              margin-top: ${theme.spacing[3]};
-              padding-top: ${theme.spacing[3]};
+              margin-top: ${theme.spacing[2]};
+              padding-top: ${theme.spacing[2]};
               border-top: 1px solid ${theme.color.border};
             `}
           >
             <div
               css={css`
-                font-weight: 500;
-                margin-bottom: ${theme.spacing[3]};
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: ${theme.spacing[2]};
+                font-size: 12px;
                 color: ${theme.color.textSecondary};
               `}
             >
-              {t('daemon.llm.modelsTitle')}
+              <span>{t('daemon.llm.modelsTitle')}</span>
+              <Button
+                type="dashed"
+                size="small"
+                icon={<Plus size={12} />}
+                onClick={() => addModel(providerIndex)}
+                data-testid={`daemon-llm-provider-${providerIndex}-add-model`}
+              >
+                {t('daemon.llm.addModel')}
+              </Button>
             </div>
 
             {provider.models.map((model, modelIndex) => (
-              <Card
+              <div
                 key={modelIndex}
-                size="small"
-                type="inner"
                 css={css`
-                  margin-bottom: ${theme.spacing[3]};
+                  display: flex;
+                  align-items: flex-end;
+                  gap: ${theme.spacing[2]};
+                  margin-bottom: ${theme.spacing[2]};
                 `}
-                extra={
-                  <Button
-                    type="text"
-                    danger
-                    size="small"
-                    icon={<Trash2 size={14} />}
-                    onClick={() => removeModel(providerIndex, modelIndex)}
-                    data-testid={`daemon-llm-provider-${providerIndex}-remove-model-${modelIndex}`}
-                  >
-                    {t('daemon.llm.removeModel')}
-                  </Button>
-                }
               >
-                <Form layout="horizontal" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
-                  <Form.Item label={t('daemon.llm.modelId')} required>
-                    <Input
-                      value={model.modelId}
-                      onChange={(e) =>
-                        updateModel(providerIndex, modelIndex, { modelId: e.target.value })
-                      }
-                      placeholder="gpt-4o"
-                      data-testid={`daemon-llm-provider-${providerIndex}-model-${modelIndex}-modelId`}
-                    />
-                  </Form.Item>
+                <div
+                  css={css`
+                    flex: 2;
+                    min-width: 0;
+                  `}
+                >
+                  <label
+                    css={css`
+                      display: block;
+                      margin-bottom: ${theme.spacing[1]};
+                      font-size: 12px;
+                      color: ${theme.color.textSecondary};
+                    `}
+                  >
+                    {t('daemon.llm.modelId')}
+                  </label>
+                  <Input
+                    value={model.modelId}
+                    onChange={(e) =>
+                      updateModel(providerIndex, modelIndex, { modelId: e.target.value })
+                    }
+                    placeholder="gpt-4o"
+                    size="small"
+                    data-testid={`daemon-llm-provider-${providerIndex}-model-${modelIndex}-modelId`}
+                  />
+                </div>
 
-                  <Form.Item label={t('daemon.llm.contextWindow')}>
-                    <InputNumber
-                      value={model.contextWindow ?? undefined}
-                      onChange={(v) =>
-                        updateModel(providerIndex, modelIndex, { contextWindow: v ?? null })
-                      }
-                      placeholder="Auto"
-                      style={{ width: '100%' }}
-                      data-testid={`daemon-llm-provider-${providerIndex}-model-${modelIndex}-contextWindow`}
-                    />
-                  </Form.Item>
+                <div
+                  css={css`
+                    flex: 1;
+                    min-width: 0;
+                  `}
+                >
+                  <label
+                    css={css`
+                      display: block;
+                      margin-bottom: ${theme.spacing[1]};
+                      font-size: 12px;
+                      color: ${theme.color.textSecondary};
+                    `}
+                  >
+                    {t('daemon.llm.contextWindow')}
+                  </label>
+                  <InputNumber
+                    value={model.contextWindow ?? undefined}
+                    onChange={(v) =>
+                      updateModel(providerIndex, modelIndex, { contextWindow: v ?? null })
+                    }
+                    placeholder="Auto"
+                    size="small"
+                    style={{ width: '100%' }}
+                    data-testid={`daemon-llm-provider-${providerIndex}-model-${modelIndex}-contextWindow`}
+                  />
+                </div>
 
-                  <Form.Item label={t('daemon.llm.maxTokens')}>
-                    <InputNumber
-                      value={model.maxTokens ?? undefined}
-                      onChange={(v) =>
-                        updateModel(providerIndex, modelIndex, { maxTokens: v ?? null })
-                      }
-                      placeholder="Auto"
-                      style={{ width: '100%' }}
-                      data-testid={`daemon-llm-provider-${providerIndex}-model-${modelIndex}-maxTokens`}
-                    />
-                  </Form.Item>
+                <div
+                  css={css`
+                    flex: 1;
+                    min-width: 0;
+                  `}
+                >
+                  <label
+                    css={css`
+                      display: block;
+                      margin-bottom: ${theme.spacing[1]};
+                      font-size: 12px;
+                      color: ${theme.color.textSecondary};
+                    `}
+                  >
+                    {t('daemon.llm.maxTokens')}
+                  </label>
+                  <InputNumber
+                    value={model.maxTokens ?? undefined}
+                    onChange={(v) =>
+                      updateModel(providerIndex, modelIndex, { maxTokens: v ?? null })
+                    }
+                    placeholder="Auto"
+                    size="small"
+                    style={{ width: '100%' }}
+                    data-testid={`daemon-llm-provider-${providerIndex}-model-${modelIndex}-maxTokens`}
+                  />
+                </div>
 
-                  <Form.Item label={t('daemon.llm.reasoning')}>
-                    <Select
-                      value={String(model.reasoning ?? 'auto')}
-                      onChange={(v) => {
-                        const resolved = v === 'auto' ? null : v === 'true';
-                        updateModel(providerIndex, modelIndex, { reasoning: resolved });
-                      }}
-                      options={REASONING_OPTIONS.map((opt) => ({
-                        value: opt.value,
-                        label: t(opt.labelKey),
-                      }))}
-                      data-testid={`daemon-llm-provider-${providerIndex}-model-${modelIndex}-reasoning`}
-                    />
-                  </Form.Item>
-                </Form>
-              </Card>
+                <div
+                  css={css`
+                    flex: 1;
+                    min-width: 0;
+                  `}
+                >
+                  <label
+                    css={css`
+                      display: block;
+                      margin-bottom: ${theme.spacing[1]};
+                      font-size: 12px;
+                      color: ${theme.color.textSecondary};
+                    `}
+                  >
+                    {t('daemon.llm.reasoning')}
+                  </label>
+                  <Select
+                    value={String(model.reasoning ?? 'auto')}
+                    onChange={(v) => {
+                      const resolved = v === 'auto' ? null : v === 'true';
+                      updateModel(providerIndex, modelIndex, { reasoning: resolved });
+                    }}
+                    options={REASONING_OPTIONS.map((opt) => ({
+                      value: opt.value,
+                      label: t(opt.labelKey),
+                    }))}
+                    size="small"
+                    style={{ width: '100%' }}
+                    data-testid={`daemon-llm-provider-${providerIndex}-model-${modelIndex}-reasoning`}
+                  />
+                </div>
+
+                <Button
+                  type="text"
+                  danger
+                  size="small"
+                  icon={<Trash2 size={14} />}
+                  onClick={() => removeModel(providerIndex, modelIndex)}
+                  css={css`
+                    margin-bottom: 1px;
+                  `}
+                  data-testid={`daemon-llm-provider-${providerIndex}-remove-model-${modelIndex}`}
+                />
+              </div>
             ))}
-
-            <Button
-              type="dashed"
-              size="small"
-              icon={<Plus size={14} />}
-              onClick={() => addModel(providerIndex)}
-              data-testid={`daemon-llm-provider-${providerIndex}-add-model`}
-            >
-              {t('daemon.llm.addModel')}
-            </Button>
           </div>
         </Card>
       ))}
 
       <Button
         type="dashed"
+        size="small"
         icon={<Plus size={14} />}
         onClick={addProvider}
         data-testid="daemon-llm-add-provider"

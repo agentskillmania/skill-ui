@@ -3,8 +3,8 @@ const enUS = {
     tab: 'AI Connection',
     llm: {
       title: 'LLM Connection',
-      providerTitle: 'Provider {{index}}',
-      providerName: 'Name',
+      providerTitle: 'Connection {{index}}',
+      providerName: 'Provider',
       baseUrl: 'Base URL',
       apiKey: 'API Key',
       maxConcurrency: 'Max Concurrency',

@@ -3,8 +3,8 @@ const zhCN = {
     tab: 'AI 连接',
     llm: {
       title: 'LLM 连接',
-      providerTitle: 'Provider {{index}}',
-      providerName: '名称',
+      providerTitle: '连接 {{index}}',
+      providerName: '服务商',
       baseUrl: 'Base URL',
       apiKey: 'API Key',
       maxConcurrency: '最大并发',
