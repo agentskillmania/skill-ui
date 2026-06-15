@@ -196,6 +196,9 @@ describe('DaemonConfigPanel', () => {
     const removeButton = screen.getByTestId('daemon-llm-remove-provider-1');
     await userEvent.click(removeButton);
 
+    const confirmButton = await screen.findByText('common.ok');
+    await userEvent.click(confirmButton);
+
     const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
     expect(lastCall.llm.providers).toHaveLength(1);
     expect(lastCall.llm.providers[0].name).toBe('openai');
@@ -231,6 +234,9 @@ describe('DaemonConfigPanel', () => {
 
     const removeButton = screen.getByTestId('daemon-llm-provider-0-remove-model-1');
     await userEvent.click(removeButton);
+
+    const confirmButton = await screen.findByText('common.ok');
+    await userEvent.click(confirmButton);
 
     const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
     expect(lastCall.llm.providers[0].models).toHaveLength(1);

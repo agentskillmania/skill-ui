@@ -7,7 +7,7 @@
 
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
-import { Button, Card, Col, Form, Input, InputNumber, Row, Select, Space } from 'antd';
+import { Button, Card, Col, Form, Input, InputNumber, Popconfirm, Row, Select, Space } from 'antd';
 import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -190,13 +190,19 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
                               onClick={() => toggleProvider(providerField.key)}
                               data-testid={`daemon-llm-toggle-provider-${providerField.name}`}
                             />
-                            <Button
-                              type="text"
-                              danger
-                              icon={<Trash2 size={14} />}
-                              onClick={() => removeProvider(providerField.name)}
-                              data-testid={`daemon-llm-remove-provider-${providerField.name}`}
-                            />
+                            <Popconfirm
+                              title={t('daemon.llm.removeProviderConfirm')}
+                              okText={t('common.ok')}
+                              cancelText={t('common.cancel')}
+                              onConfirm={() => removeProvider(providerField.name)}
+                            >
+                              <Button
+                                type="text"
+                                danger
+                                icon={<Trash2 size={14} />}
+                                data-testid={`daemon-llm-remove-provider-${providerField.name}`}
+                              />
+                            </Popconfirm>
                           </Space>
                         }
                         css={css`
@@ -372,13 +378,19 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
                                         labelCol={{ span: 24 }}
                                         wrapperCol={{ span: 24 }}
                                       >
-                                        <Button
-                                          type="text"
-                                          danger
-                                          icon={<Trash2 size={14} />}
-                                          onClick={() => removeModel(modelField.name)}
-                                          data-testid={`daemon-llm-provider-${providerField.name}-remove-model-${modelField.name}`}
-                                        />
+                                        <Popconfirm
+                                          title={t('daemon.llm.removeModelConfirm')}
+                                          okText={t('common.ok')}
+                                          cancelText={t('common.cancel')}
+                                          onConfirm={() => removeModel(modelField.name)}
+                                        >
+                                          <Button
+                                            type="text"
+                                            danger
+                                            icon={<Trash2 size={14} />}
+                                            data-testid={`daemon-llm-provider-${providerField.name}-remove-model-${modelField.name}`}
+                                          />
+                                        </Popconfirm>
                                       </Form.Item>
                                     </Col>
                                   </Row>

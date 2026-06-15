@@ -2,6 +2,8 @@ const enUS = {
   common: {
     submit: 'Submit',
     reset: 'Reset',
+    ok: 'OK',
+    cancel: 'Cancel',
   },
   daemon: {
     tab: 'AI Connection',
@@ -19,8 +21,10 @@ const enUS = {
       reasoning: 'Reasoning',
       addProvider: 'Add Connection',
       removeProvider: 'Remove Provider',
+      removeProviderConfirm: 'Are you sure you want to delete this connection?',
       addModel: 'Add Model',
       removeModel: 'Remove Model',
+      removeModelConfirm: 'Are you sure you want to delete this model?',
     },
     server: {
       title: 'Server',

@@ -2,6 +2,8 @@ const zhCN = {
   common: {
     submit: '提交',
     reset: '还原',
+    ok: '确定',
+    cancel: '取消',
   },
   daemon: {
     tab: 'AI 连接',
@@ -19,8 +21,10 @@ const zhCN = {
       reasoning: '推理能力',
       addProvider: '添加连接',
       removeProvider: '删除 Provider',
+      removeProviderConfirm: '确定要删除这个连接吗？',
       addModel: '添加模型',
       removeModel: '删除模型',
+      removeModelConfirm: '确定要删除这个模型吗？',
     },
     server: {
       title: '服务',
