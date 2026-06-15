@@ -7,9 +7,9 @@
 
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
-import { Button, Card, Col, Form, Input, InputNumber, Row, Select } from 'antd';
-import { Plus, Trash2 } from 'lucide-react';
-import { useEffect } from 'react';
+import { Button, Card, Col, Form, Input, InputNumber, Row, Select, Space } from 'antd';
+import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
@@ -108,6 +108,7 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const [form] = Form.useForm<LlmQuickInitForm>();
+  const [collapsedKeys, setCollapsedKeys] = useState<Set<string | number>>(new Set());
 
   useEffect(() => {
     form.setFieldsValue(normalizeLlmForForm(value.llm));
@@ -115,6 +116,18 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
 
   const handleValuesChange = (_changed: unknown, all: LlmQuickInitForm) => {
     onChange({ llm: normalizeLlmFromForm(all) });
+  };
+
+  const toggleProvider = (key: string | number) => {
+    setCollapsedKeys((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
   };
 
   return (
@@ -147,6 +160,7 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
                   {({ getFieldValue }) => {
                     const providerName: string =
                       getFieldValue(['providers', providerField.name, 'name']) ?? '';
+                    const isCollapsed = collapsedKeys.has(providerField.key);
                     return (
                       <Card
                         size="small"
@@ -167,18 +181,29 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
                           </span>
                         }
                         extra={
-                          <Button
-                            type="text"
-                            danger
-                            icon={<Trash2 size={14} />}
-                            onClick={() => removeProvider(providerField.name)}
-                            data-testid={`daemon-llm-remove-provider-${providerField.name}`}
-                          />
+                          <Space>
+                            <Button
+                              type="text"
+                              icon={
+                                isCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />
+                              }
+                              onClick={() => toggleProvider(providerField.key)}
+                              data-testid={`daemon-llm-toggle-provider-${providerField.name}`}
+                            />
+                            <Button
+                              type="text"
+                              danger
+                              icon={<Trash2 size={14} />}
+                              onClick={() => removeProvider(providerField.name)}
+                              data-testid={`daemon-llm-remove-provider-${providerField.name}`}
+                            />
+                          </Space>
                         }
                         css={css`
                           margin-bottom: ${theme.spacing[3]};
                           .ant-card-body {
-                            padding: ${theme.spacing[3]};
+                            padding: ${isCollapsed ? 0 : theme.spacing[3]};
+                            display: ${isCollapsed ? 'none' : 'block'};
                           }
                         `}
                       >
