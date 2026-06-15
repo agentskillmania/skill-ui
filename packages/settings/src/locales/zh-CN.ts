@@ -13,7 +13,7 @@ const zhCN = {
       contextWindow: 'Context Window',
       maxTokens: 'Max Tokens',
       reasoning: '推理能力',
-      addProvider: '添加 Provider',
+      addProvider: '添加连接',
       removeProvider: '删除 Provider',
       addModel: '添加模型',
       removeModel: '删除模型',

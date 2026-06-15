@@ -13,7 +13,7 @@ const enUS = {
       contextWindow: 'Context Window',
       maxTokens: 'Max Tokens',
       reasoning: 'Reasoning',
-      addProvider: 'Add Provider',
+      addProvider: 'Add Connection',
       removeProvider: 'Remove Provider',
       addModel: 'Add Model',
       removeModel: 'Remove Model',
