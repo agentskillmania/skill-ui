@@ -14,12 +14,14 @@ type Story = StoryObj;
 
 const defaultConfig: DaemonConfig = {
   llm: {
-    baseUrl: 'https://api.openai.com/v1',
-    apiKey: 'sk-proj-xxxxxxxxxxxxxxxx',
-    model: 'gpt-4o',
-    contextWindow: null,
-    maxTokens: null,
-    reasoning: 'auto',
+    providers: [
+      {
+        name: 'openai',
+        apiKey: 'sk-proj-xxxxxxxxxxxxxxxx',
+        baseUrl: 'https://api.openai.com/v1',
+        models: [{ modelId: 'gpt-4o' }],
+      },
+    ],
   },
   server: {
     host: 'localhost',
@@ -27,7 +29,7 @@ const defaultConfig: DaemonConfig = {
   },
 };
 
-/** Default state with typical values. */
+/** Default state with a single provider. */
 export const Default: Story = {
   render: (args) => {
     const [value, setValue] = useState<DaemonConfig>(defaultConfig);
@@ -45,7 +47,7 @@ export const Default: Story = {
 export const Empty: Story = {
   render: (args) => {
     const [value, setValue] = useState<DaemonConfig>({
-      llm: { baseUrl: '', apiKey: '', model: '' },
+      llm: { providers: [{ name: '', apiKey: '', models: [{ modelId: '' }] }] },
       server: { host: 'localhost', port: 3100 },
     });
     return (
@@ -63,14 +65,55 @@ export const DeepSeek: Story = {
   render: (args) => {
     const [value, setValue] = useState<DaemonConfig>({
       llm: {
-        baseUrl: 'https://api.deepseek.com/v1',
-        apiKey: 'sk-xxxxxxxx',
-        model: 'deepseek-chat',
-        contextWindow: 64000,
-        maxTokens: 8192,
-        reasoning: 'auto',
+        providers: [
+          {
+            name: 'deepseek',
+            apiKey: 'sk-xxxxxxxx',
+            baseUrl: 'https://api.deepseek.com/v1',
+            models: [
+              {
+                modelId: 'deepseek-chat',
+                contextWindow: 64000,
+                maxTokens: 8192,
+                reasoning: false,
+              },
+            ],
+          },
+        ],
       },
       server: { host: '0.0.0.0', port: 8080 },
+    });
+    return (
+      <DaemonConfigPanel
+        {...args}
+        value={value}
+        onChange={(partial) => setValue((prev) => ({ ...prev, ...partial }))}
+      />
+    );
+  },
+};
+
+/** Multiple providers with several models each. */
+export const MultiProvider: Story = {
+  render: (args) => {
+    const [value, setValue] = useState<DaemonConfig>({
+      llm: {
+        providers: [
+          {
+            name: 'openai',
+            apiKey: 'sk-openai',
+            baseUrl: 'https://api.openai.com/v1',
+            models: [{ modelId: 'gpt-4o' }, { modelId: 'gpt-4o-mini' }],
+          },
+          {
+            name: 'anthropic',
+            apiKey: 'sk-anthropic',
+            baseUrl: 'https://api.anthropic.com/v1',
+            models: [{ modelId: 'claude-3-5-sonnet' }],
+          },
+        ],
+      },
+      server: { host: 'localhost', port: 3100 },
     });
     return (
       <DaemonConfigPanel

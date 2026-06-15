@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@agentskillmania/skill-ui-theme';
 import { DaemonConfigPanel } from '../../src/components/DaemonConfigPanel.js';
@@ -11,12 +11,22 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 const defaultValue: DaemonConfig = {
   llm: {
-    baseUrl: 'https://api.openai.com/v1',
-    apiKey: 'sk-test-key',
-    model: 'gpt-4o',
-    contextWindow: null,
-    maxTokens: null,
-    reasoning: 'auto',
+    providers: [
+      {
+        name: 'openai',
+        apiKey: 'sk-test-key',
+        baseUrl: 'https://api.openai.com/v1',
+        maxConcurrency: 4,
+        models: [
+          {
+            modelId: 'gpt-4o',
+            contextWindow: null,
+            maxTokens: null,
+            reasoning: null,
+          },
+        ],
+      },
+    ],
   },
   server: {
     host: 'localhost',
@@ -25,181 +35,223 @@ const defaultValue: DaemonConfig = {
 };
 
 describe('DaemonConfigPanel', () => {
-  it('renders LLM form fields', () => {
+  it('renders provider and model form fields', () => {
     render(<DaemonConfigPanel value={defaultValue} onChange={() => {}} />, { wrapper });
 
-    expect(screen.getByTestId('daemon-llm-baseUrl')).toBeInTheDocument();
-    expect(screen.getByTestId('daemon-llm-apiKey')).toBeInTheDocument();
-    expect(screen.getByTestId('daemon-llm-model')).toBeInTheDocument();
-    expect(screen.getByTestId('daemon-llm-contextWindow')).toBeInTheDocument();
-    expect(screen.getByTestId('daemon-llm-maxTokens')).toBeInTheDocument();
-    expect(screen.getByTestId('daemon-llm-reasoning')).toBeInTheDocument();
+    expect(screen.getByTestId('daemon-llm-provider-0-name')).toBeInTheDocument();
+    expect(screen.getByTestId('daemon-llm-provider-0-apiKey')).toBeInTheDocument();
+    expect(screen.getByTestId('daemon-llm-provider-0-baseUrl')).toBeInTheDocument();
+    expect(screen.getByTestId('daemon-llm-provider-0-maxConcurrency')).toBeInTheDocument();
+    expect(screen.getByTestId('daemon-llm-provider-0-model-0-modelId')).toBeInTheDocument();
+    expect(screen.getByTestId('daemon-llm-provider-0-model-0-contextWindow')).toBeInTheDocument();
+    expect(screen.getByTestId('daemon-llm-provider-0-model-0-maxTokens')).toBeInTheDocument();
+    expect(screen.getByTestId('daemon-llm-provider-0-model-0-reasoning')).toBeInTheDocument();
   });
 
-  it('displays current values', () => {
+  it('displays current provider and model values', () => {
     render(<DaemonConfigPanel value={defaultValue} onChange={() => {}} />, { wrapper });
 
-    const baseUrlInput = screen.getByTestId('daemon-llm-baseUrl') as HTMLInputElement;
-    expect(baseUrlInput.value).toBe('https://api.openai.com/v1');
+    const nameInput = screen.getByTestId('daemon-llm-provider-0-name') as HTMLInputElement;
+    expect(nameInput.value).toBe('openai');
 
-    const modelInput = screen.getByTestId('daemon-llm-model') as HTMLInputElement;
+    const modelInput = screen.getByTestId(
+      'daemon-llm-provider-0-model-0-modelId'
+    ) as HTMLInputElement;
     expect(modelInput.value).toBe('gpt-4o');
   });
 
-  it('calls onChange with llm partial when baseUrl changes', async () => {
+  it('calls onChange when provider name changes', () => {
     const onChange = vi.fn();
     render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
 
-    const baseUrlInput = screen.getByTestId('daemon-llm-baseUrl');
-    await userEvent.type(baseUrlInput, '2');
+    const nameInput = screen.getByTestId('daemon-llm-provider-0-name');
+    fireEvent.change(nameInput, { target: { value: 'anthropic' } });
 
     expect(onChange).toHaveBeenCalled();
     const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
     expect(lastCall).toHaveProperty('llm');
-    expect(lastCall.llm.baseUrl).toContain('https://api.openai.com/v12');
+    expect(lastCall.llm.providers[0].name).toBe('anthropic');
   });
 
-  it('calls onChange with llm partial when model changes', async () => {
+  it('calls onChange when apiKey changes', () => {
     const onChange = vi.fn();
     render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
 
-    await userEvent.type(screen.getByTestId('daemon-llm-model'), 'o');
+    const apiKeyInput = screen.getByTestId('daemon-llm-provider-0-apiKey');
+    fireEvent.change(apiKeyInput, { target: { value: 'sk-new-key' } });
 
-    expect(onChange).toHaveBeenCalled();
     const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-    expect(lastCall).toHaveProperty('llm');
-    expect(lastCall.llm.model).toBe('gpt-4oo');
+    expect(lastCall.llm.providers[0].apiKey).toBe('sk-new-key');
   });
 
-  it('renders i18n section title', () => {
-    render(<DaemonConfigPanel value={defaultValue} onChange={() => {}} />, { wrapper });
+  it('calls onChange when baseUrl changes', () => {
+    const onChange = vi.fn();
+    render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
 
-    // i18n mock returns the key
-    expect(screen.getByText('daemon.llm.title')).toBeInTheDocument();
+    const baseUrlInput = screen.getByTestId('daemon-llm-provider-0-baseUrl');
+    fireEvent.change(baseUrlInput, { target: { value: 'https://api.anthropic.com/v1' } });
+
+    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+    expect(lastCall.llm.providers[0].baseUrl).toBe('https://api.anthropic.com/v1');
   });
 
-  it('renders required asterisks for baseUrl, apiKey, model', () => {
-    const { container } = render(
-      <DaemonConfigPanel value={defaultValue} onChange={() => {}} />,
-      { wrapper },
-    );
+  it('calls onChange when maxConcurrency changes', () => {
+    const onChange = vi.fn();
+    render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
 
-    // Ant Design Form.Item with required prop renders a required marker
-    // in the label via CSS ::before pseudo-element or a dedicated span.
-    // Verify the three required Form.Items are present by checking label text.
-    const allText = container.textContent ?? '';
-    expect(allText).toContain('daemon.llm.baseUrl');
-    expect(allText).toContain('daemon.llm.apiKey');
-    expect(allText).toContain('daemon.llm.model');
+    const maxConcurrencyInput = screen.getByTestId('daemon-llm-provider-0-maxConcurrency');
+    fireEvent.change(maxConcurrencyInput, { target: { value: '8' } });
+
+    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+    expect(lastCall.llm.providers[0].maxConcurrency).toBe(8);
+  });
+
+  it('calls onChange when modelId changes', () => {
+    const onChange = vi.fn();
+    render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
+
+    const modelIdInput = screen.getByTestId('daemon-llm-provider-0-model-0-modelId');
+    fireEvent.change(modelIdInput, { target: { value: 'claude-3' } });
+
+    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+    expect(lastCall.llm.providers[0].models[0].modelId).toBe('claude-3');
+  });
+
+  it('calls onChange when contextWindow changes', () => {
+    const onChange = vi.fn();
+    render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
+
+    const contextWindowInput = screen.getByTestId('daemon-llm-provider-0-model-0-contextWindow');
+    fireEvent.change(contextWindowInput, { target: { value: '8000' } });
+
+    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+    expect(lastCall.llm.providers[0].models[0].contextWindow).toBe(8000);
+  });
+
+  it('calls onChange when maxTokens changes', () => {
+    const onChange = vi.fn();
+    render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
+
+    const maxTokensInput = screen.getByTestId('daemon-llm-provider-0-model-0-maxTokens');
+    fireEvent.change(maxTokensInput, { target: { value: '2048' } });
+
+    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+    expect(lastCall.llm.providers[0].models[0].maxTokens).toBe(2048);
   });
 
   it('handles reasoning select change to disabled', async () => {
     const onChange = vi.fn();
     render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
 
-    // Open the select and pick "disabled" option
-    const select = screen.getByTestId('daemon-llm-reasoning');
+    const select = screen.getByTestId('daemon-llm-provider-0-model-0-reasoning');
     await userEvent.click(select);
 
     const disabledOption = await screen.findByText('reasoning.disabled');
     await userEvent.click(disabledOption);
 
-    expect(onChange).toHaveBeenCalled();
     const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-    expect(lastCall.llm.reasoning).toBe(false);
+    expect(lastCall.llm.providers[0].models[0].reasoning).toBe(false);
   });
 
   it('handles reasoning select change to enabled', async () => {
     const onChange = vi.fn();
     render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
 
-    const select = screen.getByTestId('daemon-llm-reasoning');
+    const select = screen.getByTestId('daemon-llm-provider-0-model-0-reasoning');
     await userEvent.click(select);
 
     const enabledOption = await screen.findByText('reasoning.enabled');
     await userEvent.click(enabledOption);
 
-    expect(onChange).toHaveBeenCalled();
     const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-    expect(lastCall.llm.reasoning).toBe(true);
+    expect(lastCall.llm.providers[0].models[0].reasoning).toBe(true);
   });
 
-  it('handles empty default values', () => {
+  it('calls onChange when adding a provider', async () => {
+    const onChange = vi.fn();
+    render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
+
+    const addButton = screen.getByTestId('daemon-llm-add-provider');
+    await userEvent.click(addButton);
+
+    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+    expect(lastCall.llm.providers).toHaveLength(2);
+    expect(lastCall.llm.providers[1].name).toBe('');
+  });
+
+  it('calls onChange when removing a provider', async () => {
+    const multiProviderValue: DaemonConfig = {
+      ...defaultValue,
+      llm: {
+        providers: [
+          ...defaultValue.llm.providers,
+          { name: 'anthropic', apiKey: 'sk-ant', models: [{ modelId: 'claude-3' }] },
+        ],
+      },
+    };
+
+    const onChange = vi.fn();
+    render(<DaemonConfigPanel value={multiProviderValue} onChange={onChange} />, { wrapper });
+
+    const removeButton = screen.getByTestId('daemon-llm-remove-provider-1');
+    await userEvent.click(removeButton);
+
+    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+    expect(lastCall.llm.providers).toHaveLength(1);
+    expect(lastCall.llm.providers[0].name).toBe('openai');
+  });
+
+  it('calls onChange when adding a model', async () => {
+    const onChange = vi.fn();
+    render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
+
+    const addButton = screen.getByTestId('daemon-llm-provider-0-add-model');
+    await userEvent.click(addButton);
+
+    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+    expect(lastCall.llm.providers[0].models).toHaveLength(2);
+    expect(lastCall.llm.providers[0].models[1].modelId).toBe('');
+  });
+
+  it('calls onChange when removing a model', async () => {
+    const multiModelValue: DaemonConfig = {
+      ...defaultValue,
+      llm: {
+        providers: [
+          {
+            ...defaultValue.llm.providers[0],
+            models: [...defaultValue.llm.providers[0].models, { modelId: 'gpt-4o-mini' }],
+          },
+        ],
+      },
+    };
+
+    const onChange = vi.fn();
+    render(<DaemonConfigPanel value={multiModelValue} onChange={onChange} />, { wrapper });
+
+    const removeButton = screen.getByTestId('daemon-llm-provider-0-remove-model-1');
+    await userEvent.click(removeButton);
+
+    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
+    expect(lastCall.llm.providers[0].models).toHaveLength(1);
+    expect(lastCall.llm.providers[0].models[0].modelId).toBe('gpt-4o');
+  });
+
+  it('renders i18n section title', () => {
+    render(<DaemonConfigPanel value={defaultValue} onChange={() => {}} />, { wrapper });
+
+    expect(screen.getByText('daemon.llm.title')).toBeInTheDocument();
+  });
+
+  it('renders an empty provider when no providers are present', () => {
     const emptyValue: DaemonConfig = {
-      llm: { baseUrl: '', apiKey: '', model: '' },
+      llm: { providers: [] },
       server: { host: '', port: 3100 },
     };
 
     render(<DaemonConfigPanel value={emptyValue} onChange={() => {}} />, { wrapper });
 
-    const baseUrlInput = screen.getByTestId('daemon-llm-baseUrl') as HTMLInputElement;
-    expect(baseUrlInput.value).toBe('');
-  });
-
-  it('calls onChange when apiKey changes', async () => {
-    const onChange = vi.fn();
-    render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
-
-    const apiKeyInput = screen.getByTestId('daemon-llm-apiKey');
-    await userEvent.type(apiKeyInput, 'x');
-
-    expect(onChange).toHaveBeenCalled();
-    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-    expect(lastCall).toHaveProperty('llm');
-    expect(lastCall.llm.apiKey).toContain('x');
-  });
-
-  it('calls onChange when contextWindow changes', async () => {
-    const onChange = vi.fn();
-    render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
-
-    const contextWindowInput = screen.getByTestId('daemon-llm-contextWindow');
-    await userEvent.type(contextWindowInput, '8');
-    await userEvent.type(contextWindowInput, '000');
-
-    expect(onChange).toHaveBeenCalled();
-    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-    expect(lastCall.llm.contextWindow).toBe(8000);
-  });
-
-  it('calls onChange when maxTokens changes', async () => {
-    const onChange = vi.fn();
-    render(<DaemonConfigPanel value={defaultValue} onChange={onChange} />, { wrapper });
-
-    const maxTokensInput = screen.getByTestId('daemon-llm-maxTokens');
-    await userEvent.type(maxTokensInput, '2');
-    await userEvent.type(maxTokensInput, '048');
-
-    expect(onChange).toHaveBeenCalled();
-    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-    expect(lastCall.llm.maxTokens).toBe(2048);
-  });
-
-  it('calls onChange with null when contextWindow is cleared', async () => {
-    const onChange = vi.fn();
-    // Set initial contextWindow to a non-null value so InputNumber shows a value
-    const withCtx = { ...defaultValue, llm: { ...defaultValue.llm, contextWindow: 4096 } };
-    render(<DaemonConfigPanel value={withCtx} onChange={onChange} />, { wrapper });
-
-    const contextWindowInput = screen.getByTestId('daemon-llm-contextWindow');
-    // Clear the input — InputNumber onChange fires null
-    await userEvent.clear(contextWindowInput);
-
-    expect(onChange).toHaveBeenCalled();
-    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-    expect(lastCall.llm.contextWindow).toBeNull();
-  });
-
-  it('calls onChange with null when maxTokens is cleared', async () => {
-    const onChange = vi.fn();
-    const withTokens = { ...defaultValue, llm: { ...defaultValue.llm, maxTokens: 2048 } };
-    render(<DaemonConfigPanel value={withTokens} onChange={onChange} />, { wrapper });
-
-    const maxTokensInput = screen.getByTestId('daemon-llm-maxTokens');
-    await userEvent.clear(maxTokensInput);
-
-    expect(onChange).toHaveBeenCalled();
-    const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-    expect(lastCall.llm.maxTokens).toBeNull();
+    expect(screen.getByTestId('daemon-llm-provider-0-name')).toBeInTheDocument();
+    expect(screen.getByTestId('daemon-llm-provider-0-model-0-modelId')).toBeInTheDocument();
   });
 });

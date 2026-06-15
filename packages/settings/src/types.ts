@@ -5,24 +5,50 @@
  */
 
 /**
- * Daemon LLM configuration.
+ * Single LLM model entry.
  *
  * @remarks
- * Maps to `config.yaml` llm section managed by wrangler-daemon.
+ * Mirrors the model shape used by `@agentskillmania/colts` / `wrangler-daemon`.
  */
-export interface DaemonLlmConfig {
-  /** API base URL (e.g. https://api.openai.com/v1) */
-  baseUrl: string;
-  /** API key for authentication */
-  apiKey: string;
-  /** Default model name */
-  model: string;
+export interface LlmModelEntry {
+  /** Model identifier (e.g. gpt-4o, deepseek-chat) */
+  modelId: string;
   /** Model context window override (null = auto) */
   contextWindow?: number | null;
   /** Model max output tokens override (null = auto) */
   maxTokens?: number | null;
-  /** Reasoning capability override ('auto' = detect from model) */
-  reasoning?: 'auto' | boolean | null;
+  /** Reasoning capability override (null = auto) */
+  reasoning?: boolean | null;
+}
+
+/**
+ * Single LLM provider entry (one API key per provider).
+ *
+ * @remarks
+ * Mirrors the provider shape used by `@agentskillmania/colts` / `wrangler-daemon`.
+ */
+export interface LlmProviderEntry {
+  /** Provider name (e.g. openai, anthropic, deepseek) */
+  name: string;
+  /** API key for authentication */
+  apiKey: string;
+  /** API base URL (e.g. https://api.openai.com/v1) */
+  baseUrl?: string;
+  /** Provider-level max concurrency override (null = auto) */
+  maxConcurrency?: number | null;
+  /** Models served by this provider */
+  models: LlmModelEntry[];
+}
+
+/**
+ * Multi-provider LLM quick init configuration.
+ *
+ * @remarks
+ * Mirrors `LLMQuickInit` from `@agentskillmania/colts`.
+ */
+export interface LlmQuickInit {
+  /** Ordered list of providers */
+  providers: LlmProviderEntry[];
 }
 
 /**
@@ -46,7 +72,7 @@ export interface DaemonServerConfig {
  */
 export interface DaemonConfig {
   /** LLM connection settings */
-  llm: DaemonLlmConfig;
+  llm: LlmQuickInit;
   /** Server binding settings */
   server: DaemonServerConfig;
 }
@@ -165,7 +191,7 @@ export interface SettingsPanelProps {
   onDaemonConfigChange: (partial: Partial<DaemonConfig>) => void;
   /** Current MCP configuration */
   mcpConfig: McpConfig;
-  /** Callback when MCP config changes */
+  /** Callback when MCP configuration changes */
   onMcpConfigChange: (config: McpConfig) => void;
   /** Current application preferences */
   preferences: AppPreferences;

@@ -15,7 +15,16 @@ function wrapper({ children }: { children: React.ReactNode }) {
 }
 
 const daemonConfig: DaemonConfig = {
-  llm: { baseUrl: 'https://api.openai.com/v1', apiKey: 'sk-test', model: 'gpt-4o' },
+  llm: {
+    providers: [
+      {
+        name: 'openai',
+        apiKey: 'sk-test',
+        baseUrl: 'https://api.openai.com/v1',
+        models: [{ modelId: 'gpt-4o' }],
+      },
+    ],
+  },
   server: { host: 'localhost', port: 3100 },
 };
 
@@ -44,7 +53,7 @@ describe('SettingsPanel', () => {
         preferences={preferences}
         onPreferencesChange={() => {}}
       />,
-      { wrapper },
+      { wrapper }
     );
 
     // Tab labels contain the tab names
@@ -63,7 +72,7 @@ describe('SettingsPanel', () => {
         preferences={preferences}
         onPreferencesChange={() => {}}
       />,
-      { wrapper },
+      { wrapper }
     );
 
     // Preferences panel is the first tab and should be visible
@@ -80,7 +89,7 @@ describe('SettingsPanel', () => {
         preferences={preferences}
         onPreferencesChange={() => {}}
       />,
-      { wrapper },
+      { wrapper }
     );
 
     const mcpTab = screen.getByText('mcp.title');
@@ -99,7 +108,7 @@ describe('SettingsPanel', () => {
         preferences={preferences}
         onPreferencesChange={() => {}}
       />,
-      { wrapper },
+      { wrapper }
     );
 
     const prefsTab = screen.getByText('prefs.title');
@@ -118,7 +127,7 @@ describe('SettingsPanel', () => {
         preferences={preferences}
         onPreferencesChange={() => {}}
       />,
-      { wrapper },
+      { wrapper }
     );
 
     // Each tab has an SVG icon

@@ -14,12 +14,14 @@ type Story = StoryObj;
 
 const daemonConfig: DaemonConfig = {
   llm: {
-    baseUrl: 'https://api.openai.com/v1',
-    apiKey: 'sk-proj-xxxxxxxxxxxxxxxx',
-    model: 'gpt-4o',
-    contextWindow: null,
-    maxTokens: null,
-    reasoning: 'auto',
+    providers: [
+      {
+        name: 'openai',
+        apiKey: 'sk-proj-xxxxxxxxxxxxxxxx',
+        baseUrl: 'https://api.openai.com/v1',
+        models: [{ modelId: 'gpt-4o' }],
+      },
+    ],
   },
   server: {
     host: 'localhost',
@@ -71,7 +73,7 @@ export const Default: Story = {
 export const EmptySetup: Story = {
   render: (args) => {
     const [daemon, setDaemon] = useState<DaemonConfig>({
-      llm: { baseUrl: '', apiKey: '', model: '' },
+      llm: { providers: [{ name: '', apiKey: '', models: [{ modelId: '' }] }] },
       server: { host: 'localhost', port: 3100 },
     });
     const [mcp, setMcp] = useState<McpConfig>({
