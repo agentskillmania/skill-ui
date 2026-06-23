@@ -4,7 +4,6 @@ export { CompressionCard } from './CompressionCard.js';
 export { LLMContextCard } from './LLMContextCard.js';
 export type {
   SkillStateData,
-  SkillStackFrameData,
   CompressionData,
   AgentStateSectionProps,
 } from './types.js';

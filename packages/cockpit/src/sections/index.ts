@@ -9,7 +9,6 @@ export { SessionSection, SessionOverviewCard, SessionInfoCard } from './session/
 
 export type {
   SkillStateData,
-  SkillStackFrameData,
   CompressionData,
   AgentStateSectionProps,
 } from './agent-state/index.js';

@@ -34,17 +34,11 @@ export const Empty: Story = {
   },
 };
 
-/** Active skill with a nested call stack. */
+/** Active skill with the current skill name set. */
 export const ActiveSkill: Story = {
   args: {
     skillState: {
       current: 'execute-plan',
-      stack: [
-        { skillName: 'code-review', loadedAt: NOW - 45000 },
-        { skillName: 'analyze-repo', loadedAt: NOW - 120000 },
-      ],
-      loadedInstructions:
-        'You are code-reviewer, an expert code review agent.\n\n## Available skills:\n- code-review: Automated code review\n- execute-plan: Execute an approved plan\n\nWhen you COMPLETE your task, you MUST call the return_skill tool.',
     },
     compression: null,
     llm: null,
@@ -99,12 +93,6 @@ export const Full: Story = {
   args: {
     skillState: {
       current: 'execute-plan',
-      stack: [
-        { skillName: 'code-review', loadedAt: NOW - 45000 },
-        { skillName: 'analyze-repo', loadedAt: NOW - 120000 },
-      ],
-      loadedInstructions:
-        'You are code-reviewer, an expert code review agent.\n\n## Available skills:\n- code-review\n- execute-plan\n\nWhen you COMPLETE your task, you MUST call the return_skill tool.',
     },
     compression: {
       summary: 'Fixed 2 unused imports and 1 any type in types.ts and eventRows.tsx.',

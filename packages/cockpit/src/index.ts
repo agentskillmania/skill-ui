@@ -26,7 +26,6 @@ export type { SessionsPanelProps } from './panels/sessions/types.js';
 
 export type {
   SkillStateData,
-  SkillStackFrameData,
   CompressionData,
   AgentStateSectionProps,
 } from './sections/agent-state/types.js';

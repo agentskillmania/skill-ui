@@ -57,9 +57,7 @@
   "agentState": {
     "activeSkill": {
       "title": "Active Skill",
-      "none": "No active skill",
-      "stackDepth": "{{count}} deep",
-      "instructions": "Instructions"
+      "none": "No active skill"
     },
     "compression": {
       "title": "Compression",

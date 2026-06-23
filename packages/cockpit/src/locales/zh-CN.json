@@ -57,9 +57,7 @@
   "agentState": {
     "activeSkill": {
       "title": "活动技能",
-      "none": "无活动技能",
-      "stackDepth": "深度 {{count}}",
-      "instructions": "指令"
+      "none": "无活动技能"
     },
     "compression": {
       "title": "压缩",

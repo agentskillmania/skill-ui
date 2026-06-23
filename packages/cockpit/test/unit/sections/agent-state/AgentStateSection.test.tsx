@@ -16,8 +16,7 @@ function renderWithTheme(ui: React.ReactElement) {
 /** Helper: create minimal valid SkillStateData. */
 function createSkillState(overrides: Partial<SkillStateData> = {}): SkillStateData {
   return {
-    current: 'execute-plan',
-    stack: [],
+    current: null,
     ...overrides,
   };
 }

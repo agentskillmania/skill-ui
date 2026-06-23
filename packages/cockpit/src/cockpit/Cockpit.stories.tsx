@@ -364,11 +364,6 @@ const mockSessionBoardState: SessionBoardData = {
     context: {
       skillState: {
         current: 'execute-plan',
-        stack: [
-          { skillName: 'code-review', loadedAt: Date.now() - 45000 },
-          { skillName: 'analyze-repo', loadedAt: Date.now() - 120000 },
-        ],
-        loadedInstructions: 'You are executing the execute-plan skill.',
       },
       compression: {
         summary: 'Fixed 2 unused imports and 1 any type in types.ts and eventRows.tsx',

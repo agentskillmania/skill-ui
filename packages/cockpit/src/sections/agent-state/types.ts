@@ -3,24 +3,17 @@
  * and daemon-level diagnostics.
  */
 
-/** Skill state from colts AgentContext.skillState */
+/**
+ * Skill state from colts AgentContext.skillState.
+ *
+ * Note: colts' skill persistence redesign slimmed SkillState to just the
+ * current skill name. The call stack and loaded instructions are no longer
+ * part of SkillState — skill instructions now live in conversation history
+ * as load_skill tool results, not in this runtime state.
+ */
 export interface SkillStateData {
   /** Currently active skill name, or null when idle. */
   current: string | null;
-  /** Nested skill call stack (outermost first). */
-  stack: SkillStackFrameData[];
-  /** Loaded skill instructions text, if any. */
-  loadedInstructions?: string;
-}
-
-/** Single frame in the skill call stack. */
-export interface SkillStackFrameData {
-  /** Skill name. */
-  skillName: string;
-  /** Unix timestamp (ms) when this skill was loaded. */
-  loadedAt?: number;
-  /** Opaque task context from the skill. */
-  taskContext?: unknown;
 }
 
 /** Compression state from colts AgentContext.compression */

@@ -1,6 +1,5 @@
 /** @jsxImportSource @emotion/react */
 import type { Theme } from '@agentskillmania/skill-ui-theme';
-import { flexColumn, flexRow } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 
 /** Empty state text — muted, centered. */
@@ -34,27 +33,6 @@ export const codeBlockStyle = (theme: Theme, isExpanded: boolean) => css`
       ? 'white-space: pre-wrap; word-break: break-all;'
       : 'white-space: nowrap; overflow: hidden; text-overflow: ellipsis;'}
   }
-`;
-
-/** Stack frame row — skill name + time. */
-export const stackFrameStyle = (theme: Theme) => css`
-  ${flexRow(theme, '1')};
-  justify-content: space-between;
-  align-items: center;
-  padding: ${theme.spacing[1]} ${theme.spacing[2]};
-  background: ${theme.color.fillSecondary};
-  border-radius: ${theme.radius.base};
-
-  & + & {
-    margin-top: 2px;
-  }
-`;
-
-/** Stack frames container — indented list. */
-export const stackContainerStyle = (theme: Theme) => css`
-  padding-left: ${theme.spacing[3]};
-  ${flexColumn(theme, '0_5')};
-  margin-top: ${theme.spacing[2]};
 `;
 
 /** Truncated text block — for non-code content like summaries. */
