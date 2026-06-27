@@ -17,7 +17,9 @@
     "test:unit": "vitest run test/unit",
     "test:coverage": "vitest run test/unit --coverage",
     "test:watch": "vitest watch test/unit",
-    "prepublishOnly": "pnpm test:unit && pnpm build"
+    "prepublishOnly": "pnpm test:unit && pnpm build",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "author": {
     "name": "yusangeng",
