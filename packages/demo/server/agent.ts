@@ -111,11 +111,10 @@ export class AgentSession {
     };
 
     // Build LLM client from .env
-    const llmClient = new LLMClient({
-      baseUrl: process.env.LLM_BASE_URL,
-    });
+    const llmClient = new LLMClient();
     llmClient.registerProvider({
       name: 'openai',
+      baseUrl: process.env.LLM_BASE_URL,
       maxConcurrency: 10,
     });
     llmClient.registerApiKey({
