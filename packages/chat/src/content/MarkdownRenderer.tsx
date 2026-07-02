@@ -187,6 +187,9 @@ export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps)
             : undefined
         }
         openLinksInNewTab
+        // SEC13: escape raw HTML in markdown as plain text to prevent XSS.
+        // LLM output is untrusted; <script>/<img onerror> must not execute.
+        escapeRawHtml
       />
     </div>
   );
