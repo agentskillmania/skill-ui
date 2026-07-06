@@ -20,76 +20,87 @@ const ellipsisStyle = {
   whiteSpace: 'nowrap' as const,
 };
 
-export const SkillCard = memo(function SkillCard({ skill, onChat, onEdit, onDelete }: SkillCardProps) {
-  const theme = useTheme();
-  const { t } = useTranslation('skill-ui-portal');
-  const [hovered, setHovered] = useState(false);
+export const SkillCard = memo(
+  function SkillCard({ skill, onChat, onEdit, onDelete }: SkillCardProps) {
+    const theme = useTheme();
+    const { t } = useTranslation('skill-ui-portal');
+    const [hovered, setHovered] = useState(false);
 
-  return (
-    <Card
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      css={{
-        position: 'relative',
-        transition: `border-color ${theme.motion.duration.fast}, box-shadow ${theme.motion.duration.fast}`,
-        '&:hover': {
-          borderColor: theme.color.primary,
-          boxShadow: `0 2px 8px ${theme.color.primaryBg}`,
-        },
-      }}
-      actions={[
-        <Button size="small" icon={<Pencil size={14} />} onClick={onEdit}>
-          {t('edit')}
-        </Button>,
-        <Button type="primary" size="small" icon={<MessageCircle size={14} />} onClick={onChat}>
-          {t('chat')}
-        </Button>,
-      ]}
-    >
-      <div
+    return (
+      <Card
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         css={{
-          position: 'absolute',
-          top: 8,
-          right: 8,
-          zIndex: 1,
-          opacity: hovered ? 1 : 0,
-          transition: `opacity ${theme.motion.duration.fast}`,
+          position: 'relative',
+          transition: `border-color ${theme.motion.duration.fast}, box-shadow ${theme.motion.duration.fast}`,
+          '&:hover': {
+            borderColor: theme.color.primary,
+            boxShadow: `0 2px 8px ${theme.color.primaryBg}`,
+          },
         }}
+        actions={[
+          <Button size="small" icon={<Pencil size={14} />} onClick={onEdit}>
+            {t('edit')}
+          </Button>,
+          <Button type="primary" size="small" icon={<MessageCircle size={14} />} onClick={onChat}>
+            {t('chat')}
+          </Button>,
+        ]}
       >
-        <Popconfirm
-          title={t('deleteConfirmSkill')}
-          onConfirm={onDelete}
-          okText={t('delete')}
-          cancelText={t('cancel')}
-          okButtonProps={{ danger: true }}
+        <div
+          css={{
+            position: 'absolute',
+            top: 8,
+            right: 8,
+            zIndex: 1,
+            opacity: hovered ? 1 : 0,
+            transition: `opacity ${theme.motion.duration.fast}`,
+          }}
         >
-          <Button type="text" danger icon={<Trash2 size={14} />} size="small" />
-        </Popconfirm>
-      </div>
+          <Popconfirm
+            title={t('deleteConfirmSkill')}
+            onConfirm={onDelete}
+            okText={t('delete')}
+            cancelText={t('cancel')}
+            okButtonProps={{ danger: true }}
+          >
+            <Button type="text" danger icon={<Trash2 size={14} />} size="small" />
+          </Popconfirm>
+        </div>
 
-      <Card.Meta
-        avatar={<ResourceAvatar id={skill.id} name={skill.name} size={32} />}
-        title={
-          <Tooltip title={skill.name}>
-            <div css={ellipsisStyle}>{skill.name}</div>
-          </Tooltip>
-        }
-        description={
-          <div css={{ display: 'flex', flexDirection: 'column', gap: theme.spacing[1] }}>
-            <Tooltip title={skill.description}>
-              <div
-                css={{
-                  ...ellipsisStyle,
-                  color: theme.color.textSecondary,
-                  fontSize: theme.font.size.sm,
-                }}
-              >
-                {skill.description}
-              </div>
+        <Card.Meta
+          avatar={<ResourceAvatar id={skill.id} name={skill.name} size={32} />}
+          title={
+            <Tooltip title={skill.name}>
+              <div css={ellipsisStyle}>{skill.name}</div>
             </Tooltip>
-          </div>
-        }
-      />
-    </Card>
-  );
-});
+          }
+          description={
+            <div css={{ display: 'flex', flexDirection: 'column', gap: theme.spacing[1] }}>
+              <Tooltip title={skill.description}>
+                <div
+                  css={{
+                    ...ellipsisStyle,
+                    color: theme.color.textSecondary,
+                    fontSize: theme.font.size.sm,
+                  }}
+                >
+                  {skill.description}
+                </div>
+              </Tooltip>
+            </div>
+          }
+        />
+      </Card>
+    );
+  },
+  (prev, next) => {
+    // UI16: custom comparison — parent passes inline arrow callbacks.
+    if (prev.skill === next.skill) return true;
+    const a = prev.skill;
+    const b = next.skill;
+    return (
+      a.id === b.id && a.name === b.name && a.description === b.description && a.source === b.source
+    );
+  }
+);

@@ -16,10 +16,7 @@ const spin = keyframes`
   to { transform: rotate(360deg); }
 `;
 
-export function A2UIBlock({
-  block,
-  onAction,
-}: BlockProps) {
+export function A2UIBlock({ block, onAction }: BlockProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const meta = block.metadata as A2UIBlockMetadata | undefined;
@@ -289,7 +286,7 @@ export function A2UIBlock({
             />
             <span>{t('a2ui.initializing')}</span>
           </div>
-        ) : (
+        ) : smRef.current ? (
           <div
             css={css`
               min-height: 100px;
@@ -297,13 +294,13 @@ export function A2UIBlock({
             `}
           >
             <AGenUISurface
-              surfaceManager={smRef.current!}
+              surfaceManager={smRef.current}
               width="100%"
               height="100%"
               onAction={handleSurfaceAction}
             />
           </div>
-        )}
+        ) : null}
 
         {/* Gradient fade + expand button when overflow */}
         {isOverflow && engineReady && (

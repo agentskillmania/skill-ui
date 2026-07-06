@@ -2,6 +2,7 @@
  * Chat top-level component
  */
 import { css } from '@emotion/react';
+import { useMemo } from 'react';
 import { useTheme, flexColumn } from '@agentskillmania/skill-ui-theme';
 import type { ChatProps } from '../types.js';
 import { ChatContext } from '../context.js';
@@ -43,17 +44,33 @@ export function Chat({
   const { t } = useTranslation(NAMESPACE);
   const resolvedPlaceholder = placeholder ?? t('chat.placeholder');
 
-  const contextValue = {
-    renderers,
-    onConfirmHumanRequest,
-    onBlockAction,
-    messageDecorator,
-    onCopyMessage,
-    onResendMessage,
-    onRegenerateMessage,
-    onRollbackMessage,
-    onForkMessage,
-  };
+  // UI8: memoize contextValue so context consumers don't re-render on every
+  // parent render. Without useMemo every render creates a new object reference,
+  // forcing all ChatContext consumers to re-render even when nothing changed.
+  const contextValue = useMemo(
+    () => ({
+      renderers,
+      onConfirmHumanRequest,
+      onBlockAction,
+      messageDecorator,
+      onCopyMessage,
+      onResendMessage,
+      onRegenerateMessage,
+      onRollbackMessage,
+      onForkMessage,
+    }),
+    [
+      renderers,
+      onConfirmHumanRequest,
+      onBlockAction,
+      messageDecorator,
+      onCopyMessage,
+      onResendMessage,
+      onRegenerateMessage,
+      onRollbackMessage,
+      onForkMessage,
+    ]
+  );
 
   return (
     <ChatContext.Provider value={contextValue}>

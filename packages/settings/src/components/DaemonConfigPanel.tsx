@@ -9,7 +9,7 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Button, Card, Col, Form, Input, InputNumber, Popconfirm, Row, Select, Space } from 'antd';
 import { ChevronDown, ChevronUp, Plus, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
@@ -110,12 +110,23 @@ export function DaemonConfigPanel({ value, onChange, className }: DaemonConfigPa
   const [form] = Form.useForm<LlmQuickInitForm>();
   const [collapsedKeys, setCollapsedKeys] = useState<Set<string | number>>(new Set());
 
+  // UI6: track the last value emitted by handleValuesChange so the useEffect
+  // can skip setFieldsValue when the incoming value.llm is the one WE just
+  // produced. Without this, every keystroke triggers onChange → parent
+  // updates value → useEffect calls setFieldsValue → cursor jumps to end.
+  const lastEmittedRef = useRef<LlmQuickInit | null>(null);
+
   useEffect(() => {
+    // Skip if this value originated from our own onChange (round-trip echo).
+    if (lastEmittedRef.current === value.llm) return;
+    lastEmittedRef.current = null;
     form.setFieldsValue(normalizeLlmForForm(value.llm));
   }, [value.llm, form]);
 
   const handleValuesChange = (_changed: unknown, all: LlmQuickInitForm) => {
-    onChange({ llm: normalizeLlmFromForm(all) });
+    const normalized = normalizeLlmFromForm(all);
+    lastEmittedRef.current = normalized;
+    onChange({ llm: normalized });
   };
 
   const toggleProvider = (key: string | number) => {

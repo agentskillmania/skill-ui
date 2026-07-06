@@ -29,16 +29,22 @@ export function useCockpitLayout(defaultPanel: PanelId = 'event-log'): UseCockpi
 
   const switchPanel = useCallback(
     (panel: PanelId) => {
+      // UI10: setIsCollapsed must NOT be called inside the setActivePanel
+      // updater (nested setState + stale isCollapsed closure). Compute the
+      // decision outside and call each setter independently.
       setActivePanel((prev) => {
         if (prev === panel && !isCollapsed) {
-          setIsCollapsed(true);
-          return prev;
+          return prev; // same panel + expanded → will collapse below
         }
-        setIsCollapsed(false);
         return panel;
       });
+      if (activePanel === panel && !isCollapsed) {
+        setIsCollapsed(true);
+      } else {
+        setIsCollapsed(false);
+      }
     },
-    [isCollapsed]
+    [isCollapsed, activePanel]
   );
 
   const clampedSetWidth = useCallback((width: number) => {
