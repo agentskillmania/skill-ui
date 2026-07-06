@@ -47,6 +47,12 @@ export function VisualEditor({
   useEffect(() => {
     if (!rootRef.current) return;
 
+    // UI1: track whether the effect has been cleaned up before the async
+    // crepe.create() resolves. Without this, a fast unmount would run
+    // crepe.destroy() first, then create() resolves and we'd bind listeners
+    // onto a destroyed editor (orphan + console errors).
+    let cancelled = false;
+
     const crepe = new Crepe({
       root: rootRef.current,
       defaultValue: content,
@@ -60,13 +66,19 @@ export function VisualEditor({
     crepeRef.current = crepe;
 
     const initEditor = async () => {
-      await crepe.create();
+      try {
+        await crepe.create();
+      } catch (err) {
+        if (!cancelled) console.error('Crepe create failed:', err);
+        return;
+      }
+
+      // If the component unmounted during await, destroy already ran — bail.
+      if (cancelled) return;
 
       // Bind onChange callback
       crepe.on((listener: ListenerManager) => {
         listener.markdownUpdated((_ctx: unknown, markdown: string, _prev: string) => {
-          // isInternalChange flag will be reset in content sync useEffect,
-          // uses setTimeout(0) here to ensure reset happens after replaceAll completes
           if (isInternalChange.current) {
             isInternalChange.current = false;
             return;
@@ -75,13 +87,13 @@ export function VisualEditor({
         });
       });
 
-      // Set initial read-only state
       crepe.setReadonly(readOnly);
     };
 
     initEditor();
 
     return () => {
+      cancelled = true;
       crepe.destroy().catch((err: unknown) => {
         console.error('销毁 Crepe 编辑器失败:', err);
       });

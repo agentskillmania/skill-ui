@@ -42,15 +42,15 @@ export function useEditorLayout(): UseEditorLayoutReturn {
 
   const switchPanel = useCallback(
     (panel: Exclude<EditorPanel, null>) => {
+      // UI3: setIsCollapsed must NOT be called inside the setActivePanel
+      // updater (nested setState is an anti-pattern, can misbehave under
+      // React strict mode double-invoke). Call it separately before/after.
+      if (isCollapsed) {
+        setIsCollapsed(false);
+      }
       setActivePanel((prev) => {
-        // If collapsed, always expand and activate the clicked panel
-        if (isCollapsed) {
-          setIsCollapsed(false);
-          return panel;
-        }
         // If expanded and same panel, no-op (user should use chevron to collapse)
         if (prev === panel) return prev;
-        // Different panel — switch
         return panel;
       });
     },

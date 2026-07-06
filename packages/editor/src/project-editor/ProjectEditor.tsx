@@ -13,7 +13,13 @@ import { EmptyState, Sidebar, SidebarPanel, SplitDivider } from '@agentskillmani
 import type { SidebarIconItem } from '@agentskillmania/skill-ui-shared';
 import { FolderOpen, Bot, ClipboardCheck, TestTube2 } from 'lucide-react';
 import { NAMESPACE } from '../locales/index.js';
-import type { ProjectEditorProps, FileTab, CursorPosition, EditorPanel, ProjectFile } from '../types.js';
+import type {
+  ProjectEditorProps,
+  FileTab,
+  CursorPosition,
+  EditorPanel,
+  ProjectFile,
+} from '../types.js';
 import { EditorContext } from '../context/EditorContext.js';
 import { getFileLabel } from '../shared/file-utils.js';
 import { FileTabs } from '../sections/file-tabs/index.js';
@@ -105,9 +111,7 @@ export function ProjectEditor({
       const doClose = () => {
         const newTabs = editorOpenTabs.filter((tab) => tab.path !== path);
         onEditorOpenTabsChange(newTabs);
-        onEditorDirtyChange?.(
-          (editorDirtyFilePaths ?? []).filter((p) => p !== path)
-        );
+        onEditorDirtyChange?.((editorDirtyFilePaths ?? []).filter((p) => p !== path));
         if (editorActiveFilePath === path) {
           if (newTabs.length > 0) {
             onEditorActiveFileChange(newTabs[newTabs.length - 1].path);
@@ -129,7 +133,14 @@ export function ProjectEditor({
         doClose();
       }
     },
-    [editorOpenTabs, editorDirtyFilePaths, editorActiveFilePath, onEditorOpenTabsChange, onEditorDirtyChange, onEditorActiveFileChange]
+    [
+      editorOpenTabs,
+      editorDirtyFilePaths,
+      editorActiveFilePath,
+      onEditorOpenTabsChange,
+      onEditorDirtyChange,
+      onEditorActiveFileChange,
+    ]
   );
 
   const contextValue = useMemo(
@@ -142,7 +153,14 @@ export function ProjectEditor({
       setCursorPosition: onEditorCursorChange ?? (() => {}),
       setDirty: () => {}, // No longer set dirty via context
     }),
-    [editorEditMode, editorActiveFilePath, isDirty, editorCursorPosition, onEditorEditModeChange, onEditorCursorChange]
+    [
+      editorEditMode,
+      editorActiveFilePath,
+      isDirty,
+      editorCursorPosition,
+      onEditorEditModeChange,
+      onEditorCursorChange,
+    ]
   );
 
   const renderPanel = () => {
@@ -153,7 +171,11 @@ export function ProjectEditor({
       case 'files':
         return (
           <SidebarPanel title={t('activityBar.files')} icon={FolderOpen}>
-            <FileTree files={editorFiles} activeFilePath={editorActiveFilePath} onSelect={onEditorActiveFileChange} />
+            <FileTree
+              files={editorFiles}
+              activeFilePath={editorActiveFilePath}
+              onSelect={onEditorActiveFileChange}
+            />
           </SidebarPanel>
         );
       case 'copilot':
@@ -258,8 +280,13 @@ export function ProjectEditor({
           activePanel={layout.activePanel ?? ''}
           items={sidebarItems}
           onToggleCollapse={() => {
+            // UI2: layout.isCollapsed is the value BEFORE the toggle. If
+            // currently expanded (false), the toggle will collapse → notify
+            // parent with null. If currently collapsed (true), the toggle
+            // will expand → notify parent with the active panel.
+            const willCollapse = !layout.isCollapsed;
             layout.toggleCollapse();
-            onEditorPanelChange(layout.isCollapsed ? layout.activePanel : null);
+            onEditorPanelChange(willCollapse ? null : layout.activePanel);
           }}
           onSwitchPanel={(panel) => {
             layout.switchPanel(panel as Exclude<EditorPanel, null>);
@@ -274,10 +301,7 @@ export function ProjectEditor({
 }
 
 /** Recursively find file by path */
-function findFile(
-  files: ProjectFile[],
-  path: string
-): ProjectFile | null {
+function findFile(files: ProjectFile[], path: string): ProjectFile | null {
   for (const f of files) {
     if (f.path === path) return f;
     if (f.children) {

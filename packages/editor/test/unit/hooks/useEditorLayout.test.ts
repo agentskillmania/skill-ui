@@ -66,6 +66,33 @@ describe('useEditorLayout', () => {
     expect(result.current.isCollapsed).toBe(false);
   });
 
+  it('switchPanel rapid sequence does not lose state (UI3 regression guard)', () => {
+    // UI3: switchPanel used to call setIsCollapsed inside the setActivePanel
+    // updater. Nested setState in an updater is an anti-pattern that can
+    // produce wrong results under React strict mode's double-invoke.
+    // This test rapidly switches panels and collapses to verify final state.
+    const { result } = renderHook(() => useEditorLayout());
+
+    // Switch to copilot, then review, then collapse, then switch to test
+    act(() => {
+      result.current.switchPanel('copilot');
+    });
+    act(() => {
+      result.current.switchPanel('review');
+    });
+    act(() => {
+      result.current.toggleCollapse();
+    });
+    expect(result.current.isCollapsed).toBe(true);
+    act(() => {
+      result.current.switchPanel('test');
+    });
+
+    // After all operations: test panel active, not collapsed
+    expect(result.current.activePanel).toBe('test');
+    expect(result.current.isCollapsed).toBe(false);
+  });
+
   it('setSidebarWidth clamps to min 160', () => {
     const { result } = renderHook(() => useEditorLayout());
 

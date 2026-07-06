@@ -17,6 +17,46 @@ import type { PreferencesPanelProps, AppPreferences } from '../types.js';
 /** Theme options for the radio group */
 const THEME_OPTIONS = ['light', 'dark', 'system'] as const;
 
+/** Directory field with input + browse button (UI4: extracted to module scope) */
+function DirectoryField({
+  label,
+  fieldKey,
+  value,
+  onBrowse,
+  browseLabel,
+  theme,
+  disabled,
+}: {
+  label: string;
+  fieldKey: keyof AppPreferences;
+  value: string;
+  onBrowse: () => void;
+  browseLabel: string;
+  theme: ReturnType<typeof useTheme>;
+  disabled: boolean;
+}) {
+  return (
+    <Form.Item label={label}>
+      <div
+        css={css`
+          display: flex;
+          gap: ${theme.spacing[2]};
+        `}
+      >
+        <Input value={value} readOnly data-testid={`prefs-${fieldKey}`} />
+        <Button
+          icon={<FolderOpen size={14} />}
+          onClick={onBrowse}
+          disabled={disabled}
+          data-testid={`prefs-${fieldKey}-browse`}
+        >
+          {browseLabel}
+        </Button>
+      </div>
+    </Form.Item>
+  );
+}
+
 /**
  * Application preferences panel.
  *
@@ -64,31 +104,13 @@ export function PreferencesPanel({
         // Dialog dismissed or failed — no action needed
       }
     },
-    [onBrowseDirectory, onChange],
+    [onBrowseDirectory, onChange]
   );
 
-  /** Directory field with input + browse button */
-  function DirectoryField({ label, fieldKey }: { label: string; fieldKey: keyof AppPreferences }) {
-    return (
-      <Form.Item label={label}>
-        <div css={css`display: flex; gap: ${theme.spacing[2]};`}>
-          <Input
-            value={value[fieldKey] as string}
-            readOnly
-            data-testid={`prefs-${fieldKey}`}
-          />
-          <Button
-            icon={<FolderOpen size={14} />}
-            onClick={() => handleBrowse(fieldKey)}
-            disabled={!onBrowseDirectory}
-            data-testid={`prefs-${fieldKey}-browse`}
-          >
-            {t('prefs.workspace.browse')}
-          </Button>
-        </div>
-      </Form.Item>
-    );
-  }
+  // DirectoryField is declared OUTSIDE the component body (UI4): defining it
+  // inside PreferencesPanel caused React to see a new component type on every
+  // render, unmounting and remounting the entire subtree (losing focus/state).
+  // Now it's a stable external component that receives its dependencies as props.
 
   return (
     <div className={className}>
@@ -96,7 +118,9 @@ export function PreferencesPanel({
       <Card
         size="small"
         title={t('prefs.appearance.title')}
-        css={css`margin-bottom: ${theme.spacing[4]};`}
+        css={css`
+          margin-bottom: ${theme.spacing[4]};
+        `}
       >
         <Form layout="horizontal" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
           <Form.Item label={t('prefs.appearance.theme')}>
@@ -135,14 +159,29 @@ export function PreferencesPanel({
           <DirectoryField
             label={t('prefs.workspace.defaultWorkspacePath')}
             fieldKey="defaultWorkspacePath"
+            value={value.defaultWorkspacePath as string}
+            onBrowse={() => handleBrowse('defaultWorkspacePath')}
+            browseLabel={t('prefs.workspace.browse')}
+            theme={theme}
+            disabled={!onBrowseDirectory}
           />
           <DirectoryField
             label={t('prefs.workspace.defaultAgentsPath')}
             fieldKey="defaultAgentsPath"
+            value={value.defaultAgentsPath as string}
+            onBrowse={() => handleBrowse('defaultAgentsPath')}
+            browseLabel={t('prefs.workspace.browse')}
+            theme={theme}
+            disabled={!onBrowseDirectory}
           />
           <DirectoryField
             label={t('prefs.workspace.defaultSkillsPath')}
             fieldKey="defaultSkillsPath"
+            value={value.defaultSkillsPath as string}
+            onBrowse={() => handleBrowse('defaultSkillsPath')}
+            browseLabel={t('prefs.workspace.browse')}
+            theme={theme}
+            disabled={!onBrowseDirectory}
           />
         </Form>
       </Card>
