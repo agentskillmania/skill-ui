@@ -120,4 +120,57 @@ describe('SplitDivider', () => {
     fireEvent.mouseUp(document);
     expect(onResize).toHaveBeenCalled();
   });
+
+  it('cleans up document listeners on unmount mid-drag (UI12)', () => {
+    // UI12: if the component unmounts while a drag is in progress (or
+    // mouseup never fires because the cursor left the window), the
+    // document-level mousemove/mouseup listeners must be removed — otherwise
+    // they leak and keep firing on every mouse move.
+    //
+    // We verify this by wrapping addEventListener to count active listeners,
+    // then checking that after unmount the count returns to baseline.
+    const originalAdd = document.addEventListener.bind(document);
+    const originalRemove = document.removeEventListener.bind(document);
+    const activeListeners = new Map<string, number>();
+
+    document.addEventListener = ((
+      type: string,
+      listener: EventListenerOrEventListenerObject,
+      options?: boolean | AddEventListenerOptions
+    ) => {
+      activeListeners.set(type, (activeListeners.get(type) ?? 0) + 1);
+      return originalAdd(type, listener, options);
+    }) as typeof document.addEventListener;
+
+    document.removeEventListener = ((
+      type: string,
+      listener: EventListenerOrEventListenerObject,
+      options?: boolean | EventListenerOptions
+    ) => {
+      activeListeners.set(type, Math.max(0, (activeListeners.get(type) ?? 0) - 1));
+      return originalRemove(type, listener, options);
+    }) as typeof document.removeEventListener;
+
+    try {
+      const onResize = vi.fn();
+      const { container, unmount } = renderWithSidebar(onResize);
+      const divider = getDividerElement(container);
+
+      // After mount, the effect has registered mousemove/mouseup listeners.
+      const afterMount = activeListeners.get('mousemove') ?? 0;
+      expect(afterMount).toBeGreaterThan(0);
+
+      // Start drag
+      fireEvent.mouseDown(divider, { clientX: 200 });
+
+      // Unmount while drag is in progress — must remove the listeners
+      unmount();
+
+      // After unmount, all document listeners added by this component are gone.
+      expect(activeListeners.get('mousemove') ?? 0).toBe(0);
+    } finally {
+      document.addEventListener = originalAdd;
+      document.removeEventListener = originalRemove;
+    }
+  });
 });

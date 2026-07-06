@@ -31,16 +31,13 @@ describe('useResize', () => {
       useResize({ initialWidth: 380, minWidth: 100, maxWidth: 800 })
     );
 
-    // Start drag
-    act(() => result.current.dividerProps.onMouseDown());
+    // Start drag — capture startX at mousedown (UI11 fix)
+    act(() => {
+      result.current.dividerProps.onMouseDown({ clientX: 400 } as React.MouseEvent);
+    });
     expect(result.current.isResizing).toBe(true);
 
-    // First mousemove captures startX
-    act(() => {
-      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 400 }));
-    });
-
-    // Second mousemove calculates delta
+    // mousemove calculates delta from mousedown startX
     act(() => {
       document.dispatchEvent(new MouseEvent('mousemove', { clientX: 350 }));
     });
@@ -58,11 +55,9 @@ describe('useResize', () => {
   it('clamps width to minWidth on drag', () => {
     const { result } = renderHook(() => useResize({ initialWidth: 380, minWidth: 200 }));
 
-    act(() => result.current.dividerProps.onMouseDown());
-
-    // First move captures startX
+    // Start drag at x=400
     act(() => {
-      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 400 }));
+      result.current.dividerProps.onMouseDown({ clientX: 400 } as React.MouseEvent);
     });
 
     // Drag far right — delta = 400 - 9999 = very negative, width clamped to minWidth
@@ -76,11 +71,9 @@ describe('useResize', () => {
   it('clamps width to maxWidth on drag', () => {
     const { result } = renderHook(() => useResize({ initialWidth: 380, maxWidth: 500 }));
 
-    act(() => result.current.dividerProps.onMouseDown());
-
-    // First move captures startX
+    // Start drag at x=400
     act(() => {
-      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 400 }));
+      result.current.dividerProps.onMouseDown({ clientX: 400 } as React.MouseEvent);
     });
 
     // Drag far left — delta = 400 - (-9999) = very positive, width clamped to maxWidth
@@ -89,6 +82,37 @@ describe('useResize', () => {
     });
 
     expect(result.current.width).toBeLessThanOrEqual(500);
+  });
+
+  it('does not lose the first mousemove delta (UI11)', () => {
+    // UI11 bug: the old code initialized startX to 0 in mousedown, then used
+    // the first mousemove just to capture startX (return early, no width
+    // update). That discarded the delta between mousedown and the first
+    // mousemove. Fix: capture startX at mousedown so the first mousemove
+    // already computes the correct delta.
+    const { result } = renderHook(() =>
+      useResize({ initialWidth: 380, minWidth: 100, maxWidth: 800 })
+    );
+
+    // Mousedown at x=400
+    act(() => {
+      result.current.dividerProps.onMouseDown({ clientX: 400 } as React.MouseEvent);
+    });
+
+    // First (and only) mousemove to x=350 — delta should be 50
+    act(() => {
+      document.dispatchEvent(new MouseEvent('mousemove', { clientX: 350 }));
+    });
+
+    // Width must reflect the delta from mousedown to first move (380+50=430).
+    // The bug would leave width at 380 (unchanged) because the first move
+    // was consumed just to capture startX.
+    expect(result.current.width).toBe(430);
+
+    // End drag
+    act(() => {
+      document.dispatchEvent(new MouseEvent('mouseup'));
+    });
   });
 
   it('does not start drag when disabled', () => {

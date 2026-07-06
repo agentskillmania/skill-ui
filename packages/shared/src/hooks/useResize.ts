@@ -38,20 +38,22 @@ export function useResize({
   const [isResizing, setIsResizing] = useState(false);
   const startRef = useRef({ x: 0, width: 0 });
 
-  const onMouseDown = useCallback(() => {
-    if (disabled) return;
-    setIsResizing(true);
-    startRef.current = { x: 0, width };
-  }, [disabled, width]);
+  const onMouseDown = useCallback(
+    (e?: React.MouseEvent) => {
+      if (disabled) return;
+      // UI11: capture startX at mousedown (not on first mousemove) so the
+      // delta between mousedown and the first mousemove is not lost.
+      const startX = e?.clientX ?? 0;
+      startRef.current = { x: startX, width };
+      setIsResizing(true);
+    },
+    [disabled, width]
+  );
 
   useEffect(() => {
     if (!isResizing) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      if (startRef.current.x === 0) {
-        startRef.current.x = e.clientX;
-        return;
-      }
       const delta = startRef.current.x - e.clientX;
       const newWidth = Math.max(minWidth, Math.min(maxWidth, startRef.current.width + delta));
       setWidth(newWidth);
