@@ -6,8 +6,53 @@ import { css } from '@emotion/react';
 import { User, Check, SendHorizontal } from 'lucide-react';
 import type { BlockProps, HumanInputMetadata } from '../types.js';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import type { Theme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../locales/index.js';
+
+/**
+ * Shared button base — layout, typography, transition, and active-state
+ * feedback. Common to every action button in this block.
+ */
+const buttonBaseCss = (theme: Theme) => css`
+  display: inline-flex;
+  align-items: center;
+  gap: ${theme.spacing[1]};
+  padding: ${theme.spacing[2]} ${theme.spacing[4]};
+  border-radius: ${theme.radius.md};
+  font-size: ${theme.font.size.base};
+  font-weight: ${theme.font.weight.semibold};
+  cursor: pointer;
+  transition: all ${theme.motion.duration.fast} ${theme.motion.easing.out};
+  &:active {
+    transform: scale(0.97);
+  }
+`;
+
+/**
+ * Solid (default) button variant — bordered container background with a
+ * hover that lifts fill and border color.
+ */
+const solidButtonCss = (theme: Theme) => css`
+  border: 1px solid ${theme.color.border};
+  background: ${theme.color.bgContainer};
+  color: ${theme.color.text};
+  &:hover {
+    background: ${theme.color.fill};
+    border-color: ${theme.color.borderHover};
+  }
+`;
+
+/**
+ * Disabled-state rules appended to submit-style buttons that can be disabled
+ * when no selection has been made.
+ */
+const disabledButtonCss = css`
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+`;
 
 /** Format human input response for display */
 function formatResponse(response: unknown, t: (key: string) => string): string {
@@ -174,54 +219,24 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
               `}
             >
               <button
-                css={css`
-                  display: inline-flex;
-                  align-items: center;
-                  gap: ${theme.spacing[1]};
-                  padding: ${theme.spacing[2]} ${theme.spacing[4]};
-                  border-radius: ${theme.radius.md};
-                  font-size: ${theme.font.size.base};
-                  font-weight: ${theme.font.weight.semibold};
-                  border: 1px solid transparent;
-                  background: transparent;
-                  color: ${theme.color.textSecondary};
-                  cursor: pointer;
-                  transition: all ${theme.motion.duration.fast} ${theme.motion.easing.out};
-                  &:hover {
-                    background: ${theme.color.fillSubtle};
-                    color: ${theme.color.text};
-                  }
-                  &:active {
-                    transform: scale(0.97);
-                  }
-                `}
+                css={[
+                  buttonBaseCss(theme),
+                  css`
+                    border: 1px solid transparent;
+                    background: transparent;
+                    color: ${theme.color.textSecondary};
+                    &:hover {
+                      background: ${theme.color.fillSubtle};
+                      color: ${theme.color.text};
+                    }
+                  `,
+                ]}
                 onClick={() => handleSubmit(false)}
               >
                 {t('common.cancel')}
               </button>
               <button
-                css={css`
-                  display: inline-flex;
-                  align-items: center;
-                  gap: ${theme.spacing[1]};
-                  padding: ${theme.spacing[2]} ${theme.spacing[4]};
-                  border-radius: ${theme.radius.md};
-                  font-size: ${theme.font.size.base};
-                  font-weight: ${theme.font.weight.semibold};
-                  border: 1px solid ${theme.color.border};
-                  background: ${theme.color.bgContainer};
-                  color: ${theme.color.text};
-                  cursor: pointer;
-                  transition: all ${theme.motion.duration.fast} ${theme.motion.easing.out};
-                  &:hover {
-                    background: ${theme.color.fill};
-                    border-color: ${theme.color.borderHover};
-                    color: ${theme.color.text};
-                  }
-                  &:active {
-                    transform: scale(0.97);
-                  }
-                `}
+                css={[buttonBaseCss(theme), solidButtonCss(theme)]}
                 onClick={() => handleSubmit(true)}
               >
                 <Check size={14} />
@@ -265,27 +280,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                 `}
               />
               <button
-                css={css`
-                  display: inline-flex;
-                  align-items: center;
-                  gap: ${theme.spacing[1]};
-                  padding: ${theme.spacing[2]} ${theme.spacing[4]};
-                  border-radius: ${theme.radius.md};
-                  font-size: ${theme.font.size.base};
-                  font-weight: ${theme.font.weight.semibold};
-                  border: 1px solid ${theme.color.border};
-                  background: ${theme.color.bgContainer};
-                  color: ${theme.color.text};
-                  cursor: pointer;
-                  transition: all ${theme.motion.duration.fast} ${theme.motion.easing.out};
-                  &:hover {
-                    background: ${theme.color.fill};
-                    border-color: ${theme.color.borderHover};
-                  }
-                  &:active {
-                    transform: scale(0.97);
-                  }
-                `}
+                css={[buttonBaseCss(theme), solidButtonCss(theme)]}
                 onClick={() => handleSubmit(inputValue)}
               >
                 <SendHorizontal size={14} />
@@ -372,31 +367,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                 `}
               >
                 <button
-                  css={css`
-                    display: inline-flex;
-                    align-items: center;
-                    gap: ${theme.spacing[1]};
-                    padding: ${theme.spacing[2]} ${theme.spacing[4]};
-                    border-radius: ${theme.radius.md};
-                    font-size: ${theme.font.size.base};
-                    font-weight: ${theme.font.weight.semibold};
-                    border: 1px solid ${theme.color.border};
-                    background: ${theme.color.bgContainer};
-                    color: ${theme.color.text};
-                    cursor: pointer;
-                    transition: all ${theme.motion.duration.fast} ${theme.motion.easing.out};
-                    &:hover {
-                      background: ${theme.color.fill};
-                      border-color: ${theme.color.borderHover};
-                    }
-                    &:active {
-                      transform: scale(0.97);
-                    }
-                    &:disabled {
-                      opacity: 0.4;
-                      cursor: not-allowed;
-                    }
-                  `}
+                  css={[buttonBaseCss(theme), solidButtonCss(theme), disabledButtonCss]}
                   disabled={selectedValues.length === 0}
                   onClick={() => handleSubmit(selectedValues[0])}
                 >
@@ -489,31 +460,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                 `}
               >
                 <button
-                  css={css`
-                    display: inline-flex;
-                    align-items: center;
-                    gap: ${theme.spacing[1]};
-                    padding: ${theme.spacing[2]} ${theme.spacing[4]};
-                    border-radius: ${theme.radius.md};
-                    font-size: ${theme.font.size.base};
-                    font-weight: ${theme.font.weight.semibold};
-                    border: 1px solid ${theme.color.border};
-                    background: ${theme.color.bgContainer};
-                    color: ${theme.color.text};
-                    cursor: pointer;
-                    transition: all ${theme.motion.duration.fast} ${theme.motion.easing.out};
-                    &:hover {
-                      background: ${theme.color.fill};
-                      border-color: ${theme.color.borderHover};
-                    }
-                    &:active {
-                      transform: scale(0.97);
-                    }
-                    &:disabled {
-                      opacity: 0.4;
-                      cursor: not-allowed;
-                    }
-                  `}
+                  css={[buttonBaseCss(theme), solidButtonCss(theme), disabledButtonCss]}
                   disabled={selectedValues.length === 0}
                   onClick={() => handleSubmit(selectedValues)}
                 >
