@@ -8,16 +8,13 @@ import { Code, Eye } from 'lucide-react';
 import { useTheme, interactiveItem, borderSeparator } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../../locales/index.js';
+import { VISUAL_EDITOR_EXTENSIONS, getExtension } from '../../utils/file-extensions.js';
 import type { StatusBarProps, EditMode } from '../../types.js';
-
-/** File extensions supported by the visual (wysiwyg) editor */
-const VISUAL_EDITOR_EXTENSIONS = ['md', 'mdx'];
 
 /** Check whether a file path is supported by the visual editor */
 function isVisualEditable(filePath: string | null): boolean {
   if (!filePath) return false;
-  const ext = filePath.split('.').pop()?.toLowerCase() ?? '';
-  return VISUAL_EDITOR_EXTENSIONS.includes(ext);
+  return (VISUAL_EDITOR_EXTENSIONS as readonly string[]).includes(getExtension(filePath));
 }
 
 export const StatusBar = memo(function StatusBar({

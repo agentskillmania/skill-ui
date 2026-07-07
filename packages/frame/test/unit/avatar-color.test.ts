@@ -2,12 +2,7 @@
  * avatar-color utility tests
  */
 import { describe, it, expect } from 'vitest';
-import {
-  PALETTE,
-  hashId,
-  getAvatarColor,
-  getInitial,
-} from '../../src/components/shared/avatar-color.js';
+import { PALETTE, hashId, getAvatarColor, getInitial } from '@agentskillmania/skill-ui-shared';
 
 describe('avatar-color', () => {
   describe('hashId', () => {

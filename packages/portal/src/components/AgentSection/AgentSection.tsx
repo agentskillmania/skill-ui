@@ -1,13 +1,12 @@
 /** @jsxImportSource @emotion/react */
 import { useState } from 'react';
-import { List, Pagination, Button, Empty, Modal, Form, Input } from 'antd';
+import { List, Button, Empty, Modal, Form, Input } from 'antd';
 import { Plus } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
+import { PaginationBar, DEFAULT_PAGE_SIZE } from '@agentskillmania/skill-ui-shared';
 import { AgentCard } from '../AgentCard/AgentCard.js';
 import type { AgentItem } from '../../types.js';
-
-const DEFAULT_PAGE_SIZE = 12;
 
 interface AgentSectionProps {
   agents: AgentItem[];
@@ -80,16 +79,7 @@ export function AgentSection({
               </List.Item>
             )}
           />
-          {total > pageSize && (
-            <div css={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end' }}>
-              <Pagination
-                current={page}
-                pageSize={pageSize}
-                total={total}
-                onChange={onPageChange}
-              />
-            </div>
-          )}
+          <PaginationBar current={page} pageSize={pageSize} total={total} onChange={onPageChange} />
         </>
       ) : (
         <Empty description={t('noAgents')} />

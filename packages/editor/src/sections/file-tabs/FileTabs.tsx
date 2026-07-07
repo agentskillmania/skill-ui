@@ -10,41 +10,14 @@ import { X, FileCode, Book, File } from 'lucide-react';
 import { useTheme, interactiveItem, borderSeparator } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../../locales/index.js';
+import { getFileKind } from '../../utils/file-extensions.js';
 import type { FileTabsProps, FileTab } from '../../types.js';
 
 /** Get icon by file name */
 function getFileIcon(filename: string) {
-  const ext = filename.split('.').pop()?.toLowerCase();
-  const docExts = ['md', 'mdx', 'txt', 'rst', 'adoc'];
-  if (docExts.includes(ext ?? '')) return <Book size={12} />;
-  const codeExts = [
-    'js',
-    'jsx',
-    'ts',
-    'tsx',
-    'py',
-    'rb',
-    'go',
-    'rs',
-    'java',
-    'c',
-    'cpp',
-    'h',
-    'sh',
-    'bash',
-    'zsh',
-    'json',
-    'yaml',
-    'yml',
-    'toml',
-    'xml',
-    'html',
-    'css',
-    'scss',
-    'less',
-    'sql',
-  ];
-  if (codeExts.includes(ext ?? '')) return <FileCode size={12} />;
+  const kind = getFileKind(filename);
+  if (kind === 'doc') return <Book size={12} />;
+  if (kind === 'code') return <FileCode size={12} />;
   return <File size={12} />;
 }
 

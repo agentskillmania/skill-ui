@@ -19,6 +19,7 @@ export {
   CopyValue,
   InfoRow,
   ExpandableRow,
+  PaginationBar,
 } from './components/index.js';
 
 // Component types
@@ -40,6 +41,7 @@ export type {
   InfoRowProps,
   ExpandableRowProps,
   DetailVariant,
+  PaginationBarProps,
 } from './components/index.js';
 
 // Hooks
@@ -64,6 +66,12 @@ export {
   truncate,
   formatTimestamp,
 } from './utils/format.js';
+
+export { PALETTE, hashId, getAvatarColor, getInitial } from './utils/avatar-color.js';
+
+export { FONT_DISPLAY } from './utils/fonts.js';
+
+export { DEFAULT_PAGE_SIZE } from './utils/pagination.js';
 
 // Locales
 export { NAMESPACE, resources } from './locales/index.js';

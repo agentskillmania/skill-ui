@@ -5,9 +5,8 @@
  */
 import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { FONT_DISPLAY } from '@agentskillmania/skill-ui-shared';
 import type { AppBrandProps } from '../../types.js';
-
-const FONT_DISPLAY = "'Iowan Old Style', 'Charter', Georgia, 'Songti SC', serif";
 
 export function AppBrand({ title = 'Skill Studio', icon }: AppBrandProps) {
   const theme = useTheme();

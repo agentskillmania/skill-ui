@@ -9,14 +9,12 @@ import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../../locales/index.js';
 import { useCallback } from 'react';
 import { useToggle, EmptyState } from '@agentskillmania/skill-ui-shared';
+import { getFileKind } from '../../utils/file-extensions.js';
 import type { FileTreeProps, ProjectFile } from '../../types.js';
 
 /** Get file icon by extension */
 function getFileIcon(name: string) {
-  const ext = name.split('.').pop()?.toLowerCase() ?? '';
-  const docExts = ['md', 'mdx', 'txt', 'rst'];
-  if (docExts.includes(ext)) return <Book size={14} />;
-  return <FileCode size={14} />;
+  return getFileKind(name) === 'doc' ? <Book size={14} /> : <FileCode size={14} />;
 }
 
 /** Single tree node */

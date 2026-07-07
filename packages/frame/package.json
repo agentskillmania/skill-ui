@@ -35,6 +35,7 @@
     "directory": "packages/frame"
   },
   "dependencies": {
+    "@agentskillmania/skill-ui-shared": "workspace:*",
     "@agentskillmania/skill-ui-theme": "workspace:*",
     "@emotion/react": "^11.14.0",
     "lucide-react": "^0.460.0"

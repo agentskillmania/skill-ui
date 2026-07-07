@@ -1,6 +1,7 @@
 /**
  * Avatar color utility
  * Deterministic color assignment based on id hash.
+ * Used by ResourceAvatar (portal), AppBrand (frame), and other components.
  */
 
 /** Color block palette — solid opaque background + contrasting text color */

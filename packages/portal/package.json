@@ -35,6 +35,7 @@
     "directory": "packages/portal"
   },
   "dependencies": {
+    "@agentskillmania/skill-ui-shared": "workspace:*",
     "@agentskillmania/skill-ui-theme": "workspace:*",
     "lucide-react": "^0.460.0"
   },

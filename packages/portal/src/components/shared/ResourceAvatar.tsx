@@ -1,6 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import { Avatar } from 'antd';
-import { getAvatarColor, getInitial } from './avatar-color.js';
+import { getAvatarColor, getInitial } from '@agentskillmania/skill-ui-shared';
 
 interface ResourceAvatarProps {
   id: string;

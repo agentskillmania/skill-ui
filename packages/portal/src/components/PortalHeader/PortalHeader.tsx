@@ -5,6 +5,7 @@ import { AutoComplete, Input, Button, Tooltip } from 'antd';
 import { Search, Github } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
+import { FONT_DISPLAY } from '@agentskillmania/skill-ui-shared';
 import { SearchResultItem } from '../shared/SearchResultItem.js';
 import type { SearchResults, SearchResultType } from '../../types.js';
 
@@ -19,8 +20,6 @@ interface PortalHeaderProps {
   onEdit: (type: SearchResultType, id: string) => void;
   githubUrl?: string;
 }
-
-const FONT_DISPLAY = "'Iowan Old Style', 'Charter', Georgia, 'Songti SC', serif";
 
 const gradientFlow = keyframes`
   0% { background-position: 0% 50%; }

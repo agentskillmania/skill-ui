@@ -1,12 +1,11 @@
 /** @jsxImportSource @emotion/react */
 import { useMemo } from 'react';
-import { Button, Empty, Pagination, Select, Popconfirm } from 'antd';
+import { Button, Empty, Select, Popconfirm } from 'antd';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
+import { PaginationBar, DEFAULT_PAGE_SIZE } from '@agentskillmania/skill-ui-shared';
 import { SessionRow } from '../SessionRow/SessionRow.js';
 import type { SessionItem } from '../../types.js';
-
-const DEFAULT_PAGE_SIZE = 12;
 
 interface SessionSectionProps {
   sessions: SessionItem[];
@@ -110,16 +109,7 @@ export function SessionSection({
               />
             ))}
           </div>
-          {total > pageSize && (
-            <div css={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end' }}>
-              <Pagination
-                current={page}
-                pageSize={pageSize}
-                total={total}
-                onChange={onPageChange}
-              />
-            </div>
-          )}
+          <PaginationBar current={page} pageSize={pageSize} total={total} onChange={onPageChange} />
         </>
       ) : (
         <Empty description={t('noSessions')} />

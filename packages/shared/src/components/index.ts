@@ -27,3 +27,5 @@ export { InfoRow } from './InfoRow.js';
 export type { InfoRowProps } from './InfoRow.js';
 export { ExpandableRow } from './ExpandableRow.js';
 export type { ExpandableRowProps, DetailVariant } from './ExpandableRow.js';
+export { PaginationBar } from './PaginationBar.js';
+export type { PaginationBarProps } from './PaginationBar.js';
