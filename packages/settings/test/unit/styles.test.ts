@@ -4,7 +4,6 @@
 import { describe, it, expect } from 'vitest';
 import { lightTheme } from '@agentskillmania/skill-ui-theme';
 import {
-  terminalCommand,
   stepNumber,
   stepConnector,
   stepRow,
@@ -13,13 +12,6 @@ import {
 } from '../../src/styles/index.js';
 
 describe('settings style utilities', () => {
-  it('terminalCommand returns valid styles', () => {
-    const s = terminalCommand(lightTheme);
-    expect(s.styles).toContain('font-family');
-    expect(s.styles).toContain(lightTheme.spacing[2]);
-    expect(s.styles).toContain(':hover');
-  });
-
   it('stepNumber returns valid styles', () => {
     const s = stepNumber(lightTheme);
     expect(s.styles).toContain(lightTheme.radius.full);

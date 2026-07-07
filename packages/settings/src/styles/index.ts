@@ -12,35 +12,6 @@
 import { css } from '@emotion/react';
 import type { Theme } from '@agentskillmania/skill-ui-theme';
 
-/**
- * Terminal command code block with hover effect.
- *
- * @param theme - Theme object for token access
- * @returns Emotion serialized styles
- */
-export function terminalCommand(theme: Theme) {
-  return css`
-    display: flex;
-    align-items: center;
-    gap: ${theme.spacing[2]};
-    padding: ${theme.spacing[2]} ${theme.spacing[3]};
-    background: ${theme.color.bgSpotlight};
-    border: 1px solid ${theme.color.border};
-    border-radius: ${theme.radius.md};
-    font-family: ${theme.font.familyMono};
-    font-size: ${theme.font.size.sm};
-    color: ${theme.color.text};
-    transition: border-color ${theme.motion.duration.normal} ${theme.motion.easing.out},
-                background ${theme.motion.duration.normal} ${theme.motion.easing.out};
-    cursor: default;
-
-    &:hover {
-      border-color: ${theme.color.borderHover};
-      background: ${theme.color.fill};
-    }
-  `;
-}
-
 // --- MCP Empty State Step Layout ---
 
 /**

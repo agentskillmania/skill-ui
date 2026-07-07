@@ -1,8 +1,7 @@
 /**
  * Execution block rendering router — redesigned blocks
  */
-import type { Block } from '../types.js';
-import type { BlockProps } from '../types.js';
+import type { Block, BlockProps } from '../types.js';
 import { css, keyframes } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useChatContext } from '../context.js';
