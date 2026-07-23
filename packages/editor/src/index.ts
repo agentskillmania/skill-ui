@@ -46,7 +46,7 @@ export { ReviewPanel } from './panels/review/index.js';
 export { useEditorContext } from './context/EditorContext.js';
 
 // Utilities
-export { getFileInfo, getFileLabel } from './shared/file-utils.js';
+export { getFileInfo, getFileLabel } from './utils/file-utils.js';
 
 // i18n
 export { NAMESPACE, resources } from './locales/index.js';

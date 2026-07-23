@@ -6,7 +6,7 @@ import { Search, Github } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
 import { FONT_DISPLAY } from '@agentskillmania/skill-ui-shared';
-import { SearchResultItem } from '../shared/SearchResultItem.js';
+import { SearchResultItem } from '../SearchResultItem/index.js';
 import type { SearchResults, SearchResultType } from '../../types.js';
 
 interface PortalHeaderProps {

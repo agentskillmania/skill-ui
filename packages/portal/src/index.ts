@@ -25,7 +25,9 @@ export { SkillSection } from './components/SkillSection/index.js';
 export { SessionSection } from './components/SessionSection/index.js';
 
 // Shared components
-export { ResourceAvatar, HighlightText, SearchResultItem } from './components/shared/index.js';
+export { ResourceAvatar } from './components/ResourceAvatar/index.js';
+export { HighlightText } from './components/HighlightText/index.js';
+export { SearchResultItem } from './components/SearchResultItem/index.js';
 
 // Hooks
 export { usePortalFilter } from './hooks/index.js';

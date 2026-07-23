@@ -4,7 +4,7 @@ import { Card, Button, Tag, Popconfirm, Tooltip } from 'antd';
 import { Trash2, Pencil, MessageCircle } from 'lucide-react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
-import { ResourceAvatar } from '../shared/ResourceAvatar.js';
+import { ResourceAvatar } from '../ResourceAvatar/index.js';
 import type { AgentItem } from '../../types.js';
 
 interface AgentCardProps {

@@ -4,7 +4,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider } from '@emotion/react';
 import { ConfigProvider } from 'antd';
 import { lightTheme, lightAntdConfig } from '@agentskillmania/skill-ui-theme';
-import { SearchResultItem } from '../../src/components/shared/SearchResultItem.js';
+import { SearchResultItem } from '../../src/components/SearchResultItem/index.js';
 import type { SearchResultItemData } from '../../src/types.js';
 
 function wrapper({ children }: { children: React.ReactNode }) {

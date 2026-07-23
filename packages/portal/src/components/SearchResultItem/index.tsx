@@ -2,8 +2,8 @@
 import { memo } from 'react';
 import { Button, Tooltip } from 'antd';
 import { Pencil, Trash2 } from 'lucide-react';
-import { ResourceAvatar } from './ResourceAvatar.js';
-import { HighlightText } from './HighlightText.js';
+import { ResourceAvatar } from '../ResourceAvatar/index.js';
+import { HighlightText } from '../HighlightText/index.js';
 import type { SearchResultItemData } from '../../types.js';
 
 interface SearchResultItemProps {

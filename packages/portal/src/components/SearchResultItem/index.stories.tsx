@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { SearchResultItem } from './SearchResultItem.js';
+import { SearchResultItem } from './index.js';
 
 const meta: Meta<typeof SearchResultItem> = {
   title: 'Portal/SearchResultItem',

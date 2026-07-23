@@ -21,6 +21,7 @@ const baseSkill = {
   id: 'skill-1',
   name: 'Web Search',
   description: 'Search the web for real-time information.',
+  source: 'custom' as const,
 };
 
 export const Default: Story = {

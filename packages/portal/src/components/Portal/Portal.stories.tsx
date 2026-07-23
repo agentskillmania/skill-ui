@@ -37,6 +37,7 @@ const mockSkills = Array.from({ length: 6 }, (_, i) => ({
   id: `skill-${i}`,
   name: `Skill ${i + 1}`,
   description: `Description for skill ${i + 1}`,
+  source: 'custom' as const,
 }));
 
 const mockSessions = Array.from({ length: 4 }, (_, i) => ({

@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { HighlightText } from '../../src/components/shared/HighlightText.js';
+import { HighlightText } from '../../src/components/HighlightText/index.js';
 
 describe('HighlightText', () => {
   it('renders plain text when no query is provided', () => {

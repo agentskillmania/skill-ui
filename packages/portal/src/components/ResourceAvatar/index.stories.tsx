@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ResourceAvatar } from './ResourceAvatar.js';
+import { ResourceAvatar } from './index.js';
 
 const meta: Meta<typeof ResourceAvatar> = {
   title: 'Portal/ResourceAvatar',

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { HighlightText } from './HighlightText.js';
+import { HighlightText } from './index.js';
 
 const meta: Meta<typeof HighlightText> = {
   title: 'Portal/HighlightText',

@@ -21,7 +21,7 @@ import type {
   ProjectFile,
 } from '../types.js';
 import { EditorContext } from '../context/EditorContext.js';
-import { getFileLabel } from '../shared/file-utils.js';
+import { getFileLabel } from '../utils/file-utils.js';
 import { FileTabs } from '../sections/file-tabs/index.js';
 import { EditorArea } from '../editor-area/index.js';
 import { StatusBar } from '../sections/status-bar/index.js';

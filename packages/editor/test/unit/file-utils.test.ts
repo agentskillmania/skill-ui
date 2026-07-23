@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { getFileInfo, getFileLabel } from '../../src/shared/file-utils.js';
+import { getFileInfo, getFileLabel } from '../../src/utils/file-utils.js';
 
 describe('getFileInfo', () => {
   it('recognizes TypeScript files', () => {
