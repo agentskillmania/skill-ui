@@ -5,12 +5,13 @@
  * @module
  */
 
-import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
 import { Card, Form, Input, Select, Radio, Button } from 'antd';
 import { FolderOpen } from 'lucide-react';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { NAMESPACE } from '../locales/index.js';
 import type { PreferencesPanelProps, AppPreferences } from '../types.js';
 

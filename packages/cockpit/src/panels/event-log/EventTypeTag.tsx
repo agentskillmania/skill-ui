@@ -2,10 +2,11 @@
 /**
  * EventTypeTag — fixed-width color tag for event type labels
  */
-import { Tag } from 'antd';
-import type { CockpitEventType } from './types.js';
 import type { Theme } from '@agentskillmania/skill-ui-theme';
+import { Tag } from 'antd';
+
 import { getEventColor } from './eventCategory.js';
+import type { CockpitEventType } from './types.js';
 
 export interface EventTypeTagProps {
   type: CockpitEventType;

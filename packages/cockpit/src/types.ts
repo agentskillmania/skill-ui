@@ -2,17 +2,18 @@
  * Cockpit types — shared across modules
  */
 
-import type { CSSProperties, ReactNode } from 'react';
 import type {
   Message,
   ChatRenderers,
   ChatCommand,
   BlockAction,
 } from '@agentskillmania/skill-ui-chat';
-import type { SessionOverviewData, SessionInfoData } from './sections/session/types.js';
+import type { CSSProperties, ReactNode } from 'react';
+
+import type { CockpitEvent, EventCategory } from './panels/event-log/types.js';
 import type { SkillStateData, CompressionData } from './sections/agent-state/types.js';
 import type { RunnerDiagnosticsData } from './sections/runner/types.js';
-import type { CockpitEvent, EventCategory } from './panels/event-log/types.js';
+import type { SessionOverviewData, SessionInfoData } from './sections/session/types.js';
 
 // ---- Panel IDs ----
 

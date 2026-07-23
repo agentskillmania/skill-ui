@@ -1,10 +1,11 @@
 /** @jsxImportSource @emotion/react */
-import { memo } from 'react';
 import { Button, Tooltip } from 'antd';
 import { Pencil, Trash2 } from 'lucide-react';
-import { ResourceAvatar } from '../ResourceAvatar/index.js';
-import { HighlightText } from '../HighlightText/index.js';
+import { memo } from 'react';
+
 import type { SearchResultItemData } from '../../types.js';
+import { HighlightText } from '../HighlightText/index.js';
+import { ResourceAvatar } from '../ResourceAvatar/index.js';
 
 interface SearchResultItemProps {
   item: SearchResultItemData;
@@ -12,7 +13,11 @@ interface SearchResultItemProps {
   onEdit?: () => void;
 }
 
-export const SearchResultItem = memo(function SearchResultItem({ item, query, onEdit }: SearchResultItemProps) {
+export const SearchResultItem = memo(function SearchResultItem({
+  item,
+  query,
+  onEdit,
+}: SearchResultItemProps) {
   return (
     <div
       css={{

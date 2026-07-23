@@ -1,11 +1,12 @@
 /** @jsxImportSource @emotion/react */
-import { useMemo } from 'react';
-import { Button, Empty, Select, Popconfirm } from 'antd';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { useTranslation } from 'react-i18next';
 import { PaginationBar, DEFAULT_PAGE_SIZE } from '@agentskillmania/skill-ui-shared';
-import { SessionRow } from '../SessionRow/SessionRow.js';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { Button, Empty, Select, Popconfirm } from 'antd';
+import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import type { SessionItem } from '../../types.js';
+import { SessionRow } from '../SessionRow/SessionRow.js';
 
 interface SessionSectionProps {
   sessions: SessionItem[];

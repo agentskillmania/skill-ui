@@ -92,24 +92,18 @@ export const EmptyPaths: Story = {
 export const WithBrowseCallback: Story = {
   render: (args) => {
     const [value, setValue] = useState<AppPreferences>(defaultPrefs);
-    const onBrowseDirectory = useCallback(
-      async (field: keyof AppPreferences) => {
-        // In a real Electron app this would be:
-        //   const result = await window.studio.dialog.showOpenDialog({
-        //     properties: ['openDirectory'],
-        //     title: `Select ${field}`,
-        //   });
-        //   return result.filePaths[0];
-        //
-        // Here we simulate the user picking a directory:
-        const fieldLabel = field
-          .replace('default', '')
-          .replace('Path', '')
-          .toLowerCase();
-        return `/home/user/selected-${fieldLabel}`;
-      },
-      [],
-    );
+    const onBrowseDirectory = useCallback(async (field: keyof AppPreferences) => {
+      // In a real Electron app this would be:
+      //   const result = await window.studio.dialog.showOpenDialog({
+      //     properties: ['openDirectory'],
+      //     title: `Select ${field}`,
+      //   });
+      //   return result.filePaths[0];
+      //
+      // Here we simulate the user picking a directory:
+      const fieldLabel = field.replace('default', '').replace('Path', '').toLowerCase();
+      return `/home/user/selected-${fieldLabel}`;
+    }, []);
     return (
       <PreferencesPanel
         {...args}

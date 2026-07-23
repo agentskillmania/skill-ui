@@ -4,15 +4,10 @@ import { UserMessage } from './UserMessage.js';
 import { AssistantMessage } from './AssistantMessage.js';
 import { SystemMessage } from './SystemMessage.js';
 import { MessageWrapper } from './MessageWrapper.js';
-import { ChatContext } from '../context.js';
 import type { Message } from '../types.js';
 
 function Wrapper({ children }: { children: React.ReactNode }) {
-  return (
-    <ChatContext.Provider value={{ renderers: {} }}>
-      <div style={{ maxWidth: 600 }}>{children}</div>
-    </ChatContext.Provider>
-  );
+  return <div style={{ maxWidth: 600 }}>{children}</div>;
 }
 
 const meta: Meta<typeof UserMessage> = {

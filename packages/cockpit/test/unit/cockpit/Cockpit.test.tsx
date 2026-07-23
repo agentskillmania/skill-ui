@@ -40,13 +40,7 @@ describe('Cockpit', () => {
   });
 
   it('renders sessions panel content in DOM when switched', () => {
-    const { container } = render(
-      <Cockpit
-        {...defaultProps}
-        sessionsSessions={[]}
-      />,
-      { wrapper }
-    );
+    const { container } = render(<Cockpit {...defaultProps} sessionsSessions={[]} />, { wrapper });
     const buttons = container.querySelectorAll('button');
     // buttons: [0=ChatPanel+, 1=collapse, 2=sessions, 3=event-log, 4=session-board]
     expect(buttons.length).toBeGreaterThanOrEqual(5);

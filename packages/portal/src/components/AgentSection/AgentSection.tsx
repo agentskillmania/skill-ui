@@ -1,12 +1,13 @@
 /** @jsxImportSource @emotion/react */
-import { useState } from 'react';
+import { PaginationBar, DEFAULT_PAGE_SIZE } from '@agentskillmania/skill-ui-shared';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { List, Button, Empty, Modal, Form, Input } from 'antd';
 import { Plus } from 'lucide-react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PaginationBar, DEFAULT_PAGE_SIZE } from '@agentskillmania/skill-ui-shared';
-import { AgentCard } from '../AgentCard/AgentCard.js';
+
 import type { AgentItem } from '../../types.js';
+import { AgentCard } from '../AgentCard/AgentCard.js';
 
 interface AgentSectionProps {
   agents: AgentItem[];

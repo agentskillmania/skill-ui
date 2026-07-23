@@ -18,11 +18,15 @@ vi.mock('../../src/components/PortalHeader/PortalHeader.js', () => ({
       capturedOnSelect = props.onSelect;
       capturedOnEdit = props.onEdit;
     });
-    return React.createElement('div', { 'data-testid': 'mock-portal-header' },
+    return React.createElement(
+      'div',
+      { 'data-testid': 'mock-portal-header' },
       React.createElement('input', {
         'data-testid': 'search-input',
         placeholder: '搜索技能、智能体或会话记录…',
-        onKeyDown: (e: any) => { if (e.key === 'Enter') props.onSearch?.(props.query); },
+        onKeyDown: (e: any) => {
+          if (e.key === 'Enter') props.onSearch?.(props.query);
+        },
       })
     );
   },

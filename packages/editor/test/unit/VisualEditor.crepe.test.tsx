@@ -264,5 +264,4 @@ describe('VisualEditor (Crepe implementation)', () => {
     // At this point crepeRef.current is null, setReadonly should not be called
     expect(mockCrepeInstance.setReadonly).not.toHaveBeenCalledWith(true);
   });
-
 });

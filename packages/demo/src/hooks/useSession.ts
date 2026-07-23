@@ -2,6 +2,7 @@
  * Session lifecycle management — create, resume, delete
  */
 import { useState, useCallback } from 'react';
+
 import type { SessionInfo } from '../../server/types.js';
 
 interface UseSessionReturn {

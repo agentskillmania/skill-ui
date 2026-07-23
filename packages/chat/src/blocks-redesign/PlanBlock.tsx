@@ -1,13 +1,14 @@
 /**
  * Execution plan block — timeline/step list
  */
-import { memo } from 'react';
+import { useTheme, type Theme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { FileText, Check, CircleDot, XCircle, Minus, Circle } from 'lucide-react';
-import type { BlockProps, PlanMetadata, PlanStep } from '../types.js';
-import { useTheme, type Theme } from '@agentskillmania/skill-ui-theme';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { NAMESPACE } from '../locales/index.js';
+import type { BlockProps, PlanMetadata, PlanStep } from '../types.js';
 
 /** Get icon component for step status */
 function getStepIcon(step: PlanStep): React.ReactNode {

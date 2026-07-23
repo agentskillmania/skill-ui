@@ -76,7 +76,7 @@ describe('SkillCard', () => {
   it('handles mouse enter and leave events', () => {
     const { container } = render(
       <SkillCard skill={mockSkill} onChat={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />,
-      { wrapper },
+      { wrapper }
     );
     const card = container.querySelector('.ant-card');
     expect(card).toBeTruthy();

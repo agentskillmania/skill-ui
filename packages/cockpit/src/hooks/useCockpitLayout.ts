@@ -4,6 +4,7 @@
  */
 
 import { useState, useCallback } from 'react';
+
 import type { PanelId } from '../panels/types.js';
 
 export interface UseCockpitLayoutReturn {

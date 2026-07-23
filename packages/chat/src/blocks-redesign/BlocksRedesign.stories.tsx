@@ -1,6 +1,5 @@
 /** @jsxImportSource @emotion/react */
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { ChatContext } from '../context.js';
 import { ThinkingBlock } from './ThinkingBlock.js';
 import { ToolCallBlock } from './ToolCallBlock.js';
 import { PlanBlock } from './PlanBlock.js';
@@ -13,11 +12,9 @@ import type { Block } from '../types.js';
 
 function Wrapper({ children }: { children: React.ReactNode }) {
   return (
-    <ChatContext.Provider value={{ renderers: {} }}>
-      <div style={{ maxWidth: 600, display: 'flex', flexDirection: 'column', gap: 16 }}>
-        {children}
-      </div>
-    </ChatContext.Provider>
+    <div style={{ maxWidth: 600, display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {children}
+    </div>
   );
 }
 

@@ -1,15 +1,16 @@
 /**
  * A2UI block — renders AGenUI protocol surface inside standard block card.
  */
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { css } from '@emotion/react';
-import { Monitor, Loader2, Clock, Maximize2 } from 'lucide-react';
-import { Modal } from 'antd';
 import { AGenUI, SurfaceManager, AGenUISurface } from '@agentskillmania/agenui';
-import type { BlockProps, A2UIBlockMetadata, BlockAction } from '../types.js';
 import { useTheme, spinKeyframes } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+import { Modal } from 'antd';
+import { Monitor, Loader2, Clock, Maximize2 } from 'lucide-react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { NAMESPACE } from '../locales/index.js';
+import type { BlockProps, A2UIBlockMetadata, BlockAction } from '../types.js';
 
 export function A2UIBlock({ block, onAction }: BlockProps) {
   const theme = useTheme();

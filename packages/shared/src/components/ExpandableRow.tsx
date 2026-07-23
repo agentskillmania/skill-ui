@@ -1,8 +1,9 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import type { ReactNode } from 'react';
+
 import { ExpandableItem } from './ExpandableItem.js';
 
 /** Detail area style variant. */

@@ -76,9 +76,12 @@ describe('AgentCard', () => {
 
   it('shows builtin source tag', () => {
     const builtinAgent = { ...mockAgent, source: 'builtin' as const };
-    render(<AgentCard agent={builtinAgent} onChat={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />, {
-      wrapper,
-    });
+    render(
+      <AgentCard agent={builtinAgent} onChat={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />,
+      {
+        wrapper,
+      }
+    );
     expect(screen.getByText('内置')).toBeInTheDocument();
   });
 
@@ -100,7 +103,7 @@ describe('AgentCard', () => {
   it('handles mouse enter and leave events', () => {
     const { container } = render(
       <AgentCard agent={mockAgent} onChat={vi.fn()} onEdit={vi.fn()} onDelete={vi.fn()} />,
-      { wrapper },
+      { wrapper }
     );
     const card = container.querySelector('.ant-card');
     expect(card).toBeTruthy();

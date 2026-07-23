@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { lightTheme } from '@agentskillmania/skill-ui-theme';
+import { lightTheme, ThemeProvider } from '@agentskillmania/skill-ui-theme';
 import type { Theme } from '@agentskillmania/skill-ui-theme';
 import { ChatWrapper } from './testUtils.js';
 import { BlocksRenderer } from '../../src/blocks-redesign/BlocksRenderer.js';
@@ -212,9 +212,9 @@ describe('ToolCallBlock', () => {
       metadata: { toolName: 'test-tool', toolType: 'mcp' },
     };
     render(
-      <ChatWrapper context={{ theme: minimalTheme }}>
+      <ThemeProvider theme={minimalTheme}>
         <ToolCallBlock block={noColorBlock} />
-      </ChatWrapper>
+      </ThemeProvider>
     );
     expect(screen.getByText('test-tool')).toBeInTheDocument();
   });
@@ -257,7 +257,6 @@ describe('ToolCallBlock', () => {
     expect(dialog.textContent).toContain('search');
     expect(dialog.textContent).toContain('mcp');
   });
-
 });
 
 describe('PlanBlock', () => {
@@ -438,7 +437,7 @@ describe('HumanInputBlock', () => {
   it('clicking confirm triggers callback', () => {
     const onConfirm = vi.fn();
     render(
-      <ChatWrapper context={{ onConfirmHumanRequest: onConfirm }}>
+      <ChatWrapper>
         <HumanInputBlock block={humanBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
@@ -518,7 +517,7 @@ describe('HumanInputBlock', () => {
       metadata: { ...humanBlock.metadata, inputType: 'input', defaultValue: '默认值' },
     };
     render(
-      <ChatWrapper context={{ onConfirmHumanRequest: onConfirm }}>
+      <ChatWrapper>
         <HumanInputBlock block={inputBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
@@ -543,7 +542,7 @@ describe('HumanInputBlock', () => {
       },
     };
     render(
-      <ChatWrapper context={{ onConfirmHumanRequest: onConfirm }}>
+      <ChatWrapper>
         <HumanInputBlock block={selectBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
@@ -567,7 +566,7 @@ describe('HumanInputBlock', () => {
       },
     };
     render(
-      <ChatWrapper context={{ onConfirmHumanRequest: onConfirm }}>
+      <ChatWrapper>
         <HumanInputBlock block={multiBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
@@ -581,7 +580,7 @@ describe('HumanInputBlock', () => {
   it('confirmation type clicking cancel triggers callback', () => {
     const onConfirm = vi.fn();
     render(
-      <ChatWrapper context={{ onConfirmHumanRequest: onConfirm }}>
+      <ChatWrapper>
         <HumanInputBlock block={humanBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
@@ -596,7 +595,7 @@ describe('HumanInputBlock', () => {
       metadata: { inputType: 'confirmation', title: '请确认操作' },
     };
     render(
-      <ChatWrapper context={{ onConfirmHumanRequest: onConfirm }}>
+      <ChatWrapper>
         <HumanInputBlock block={noReqId} onConfirm={onConfirm} />
       </ChatWrapper>
     );
@@ -771,8 +770,11 @@ describe('BlocksRenderer', () => {
   it('uses custom block renderer', () => {
     const CustomBlock = ({ block }: { block: Block }) => <div>Custom: {block.type}</div>;
     render(
-      <ChatWrapper context={{ renderers: { blocks: { thinking: CustomBlock } } }}>
-        <BlocksRenderer blocks={[thinkingBlock]} />
+      <ChatWrapper>
+        <BlocksRenderer
+          blocks={[thinkingBlock]}
+          renderers={{ blocks: { thinking: CustomBlock } }}
+        />
       </ChatWrapper>
     );
     expect(screen.getByText('Custom: thinking')).toBeInTheDocument();

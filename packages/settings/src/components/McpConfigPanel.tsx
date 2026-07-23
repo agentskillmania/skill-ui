@@ -5,11 +5,12 @@
  * @module
  */
 
-import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
 import { Card, Switch, Checkbox, Alert, Typography } from 'antd';
 import { ExternalLink, Package } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+
 import { NAMESPACE } from '../locales/index.js';
 import {
   stepRow,
@@ -33,36 +34,37 @@ function CopyableCommand({ command }: { command: string }) {
   const { t } = useTranslation(NAMESPACE);
 
   return (
-      <Typography.Paragraph
-        copyable={{
-          text: command,
-          tooltips: [t('mcp.copyTooltip'), t('mcp.copiedTooltip')],
-        }}
-        css={css`
-          && {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: ${theme.spacing[2]} ${theme.spacing[3]};
-            background: ${theme.color.bgSpotlight};
-            border: 1px solid ${theme.color.border};
-            border-radius: ${theme.radius.md};
-            font-family: ${theme.font.familyMono};
-            font-size: ${theme.font.size.sm};
-            color: ${theme.color.text};
-            margin-bottom: 0;
-            transition: border-color ${theme.motion.duration.normal} ${theme.motion.easing.out},
-                        background ${theme.motion.duration.normal} ${theme.motion.easing.out};
+    <Typography.Paragraph
+      copyable={{
+        text: command,
+        tooltips: [t('mcp.copyTooltip'), t('mcp.copiedTooltip')],
+      }}
+      css={css`
+        && {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: ${theme.spacing[2]} ${theme.spacing[3]};
+          background: ${theme.color.bgSpotlight};
+          border: 1px solid ${theme.color.border};
+          border-radius: ${theme.radius.md};
+          font-family: ${theme.font.familyMono};
+          font-size: ${theme.font.size.sm};
+          color: ${theme.color.text};
+          margin-bottom: 0;
+          transition:
+            border-color ${theme.motion.duration.normal} ${theme.motion.easing.out},
+            background ${theme.motion.duration.normal} ${theme.motion.easing.out};
 
-            &:hover {
-              border-color: ${theme.color.borderHover};
-              background: ${theme.color.fill};
-            }
+          &:hover {
+            border-color: ${theme.color.borderHover};
+            background: ${theme.color.fill};
           }
-        `}
-      >
-        {command}
-      </Typography.Paragraph>
+        }
+      `}
+    >
+      {command}
+    </Typography.Paragraph>
   );
 }
 
@@ -87,11 +89,7 @@ function CopyableCommand({ command }: { command: string }) {
  * />
  * ```
  */
-export function McpConfigPanel({
-  value,
-  onChange,
-  className,
-}: McpConfigPanelProps) {
+export function McpConfigPanel({ value, onChange, className }: McpConfigPanelProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
 
@@ -127,7 +125,12 @@ export function McpConfigPanel({
             >
               {t('mcp.loadGlobal')}
             </div>
-            <Text type="secondary" css={css`font-size: ${theme.font.size.xs};`}>
+            <Text
+              type="secondary"
+              css={css`
+                font-size: ${theme.font.size.xs};
+              `}
+            >
               {t('mcp.loadGlobalDesc')}
             </Text>
           </div>
@@ -141,7 +144,11 @@ export function McpConfigPanel({
 
       {/* Server section (visible when loadGlobal is on) */}
       {value.loadGlobal && (
-        <div css={css`margin-top: ${theme.spacing[4]};`}>
+        <div
+          css={css`
+            margin-top: ${theme.spacing[4]};
+          `}
+        >
           {/* Empty state: step-by-step guidance card */}
           {value.availableServers.length === 0 ? (
             <Card size="small" data-testid="mcp-empty-state">
@@ -176,7 +183,11 @@ export function McpConfigPanel({
               </div>
 
               {/* Steps container */}
-              <div css={css`position: relative;`}>
+              <div
+                css={css`
+                  position: relative;
+                `}
+              >
                 {/* Step 1: Install */}
                 <div css={stepRow(theme)}>
                   <div css={stepNumber(theme)}>1</div>
@@ -191,9 +202,7 @@ export function McpConfigPanel({
                       {t('mcp.emptyStep1Title')}
                     </div>
                     <CopyableCommand command={t('mcp.emptyInstall')} />
-                    <div css={stepDescription(theme)}>
-                      {t('mcp.emptyHint')}
-                    </div>
+                    <div css={stepDescription(theme)}>{t('mcp.emptyHint')}</div>
                   </div>
                 </div>
 
@@ -214,9 +223,7 @@ export function McpConfigPanel({
                       {t('mcp.emptyStep2Title')}
                     </div>
                     <CopyableCommand command={t('mcp.emptyCommand')} />
-                    <div css={stepDescription(theme)}>
-                      {t('mcp.emptyStep2Desc')}
-                    </div>
+                    <div css={stepDescription(theme)}>{t('mcp.emptyStep2Desc')}</div>
                   </div>
                 </div>
               </div>
@@ -233,7 +240,12 @@ export function McpConfigPanel({
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <ExternalLink size={12} css={css`margin-right: 4px;`} />
+                  <ExternalLink
+                    size={12}
+                    css={css`
+                      margin-right: 4px;
+                    `}
+                  />
                   {t('mcp.emptyDocs')}
                 </Typography.Link>
               </div>
@@ -244,7 +256,9 @@ export function McpConfigPanel({
               <Alert
                 type="info"
                 showIcon
-                css={css`margin-bottom: ${theme.spacing[4]};`}
+                css={css`
+                  margin-bottom: ${theme.spacing[4]};
+                `}
                 title={
                   <span>
                     {t('mcp.hintBar')}
@@ -273,13 +287,17 @@ export function McpConfigPanel({
                         align-items: center;
                         gap: ${theme.spacing[2]};
                         padding: ${theme.spacing[2]} ${theme.spacing[3]};
-                        border: 1px solid ${isEnabled ? theme.color.primary : theme.color.borderSecondary};
+                        border: 1px solid
+                          ${isEnabled ? theme.color.primary : theme.color.borderSecondary};
                         border-radius: ${theme.radius.md};
                         margin-bottom: ${theme.spacing[2]};
-                        background: ${isEnabled ? (theme.color.primaryBg ?? theme.color.fillSubtle) : 'transparent'};
+                        background: ${isEnabled
+                          ? (theme.color.primaryBg ?? theme.color.fillSubtle)
+                          : 'transparent'};
                         cursor: pointer;
-                        transition: border-color ${theme.motion.duration.normal} ${theme.motion.easing.out},
-                                    background ${theme.motion.duration.normal} ${theme.motion.easing.out};
+                        transition:
+                          border-color ${theme.motion.duration.normal} ${theme.motion.easing.out},
+                          background ${theme.motion.duration.normal} ${theme.motion.easing.out};
 
                         &:hover {
                           background: ${theme.color.fillSubtle};
@@ -295,7 +313,12 @@ export function McpConfigPanel({
                         checked={isEnabled}
                         onChange={(e) => handleToggleServer(server.name, e.target.checked)}
                       />
-                      <div css={css`flex: 1; min-width: 0;`}>
+                      <div
+                        css={css`
+                          flex: 1;
+                          min-width: 0;
+                        `}
+                      >
                         <div
                           css={css`
                             font-size: ${theme.font.size.sm};

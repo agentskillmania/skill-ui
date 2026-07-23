@@ -3,8 +3,9 @@
  */
 import { theme } from 'antd';
 import type { ThemeConfig } from 'antd';
-import type { Theme } from '../types.js';
+
 import { lightTheme, darkTheme } from '../tokens/index.js';
+import type { Theme } from '../types.js';
 
 /**
  * Create Ant Design ThemeConfig from Theme tokens

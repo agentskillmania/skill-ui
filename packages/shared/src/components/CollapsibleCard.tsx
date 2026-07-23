@@ -1,8 +1,9 @@
-import { memo, useCallback, type CSSProperties, type ReactNode } from 'react';
-import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
 import { Button, Card } from 'antd';
 import { ChevronDown, ChevronRight } from 'lucide-react';
+import { memo, useCallback, type CSSProperties, type ReactNode } from 'react';
+
 import { useToggle } from '../hooks/index.js';
 
 export interface CollapsibleCardProps {

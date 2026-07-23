@@ -1,16 +1,15 @@
 /**
  * Chat top-level component
  */
-import { css } from '@emotion/react';
-import { useMemo } from 'react';
 import { useTheme, flexColumn } from '@agentskillmania/skill-ui-theme';
-import type { ChatProps } from '../types.js';
-import { ChatContext } from '../context.js';
-import { MessageList } from '../MessageList/index.js';
+import { css } from '@emotion/react';
+import { useTranslation } from 'react-i18next';
+
 import { ChatInput } from '../ChatInput/index.js';
 import { QuickCommands } from '../commands/QuickCommands.js';
-import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../locales/index.js';
+import { MessageList } from '../MessageList/index.js';
+import type { ChatProps } from '../types.js';
 
 export function Chat({
   messages,
@@ -44,107 +43,88 @@ export function Chat({
   const { t } = useTranslation(NAMESPACE);
   const resolvedPlaceholder = placeholder ?? t('chat.placeholder');
 
-  // UI8: memoize contextValue so context consumers don't re-render on every
-  // parent render. Without useMemo every render creates a new object reference,
-  // forcing all ChatContext consumers to re-render even when nothing changed.
-  const contextValue = useMemo(
-    () => ({
-      renderers,
-      onConfirmHumanRequest,
-      onBlockAction,
-      messageDecorator,
-      onCopyMessage,
-      onResendMessage,
-      onRegenerateMessage,
-      onRollbackMessage,
-      onForkMessage,
-    }),
-    [
-      renderers,
-      onConfirmHumanRequest,
-      onBlockAction,
-      messageDecorator,
-      onCopyMessage,
-      onResendMessage,
-      onRegenerateMessage,
-      onRollbackMessage,
-      onForkMessage,
-    ]
-  );
-
   return (
-    <ChatContext.Provider value={contextValue}>
+    <div
+      className={className}
+      style={style}
+      css={css`
+        ${flexColumn(theme)}
+        height: 100%;
+        width: 100%;
+        position: relative;
+        background: ${theme.color.bgBase};
+      `}
+    >
       <div
-        className={className}
-        style={style}
         css={css`
-          ${flexColumn(theme)}
-          height: 100%;
-          width: 100%;
-          position: relative;
-          background: ${theme.color.bgBase};
+          flex: 1;
+          overflow: hidden;
+          display: flex;
+          justify-content: center;
         `}
       >
         <div
           css={css`
-            flex: 1;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
+            width: 100%;
+            max-width: ${maxWidth};
+            height: 100%;
           `}
         >
-          <div
-            css={css`
-              width: 100%;
-              max-width: ${maxWidth};
-              height: 100%;
-            `}
-          >
-            <MessageList messages={messages} />
-          </div>
-        </div>
-
-        <div
-          css={css`
-            display: flex;
-            justify-content: center;
-            padding: ${theme.spacing[2]} ${theme.spacing[4]} ${theme.spacing[4]};
-          `}
-        >
-          <div
-            css={css`
-              width: 100%;
-              max-width: ${maxWidth};
-              display: flex;
-              flex-direction: column;
-              gap: ${theme.spacing[2]};
-            `}
-          >
-            {commands && commands.length > 0 && onCommand && (
-              <QuickCommands
-                commands={commands}
-                onCommand={onCommand}
-                maxCommands={maxQuickCommands}
-                disabled={disabled}
-              />
-            )}
-            <ChatInput
-              value={inputValue}
-              onChange={onInputChange}
-              onSubmit={onSendMessage}
-              onCancel={onStop}
-              loading={status === 'streaming'}
-              disabled={disabled}
-              placeholder={resolvedPlaceholder}
-              prefix={inputPrefix}
-              suffix={inputSuffix}
-              commands={commands}
-              onCommand={onCommand}
-              commandTrigger={commandTrigger}
-            />
-          </div>
+          <MessageList
+            messages={messages}
+            renderers={renderers}
+            messageDecorator={messageDecorator}
+            onConfirmHumanRequest={onConfirmHumanRequest}
+            onBlockAction={onBlockAction}
+            onCopyMessage={onCopyMessage}
+            onResendMessage={onResendMessage}
+            onRegenerateMessage={onRegenerateMessage}
+            onRollbackMessage={onRollbackMessage}
+            onForkMessage={onForkMessage}
+          />
         </div>
       </div>
-    </ChatContext.Provider>
+
+      <div
+        css={css`
+          display: flex;
+          justify-content: center;
+          padding: ${theme.spacing[2]} ${theme.spacing[4]} ${theme.spacing[4]};
+        `}
+      >
+        <div
+          css={css`
+            width: 100%;
+            max-width: ${maxWidth};
+            display: flex;
+            flex-direction: column;
+            gap: ${theme.spacing[2]};
+          `}
+        >
+          {commands && commands.length > 0 && onCommand && (
+            <QuickCommands
+              commands={commands}
+              onCommand={onCommand}
+              maxCommands={maxQuickCommands}
+              disabled={disabled}
+            />
+          )}
+          <ChatInput
+            value={inputValue}
+            onChange={onInputChange}
+            onSubmit={onSendMessage}
+            onCancel={onStop}
+            loading={status === 'streaming'}
+            disabled={disabled}
+            placeholder={resolvedPlaceholder}
+            prefix={inputPrefix}
+            suffix={inputSuffix}
+            commands={commands}
+            onCommand={onCommand}
+            commandTrigger={commandTrigger}
+          />
+        </div>
+      </div>
+    </div>
   );
 }

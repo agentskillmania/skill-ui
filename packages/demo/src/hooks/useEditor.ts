@@ -1,8 +1,8 @@
 /**
  * useEditor — file tree, active file, dirty tracking
  */
-import { useState, useEffect, useCallback } from 'react';
 import type { ProjectFile } from '@agentskillmania/skill-ui-editor';
+import { useState, useEffect, useCallback } from 'react';
 
 interface UseEditorReturn {
   files: ProjectFile[];

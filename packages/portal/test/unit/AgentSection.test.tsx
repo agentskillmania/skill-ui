@@ -17,7 +17,13 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 const mockAgents: AgentItem[] = [
   { id: 'agent-1', name: 'Agent One', description: 'First agent', source: 'custom', skillCount: 3 },
-  { id: 'agent-2', name: 'Agent Two', description: 'Second agent', source: 'builtin', skillCount: 5 },
+  {
+    id: 'agent-2',
+    name: 'Agent Two',
+    description: 'Second agent',
+    source: 'builtin',
+    skillCount: 5,
+  },
 ];
 
 describe('AgentSection', () => {
@@ -54,20 +60,30 @@ describe('AgentSection', () => {
   });
 
   it('renders pagination when total > pageSize', () => {
-    render(<AgentSection agents={mockAgents} {...baseProps} total={24} pageSize={12} />, { wrapper });
+    render(<AgentSection agents={mockAgents} {...baseProps} total={24} pageSize={12} />, {
+      wrapper,
+    });
     expect(screen.getByTitle('2')).toBeInTheDocument();
   });
 
   it('does not render pagination when total <= pageSize', () => {
-    render(<AgentSection agents={mockAgents} {...baseProps} total={12} pageSize={12} />, { wrapper });
+    render(<AgentSection agents={mockAgents} {...baseProps} total={12} pageSize={12} />, {
+      wrapper,
+    });
     expect(screen.queryByTitle('2')).not.toBeInTheDocument();
   });
 
   it('calls onPageChange when pagination changes', () => {
     const onPageChange = vi.fn();
     render(
-      <AgentSection agents={mockAgents} {...baseProps} total={24} pageSize={12} onPageChange={onPageChange} />,
-      { wrapper },
+      <AgentSection
+        agents={mockAgents}
+        {...baseProps}
+        total={24}
+        pageSize={12}
+        onPageChange={onPageChange}
+      />,
+      { wrapper }
     );
     // Click the <a> element inside the pagination item (native click needed for antd)
     const pageLink = document.querySelector('.ant-pagination-item-2 a') as HTMLElement;
@@ -78,21 +94,27 @@ describe('AgentSection', () => {
 
   it('calls onChat with agent id when chat button clicked', () => {
     const onChat = vi.fn();
-    render(<AgentSection agents={[mockAgents[0]]} {...baseProps} total={1} onChat={onChat} />, { wrapper });
+    render(<AgentSection agents={[mockAgents[0]]} {...baseProps} total={1} onChat={onChat} />, {
+      wrapper,
+    });
     fireEvent.click(screen.getByText('对话'));
     expect(onChat).toHaveBeenCalledWith('agent-1');
   });
 
   it('calls onEdit with agent id when edit button clicked', () => {
     const onEdit = vi.fn();
-    render(<AgentSection agents={[mockAgents[0]]} {...baseProps} total={1} onEdit={onEdit} />, { wrapper });
+    render(<AgentSection agents={[mockAgents[0]]} {...baseProps} total={1} onEdit={onEdit} />, {
+      wrapper,
+    });
     fireEvent.click(screen.getByText('编辑'));
     expect(onEdit).toHaveBeenCalledWith('agent-1');
   });
 
   it('calls onDelete with agent id when delete is confirmed', async () => {
     const onDelete = vi.fn();
-    render(<AgentSection agents={[mockAgents[0]]} {...baseProps} total={1} onDelete={onDelete} />, { wrapper });
+    render(<AgentSection agents={[mockAgents[0]]} {...baseProps} total={1} onDelete={onDelete} />, {
+      wrapper,
+    });
 
     // Use native click to trigger Popconfirm
     const deleteBtn = document.querySelector('.ant-btn-dangerous') as HTMLElement;
@@ -142,7 +164,9 @@ describe('AgentSection', () => {
     await screen.findByPlaceholderText('请输入名称');
 
     // Click cancel button inside modal footer
-    const cancelBtn = document.querySelector('.ant-modal-wrap .ant-btn:not(.ant-btn-primary)') as HTMLElement;
+    const cancelBtn = document.querySelector(
+      '.ant-modal-wrap .ant-btn:not(.ant-btn-primary)'
+    ) as HTMLElement;
     if (cancelBtn) {
       cancelBtn.click();
     }

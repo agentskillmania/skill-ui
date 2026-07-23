@@ -4,17 +4,18 @@
  * Merges consecutive streaming events (token, thinking) into single rows
  * Uses virtual scrolling (@tanstack/react-virtual) for performance with large lists.
  */
-import { css } from '@emotion/react';
-import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
+import { EmptyState, SidebarPanel } from '@agentskillmania/skill-ui-shared';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ClipboardList } from 'lucide-react';
+import { useRef, useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { EmptyState, SidebarPanel } from '@agentskillmania/skill-ui-shared';
-import type { CockpitEvent, EventLogPanelProps, EventCategory } from './types.js';
+
 import { getEventCategory, ALL_CATEGORIES } from './eventCategory.js';
 import { EventFilterBar } from './EventFilterBar.js';
 import { EventRow } from './EventRow.js';
+import type { CockpitEvent, EventLogPanelProps, EventCategory } from './types.js';
 import { NAMESPACE } from '../../locales/index.js';
 
 /** Event types that should be merged when consecutive */
@@ -99,8 +100,7 @@ export function EventLogPanel({
     const el = scrollRef.current;
     if (!el) return;
     const totalSize = virtualizer.getTotalSize();
-    shouldAutoScroll.current =
-      (virtualizer.scrollOffset ?? 0) + el.clientHeight >= totalSize - 50;
+    shouldAutoScroll.current = (virtualizer.scrollOffset ?? 0) + el.clientHeight >= totalSize - 50;
   }, [virtualizer]);
 
   // Auto-scroll to bottom when new events arrive
@@ -192,9 +192,9 @@ export function EventLogPanel({
                   }}
                 >
                   <EventRow
-                      event={displayEvents[vi.index]}
-                      onHeightChange={() => handleRowHeightChange(vi.index)}
-                    />
+                    event={displayEvents[vi.index]}
+                    onHeightChange={() => handleRowHeightChange(vi.index)}
+                  />
                 </div>
               ))}
             </div>

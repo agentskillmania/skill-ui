@@ -3,8 +3,9 @@
  * Each returns concise text — the tag already identifies the event type,
  * so content only needs the distinguishing detail.
  */
-import type { CockpitEvent } from './types.js';
 import { truncate } from '@agentskillmania/skill-ui-shared';
+
+import type { CockpitEvent } from './types.js';
 
 /** Render event content text based on event type */
 export function renderEventContent(event: CockpitEvent, expanded: boolean): string {

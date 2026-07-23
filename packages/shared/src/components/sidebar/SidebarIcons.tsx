@@ -1,10 +1,11 @@
-import { memo } from 'react';
-import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
 import { Tooltip } from 'antd';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { NAMESPACE } from '../../locales/index.js';
 
 /** Configuration for a single icon button in the bar. */

@@ -1,5 +1,5 @@
-import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
 import { useCallback, useEffect, useRef } from 'react';
 
 export interface SplitDividerProps {

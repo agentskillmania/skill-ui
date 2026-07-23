@@ -87,29 +87,21 @@ describe('ProjectEditor', () => {
 
   it('shows directory hint when selecting a directory file', () => {
     renderWithProviders(
-      <ProjectEditor
-        {...baseProps}
-        editorActiveFilePath="src"
-        editorActiveFileContent=""
-      />
+      <ProjectEditor {...baseProps} editorActiveFilePath="src" editorActiveFileContent="" />
     );
     expect(screen.getByText('此文件为目录')).toBeInTheDocument();
   });
 
   it('calls onEditorFileChange when content is edited', () => {
     const onEditorFileChange = vi.fn();
-    renderWithProviders(
-      <ProjectEditor {...baseProps} onEditorFileChange={onEditorFileChange} />
-    );
+    renderWithProviders(<ProjectEditor {...baseProps} onEditorFileChange={onEditorFileChange} />);
     fireEvent.click(screen.getByTestId('monaco-change'));
     expect(onEditorFileChange).toHaveBeenCalledWith('SKILL.md', 'new content');
   });
 
   it('calls onEditorSave when save shortcut triggered', () => {
     const onEditorSave = vi.fn();
-    renderWithProviders(
-      <ProjectEditor {...baseProps} onEditorSave={onEditorSave} />
-    );
+    renderWithProviders(<ProjectEditor {...baseProps} onEditorSave={onEditorSave} />);
     // Trigger the save handler registered by CodeEditor handleMount
     registeredSaveHandler?.();
     expect(onEditorSave).toHaveBeenCalledWith('SKILL.md', 'skill content');
@@ -130,9 +122,7 @@ describe('ProjectEditor', () => {
 
   it('calls onEditorSave with file path and content when saved', () => {
     const onEditorSave = vi.fn();
-    renderWithProviders(
-      <ProjectEditor {...baseProps} onEditorSave={onEditorSave} />
-    );
+    renderWithProviders(<ProjectEditor {...baseProps} onEditorSave={onEditorSave} />);
     // StatusBar renders a save button when isDirty is true
     // isDirty comes from editorDirtyFilePaths including activeFilePath
     // We can test via the monaco editor integration
@@ -172,9 +162,7 @@ describe('ProjectEditor', () => {
   });
 
   it('shows isDirty status when file is in dirtyFilePaths', () => {
-    renderWithProviders(
-      <ProjectEditor {...baseProps} editorDirtyFilePaths={['SKILL.md']} />
-    );
+    renderWithProviders(<ProjectEditor {...baseProps} editorDirtyFilePaths={['SKILL.md']} />);
     // StatusBar should reflect dirty state
     expect(screen.getByText('未保存')).toBeInTheDocument();
   });
@@ -187,23 +175,16 @@ describe('ProjectEditor', () => {
 
   it('renders status bar with cursor position when provided', () => {
     renderWithProviders(
-      <ProjectEditor
-        {...baseProps}
-        editorCursorPosition={{ line: 5, column: 10 }}
-      />
+      <ProjectEditor {...baseProps} editorCursorPosition={{ line: 5, column: 10 }} />
     );
     // Ln/Col indicators via i18n
     expect(screen.getByText('行 5, 列 10')).toBeInTheDocument();
   });
 
   it('switches sidebar panel when editorActivePanel prop changes', () => {
-    const { rerender } = renderWithProviders(
-      <ProjectEditor {...baseProps} />
-    );
+    const { rerender } = renderWithProviders(<ProjectEditor {...baseProps} />);
     // Re-render with activePanel = 'copilot'
-    rerender(
-      <ProjectEditor {...baseProps} editorActivePanel="copilot" />
-    );
+    rerender(<ProjectEditor {...baseProps} editorActivePanel="copilot" />);
     // The copilot panel title should now be in the DOM
     expect(screen.getByText('Copilot')).toBeInTheDocument();
   });
@@ -242,7 +223,9 @@ describe('ProjectEditor', () => {
       />
     );
     // Should find the nested file in children
-    expect(screen.getByTestId('monaco-content')).toHaveTextContent('export async function search()');
+    expect(screen.getByTestId('monaco-content')).toHaveTextContent(
+      'export async function search()'
+    );
   });
 
   it('triggers sidebar collapse via collapse button', () => {
@@ -283,12 +266,7 @@ describe('ProjectEditor', () => {
     });
 
     it('shows confirmation modal when closing dirty tab', () => {
-      renderWithProviders(
-        <ProjectEditor
-          {...baseProps}
-          editorDirtyFilePaths={['SKILL.md']}
-        />
-      );
+      renderWithProviders(<ProjectEditor {...baseProps} editorDirtyFilePaths={['SKILL.md']} />);
       const closeButtons = screen.getAllByRole('button', { name: /关闭/ });
       fireEvent.click(closeButtons[0]);
       expect(confirmSpy).toHaveBeenCalled();
@@ -298,12 +276,7 @@ describe('ProjectEditor', () => {
     });
 
     it('does not show modal when closing clean tab', () => {
-      renderWithProviders(
-        <ProjectEditor
-          {...baseProps}
-          editorDirtyFilePaths={[]}
-        />
-      );
+      renderWithProviders(<ProjectEditor {...baseProps} editorDirtyFilePaths={[]} />);
       const closeButtons = screen.getAllByRole('button', { name: /关闭/ });
       fireEvent.click(closeButtons[0]);
       expect(confirmSpy).not.toHaveBeenCalled();
@@ -330,4 +303,3 @@ describe('ProjectEditor', () => {
     });
   });
 });
-

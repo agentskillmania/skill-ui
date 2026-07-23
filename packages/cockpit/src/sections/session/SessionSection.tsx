@@ -1,13 +1,12 @@
 /** @jsxImportSource @emotion/react */
+import { SectionHeader } from '@agentskillmania/skill-ui-shared';
+import { useTheme, flexColumn } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Activity } from 'lucide-react';
 
-import { SectionHeader } from '@agentskillmania/skill-ui-shared';
-import { useTheme, flexColumn } from '@agentskillmania/skill-ui-theme';
-
-import type { SessionOverviewData, SessionInfoData } from './types.js';
-import { SessionOverviewCard } from './SessionOverviewCard.js';
 import { SessionInfoCard } from './SessionInfoCard.js';
+import { SessionOverviewCard } from './SessionOverviewCard.js';
+import type { SessionOverviewData, SessionInfoData } from './types.js';
 
 /** Props for SessionSection — container for Overview and Session Info cards. */
 interface SessionSectionProps {

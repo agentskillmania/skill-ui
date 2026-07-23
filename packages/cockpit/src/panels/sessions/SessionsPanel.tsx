@@ -3,12 +3,13 @@
  * SessionsPanel component
  * Displays session list for quick switching
  */
-import { css } from '@emotion/react';
+import { EmptyState, SidebarPanel, formatRelativeTime } from '@agentskillmania/skill-ui-shared';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
 import { List } from 'antd';
 import { LayoutList } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { EmptyState, SidebarPanel, formatRelativeTime } from '@agentskillmania/skill-ui-shared';
+
 import type { SessionsPanelProps } from './types.js';
 import { NAMESPACE } from '../../locales/index.js';
 

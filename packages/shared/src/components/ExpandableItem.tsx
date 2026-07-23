@@ -1,6 +1,7 @@
-import { memo, useCallback, type ReactNode } from 'react';
-import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+import { memo, useCallback, type ReactNode } from 'react';
+
 import { useToggle } from '../hooks/index.js';
 
 /** Context provided to renderSummary callback. */

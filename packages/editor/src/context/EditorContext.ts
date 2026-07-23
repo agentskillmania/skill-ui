@@ -2,6 +2,7 @@
  * Editor context
  */
 import { createContext, useContext } from 'react';
+
 import type { EditorContextValue } from '../types.js';
 
 /** @internal */

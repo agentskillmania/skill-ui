@@ -2,16 +2,12 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React from 'react';
 import { ChatInput } from './index.js';
-import { ChatContext } from '../context.js';
 
-// 在 ChatContext 中包裹，提供 renderers
 function ChatInputWrapper(props: React.ComponentProps<typeof ChatInput>) {
   return (
-    <ChatContext.Provider value={{ renderers: {} }}>
-      <div style={{ maxWidth: 600 }}>
-        <ChatInput {...props} />
-      </div>
-    </ChatContext.Provider>
+    <div style={{ maxWidth: 600 }}>
+      <ChatInput {...props} />
+    </div>
   );
 }
 

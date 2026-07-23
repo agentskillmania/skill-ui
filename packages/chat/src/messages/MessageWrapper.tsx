@@ -1,13 +1,12 @@
 /**
  * Message wrapper (avatar, alignment, spacing, hover actions)
  */
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
-import type { Message } from '../types.js';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { useChatContext } from '../context.js';
-import { MessageActions } from './MessageActions.js';
 
+import type { Message } from '../types.js';
+import { MessageActions } from './MessageActions.js';
 import type { MessageActionsVariant } from './MessageActions.js';
 
 export interface MessageWrapperProps {
@@ -32,15 +31,7 @@ export function MessageWrapper({
   onFork,
 }: MessageWrapperProps) {
   const theme = useTheme();
-  const ctx = useChatContext();
   const isUser = message.role === 'user';
-
-  // Props take precedence over context (allows storybook override)
-  const handleCopy = onCopy ?? ctx.onCopyMessage;
-  const handleResend = onResend ?? ctx.onResendMessage;
-  const handleRegenerate = onRegenerate ?? ctx.onRegenerateMessage;
-  const handleRollback = onRollback ?? ctx.onRollbackMessage;
-  const handleFork = onFork ?? ctx.onForkMessage;
 
   return (
     <div
@@ -81,11 +72,11 @@ export function MessageWrapper({
           <MessageActions
             message={message}
             variant={actionsVariant}
-            onCopy={handleCopy}
-            onResend={handleResend}
-            onRegenerate={handleRegenerate}
-            onRollback={handleRollback}
-            onFork={handleFork}
+            onCopy={onCopy}
+            onResend={onResend}
+            onRegenerate={onRegenerate}
+            onRollback={onRollback}
+            onFork={onFork}
           />
         </div>
       </div>

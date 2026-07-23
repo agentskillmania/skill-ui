@@ -1,11 +1,13 @@
 /**
  * Slash autocomplete dropdown component
  */
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Dropdown } from 'antd';
 import type { MenuProps } from 'antd';
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTranslation } from 'react-i18next';
+
 import type { ChatCommand } from '../types.js';
 import {
   extractSearchTerm,
@@ -13,7 +15,6 @@ import {
   groupCommands,
   DEFAULT_GROUP_KEY,
 } from './commandUtils.js';
-import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../locales/index.js';
 
 export interface CommandAutocompleteProps {

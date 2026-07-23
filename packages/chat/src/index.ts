@@ -47,7 +47,7 @@ export type {
 } from './types.js';
 
 // Component Props types
-export type { MessageListProps } from './MessageList/index.js';
+export type { MessageListProps } from './types.js';
 export type { ChatInputProps } from './ChatInput/index.js';
 export type { MessageItemProps } from './messages/MessageItem.js';
 export type { MessageWrapperProps } from './messages/MessageWrapper.js';

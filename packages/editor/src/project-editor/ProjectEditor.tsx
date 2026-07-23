@@ -4,15 +4,25 @@
  *
  * Three-column layout: EditorArea (flex:1) | SplitDivider | shared Sidebar
  */
-import { Modal } from 'antd';
-import { css } from '@emotion/react';
-import { useCallback, useMemo, useEffect } from 'react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { useTranslation } from 'react-i18next';
 import { EmptyState, Sidebar, SidebarPanel, SplitDivider } from '@agentskillmania/skill-ui-shared';
 import type { SidebarIconItem } from '@agentskillmania/skill-ui-shared';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+import { Modal } from 'antd';
 import { FolderOpen, Bot, ClipboardCheck, TestTube2 } from 'lucide-react';
+import { useCallback, useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { EditorContext } from '../context/EditorContext.js';
+import { EditorArea } from '../editor-area/index.js';
+import { useEditorLayout } from '../hooks/useEditorLayout.js';
 import { NAMESPACE } from '../locales/index.js';
+import { CopilotPanel } from '../panels/copilot/index.js';
+import { FileTree } from '../panels/file-tree/index.js';
+import { ReviewPanel } from '../panels/review/index.js';
+import { TestCase } from '../panels/test-case/index.js';
+import { FileTabs } from '../sections/file-tabs/index.js';
+import { StatusBar } from '../sections/status-bar/index.js';
 import type {
   ProjectEditorProps,
   FileTab,
@@ -20,16 +30,7 @@ import type {
   EditorPanel,
   ProjectFile,
 } from '../types.js';
-import { EditorContext } from '../context/EditorContext.js';
 import { getFileLabel } from '../utils/file-utils.js';
-import { FileTabs } from '../sections/file-tabs/index.js';
-import { EditorArea } from '../editor-area/index.js';
-import { StatusBar } from '../sections/status-bar/index.js';
-import { FileTree } from '../panels/file-tree/index.js';
-import { CopilotPanel } from '../panels/copilot/index.js';
-import { ReviewPanel } from '../panels/review/index.js';
-import { TestCase } from '../panels/test-case/index.js';
-import { useEditorLayout } from '../hooks/useEditorLayout.js';
 
 export function ProjectEditor({
   editorFiles,

@@ -1,15 +1,16 @@
 /**
  * Chat input component
  */
-import { memo } from 'react';
-import { css } from '@emotion/react';
-import { Sender } from '@ant-design/x';
-import type { ReactNode } from 'react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import type { ChatCommand } from '../types.js';
-import { CommandAutocomplete } from '../commands/CommandAutocomplete.js';
+import { Sender } from '@ant-design/x';
+import { css } from '@emotion/react';
+import { memo } from 'react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+
+import { CommandAutocomplete } from '../commands/CommandAutocomplete.js';
 import { NAMESPACE } from '../locales/index.js';
+import type { ChatCommand } from '../types.js';
 
 export interface ChatInputProps {
   /** Controlled input value */

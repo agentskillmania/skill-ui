@@ -2,7 +2,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState, useCallback } from 'react';
 import { ProjectEditor } from './ProjectEditor.js';
-import type { ProjectFile, EditMode, EditorPanel, FileTab, TestCase, ReviewItem } from '../types.js';
+import type {
+  ProjectFile,
+  EditMode,
+  EditorPanel,
+  FileTab,
+  TestCase,
+  ReviewItem,
+} from '../types.js';
 
 const sampleFiles: ProjectFile[] = [
   {

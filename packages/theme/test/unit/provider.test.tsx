@@ -3,11 +3,7 @@
  */
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, renderHook, screen } from '@testing-library/react';
-import {
-  ThemeProvider,
-  useTheme,
-  createEmotionTheme,
-} from '../../src/provider/index.js';
+import { ThemeProvider, useTheme, createEmotionTheme } from '../../src/provider/index.js';
 
 afterEach(() => {
   document.documentElement.removeAttribute('data-theme');
@@ -73,11 +69,7 @@ describe('ThemeProvider', () => {
   });
 
   it('supports children as function pattern', () => {
-    render(
-      <ThemeProvider>
-        {(ctx) => <div data-testid="fn-child">{ctx.mode}</div>}
-      </ThemeProvider>
-    );
+    render(<ThemeProvider>{(ctx) => <div data-testid="fn-child">{ctx.mode}</div>}</ThemeProvider>);
     expect(screen.getByTestId('fn-child').textContent).toBe('light');
   });
 
@@ -131,9 +123,7 @@ describe('useTheme', () => {
 
   it('returns dark theme when ThemeProvider is dark', () => {
     const { result } = renderHook(() => useTheme(), {
-      wrapper: ({ children }) => (
-        <ThemeProvider defaultMode="dark">{children}</ThemeProvider>
-      ),
+      wrapper: ({ children }) => <ThemeProvider defaultMode="dark">{children}</ThemeProvider>,
     });
     expect(result.current.mode).toBe('dark');
   });

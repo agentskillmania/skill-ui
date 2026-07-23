@@ -3,10 +3,11 @@
  * TrafficLights component
  * macOS-style window control buttons (red/yellow/green), display-only + callbacks, does not call window API
  */
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { X, Minus, Copy, Expand } from 'lucide-react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
+
 import type { TrafficLightsProps } from '../../types.js';
 
 export function TrafficLights({

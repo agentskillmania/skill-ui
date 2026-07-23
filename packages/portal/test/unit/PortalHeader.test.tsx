@@ -96,9 +96,7 @@ describe('PortalHeader', () => {
 
   it('renders the subtitle', () => {
     render(<PortalHeader {...defaultProps} />, { wrapper });
-    expect(
-      screen.getByText('创建智能体 · 编排技能 · 开启你的 AI 工作流'),
-    ).toBeInTheDocument();
+    expect(screen.getByText('创建智能体 · 编排技能 · 开启你的 AI 工作流')).toBeInTheDocument();
   });
 
   it('shows github button when githubUrl is provided', () => {
@@ -132,7 +130,9 @@ describe('PortalHeader', () => {
 
   it('handles AutoComplete onChange with empty value', () => {
     const onQueryChange = vi.fn();
-    render(<PortalHeader {...defaultProps} query="test" onQueryChange={onQueryChange} />, { wrapper });
+    render(<PortalHeader {...defaultProps} query="test" onQueryChange={onQueryChange} />, {
+      wrapper,
+    });
     const input = screen.getByPlaceholderText('搜索技能、智能体或会话记录…');
     // AutoComplete's onChange fires onQueryChange with the value
     fireEvent.change(input, { target: { value: '' } });
@@ -158,7 +158,7 @@ describe('PortalHeader', () => {
         onSelect={onSelect}
         onEdit={onEdit}
       />,
-      { wrapper },
+      { wrapper }
     );
 
     // Try to open the AutoComplete dropdown by focusing the input
@@ -181,9 +181,8 @@ describe('PortalHeader', () => {
         onEdit={onEdit}
         onSelect={vi.fn()}
       />,
-      { wrapper },
+      { wrapper }
     );
     expect(screen.getByPlaceholderText('搜索技能、智能体或会话记录…')).toBeInTheDocument();
   });
-
 });

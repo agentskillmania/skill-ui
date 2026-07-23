@@ -64,7 +64,7 @@ describe('SessionRow', () => {
     const onFork = vi.fn();
     render(
       <SessionRow session={mockSession} onResume={vi.fn()} onDelete={vi.fn()} onFork={onFork} />,
-      { wrapper },
+      { wrapper }
     );
 
     // Find the fork button (second within the actions area)
@@ -97,7 +97,7 @@ describe('SessionRow', () => {
   it('handles mouse enter and leave events', () => {
     const { container } = render(
       <SessionRow session={mockSession} onResume={vi.fn()} onDelete={vi.fn()} />,
-      { wrapper },
+      { wrapper }
     );
     // The session row is the first child div of the rendered container
     const row = container.querySelector('[class*="css"]');

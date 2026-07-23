@@ -2,8 +2,8 @@
  * Theme tokens unified exports
  */
 import type { Theme } from '../types.js';
-import { lightTheme } from './light.js';
 import { darkTheme } from './dark.js';
+import { lightTheme } from './light.js';
 
 export { breakpoints } from './shared.js';
 export {

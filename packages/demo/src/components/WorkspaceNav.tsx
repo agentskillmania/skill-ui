@@ -1,10 +1,10 @@
 /**
  * Titlebar center slot — home button + workspace breadcrumb
  */
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Dropdown, Button } from 'antd';
 import type { MenuProps } from 'antd';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
 
 interface WorkspaceNavProps {
   workspaceName: string;

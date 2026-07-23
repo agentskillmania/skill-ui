@@ -5,13 +5,14 @@
  * Adapted from skill-studio PanelTabs, adapted for the editor package.
  * Supports elastic shrinkage, unsaved indicator, close button.
  */
+import { useTheme, interactiveItem, borderSeparator } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { X, FileCode, Book, File } from 'lucide-react';
-import { useTheme, interactiveItem, borderSeparator } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
+
 import { NAMESPACE } from '../../locales/index.js';
-import { getFileKind } from '../../utils/file-extensions.js';
 import type { FileTabsProps, FileTab } from '../../types.js';
+import { getFileKind } from '../../utils/file-extensions.js';
 
 /** Get icon by file name */
 function getFileIcon(filename: string) {

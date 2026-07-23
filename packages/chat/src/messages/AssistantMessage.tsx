@@ -1,14 +1,20 @@
 /**
  * AI assistant message
  */
-import { memo } from 'react';
-import { css } from '@emotion/react';
-import type { MessageProps } from '../types.js';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { MarkdownRenderer } from '../content/MarkdownRenderer.js';
-import { BlocksRenderer } from '../blocks-redesign/BlocksRenderer.js';
+import { css } from '@emotion/react';
+import { memo } from 'react';
 
-export const AssistantMessage = memo(function AssistantMessage({ message }: MessageProps) {
+import { BlocksRenderer } from '../blocks-redesign/BlocksRenderer.js';
+import { MarkdownRenderer } from '../content/MarkdownRenderer.js';
+import type { MessageProps } from '../types.js';
+
+export const AssistantMessage = memo(function AssistantMessage({
+  message,
+  onConfirmHumanRequest,
+  onBlockAction,
+  renderers,
+}: MessageProps) {
   const theme = useTheme();
 
   return (
@@ -26,7 +32,12 @@ export const AssistantMessage = memo(function AssistantMessage({ message }: Mess
             margin-bottom: ${theme.spacing[3]};
           `}
         >
-          <BlocksRenderer blocks={message.blocks} />
+          <BlocksRenderer
+            blocks={message.blocks}
+            renderers={renderers}
+            onConfirmHumanRequest={onConfirmHumanRequest}
+            onBlockAction={onBlockAction}
+          />
         </div>
       )}
       {message.content && (

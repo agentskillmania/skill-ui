@@ -14,7 +14,12 @@ function wrapper({ children }: { children: React.ReactNode }) {
 
 const mockSessions: SessionInfo[] = [
   { id: 's1', agentName: 'Agent A', model: 'gpt-4o', updatedAt: new Date().toISOString() },
-  { id: 's2', agentName: 'Agent B', model: 'claude-4', updatedAt: new Date(Date.now() - 3600000).toISOString() },
+  {
+    id: 's2',
+    agentName: 'Agent B',
+    model: 'claude-4',
+    updatedAt: new Date(Date.now() - 3600000).toISOString(),
+  },
 ];
 
 describe('SessionsPanel', () => {

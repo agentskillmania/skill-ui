@@ -3,10 +3,11 @@
  *
  * Three-layer injection: Emotion ThemeProvider + Ant Design XProvider + CSS data-theme attribute
  */
-import { useEffect, useState, useCallback, type ReactNode } from 'react';
 import { ThemeProvider as EmotionThemeProvider, useTheme as useEmotionTheme } from '@emotion/react';
-import type { Theme } from '../types.js';
+import { useEffect, useState, useCallback, type ReactNode } from 'react';
+
 import { getTheme } from '../tokens/index.js';
+import type { Theme } from '../types.js';
 
 export { GlobalStyles } from './GlobalStyles.js';
 

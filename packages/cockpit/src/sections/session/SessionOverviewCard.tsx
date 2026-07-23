@@ -1,13 +1,4 @@
 /** @jsxImportSource @emotion/react */
-import { memo } from 'react';
-import { css } from '@emotion/react';
-import { Progress, Tag, Typography } from 'antd';
-import { useTranslation } from 'react-i18next';
-import type { Theme } from '@agentskillmania/skill-ui-theme';
-import { useTheme, flexColumn, flexRow } from '@agentskillmania/skill-ui-theme';
-
-import { NAMESPACE } from '../../locales/index.js';
-import type { SessionOverviewData, SessionStatus } from './types.js';
 import {
   CollapsibleCard,
   useToggle,
@@ -16,6 +7,15 @@ import {
   formatTimestamp,
   metricGrid,
 } from '@agentskillmania/skill-ui-shared';
+import type { Theme } from '@agentskillmania/skill-ui-theme';
+import { useTheme, flexColumn, flexRow } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+import { Progress, Tag, Typography } from 'antd';
+import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import type { SessionOverviewData, SessionStatus } from './types.js';
+import { NAMESPACE } from '../../locales/index.js';
 
 /** Props for SessionOverviewCard. */
 export interface SessionOverviewCardProps {
@@ -64,7 +64,10 @@ const timestampStyle = (theme: Theme) => css`
  * SessionOverviewCard renders a collapsible card summarizing a session's
  * title, status, metrics, token usage, context window, and timestamps.
  */
-export const SessionOverviewCard = memo(function SessionOverviewCard({ data, defaultCollapsed = false }: SessionOverviewCardProps) {
+export const SessionOverviewCard = memo(function SessionOverviewCard({
+  data,
+  defaultCollapsed = false,
+}: SessionOverviewCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
   const collapsedToggle = useToggle(defaultCollapsed);

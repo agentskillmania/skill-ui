@@ -2,15 +2,16 @@
 /**
  * File tree component
  */
+import { useToggle, EmptyState } from '@agentskillmania/skill-ui-shared';
+import { useTheme, interactiveItem } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { ChevronRight, ChevronDown, FileCode, Book, FolderOpen } from 'lucide-react';
-import { useTheme, interactiveItem } from '@agentskillmania/skill-ui-theme';
-import { useTranslation } from 'react-i18next';
-import { NAMESPACE } from '../../locales/index.js';
 import { useCallback } from 'react';
-import { useToggle, EmptyState } from '@agentskillmania/skill-ui-shared';
-import { getFileKind } from '../../utils/file-extensions.js';
+import { useTranslation } from 'react-i18next';
+
+import { NAMESPACE } from '../../locales/index.js';
 import type { FileTreeProps, ProjectFile } from '../../types.js';
+import { getFileKind } from '../../utils/file-extensions.js';
 
 /** Get file icon by extension */
 function getFileIcon(name: string) {

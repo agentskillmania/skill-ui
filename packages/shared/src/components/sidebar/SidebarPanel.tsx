@@ -1,7 +1,7 @@
-import { memo } from 'react';
-import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
 import type { LucideIcon } from 'lucide-react';
+import { memo } from 'react';
 import type { ReactNode } from 'react';
 
 export interface SidebarPanelProps {
@@ -14,7 +14,11 @@ export interface SidebarPanelProps {
 }
 
 /** Renders a panel with icon + uppercase title header and scrollable body. */
-export const SidebarPanel = memo(function SidebarPanel({ title, icon: Icon, children }: SidebarPanelProps) {
+export const SidebarPanel = memo(function SidebarPanel({
+  title,
+  icon: Icon,
+  children,
+}: SidebarPanelProps) {
   const theme = useTheme();
 
   return (

@@ -150,6 +150,12 @@ export interface ChatCommand {
 export interface MessageProps {
   message: Message;
   children?: ReactNode;
+  /** Human interaction confirmation (forwarded to BlocksRenderer for HumanInputBlock) */
+  onConfirmHumanRequest?: (requestId: string, response: unknown) => void;
+  /** Block action callback (forwarded to BlocksRenderer for A2UIBlock) */
+  onBlockAction?: (action: BlockAction) => void;
+  /** Custom renderer registry (forwards blocks sub-registry to BlocksRenderer) */
+  renderers?: ChatRenderers;
 }
 
 /** Block rendering component props */
@@ -168,6 +174,27 @@ export interface ChatRenderers {
   messages?: Record<string, ComponentType<MessageProps>>;
   /** Register custom renderers by block type (can override built-in, extend new types) */
   blocks?: Record<string, ComponentType<BlockProps>>;
+}
+
+// ---- Message List Props ----
+
+/** MessageList component props (forwards callbacks to MessageItem) */
+export interface MessageListProps {
+  messages: Message[];
+  /** Custom renderer registry */
+  renderers?: ChatRenderers;
+  /** Message decorator */
+  messageDecorator?: (message: Message, element: ReactNode) => ReactNode;
+  /** Human interaction confirmation (forwarded to blocks) */
+  onConfirmHumanRequest?: (requestId: string, response: unknown) => void;
+  /** Block action callback (forwarded to blocks) */
+  onBlockAction?: (action: BlockAction) => void;
+  /** Message action callbacks */
+  onCopyMessage?: (message: Message) => void;
+  onResendMessage?: (message: Message) => void;
+  onRegenerateMessage?: (message: Message) => void;
+  onRollbackMessage?: (message: Message) => void;
+  onForkMessage?: (message: Message) => void;
 }
 
 // ---- Top-level Component Props ----

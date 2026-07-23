@@ -1,16 +1,13 @@
 /** @jsxImportSource @emotion/react */
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MessageList } from './index.js';
-import { ChatContext } from '../context.js';
 import type { Message } from '../types.js';
 
 function Wrapper({ messages }: { messages: Message[] }) {
   return (
-    <ChatContext.Provider value={{ renderers: {} }}>
-      <div style={{ height: 400, border: '1px solid #e2e8f0', borderRadius: 8 }}>
-        <MessageList messages={messages} />
-      </div>
-    </ChatContext.Provider>
+    <div style={{ height: 400, border: '1px solid #e2e8f0', borderRadius: 8 }}>
+      <MessageList messages={messages} />
+    </div>
   );
 }
 

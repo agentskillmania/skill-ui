@@ -1,13 +1,13 @@
 /** @jsxImportSource @emotion/react */
-import { memo } from 'react';
+import { CollapsibleCard, useToggle, emptyTextStyle } from '@agentskillmania/skill-ui-shared';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { Tag, Typography } from 'antd';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { NAMESPACE } from '../../locales/index.js';
 import { tagRowStyle, titleRowStyle } from './styles.js';
 import type { RunnerFeatureFlags } from './types.js';
-import { CollapsibleCard, useToggle, emptyTextStyle } from '@agentskillmania/skill-ui-shared';
+import { NAMESPACE } from '../../locales/index.js';
 
 /** Props for FeatureTagsCard. */
 export interface FeatureTagsCardProps {

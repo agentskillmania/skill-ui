@@ -121,7 +121,7 @@ describe('PreferencesPanel', () => {
     const onBrowse = vi.fn().mockResolvedValue(undefined);
     render(
       <PreferencesPanel value={defaultValue} onChange={() => {}} onBrowseDirectory={onBrowse} />,
-      { wrapper },
+      { wrapper }
     );
 
     const browseButtons = screen.getAllByTestId(/prefs-.*-browse/);
@@ -134,12 +134,8 @@ describe('PreferencesPanel', () => {
     const onChange = vi.fn();
     const onBrowse = vi.fn().mockResolvedValue('/home/user/selected-workspace');
     render(
-      <PreferencesPanel
-        value={defaultValue}
-        onChange={onChange}
-        onBrowseDirectory={onBrowse}
-      />,
-      { wrapper },
+      <PreferencesPanel value={defaultValue} onChange={onChange} onBrowseDirectory={onBrowse} />,
+      { wrapper }
     );
 
     const workspaceBrowse = screen.getByTestId('prefs-defaultWorkspacePath-browse');
@@ -148,7 +144,9 @@ describe('PreferencesPanel', () => {
     expect(onBrowse).toHaveBeenCalledWith('defaultWorkspacePath');
     // Wait for the async callback to resolve
     await vi.waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith({ defaultWorkspacePath: '/home/user/selected-workspace' });
+      expect(onChange).toHaveBeenCalledWith({
+        defaultWorkspacePath: '/home/user/selected-workspace',
+      });
     });
   });
 
@@ -156,12 +154,8 @@ describe('PreferencesPanel', () => {
     const onChange = vi.fn();
     const onBrowse = vi.fn().mockResolvedValue(undefined);
     render(
-      <PreferencesPanel
-        value={defaultValue}
-        onChange={onChange}
-        onBrowseDirectory={onBrowse}
-      />,
-      { wrapper },
+      <PreferencesPanel value={defaultValue} onChange={onChange} onBrowseDirectory={onBrowse} />,
+      { wrapper }
     );
 
     const workspaceBrowse = screen.getByTestId('prefs-defaultWorkspacePath-browse');
@@ -180,12 +174,8 @@ describe('PreferencesPanel', () => {
     const onChange = vi.fn();
     const onBrowse = vi.fn().mockRejectedValue(new Error('Dialog failed'));
     render(
-      <PreferencesPanel
-        value={defaultValue}
-        onChange={onChange}
-        onBrowseDirectory={onBrowse}
-      />,
-      { wrapper },
+      <PreferencesPanel value={defaultValue} onChange={onChange} onBrowseDirectory={onBrowse} />,
+      { wrapper }
     );
 
     const workspaceBrowse = screen.getByTestId('prefs-defaultWorkspacePath-browse');

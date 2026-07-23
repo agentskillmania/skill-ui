@@ -1,13 +1,14 @@
 /** @jsxImportSource @emotion/react */
-import { useState } from 'react';
-import { Tabs } from 'antd';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { Tabs } from 'antd';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PortalHeader } from '../PortalHeader/PortalHeader.js';
-import { SkillSection } from '../SkillSection/SkillSection.js';
-import { AgentSection } from '../AgentSection/AgentSection.js';
-import { SessionSection } from '../SessionSection/SessionSection.js';
+
 import type { PortalProps, PortalTab } from '../../types.js';
+import { AgentSection } from '../AgentSection/AgentSection.js';
+import { PortalHeader } from '../PortalHeader/PortalHeader.js';
+import { SessionSection } from '../SessionSection/SessionSection.js';
+import { SkillSection } from '../SkillSection/SkillSection.js';
 
 export function Portal(props: PortalProps) {
   const theme = useTheme();

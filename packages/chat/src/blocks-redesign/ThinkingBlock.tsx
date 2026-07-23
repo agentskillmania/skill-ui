@@ -1,13 +1,14 @@
 /**
  * Thinking process block — lightweight, draft-like
  */
-import { memo } from 'react';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css, keyframes } from '@emotion/react';
 import { Brain } from 'lucide-react';
-import type { BlockProps } from '../types.js';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { NAMESPACE } from '../locales/index.js';
+import type { BlockProps } from '../types.js';
 
 const pulseRing = keyframes`
   0% { box-shadow: 0 0 0 0 var(--pulse-color); }

@@ -1,8 +1,8 @@
 /**
  * useChatAgent — SSE connection hook, maps server events to skill-ui-chat Message[]
  */
-import { useState, useRef, useCallback, useEffect } from 'react';
 import type { Message, Block, ChatCommand } from '@agentskillmania/skill-ui-chat';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 let idCounter = 0;
 function genId(): string {

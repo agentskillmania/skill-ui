@@ -2,8 +2,9 @@
 /**
  * Editor area component — switches between code/visual editor based on mode
  */
-import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+
 import type { EditorAreaProps } from '../types.js';
 import { CodeEditor } from './CodeEditor.js';
 import { VisualEditor } from './VisualEditor.js';

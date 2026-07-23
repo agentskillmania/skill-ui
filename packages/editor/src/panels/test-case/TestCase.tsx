@@ -5,11 +5,17 @@
  * Uses shared components: ExpandableRow, SectionLabel
  * Title bar provided by parent SidebarPanel.
  */
+import {
+  ExpandableRow,
+  SectionLabel,
+  EmptyState,
+  formatDuration,
+} from '@agentskillmania/skill-ui-shared';
+import { useTheme, interactiveItem } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Play, Loader, CheckCircle2, XCircle } from 'lucide-react';
-import { useTheme, interactiveItem } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
-import { ExpandableRow, SectionLabel, EmptyState, formatDuration } from '@agentskillmania/skill-ui-shared';
+
 import { NAMESPACE } from '../../locales/index.js';
 import type { TestCasePanelProps, TestCaseStatus } from '../../types.js';
 import type { TestCase as TestCaseType } from '../../types.js';

@@ -1,14 +1,19 @@
 /** @jsxImportSource @emotion/react */
-import { memo } from 'react';
-import { css } from '@emotion/react';
+import {
+  CollapsibleCard,
+  useToggle,
+  ExpandableRow,
+  emptyTextStyle,
+} from '@agentskillmania/skill-ui-shared';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
 import { Typography } from 'antd';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { NAMESPACE } from '../../locales/index.js';
 import { titleRowStyle, itemNameStyle, sourcePathStyle } from './styles.js';
 import type { RunnerSkillInfo } from './types.js';
-import { CollapsibleCard, useToggle, ExpandableRow, emptyTextStyle } from '@agentskillmania/skill-ui-shared';
+import { NAMESPACE } from '../../locales/index.js';
 
 /** Props for SkillsCard. */
 export interface SkillsCardProps {

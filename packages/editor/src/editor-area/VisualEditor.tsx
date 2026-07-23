@@ -6,14 +6,15 @@
  * including format toolbar, slash commands, block drag-and-drop, tables, link editing, etc.
  */
 import '@milkdown/crepe/theme/frame.css';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
-import { useEffect, useRef } from 'react';
 // @ts-expect-error — @milkdown/crepe's package.json exports do not correctly declare types
 import { Crepe } from '@milkdown/crepe';
 // @ts-expect-error — @milkdown/utils's package.json exports do not correctly declare types
 import { replaceAll } from '@milkdown/utils';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { NAMESPACE } from '../locales/index.js';
 import type { EditorAreaProps } from '../types.js';
 

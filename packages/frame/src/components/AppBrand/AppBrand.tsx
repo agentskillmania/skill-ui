@@ -3,9 +3,10 @@
  * AppBrand component
  * App brand display (icon + name), first word in default text color, second in primary color
  */
-import { css } from '@emotion/react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { FONT_DISPLAY } from '@agentskillmania/skill-ui-shared';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+
 import type { AppBrandProps } from '../../types.js';
 
 export function AppBrand({ title = 'Skill Studio', icon }: AppBrandProps) {

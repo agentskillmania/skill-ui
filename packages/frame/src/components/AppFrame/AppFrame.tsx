@@ -3,10 +3,11 @@
  * AppFrame component
  * Top-level window shell, Titlebar + Portal (children)
  */
-import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { Titlebar } from '../Titlebar/index.js';
+import { css } from '@emotion/react';
+
 import type { AppFrameProps } from '../../types.js';
+import { Titlebar } from '../Titlebar/index.js';
 
 export function AppFrame({
   children,

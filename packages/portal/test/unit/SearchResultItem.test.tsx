@@ -82,8 +82,9 @@ describe('SearchResultItem', () => {
     render(<SearchResultItem item={sessionItem} query="" onEdit={onEdit} />, { wrapper });
     const deleteBtn = document.querySelector('.lucide-trash-2')?.closest('button');
     // Note: Trash2 might render with class lucide-trash-2 or lucide-trash2 depending on version
-    const btn = document.querySelector('.lucide-trash-2')?.closest('button')
-      || document.querySelector('.lucide-trash2')?.closest('button');
+    const btn =
+      document.querySelector('.lucide-trash-2')?.closest('button') ||
+      document.querySelector('.lucide-trash2')?.closest('button');
     expect(btn).toBeTruthy();
     btn?.click();
     expect(onEdit).toHaveBeenCalledTimes(1);
@@ -102,7 +103,7 @@ describe('SearchResultItem', () => {
       <div onClick={parentClick}>
         <SearchResultItem item={skillItem} query="" onEdit={onEdit} />
       </div>,
-      { wrapper },
+      { wrapper }
     );
     const editBtn = document.querySelector('.lucide-pencil')?.closest('button');
     expect(editBtn).toBeTruthy();

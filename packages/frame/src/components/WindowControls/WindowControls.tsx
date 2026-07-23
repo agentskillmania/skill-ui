@@ -3,9 +3,10 @@
  * Windows-style window control buttons (minimize / maximize / close)
  * Display-only + callbacks, does not call window API
  */
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Minus, Maximize2, Minimize2, X } from 'lucide-react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+
 import type { TrafficLightsProps } from '../../types.js';
 
 export function WindowControls({

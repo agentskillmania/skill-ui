@@ -1,10 +1,11 @@
 /**
  * Launcher page — full-screen home with agents, skills, sessions
  */
-import { css } from '@emotion/react';
-import { Spin, Empty } from 'antd';
 import { Launcher } from '@agentskillmania/skill-ui-frame';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+import { Spin, Empty } from 'antd';
+
 import { useLauncher } from '../hooks/useLauncher.js';
 import type { Route } from '../types.js';
 

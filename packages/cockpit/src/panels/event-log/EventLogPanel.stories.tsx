@@ -137,7 +137,10 @@ function generateEvents(count: number): CockpitEvent[] {
         payload = { step: (i % 5) + 1, duration: Math.floor(Math.random() * 5000) };
         break;
       case 'phase-change':
-        payload = { from: 'processing', to: ['done', 'error', 'waiting'][Math.floor(Math.random() * 3)] };
+        payload = {
+          from: 'processing',
+          to: ['done', 'error', 'waiting'][Math.floor(Math.random() * 3)],
+        };
         break;
       case 'thinking':
         label = tokenPhrases[i % tokenPhrases.length];
@@ -147,7 +150,9 @@ function generateEvents(count: number): CockpitEvent[] {
         payload = { token: `word_${i}` };
         break;
       case 'tool:start':
-        label = ['read_file', 'write_file', 'search_web', 'run_command'][Math.floor(Math.random() * 4)];
+        label = ['read_file', 'write_file', 'search_web', 'run_command'][
+          Math.floor(Math.random() * 4)
+        ];
         payload = { name: label };
         break;
       case 'error':
@@ -171,7 +176,15 @@ function generateEvents(count: number): CockpitEvent[] {
 
 function Container({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ width: WIDTH, height: HEIGHT, border: '1px solid #e0e0e0', borderRadius: '8px', overflow: 'hidden' }}>
+    <div
+      style={{
+        width: WIDTH,
+        height: HEIGHT,
+        border: '1px solid #e0e0e0',
+        borderRadius: '8px',
+        overflow: 'hidden',
+      }}
+    >
       {children}
     </div>
   );
@@ -238,37 +251,76 @@ export const LiveStreaming = {
     const isStreamingTokensRef = useRef(false);
     const tokenCountRef = useRef(0);
 
-    const addEvent = useCallback((type: CockpitEventType, label: string, payload?: Record<string, unknown>) => {
-      setEvents((prev) => [
-        ...prev,
-        {
-          id: `live-${counterRef.current++}`,
-          timestamp: Date.now(),
-          type,
-          label,
-          payload,
-        },
-      ]);
-    }, []);
+    const addEvent = useCallback(
+      (type: CockpitEventType, label: string, payload?: Record<string, unknown>) => {
+        setEvents((prev) => [
+          ...prev,
+          {
+            id: `live-${counterRef.current++}`,
+            timestamp: Date.now(),
+            type,
+            label,
+            payload,
+          },
+        ]);
+      },
+      []
+    );
 
     // Simulate agent execution loop
     useEffect(() => {
-      const phases: Array<{ type: CockpitEventType; label: string; payload?: Record<string, unknown> }> = [
+      const phases: Array<{
+        type: CockpitEventType;
+        label: string;
+        payload?: Record<string, unknown>;
+      }> = [
         { type: 'phase-change', label: '', payload: { from: 'idle', to: 'processing' } },
         { type: 'step:start', label: 'Step 1', payload: { step: 1, name: 'analyze' } },
-        { type: 'thinking', label: 'Analyzing the request...', payload: { content: 'Analyzing the request...' } },
-        { type: 'tool:start', label: 'read_file', payload: { name: 'read_file', args: 'src/main.ts' } },
-        { type: 'tool:end', label: 'read_file done', payload: { name: 'read_file', duration: 320 } },
-        { type: 'thinking', label: 'Checking available tools...', payload: { content: 'Checking available tools...' } },
-        { type: 'tool:start', label: 'search_web', payload: { name: 'search_web', query: 'react-virtual' } },
-        { type: 'tool:end', label: 'search_web done', payload: { name: 'search_web', duration: 1500 } },
-        { type: 'thinking', label: 'Synthesizing results...', payload: { content: 'Synthesizing results...' } },
+        {
+          type: 'thinking',
+          label: 'Analyzing the request...',
+          payload: { content: 'Analyzing the request...' },
+        },
+        {
+          type: 'tool:start',
+          label: 'read_file',
+          payload: { name: 'read_file', args: 'src/main.ts' },
+        },
+        {
+          type: 'tool:end',
+          label: 'read_file done',
+          payload: { name: 'read_file', duration: 320 },
+        },
+        {
+          type: 'thinking',
+          label: 'Checking available tools...',
+          payload: { content: 'Checking available tools...' },
+        },
+        {
+          type: 'tool:start',
+          label: 'search_web',
+          payload: { name: 'search_web', query: 'react-virtual' },
+        },
+        {
+          type: 'tool:end',
+          label: 'search_web done',
+          payload: { name: 'search_web', duration: 1500 },
+        },
+        {
+          type: 'thinking',
+          label: 'Synthesizing results...',
+          payload: { content: 'Synthesizing results...' },
+        },
         { type: 'step:end', label: 'Step 1 done', payload: { step: 1, duration: 2800 } },
         { type: 'step:start', label: 'Step 2', payload: { step: 2, name: 'implement' } },
         { type: 'compressing', label: '', payload: {} },
         { type: 'compressed', label: '', payload: { tokensBefore: 4520, tokensAfter: 2100 } },
         { type: 'step:end', label: 'Step 2 done', payload: { step: 2, duration: 1500 } },
-        { type: 'error', label: 'Error: rate_limit', payload: { message: 'Rate limit exceeded', retryAfter: 5 } },
+        {
+          type: 'error',
+          label: 'Error: rate_limit',
+          payload: { message: 'Rate limit exceeded', retryAfter: 5 },
+        },
       ];
 
       let idx = 0;
@@ -297,9 +349,17 @@ export const LiveStreaming = {
     useEffect(() => {
       const tokenInterval = setInterval(() => {
         if (isStreamingTokensRef.current) {
-          const word = ['The', ' agent', ' is', ' processing', ' the', ' request', '...', ' done', '.'][
-            tokenCountRef.current % 9
-          ];
+          const word = [
+            'The',
+            ' agent',
+            ' is',
+            ' processing',
+            ' the',
+            ' request',
+            '...',
+            ' done',
+            '.',
+          ][tokenCountRef.current % 9];
           addEvent('token', '', { token: word });
           tokenCountRef.current++;
 

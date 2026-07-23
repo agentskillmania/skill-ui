@@ -1,5 +1,5 @@
-import zhCN from './zh-CN.js';
 import enUS from './en-US.js';
+import zhCN from './zh-CN.js';
 
 /** i18n namespace for shared package components. */
 export const NAMESPACE = 'skill-ui-shared';

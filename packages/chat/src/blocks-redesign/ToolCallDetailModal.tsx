@@ -1,12 +1,12 @@
 /**
  * Tool call detail modal — shows input/output with JSON tree and raw Monaco views
  */
-import { useState, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { Modal, Tabs, Input } from 'antd';
-import { Wrench, X } from 'lucide-react';
 import JsonViewPkg from '@microlink/react-json-view';
 import EditorPkg from '@monaco-editor/react';
+import { Modal, Tabs, Input } from 'antd';
+import { Wrench, X } from 'lucide-react';
+import { useState, useMemo } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const JsonView = JsonViewPkg as unknown as React.ComponentType<any>;
@@ -14,8 +14,9 @@ const JsonView = JsonViewPkg as unknown as React.ComponentType<any>;
 const Editor = EditorPkg as unknown as React.ComponentType<any>;
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
-import { NAMESPACE } from '../locales/index.js';
+
 import { getToolColorKey } from './toolColorUtils.js';
+import { NAMESPACE } from '../locales/index.js';
 
 export interface ToolCallDetailModalProps {
   open: boolean;

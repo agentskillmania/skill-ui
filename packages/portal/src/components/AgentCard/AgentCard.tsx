@@ -1,11 +1,12 @@
 /** @jsxImportSource @emotion/react */
-import { memo, useState } from 'react';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { Card, Button, Tag, Popconfirm, Tooltip } from 'antd';
 import { Trash2, Pencil, MessageCircle } from 'lucide-react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ResourceAvatar } from '../ResourceAvatar/index.js';
+
 import type { AgentItem } from '../../types.js';
+import { ResourceAvatar } from '../ResourceAvatar/index.js';
 
 interface AgentCardProps {
   agent: AgentItem;

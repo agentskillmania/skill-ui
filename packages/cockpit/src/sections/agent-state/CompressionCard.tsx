@@ -1,13 +1,4 @@
 /** @jsxImportSource @emotion/react */
-import { memo } from 'react';
-import { css } from '@emotion/react';
-import { Typography } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { useTheme, flexRow } from '@agentskillmania/skill-ui-theme';
-
-import { NAMESPACE } from '../../locales/index.js';
-import type { CompressionData } from './types.js';
-import { textBlockStyle } from './styles.js';
 import {
   CollapsibleCard,
   useToggle,
@@ -18,6 +9,15 @@ import {
   metricGrid,
   emptyTextStyle,
 } from '@agentskillmania/skill-ui-shared';
+import { useTheme, flexRow } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+import { Typography } from 'antd';
+import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { textBlockStyle } from './styles.js';
+import type { CompressionData } from './types.js';
+import { NAMESPACE } from '../../locales/index.js';
 
 /** Props for CompressionCard. */
 export interface CompressionCardProps {
@@ -30,7 +30,9 @@ export interface CompressionCardProps {
  * removed token count, summary token count, and time since compression.
  * Summary text is shown directly, truncated by default, click to expand.
  */
-export const CompressionCard = memo(function CompressionCard({ compression }: CompressionCardProps) {
+export const CompressionCard = memo(function CompressionCard({
+  compression,
+}: CompressionCardProps) {
   const { t } = useTranslation(NAMESPACE);
   const theme = useTheme();
   const collapsedToggle = useToggle(false);

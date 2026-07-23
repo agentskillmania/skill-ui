@@ -1,10 +1,11 @@
 /**
  * Quick command capsule tag component
  */
-import { memo } from 'react';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Tag } from 'antd';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { memo } from 'react';
+
 import type { ChatCommand } from '../types.js';
 
 export interface QuickCommandsProps {

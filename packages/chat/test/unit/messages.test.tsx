@@ -188,8 +188,8 @@ describe('MessageItem', () => {
   it('uses custom message renderer', () => {
     const CustomMsg = ({ message }: { message: Message }) => <div>Custom: {message.content}</div>;
     render(
-      <ChatWrapper context={{ renderers: { messages: { user: CustomMsg } } }}>
-        <MessageItem message={userMsg} />
+      <ChatWrapper>
+        <MessageItem message={userMsg} renderers={{ messages: { user: CustomMsg } }} />
       </ChatWrapper>
     );
     expect(screen.getByText('Custom: Hello')).toBeInTheDocument();
@@ -197,12 +197,11 @@ describe('MessageItem', () => {
 
   it('applies messageDecorator', () => {
     render(
-      <ChatWrapper
-        context={{
-          messageDecorator: (msg, el) => <div data-testid="decorated">{el}</div>,
-        }}
-      >
-        <MessageItem message={userMsg} />
+      <ChatWrapper>
+        <MessageItem
+          message={userMsg}
+          messageDecorator={(_msg, el) => <div data-testid="decorated">{el}</div>}
+        />
       </ChatWrapper>
     );
     expect(screen.getByTestId('decorated')).toBeInTheDocument();

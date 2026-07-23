@@ -1,12 +1,4 @@
 /** @jsxImportSource @emotion/react */
-import { memo } from 'react';
-import { css } from '@emotion/react';
-import { Typography } from 'antd';
-import { useTranslation } from 'react-i18next';
-import { useTheme, flexRow } from '@agentskillmania/skill-ui-theme';
-
-import { NAMESPACE } from '../../locales/index.js';
-import { codeBlockStyle } from './styles.js';
 import {
   CollapsibleCard,
   useToggle,
@@ -15,6 +7,14 @@ import {
   emptyTextStyle,
   metricGrid,
 } from '@agentskillmania/skill-ui-shared';
+import { useTheme, flexRow } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+import { Typography } from 'antd';
+import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import { codeBlockStyle } from './styles.js';
+import { NAMESPACE } from '../../locales/index.js';
 
 /** Props for LLMContextCard. */
 export interface LLMContextCardProps {

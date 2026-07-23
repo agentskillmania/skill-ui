@@ -3,12 +3,13 @@
  * ChatPanel component
  * Left main area containing the Chat component from skill-ui-chat
  */
-import { css } from '@emotion/react';
+import { Chat } from '@agentskillmania/skill-ui-chat';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
 import { Button, Tooltip } from 'antd';
 import { Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { Chat } from '@agentskillmania/skill-ui-chat';
+
 import type { ChatPanelProps } from './types.js';
 import { NAMESPACE } from '../../locales/index.js';
 

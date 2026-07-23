@@ -54,20 +54,30 @@ describe('SkillSection', () => {
   });
 
   it('renders pagination when total > pageSize', () => {
-    render(<SkillSection skills={mockSkills} {...baseProps} total={24} pageSize={12} />, { wrapper });
+    render(<SkillSection skills={mockSkills} {...baseProps} total={24} pageSize={12} />, {
+      wrapper,
+    });
     expect(screen.getByTitle('2')).toBeInTheDocument();
   });
 
   it('does not render pagination when total <= pageSize', () => {
-    render(<SkillSection skills={mockSkills} {...baseProps} total={12} pageSize={12} />, { wrapper });
+    render(<SkillSection skills={mockSkills} {...baseProps} total={12} pageSize={12} />, {
+      wrapper,
+    });
     expect(screen.queryByTitle('2')).not.toBeInTheDocument();
   });
 
   it('calls onPageChange when pagination changes', () => {
     const onPageChange = vi.fn();
     render(
-      <SkillSection skills={mockSkills} {...baseProps} total={24} pageSize={12} onPageChange={onPageChange} />,
-      { wrapper },
+      <SkillSection
+        skills={mockSkills}
+        {...baseProps}
+        total={24}
+        pageSize={12}
+        onPageChange={onPageChange}
+      />,
+      { wrapper }
     );
     // Click the <a> element inside the pagination item (native click needed for antd)
     const pageLink = document.querySelector('.ant-pagination-item-2 a') as HTMLElement;
@@ -78,21 +88,27 @@ describe('SkillSection', () => {
 
   it('calls onChat with skill id when chat button clicked', () => {
     const onChat = vi.fn();
-    render(<SkillSection skills={[mockSkills[0]]} {...baseProps} total={1} onChat={onChat} />, { wrapper });
+    render(<SkillSection skills={[mockSkills[0]]} {...baseProps} total={1} onChat={onChat} />, {
+      wrapper,
+    });
     fireEvent.click(screen.getByText('对话'));
     expect(onChat).toHaveBeenCalledWith('skill-1');
   });
 
   it('calls onEdit with skill id when edit button clicked', () => {
     const onEdit = vi.fn();
-    render(<SkillSection skills={[mockSkills[0]]} {...baseProps} total={1} onEdit={onEdit} />, { wrapper });
+    render(<SkillSection skills={[mockSkills[0]]} {...baseProps} total={1} onEdit={onEdit} />, {
+      wrapper,
+    });
     fireEvent.click(screen.getByText('编辑'));
     expect(onEdit).toHaveBeenCalledWith('skill-1');
   });
 
   it('calls onDelete with skill id when delete is confirmed', async () => {
     const onDelete = vi.fn();
-    render(<SkillSection skills={[mockSkills[0]]} {...baseProps} total={1} onDelete={onDelete} />, { wrapper });
+    render(<SkillSection skills={[mockSkills[0]]} {...baseProps} total={1} onDelete={onDelete} />, {
+      wrapper,
+    });
 
     // Use native click to trigger Popconfirm
     const deleteBtn = document.querySelector('.ant-btn-dangerous') as HTMLElement;
@@ -142,7 +158,9 @@ describe('SkillSection', () => {
     await screen.findByPlaceholderText('请输入名称');
 
     // Click cancel button inside modal footer
-    const cancelBtn = document.querySelector('.ant-modal-wrap .ant-btn:not(.ant-btn-primary)') as HTMLElement;
+    const cancelBtn = document.querySelector(
+      '.ant-modal-wrap .ant-btn:not(.ant-btn-primary)'
+    ) as HTMLElement;
     if (cancelBtn) {
       cancelBtn.click();
     }

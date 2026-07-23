@@ -42,16 +42,10 @@ vi.mock('@monaco-editor/react', () => ({
         <span data-testid="monaco-theme">{props.theme}</span>
         <span data-testid="monaco-value">{props.value ?? props.defaultValue}</span>
         <span data-testid="monaco-readonly">{String(props.options?.readOnly)}</span>
-        <button
-          data-testid="mock-edit"
-          onClick={() => props.onChange?.('edited')}
-        >
+        <button data-testid="mock-edit" onClick={() => props.onChange?.('edited')}>
           edit-defined
         </button>
-        <button
-          data-testid="mock-edit-undefined"
-          onClick={() => props.onChange?.(undefined)}
-        >
+        <button data-testid="mock-edit-undefined" onClick={() => props.onChange?.(undefined)}>
           edit-undefined
         </button>
       </div>
@@ -105,9 +99,7 @@ describe('CodeEditor', () => {
   });
 
   it('falls back to plaintext for unknown file extension', () => {
-    renderWithTheme(
-      <CodeEditor {...defaultProps} filePath="unknown.xyz" />,
-    );
+    renderWithTheme(<CodeEditor {...defaultProps} filePath="unknown.xyz" />);
     expect(screen.getByTestId('monaco-language').textContent).toBe('plaintext');
   });
 
@@ -160,13 +152,7 @@ describe('CodeEditor', () => {
 
   it('calls onSave with current content when Ctrl+S fires and onSave is provided', () => {
     const onSave = vi.fn();
-    renderWithTheme(
-      <CodeEditor
-        {...defaultProps}
-        content="content to save"
-        onSave={onSave}
-      />,
-    );
+    renderWithTheme(<CodeEditor {...defaultProps} content="content to save" onSave={onSave} />);
     mockCtrlSHandler?.();
     expect(onSave).toHaveBeenCalledWith('content to save');
   });

@@ -1,9 +1,9 @@
 /**
  * Titlebar end slot — theme toggle + settings
  */
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Switch } from 'antd';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
 
 interface TitlebarEndProps {
   isDark: boolean;

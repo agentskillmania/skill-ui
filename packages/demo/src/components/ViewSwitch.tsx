@@ -1,9 +1,10 @@
 /**
  * View switch — Editor | Cockpit segmented control
  */
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Segmented } from 'antd';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+
 import type { ViewMode } from '../types.js';
 
 interface ViewSwitchProps {

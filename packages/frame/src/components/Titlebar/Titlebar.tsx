@@ -5,12 +5,13 @@
  * macOS: [TrafficLights] [AppBrand] [center] —spacer— [end]
  * Windows: [AppBrand] [center] —spacer— [end] [WindowControls]
  */
-import { css } from '@emotion/react';
 import { useTheme, layout } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+
+import type { TitlebarProps } from '../../types.js';
+import { AppBrand } from '../AppBrand/index.js';
 import { TrafficLights } from '../TrafficLights/index.js';
 import { WindowControls } from '../WindowControls/index.js';
-import { AppBrand } from '../AppBrand/index.js';
-import type { TitlebarProps } from '../../types.js';
 
 function detectPlatform(): 'macos' | 'windows' {
   if (typeof navigator !== 'undefined') {

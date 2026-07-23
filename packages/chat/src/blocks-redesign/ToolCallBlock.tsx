@@ -1,15 +1,16 @@
 /**
  * Tool call block — single-line rows with detail modal
  */
-import { memo, useState } from 'react';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Wrench } from 'lucide-react';
-import type { BlockProps, ToolCallMetadata } from '../types.js';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { NAMESPACE } from '../locales/index.js';
+
+import type { BlockProps, ToolCallMetadata } from '../types.js';
 import { ToolCallDetailModal } from './ToolCallDetailModal.js';
 import { getToolColorKey } from './toolColorUtils.js';
+import { NAMESPACE } from '../locales/index.js';
 
 /** Single-line code row with ellipsis */
 function CodeRow({
@@ -97,9 +98,7 @@ function CodeRow({
   );
 }
 
-export const ToolCallBlock = memo(function ToolCallBlock({
-  block,
-}: BlockProps) {
+export const ToolCallBlock = memo(function ToolCallBlock({ block }: BlockProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const meta = block.metadata as ToolCallMetadata | undefined;

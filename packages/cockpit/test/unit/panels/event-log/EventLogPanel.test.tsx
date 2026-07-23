@@ -82,10 +82,7 @@ describe('EventLogPanel', () => {
     const onActiveCategoriesChange = vi.fn();
     render(
       <TestWrapper>
-        <EventLogPanel
-          events={mockEvents}
-          onActiveCategoriesChange={onActiveCategoriesChange}
-        />
+        <EventLogPanel events={mockEvents} onActiveCategoriesChange={onActiveCategoriesChange} />
       </TestWrapper>
     );
     // Find filter tags (Ant Design Tag components with onClick)
@@ -110,10 +107,7 @@ describe('EventLogPanel', () => {
     const defaultActiveCategories = new Set<EventCategory>(['error']);
     const { container } = render(
       <TestWrapper>
-        <EventLogPanel
-          events={mockEvents}
-          defaultActiveCategories={defaultActiveCategories}
-        />
+        <EventLogPanel events={mockEvents} defaultActiveCategories={defaultActiveCategories} />
       </TestWrapper>
     );
     // The component should render without errors

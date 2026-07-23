@@ -1,14 +1,15 @@
 /**
  * Human interaction block — dialog/form style
  */
-import { useState } from 'react';
-import { css } from '@emotion/react';
-import { User, Check, SendHorizontal } from 'lucide-react';
-import type { BlockProps, HumanInputMetadata } from '../types.js';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import type { Theme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+import { User, Check, SendHorizontal } from 'lucide-react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { NAMESPACE } from '../locales/index.js';
+import type { BlockProps, HumanInputMetadata } from '../types.js';
 
 /**
  * Shared button base — layout, typography, transition, and active-state

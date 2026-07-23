@@ -1,13 +1,13 @@
 /** @jsxImportSource @emotion/react */
-import { memo } from 'react';
+import { CollapsibleCard, useToggle, emptyTextStyle } from '@agentskillmania/skill-ui-shared';
+import { useTheme, flexRow } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Typography } from 'antd';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useTheme, flexRow } from '@agentskillmania/skill-ui-theme';
 
-import { NAMESPACE } from '../../locales/index.js';
 import type { SkillStateData } from './types.js';
-import { CollapsibleCard, useToggle, emptyTextStyle } from '@agentskillmania/skill-ui-shared';
+import { NAMESPACE } from '../../locales/index.js';
 
 /** Props for ActiveSkillCard. */
 export interface ActiveSkillCardProps {

@@ -21,18 +21,19 @@ describe('renderEventContent', () => {
   // ── step:start / step:end ──────────────────────────────────────────
   describe('step:start / step:end', () => {
     it('returns step number when payload has step', () => {
-      expect(renderEventContent(makeEvent({ type: 'step:start', payload: { step: 3 } }), false))
-        .toBe('#3');
+      expect(
+        renderEventContent(makeEvent({ type: 'step:start', payload: { step: 3 } }), false)
+      ).toBe('#3');
     });
 
     it('returns fallback when step is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'step:end', payload: {} }), false))
-        .toBe('#?');
+      expect(renderEventContent(makeEvent({ type: 'step:end', payload: {} }), false)).toBe('#?');
     });
 
     it('returns fallback when step is nullish', () => {
-      expect(renderEventContent(makeEvent({ type: 'step:start', payload: { step: null } }), false))
-        .toBe('#?');
+      expect(
+        renderEventContent(makeEvent({ type: 'step:start', payload: { step: null } }), false)
+      ).toBe('#?');
     });
   });
 
@@ -43,21 +44,24 @@ describe('renderEventContent', () => {
     });
 
     it('ignores payload', () => {
-      expect(renderEventContent(makeEvent({ type: 'complete', payload: { extra: true } }), false))
-        .toBe('✓');
+      expect(
+        renderEventContent(makeEvent({ type: 'complete', payload: { extra: true } }), false)
+      ).toBe('✓');
     });
   });
 
   // ── abort ──────────────────────────────────────────────────────────
   describe('abort', () => {
     it('returns abort info with step', () => {
-      expect(renderEventContent(makeEvent({ type: 'abort', payload: { step: 7 } }), false))
-        .toBe('✕ @ step 7');
+      expect(renderEventContent(makeEvent({ type: 'abort', payload: { step: 7 } }), false)).toBe(
+        '✕ @ step 7'
+      );
     });
 
     it('returns fallback when step is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'abort', payload: {} }), false))
-        .toBe('✕ @ step ?');
+      expect(renderEventContent(makeEvent({ type: 'abort', payload: {} }), false)).toBe(
+        '✕ @ step ?'
+      );
     });
   });
 
@@ -65,26 +69,29 @@ describe('renderEventContent', () => {
   describe('phase-change', () => {
     it('returns from → to', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'phase-change', payload: { from: 'idle', to: 'running' } }), false),
+        renderEventContent(
+          makeEvent({ type: 'phase-change', payload: { from: 'idle', to: 'running' } }),
+          false
+        )
       ).toBe('idle → running');
     });
 
     it('falls back when from is missing', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'phase-change', payload: { to: 'done' } }), false),
+        renderEventContent(makeEvent({ type: 'phase-change', payload: { to: 'done' } }), false)
       ).toBe('? → done');
     });
 
     it('falls back when to is missing', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'phase-change', payload: { from: 'idle' } }), false),
+        renderEventContent(makeEvent({ type: 'phase-change', payload: { from: 'idle' } }), false)
       ).toBe('idle → ?');
     });
 
     it('falls back when both are missing', () => {
-      expect(
-        renderEventContent(makeEvent({ type: 'phase-change', payload: {} }), false),
-      ).toBe('? → ?');
+      expect(renderEventContent(makeEvent({ type: 'phase-change', payload: {} }), false)).toBe(
+        '? → ?'
+      );
     });
   });
 
@@ -93,14 +100,20 @@ describe('renderEventContent', () => {
     const longText = 'a'.repeat(100);
 
     it('truncates long content when collapsed', () => {
-      const result = renderEventContent(makeEvent({ type: 'thinking', payload: { content: longText } }), false);
+      const result = renderEventContent(
+        makeEvent({ type: 'thinking', payload: { content: longText } }),
+        false
+      );
       // truncate appends '...' within maxLength, so 57 chars + '...' = 60
       expect(result).toBe('a'.repeat(57) + '...');
       expect(result.length).toBe(60);
     });
 
     it('returns full content when expanded', () => {
-      const result = renderEventContent(makeEvent({ type: 'thinking', payload: { content: longText } }), true);
+      const result = renderEventContent(
+        makeEvent({ type: 'thinking', payload: { content: longText } }),
+        true
+      );
       expect(result).toBe(longText);
     });
 
@@ -120,19 +133,28 @@ describe('renderEventContent', () => {
     const longText = 'b'.repeat(100);
 
     it('truncates long text when collapsed', () => {
-      const result = renderEventContent(makeEvent({ type: 'token', payload: { text: longText } }), false);
+      const result = renderEventContent(
+        makeEvent({ type: 'token', payload: { text: longText } }),
+        false
+      );
       // truncate appends '...' within maxLength, so 57 chars + '...' = 60
       expect(result).toBe('b'.repeat(57) + '...');
       expect(result.length).toBe(60);
     });
 
     it('returns full text when expanded', () => {
-      const result = renderEventContent(makeEvent({ type: 'token', payload: { text: longText } }), true);
+      const result = renderEventContent(
+        makeEvent({ type: 'token', payload: { text: longText } }),
+        true
+      );
       expect(result).toBe(longText);
     });
 
     it('falls back to p.token when p.text is undefined', () => {
-      const result = renderEventContent(makeEvent({ type: 'token', payload: { token: 'abc' } }), false);
+      const result = renderEventContent(
+        makeEvent({ type: 'token', payload: { token: 'abc' } }),
+        false
+      );
       expect(result).toBe('abc');
     });
 
@@ -147,7 +169,10 @@ describe('renderEventContent', () => {
     it('includes skill name when skill.current is set', () => {
       const event = makeEvent({
         type: 'llm:request',
-        payload: { skill: { current: 'code-writer' }, messages: [{ role: 'user' }, { role: 'assistant' }] },
+        payload: {
+          skill: { current: 'code-writer' },
+          messages: [{ role: 'user' }, { role: 'assistant' }],
+        },
       });
       expect(renderEventContent(event, false)).toBe('code-writer · 2 msgs');
     });
@@ -198,7 +223,9 @@ describe('renderEventContent', () => {
     it('returns truncated text when text is present', () => {
       const event = makeEvent({
         type: 'llm:response',
-        payload: { text: 'Here is a very long response that should be truncated to fifty characters exactly' },
+        payload: {
+          text: 'Here is a very long response that should be truncated to fifty characters exactly',
+        },
       });
       const result = renderEventContent(event, false);
       expect(result.length).toBeLessThanOrEqual(50);
@@ -245,13 +272,13 @@ describe('renderEventContent', () => {
   // ── tool:start ─────────────────────────────────────────────────────
   describe('tool:start', () => {
     it('returns tool name when present', () => {
-      expect(renderEventContent(makeEvent({ type: 'tool:start', payload: { name: 'read_file' } }), false))
-        .toBe('read_file');
+      expect(
+        renderEventContent(makeEvent({ type: 'tool:start', payload: { name: 'read_file' } }), false)
+      ).toBe('read_file');
     });
 
     it('falls back when name is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'tool:start', payload: {} }), false))
-        .toBe('?');
+      expect(renderEventContent(makeEvent({ type: 'tool:start', payload: {} }), false)).toBe('?');
     });
   });
 
@@ -259,20 +286,22 @@ describe('renderEventContent', () => {
   describe('tool:end', () => {
     it('returns truncated result', () => {
       const longResult = 'c'.repeat(100);
-      const result = renderEventContent(makeEvent({ type: 'tool:end', payload: { result: longResult } }), false);
+      const result = renderEventContent(
+        makeEvent({ type: 'tool:end', payload: { result: longResult } }),
+        false
+      );
       // truncate appends '...' within maxLength, so 57 chars + '...' = 60
       expect(result).toBe('c'.repeat(57) + '...');
       expect(result.length).toBe(60);
     });
 
     it('handles empty result', () => {
-      expect(renderEventContent(makeEvent({ type: 'tool:end', payload: {} }), false))
-        .toBe('');
+      expect(renderEventContent(makeEvent({ type: 'tool:end', payload: {} }), false)).toBe('');
     });
 
     it('converts non-string result to string', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'tool:end', payload: { result: 42 } }), false),
+        renderEventContent(makeEvent({ type: 'tool:end', payload: { result: 42 } }), false)
       ).toBe('42');
     });
   });
@@ -288,13 +317,18 @@ describe('renderEventContent', () => {
     });
 
     it('falls back when actions is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'tools:start', payload: {} }), false))
-        .toBe('? tools');
+      expect(renderEventContent(makeEvent({ type: 'tools:start', payload: {} }), false)).toBe(
+        '? tools'
+      );
     });
 
     it('falls back when actions is not an array', () => {
-      expect(renderEventContent(makeEvent({ type: 'tools:start', payload: { actions: 'string' } }), false))
-        .toBe('? tools');
+      expect(
+        renderEventContent(
+          makeEvent({ type: 'tools:start', payload: { actions: 'string' } }),
+          false
+        )
+      ).toBe('? tools');
     });
   });
 
@@ -309,8 +343,9 @@ describe('renderEventContent', () => {
     });
 
     it('falls back when results is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'tools:end', payload: {} }), false))
-        .toBe('? results');
+      expect(renderEventContent(makeEvent({ type: 'tools:end', payload: {} }), false)).toBe(
+        '? results'
+      );
     });
 
     it('falls back when results is not an object', () => {
@@ -325,13 +360,18 @@ describe('renderEventContent', () => {
   // ── skill:loading ──────────────────────────────────────────────────
   describe('skill:loading', () => {
     it('returns skill name', () => {
-      expect(renderEventContent(makeEvent({ type: 'skill:loading', payload: { name: 'code-review' } }), false))
-        .toBe('code-review');
+      expect(
+        renderEventContent(
+          makeEvent({ type: 'skill:loading', payload: { name: 'code-review' } }),
+          false
+        )
+      ).toBe('code-review');
     });
 
     it('falls back when name is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'skill:loading', payload: {} }), false))
-        .toBe('?');
+      expect(renderEventContent(makeEvent({ type: 'skill:loading', payload: {} }), false)).toBe(
+        '?'
+      );
     });
   });
 
@@ -346,13 +386,15 @@ describe('renderEventContent', () => {
     });
 
     it('falls back when name is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'skill:loaded', payload: { tokenCount: 500 } }), false))
-        .toBe('? · 500 tokens');
+      expect(
+        renderEventContent(makeEvent({ type: 'skill:loaded', payload: { tokenCount: 500 } }), false)
+      ).toBe('? · 500 tokens');
     });
 
     it('falls back when tokenCount is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'skill:loaded', payload: { name: 'coder' } }), false))
-        .toBe('coder · ? tokens');
+      expect(
+        renderEventContent(makeEvent({ type: 'skill:loaded', payload: { name: 'coder' } }), false)
+      ).toBe('coder · ? tokens');
     });
   });
 
@@ -368,13 +410,13 @@ describe('renderEventContent', () => {
 
     it('falls back when name is missing', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'skill:start', payload: { task: 'do work' } }), false),
+        renderEventContent(makeEvent({ type: 'skill:start', payload: { task: 'do work' } }), false)
       ).toBe('?: do work');
     });
 
     it('handles missing task', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'skill:start', payload: { name: 'tester' } }), false),
+        renderEventContent(makeEvent({ type: 'skill:start', payload: { name: 'tester' } }), false)
       ).toBe('tester: ');
     });
 
@@ -382,7 +424,7 @@ describe('renderEventContent', () => {
       const longTask = 'd'.repeat(100);
       const result = renderEventContent(
         makeEvent({ type: 'skill:start', payload: { name: 'x', task: longTask } }),
-        false,
+        false
       );
       // truncate with maxLength=40 => 37 chars + '...' = 40
       expect(result).toBe('x: ' + 'd'.repeat(37) + '...');
@@ -392,13 +434,16 @@ describe('renderEventContent', () => {
   // ── skill:end ──────────────────────────────────────────────────────
   describe('skill:end', () => {
     it('returns skill name', () => {
-      expect(renderEventContent(makeEvent({ type: 'skill:end', payload: { name: 'code-review' } }), false))
-        .toBe('code-review');
+      expect(
+        renderEventContent(
+          makeEvent({ type: 'skill:end', payload: { name: 'code-review' } }),
+          false
+        )
+      ).toBe('code-review');
     });
 
     it('falls back when name is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'skill:end', payload: {} }), false))
-        .toBe('?');
+      expect(renderEventContent(makeEvent({ type: 'skill:end', payload: {} }), false)).toBe('?');
     });
   });
 
@@ -414,13 +459,19 @@ describe('renderEventContent', () => {
 
     it('falls back when name is missing', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'subagent:start', payload: { task: 'research' } }), false),
+        renderEventContent(
+          makeEvent({ type: 'subagent:start', payload: { task: 'research' } }),
+          false
+        )
       ).toBe('?: research');
     });
 
     it('handles missing task', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'subagent:start', payload: { name: 'helper' } }), false),
+        renderEventContent(
+          makeEvent({ type: 'subagent:start', payload: { name: 'helper' } }),
+          false
+        )
       ).toBe('helper: ');
     });
   });
@@ -428,13 +479,16 @@ describe('renderEventContent', () => {
   // ── subagent:end ───────────────────────────────────────────────────
   describe('subagent:end', () => {
     it('returns subagent name', () => {
-      expect(renderEventContent(makeEvent({ type: 'subagent:end', payload: { name: 'researcher' } }), false))
-        .toBe('researcher');
+      expect(
+        renderEventContent(
+          makeEvent({ type: 'subagent:end', payload: { name: 'researcher' } }),
+          false
+        )
+      ).toBe('researcher');
     });
 
     it('falls back when name is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'subagent:end', payload: {} }), false))
-        .toBe('?');
+      expect(renderEventContent(makeEvent({ type: 'subagent:end', payload: {} }), false)).toBe('?');
     });
   });
 
@@ -448,13 +502,15 @@ describe('renderEventContent', () => {
   // ── compressed ─────────────────────────────────────────────────────
   describe('compressed', () => {
     it('returns removed count', () => {
-      expect(renderEventContent(makeEvent({ type: 'compressed', payload: { removedCount: 5 } }), false))
-        .toBe('-5 msgs');
+      expect(
+        renderEventContent(makeEvent({ type: 'compressed', payload: { removedCount: 5 } }), false)
+      ).toBe('-5 msgs');
     });
 
     it('falls back when removedCount is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'compressed', payload: {} }), false))
-        .toBe('-? msgs');
+      expect(renderEventContent(makeEvent({ type: 'compressed', payload: {} }), false)).toBe(
+        '-? msgs'
+      );
     });
   });
 
@@ -469,19 +525,21 @@ describe('renderEventContent', () => {
   describe('error', () => {
     it('returns message when present', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'error', payload: { message: 'Something broke' } }), false),
+        renderEventContent(
+          makeEvent({ type: 'error', payload: { message: 'Something broke' } }),
+          false
+        )
       ).toBe('Something broke');
     });
 
     it('falls back to error field when message is absent', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'error', payload: { error: 'Error details' } }), false),
+        renderEventContent(makeEvent({ type: 'error', payload: { error: 'Error details' } }), false)
       ).toBe('Error details');
     });
 
     it('falls back to Unknown when both are missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'error', payload: {} }), false))
-        .toBe('Unknown');
+      expect(renderEventContent(makeEvent({ type: 'error', payload: {} }), false)).toBe('Unknown');
     });
   });
 
@@ -495,7 +553,10 @@ describe('renderEventContent', () => {
     });
 
     it('falls back to event type when label is empty', () => {
-      const result = renderEventContent({ ...makeEvent(), type: 'unknown-type' as never, label: '' }, false);
+      const result = renderEventContent(
+        { ...makeEvent(), type: 'unknown-type' as never, label: '' },
+        false
+      );
       expect(result).toBe('unknown-type');
     });
   });

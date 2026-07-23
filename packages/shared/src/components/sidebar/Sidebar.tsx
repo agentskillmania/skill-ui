@@ -1,7 +1,8 @@
-import { memo } from 'react';
-import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+import { memo } from 'react';
 import type { ReactNode } from 'react';
+
 import { SidebarIcons } from './SidebarIcons.js';
 import type { SidebarIconItem } from './SidebarIcons.js';
 

@@ -1,6 +1,7 @@
 /**
  * Event type to UI category mapping and helpers
  */
+import type { Theme } from '@agentskillmania/skill-ui-theme';
 import type { LucideIcon } from 'lucide-react';
 import {
   Activity,
@@ -15,8 +16,8 @@ import {
   UserCheck,
   AlertCircle,
 } from 'lucide-react';
+
 import type { CockpitEventType, EventCategory } from './types.js';
-import type { Theme } from '@agentskillmania/skill-ui-theme';
 
 /** Map raw event type to UI filter category */
 export function getEventCategory(type: CockpitEventType): EventCategory {

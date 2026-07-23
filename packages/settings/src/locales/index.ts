@@ -4,8 +4,8 @@
  * @module
  */
 
-import zhCN from './zh-CN.js';
 import enUS from './en-US.js';
+import zhCN from './zh-CN.js';
 
 /** i18n namespace for settings package components. */
 export const NAMESPACE = 'skill-ui-settings';

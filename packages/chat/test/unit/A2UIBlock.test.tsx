@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import { ThemeProvider } from '@agentskillmania/skill-ui-theme';
-import { ChatContext } from '../../src/context.js';
 import { ChatWrapper } from './testUtils.js';
 import type { Block, A2UIBlockMetadata } from '../../src/types.js';
 import { mockSurfaceManager, AGenUI } from '@agentskillmania/agenui';
@@ -312,12 +311,10 @@ describe('A2UIBlock', () => {
       const [dark, setDark] = useState(false);
       return (
         <ThemeProvider mode={dark ? 'dark' : 'light'}>
-          <ChatContext.Provider value={{ renderers: {} }}>
-            <A2UIBlock block={block} />
-            <button data-testid="toggle-theme" onClick={() => setDark((d) => !d)}>
-              toggle
-            </button>
-          </ChatContext.Provider>
+          <A2UIBlock block={block} />
+          <button data-testid="toggle-theme" onClick={() => setDark((d) => !d)}>
+            toggle
+          </button>
         </ThemeProvider>
       );
     }

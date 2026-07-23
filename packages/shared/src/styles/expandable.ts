@@ -1,5 +1,5 @@
-import { css } from '@emotion/react';
 import type { Theme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
 
 /**
  * Expandable detail area transition.

@@ -1,13 +1,13 @@
 /** @jsxImportSource @emotion/react */
-import { memo } from 'react';
+import { emptyTextStyle } from '@agentskillmania/skill-ui-shared';
+import { CollapsibleCard, useToggle, StatusDot } from '@agentskillmania/skill-ui-shared';
 import { useTheme, interactiveRow } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Tabs, Typography } from 'antd';
+import { memo } from 'react';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
-import { NAMESPACE } from '../../locales/index.js';
-import { emptyTextStyle } from '@agentskillmania/skill-ui-shared';
 import {
   titleRowStyle,
   toolRowTopStyle,
@@ -16,7 +16,7 @@ import {
   tabCountStyle,
 } from './styles.js';
 import type { RunnerToolInfo } from './types.js';
-import { CollapsibleCard, useToggle, StatusDot } from '@agentskillmania/skill-ui-shared';
+import { NAMESPACE } from '../../locales/index.js';
 
 /** Props for ToolsCard. */
 export interface ToolsCardProps {

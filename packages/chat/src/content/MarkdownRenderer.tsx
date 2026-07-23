@@ -4,12 +4,12 @@
  * Based on @ant-design/x-markdown (marked.js), consistent with skill-studio.
  * Supports streaming rendering, code highlighting, GFM syntax.
  */
-import { css, keyframes } from '@emotion/react';
-import React from 'react';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { CodeHighlighter } from '@ant-design/x';
 import _XMarkdown from '@ant-design/x-markdown';
 import type { ComponentProps, XMarkdownProps } from '@ant-design/x-markdown';
-import { CodeHighlighter } from '@ant-design/x';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css, keyframes } from '@emotion/react';
+import React from 'react';
 
 // React 19 type compatibility: XMarkdown declared as FC but TS cannot recognize it as JSX component
 const XMarkdown = _XMarkdown as unknown as React.ComponentType<XMarkdownProps>;

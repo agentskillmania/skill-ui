@@ -5,9 +5,10 @@
  * Uses controlled mode (value + onChange), correctly updates content when switching files.
  * Forces Monaco to rebuild instance on file switch via key={filePath}.
  */
-import React, { useRef } from 'react';
-import _MonacoEditor from '@monaco-editor/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import _MonacoEditor from '@monaco-editor/react';
+import React, { useRef } from 'react';
+
 import type { EditorAreaProps } from '../types.js';
 import { getFileInfo } from '../utils/file-utils.js';
 

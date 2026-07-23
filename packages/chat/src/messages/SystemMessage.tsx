@@ -1,10 +1,11 @@
 /**
  * System message
  */
-import { memo } from 'react';
-import { css } from '@emotion/react';
-import type { MessageProps } from '../types.js';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+import { memo } from 'react';
+
+import type { MessageProps } from '../types.js';
 
 export const SystemMessage = memo(function SystemMessage({ message }: MessageProps) {
   const theme = useTheme();

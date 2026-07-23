@@ -1,9 +1,6 @@
 /**
  * chat-demo main UI — AppFrame with Launcher / Workspace routing
  */
-import { css } from '@emotion/react';
-import { useState, useCallback, useEffect } from 'react';
-import { ConfigProvider, Spin, Divider } from 'antd';
 import { AppFrame } from '@agentskillmania/skill-ui-frame';
 import {
   ThemeProvider,
@@ -11,12 +8,16 @@ import {
   darkAntdConfig,
   GlobalStyles,
 } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+import { ConfigProvider, Spin, Divider } from 'antd';
+import { useState, useCallback, useEffect } from 'react';
+
 import { TitlebarEnd } from './components/TitlebarEnd.js';
-import { WorkspaceNav } from './components/WorkspaceNav.js';
 import { ViewSwitch } from './components/ViewSwitch.js';
+import { WorkspaceNav } from './components/WorkspaceNav.js';
+import { useSession } from './hooks/useSession.js';
 import { LauncherPage } from './pages/LauncherPage.js';
 import { WorkspacePage } from './pages/WorkspacePage.js';
-import { useSession } from './hooks/useSession.js';
 import type { Route, ViewMode } from './types.js';
 
 function parseHash(): Route {

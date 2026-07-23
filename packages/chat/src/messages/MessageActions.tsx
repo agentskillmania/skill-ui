@@ -1,11 +1,12 @@
 /**
  * Message action bar — appears on hover, inside message bubble
  */
-import { memo } from 'react';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Tooltip } from 'antd';
 import { Copy, RefreshCw, GitBranch, Send, Undo2 } from 'lucide-react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { memo } from 'react';
+
 import type { Message } from '../types.js';
 
 export type MessageActionsVariant = 'ghost' | 'pill';

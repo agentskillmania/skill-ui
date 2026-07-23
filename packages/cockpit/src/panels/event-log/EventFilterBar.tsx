@@ -2,13 +2,14 @@
 /**
  * EventFilterBar — toggle tags for filtering events by category
  */
-import { memo } from 'react';
-import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
 import { Tag } from 'antd';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { EventCategory } from './types.js';
+
 import { ALL_CATEGORIES, getCategoryIcon } from './eventCategory.js';
+import type { EventCategory } from './types.js';
 import { NAMESPACE } from '../../locales/index.js';
 
 export interface EventFilterBarProps {
@@ -16,7 +17,10 @@ export interface EventFilterBarProps {
   onToggle: (category: EventCategory) => void;
 }
 
-export const EventFilterBar = memo(function EventFilterBar({ activeCategories, onToggle }: EventFilterBarProps) {
+export const EventFilterBar = memo(function EventFilterBar({
+  activeCategories,
+  onToggle,
+}: EventFilterBarProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
 

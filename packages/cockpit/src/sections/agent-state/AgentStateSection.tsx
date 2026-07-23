@@ -1,9 +1,8 @@
 /** @jsxImportSource @emotion/react */
+import { SectionHeader } from '@agentskillmania/skill-ui-shared';
+import { useTheme, flexColumn } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Cpu } from 'lucide-react';
-
-import { useTheme, flexColumn } from '@agentskillmania/skill-ui-theme';
-import { SectionHeader } from '@agentskillmania/skill-ui-shared';
 
 import { ActiveSkillCard } from './ActiveSkillCard.js';
 import { CompressionCard } from './CompressionCard.js';

@@ -1,12 +1,12 @@
 /**
  * useCockpitEvents — SSE hook for cockpit events and agent state
  */
-import { useState, useEffect, useRef, useCallback } from 'react';
 import type {
   CockpitEvent,
   CockpitEventType,
   AgentStateData,
 } from '@agentskillmania/skill-ui-cockpit';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 interface CockpitEventsState {
   events: CockpitEvent[];

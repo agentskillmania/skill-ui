@@ -1,17 +1,25 @@
 /**
  * Message list component
  */
-import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { useAutoScroll } from '../utils/autoScroll.js';
+import { css } from '@emotion/react';
+
 import { MessageItem } from '../messages/MessageItem.js';
-import type { Message } from '../types.js';
+import type { MessageListProps } from '../types.js';
+import { useAutoScroll } from '../utils/autoScroll.js';
 
-export interface MessageListProps {
-  messages: Message[];
-}
-
-export function MessageList({ messages }: MessageListProps) {
+export function MessageList({
+  messages,
+  renderers,
+  messageDecorator,
+  onConfirmHumanRequest,
+  onBlockAction,
+  onCopyMessage,
+  onResendMessage,
+  onRegenerateMessage,
+  onRollbackMessage,
+  onForkMessage,
+}: MessageListProps) {
   const theme = useTheme();
   const { ref, handleScroll } = useAutoScroll<HTMLDivElement>([messages]);
 
@@ -28,7 +36,19 @@ export function MessageList({ messages }: MessageListProps) {
       `}
     >
       {messages.map((message) => (
-        <MessageItem key={message.id} message={message} />
+        <MessageItem
+          key={message.id}
+          message={message}
+          renderers={renderers}
+          messageDecorator={messageDecorator}
+          onConfirmHumanRequest={onConfirmHumanRequest}
+          onBlockAction={onBlockAction}
+          onCopyMessage={onCopyMessage}
+          onResendMessage={onResendMessage}
+          onRegenerateMessage={onRegenerateMessage}
+          onRollbackMessage={onRollbackMessage}
+          onForkMessage={onForkMessage}
+        />
       ))}
     </div>
   );

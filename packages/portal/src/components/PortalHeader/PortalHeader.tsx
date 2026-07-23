@@ -1,13 +1,14 @@
 /** @jsxImportSource @emotion/react */
-import { memo } from 'react';
+import { FONT_DISPLAY } from '@agentskillmania/skill-ui-shared';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { keyframes } from '@emotion/react';
 import { AutoComplete, Input, Button, Tooltip } from 'antd';
 import { Search, Github } from 'lucide-react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FONT_DISPLAY } from '@agentskillmania/skill-ui-shared';
-import { SearchResultItem } from '../SearchResultItem/index.js';
+
 import type { SearchResults, SearchResultType } from '../../types.js';
+import { SearchResultItem } from '../SearchResultItem/index.js';
 
 interface PortalHeaderProps {
   /** Controlled search query value */

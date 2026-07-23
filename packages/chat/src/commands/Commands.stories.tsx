@@ -4,7 +4,6 @@ import React from 'react';
 import { QuickCommands } from './QuickCommands.js';
 import { CommandAutocomplete } from './CommandAutocomplete.js';
 import type { ChatCommand } from '../types.js';
-import { ChatContext } from '../context.js';
 
 const mockCommands: ChatCommand[] = [
   {
@@ -41,11 +40,9 @@ const mockCommands: ChatCommand[] = [
 
 function QuickCommandsWrapper(props: React.ComponentProps<typeof QuickCommands>) {
   return (
-    <ChatContext.Provider value={{ renderers: {} }}>
-      <div style={{ maxWidth: 600 }}>
-        <QuickCommands {...props} />
-      </div>
-    </ChatContext.Provider>
+    <div style={{ maxWidth: 600 }}>
+      <QuickCommands {...props} />
+    </div>
   );
 }
 
@@ -107,28 +104,26 @@ function AutocompleteWrapper({
   trigger?: string;
 }) {
   return (
-    <ChatContext.Provider value={{ renderers: {} }}>
-      <div style={{ maxWidth: 600 }}>
-        <CommandAutocomplete
-          commands={commands}
-          onCommand={(cmd) => alert(`选择了: ${cmd.label}`)}
-          inputValue={inputValue}
-          trigger={trigger}
+    <div style={{ maxWidth: 600 }}>
+      <CommandAutocomplete
+        commands={commands}
+        onCommand={(cmd) => alert(`选择了: ${cmd.label}`)}
+        inputValue={inputValue}
+        trigger={trigger}
+      >
+        <div
+          style={{
+            padding: '8px 12px',
+            border: '1px solid #e2e8f0',
+            borderRadius: 8,
+            background: '#fff',
+            color: '#0f172a',
+          }}
         >
-          <div
-            style={{
-              padding: '8px 12px',
-              border: '1px solid #e2e8f0',
-              borderRadius: 8,
-              background: '#fff',
-              color: '#0f172a',
-            }}
-          >
-            输入: {inputValue || '(空)'}
-          </div>
-        </CommandAutocomplete>
-      </div>
-    </ChatContext.Provider>
+          输入: {inputValue || '(空)'}
+        </div>
+      </CommandAutocomplete>
+    </div>
   );
 }
 

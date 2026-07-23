@@ -1,17 +1,17 @@
 /**
  * Execution block rendering router — redesigned blocks
  */
-import type { Block, BlockProps } from '../types.js';
-import { css, keyframes } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { useChatContext } from '../context.js';
-import { ThinkingBlock } from './ThinkingBlock.js';
-import { ToolCallBlock } from './ToolCallBlock.js';
-import { PlanBlock } from './PlanBlock.js';
+import { css, keyframes } from '@emotion/react';
+
+import type { Block, BlockProps, ChatRenderers, BlockAction } from '../types.js';
+import { A2UIBlock } from './A2UIBlock.js';
 import { ErrorBlock } from './ErrorBlock.js';
 import { HumanInputBlock } from './HumanInputBlock.js';
+import { PlanBlock } from './PlanBlock.js';
 import { SkillBlock } from './SkillBlock.js';
-import { A2UIBlock } from './A2UIBlock.js';
+import { ThinkingBlock } from './ThinkingBlock.js';
+import { ToolCallBlock } from './ToolCallBlock.js';
 
 const fadeInUp = keyframes`
   from { opacity: 0; transform: translateY(8px); }
@@ -20,6 +20,12 @@ const fadeInUp = keyframes`
 
 export interface BlocksRendererProps {
   blocks: Block[];
+  /** Custom block renderers (override built-ins) */
+  renderers?: ChatRenderers;
+  /** Human interaction confirmation callback */
+  onConfirmHumanRequest?: (requestId: string, response: unknown) => void;
+  /** Block action callback */
+  onBlockAction?: (action: BlockAction) => void;
 }
 
 /** Built-in block renderers (redesigned) */
@@ -33,9 +39,13 @@ const builtinBlockRenderers: Record<string, React.ComponentType<BlockProps>> = {
   a2ui: A2UIBlock,
 };
 
-export function BlocksRenderer({ blocks }: BlocksRendererProps) {
+export function BlocksRenderer({
+  blocks,
+  renderers,
+  onConfirmHumanRequest,
+  onBlockAction,
+}: BlocksRendererProps) {
   const theme = useTheme();
-  const { renderers, onConfirmHumanRequest, onBlockAction } = useChatContext();
 
   return (
     <div
@@ -47,7 +57,7 @@ export function BlocksRenderer({ blocks }: BlocksRendererProps) {
     >
       {blocks.map((block, index) => {
         // Custom renderer takes priority
-        const CustomRenderer = renderers.blocks?.[block.type];
+        const CustomRenderer = renderers?.blocks?.[block.type];
         const BuiltinRenderer = builtinBlockRenderers[block.type];
         const Renderer = CustomRenderer ?? BuiltinRenderer;
 

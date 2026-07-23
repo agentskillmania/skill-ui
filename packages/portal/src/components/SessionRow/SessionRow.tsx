@@ -1,11 +1,12 @@
 /** @jsxImportSource @emotion/react */
-import { memo, useState } from 'react';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { Button, Popconfirm, Space } from 'antd';
 import { Trash2, MessageCircle, GitBranch } from 'lucide-react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ResourceAvatar } from '../ResourceAvatar/index.js';
+
 import type { SessionItem } from '../../types.js';
+import { ResourceAvatar } from '../ResourceAvatar/index.js';
 
 interface SessionRowProps {
   session: SessionItem;

@@ -2,6 +2,7 @@
  * Global styles component
  */
 import { Global, css } from '@emotion/react';
+
 import { useTheme } from './index.js';
 
 export function GlobalStyles() {

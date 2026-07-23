@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+
 import { CopyValue } from './CopyValue.js';
 
 /** Props for the InfoRow component. */

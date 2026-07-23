@@ -1,8 +1,8 @@
 /** @jsxImportSource @emotion/react */
-import { css } from '@emotion/react';
-import { Statistic } from 'antd';
 import type { Theme } from '@agentskillmania/skill-ui-theme';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+import { Statistic } from 'antd';
 
 /** Props for the MetricTile component. */
 export interface MetricTileProps {

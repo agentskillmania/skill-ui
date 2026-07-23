@@ -93,7 +93,16 @@ describe('usePortalFilter', () => {
   it('handles agents with undefined description', () => {
     const dataWithUndefinedDesc = {
       ...mockData,
-      agents: [...mockData.agents, { id: 'a3', name: 'NoDesc', description: undefined, source: 'custom' as const, skillCount: 0 }],
+      agents: [
+        ...mockData.agents,
+        {
+          id: 'a3',
+          name: 'NoDesc',
+          description: undefined,
+          source: 'custom' as const,
+          skillCount: 0,
+        },
+      ],
     };
     const { result } = renderHook(() => usePortalFilter(dataWithUndefinedDesc, 'nodesc'));
     expect(result.current.filteredAgents).toHaveLength(1);

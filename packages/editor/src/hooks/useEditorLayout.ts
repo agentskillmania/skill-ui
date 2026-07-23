@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+
 import type { EditorPanel } from '../types.js';
 
 /** Default sidebar width in pixels (narrower than cockpit to maximize editor space) */

@@ -4,13 +4,14 @@
  * Displays type tag, content text, and expandable payload detail.
  * Uses shared ExpandableRow with code variant for JSON payloads.
  */
-import { memo, useCallback } from 'react';
-import { css } from '@emotion/react';
+import { ExpandableRow } from '@agentskillmania/skill-ui-shared';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import type { CockpitEvent } from './types.js';
+import { css } from '@emotion/react';
+import { memo, useCallback } from 'react';
+
 import { renderEventContent } from './eventRows.js';
 import { EventTypeTag } from './EventTypeTag.js';
-import { ExpandableRow } from '@agentskillmania/skill-ui-shared';
+import type { CockpitEvent } from './types.js';
 
 export interface EventRowProps {
   event: CockpitEvent;

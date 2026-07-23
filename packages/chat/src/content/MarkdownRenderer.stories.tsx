@@ -1,14 +1,9 @@
 /** @jsxImportSource @emotion/react */
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { MarkdownRenderer } from './MarkdownRenderer.js';
-import { ChatContext } from '../context.js';
 
 function Wrapper({ children }: { children: React.ReactNode }) {
-  return (
-    <ChatContext.Provider value={{ renderers: {} }}>
-      <div style={{ maxWidth: 600 }}>{children}</div>
-    </ChatContext.Provider>
-  );
+  return <div style={{ maxWidth: 600 }}>{children}</div>;
 }
 
 const meta: Meta<typeof MarkdownRenderer> = {

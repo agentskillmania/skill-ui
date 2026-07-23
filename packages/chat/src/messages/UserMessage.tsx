@@ -1,10 +1,11 @@
 /**
  * User message
  */
-import { memo } from 'react';
-import { css } from '@emotion/react';
-import type { MessageProps } from '../types.js';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
+import { memo } from 'react';
+
+import type { MessageProps } from '../types.js';
 
 export const UserMessage = memo(function UserMessage({ message }: MessageProps) {
   const theme = useTheme();

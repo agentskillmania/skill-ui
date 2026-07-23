@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Tooltip, message } from 'antd';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
 
 /** Props for the CopyValue component. */
 export interface CopyValueProps {

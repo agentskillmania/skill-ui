@@ -17,10 +17,13 @@ vi.mock('antd', async () => {
       const { filterOption, ...rest } = props;
       capturedFilterOption = filterOption;
       const ActualSelect = (actual as any).Select;
-      return React.createElement(ActualSelect, { ...rest, filterOption: (input: string, option: any) => {
-        capturedFilterOption = filterOption;
-        return filterOption(input, option);
-      } });
+      return React.createElement(ActualSelect, {
+        ...rest,
+        filterOption: (input: string, option: any) => {
+          capturedFilterOption = filterOption;
+          return filterOption(input, option);
+        },
+      });
     },
   };
 });
@@ -79,12 +82,8 @@ describe('SessionSection', () => {
 
   it('shows empty state when all sessions are filtered out', () => {
     render(
-      <SessionSection
-        sessions={mockSessions}
-        {...baseProps}
-        filterWorkspace="/nonexistent"
-      />,
-      { wrapper },
+      <SessionSection sessions={mockSessions} {...baseProps} filterWorkspace="/nonexistent" />,
+      { wrapper }
     );
     expect(screen.getByText('暂无会话')).toBeInTheDocument();
     expect(screen.queryByText('Code Reviewer')).not.toBeInTheDocument();
@@ -97,18 +96,16 @@ describe('SessionSection', () => {
   });
 
   it('renders pagination when total > pageSize', () => {
-    render(
-      <SessionSection sessions={mockSessions} {...baseProps} total={24} pageSize={12} />,
-      { wrapper },
-    );
+    render(<SessionSection sessions={mockSessions} {...baseProps} total={24} pageSize={12} />, {
+      wrapper,
+    });
     expect(screen.getByTitle('2')).toBeInTheDocument();
   });
 
   it('does not render pagination when total <= pageSize', () => {
-    render(
-      <SessionSection sessions={mockSessions} {...baseProps} total={12} pageSize={12} />,
-      { wrapper },
-    );
+    render(<SessionSection sessions={mockSessions} {...baseProps} total={12} pageSize={12} />, {
+      wrapper,
+    });
     expect(screen.queryByTitle('2')).not.toBeInTheDocument();
   });
 
@@ -122,7 +119,7 @@ describe('SessionSection', () => {
         pageSize={12}
         onPageChange={onPageChange}
       />,
-      { wrapper },
+      { wrapper }
     );
     // Click the <a> element inside the pagination item (native click needed for antd)
     const pageLink = document.querySelector('.ant-pagination-item-2 a') as HTMLElement;
@@ -135,7 +132,7 @@ describe('SessionSection', () => {
     const onResume = vi.fn();
     render(
       <SessionSection sessions={[mockSessions[0]]} {...baseProps} total={1} onResume={onResume} />,
-      { wrapper },
+      { wrapper }
     );
 
     // Find the resume button (first button in the Space)
@@ -151,7 +148,7 @@ describe('SessionSection', () => {
     const onDelete = vi.fn();
     render(
       <SessionSection sessions={[mockSessions[0]]} {...baseProps} total={1} onDelete={onDelete} />,
-      { wrapper },
+      { wrapper }
     );
 
     // Use native click to trigger Popconfirm
@@ -169,13 +166,8 @@ describe('SessionSection', () => {
   it('calls onFork with session id when fork button is clicked and onFork is provided', () => {
     const onFork = vi.fn();
     render(
-      <SessionSection
-        sessions={[mockSessions[0]]}
-        {...baseProps}
-        total={1}
-        onFork={onFork}
-      />,
-      { wrapper },
+      <SessionSection sessions={[mockSessions[0]]} {...baseProps} total={1} onFork={onFork} />,
+      { wrapper }
     );
 
     // Find the fork button (second button in the Space)
@@ -188,10 +180,9 @@ describe('SessionSection', () => {
   });
 
   it('shows clear all button when onClear is provided and total > 0', () => {
-    render(
-      <SessionSection sessions={mockSessions} {...baseProps} total={2} onClear={vi.fn()} />,
-      { wrapper },
-    );
+    render(<SessionSection sessions={mockSessions} {...baseProps} total={2} onClear={vi.fn()} />, {
+      wrapper,
+    });
     expect(screen.getByText('清除全部')).toBeInTheDocument();
   });
 
@@ -201,19 +192,17 @@ describe('SessionSection', () => {
   });
 
   it('does not show clear all button when total is 0', () => {
-    render(
-      <SessionSection sessions={[]} {...baseProps} total={0} onClear={vi.fn()} />,
-      { wrapper },
-    );
+    render(<SessionSection sessions={[]} {...baseProps} total={0} onClear={vi.fn()} />, {
+      wrapper,
+    });
     expect(screen.queryByText('清除全部')).not.toBeInTheDocument();
   });
 
   it('calls onClear when clear all is confirmed', async () => {
     const onClear = vi.fn();
-    render(
-      <SessionSection sessions={mockSessions} {...baseProps} total={2} onClear={onClear} />,
-      { wrapper },
-    );
+    render(<SessionSection sessions={mockSessions} {...baseProps} total={2} onClear={onClear} />, {
+      wrapper,
+    });
 
     // Click the clear all button
     fireEvent.click(screen.getByText('清除全部'));
@@ -227,12 +216,8 @@ describe('SessionSection', () => {
 
   it('filters sessions by workspace', () => {
     render(
-      <SessionSection
-        sessions={mockSessions}
-        {...baseProps}
-        filterWorkspace="/tmp/review-42"
-      />,
-      { wrapper },
+      <SessionSection sessions={mockSessions} {...baseProps} filterWorkspace="/tmp/review-42" />,
+      { wrapper }
     );
     expect(screen.getByText('Code Reviewer')).toBeInTheDocument();
     expect(screen.queryByText('Skill Builder')).not.toBeInTheDocument();
@@ -245,10 +230,9 @@ describe('SessionSection', () => {
   });
 
   it('supports custom pageSize', () => {
-    render(
-      <SessionSection sessions={mockSessions} {...baseProps} total={5} pageSize={5} />,
-      { wrapper },
-    );
+    render(<SessionSection sessions={mockSessions} {...baseProps} total={5} pageSize={5} />, {
+      wrapper,
+    });
     expect(screen.queryByTitle('2')).not.toBeInTheDocument();
   });
 

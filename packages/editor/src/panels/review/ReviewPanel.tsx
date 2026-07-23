@@ -4,11 +4,12 @@
  *
  * Displays lint results and AI review feedback as an auto-scrolling log.
  */
-import { useRef, useEffect } from 'react';
-import { AlertTriangle, Info, XCircle, ClipboardCheck } from 'lucide-react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { useTranslation } from 'react-i18next';
 import { EmptyState, ExpandableRow, InfoRow } from '@agentskillmania/skill-ui-shared';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { AlertTriangle, Info, XCircle, ClipboardCheck } from 'lucide-react';
+import { useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+
 import { NAMESPACE } from '../../locales/index.js';
 import type { ReviewPanelProps, ReviewItem, ReviewSeverity } from '../../types.js';
 

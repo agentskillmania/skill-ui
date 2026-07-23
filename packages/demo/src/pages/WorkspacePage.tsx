@@ -1,16 +1,17 @@
 /**
  * Workspace page — Cockpit view with Chat + Panels, Editor with ProjectEditor
  */
-import { css } from '@emotion/react';
-import { useCallback, useEffect } from 'react';
+import type { ChatCommand } from '@agentskillmania/skill-ui-chat';
 import { Cockpit } from '@agentskillmania/skill-ui-cockpit';
 import { ProjectEditor } from '@agentskillmania/skill-ui-editor';
-import type { ChatCommand } from '@agentskillmania/skill-ui-chat';
+import { css } from '@emotion/react';
+import { useCallback, useEffect } from 'react';
+
+import type { SessionInfo } from '../../server/types.js';
 import { useChatAgent } from '../hooks/useChatAgent.js';
 import { useCockpitEvents } from '../hooks/useCockpitEvents.js';
 import { useEditor } from '../hooks/useEditor.js';
 import type { ViewMode } from '../types.js';
-import type { SessionInfo } from '../../server/types.js';
 
 interface WorkspacePageProps {
   session: SessionInfo;

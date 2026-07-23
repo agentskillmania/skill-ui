@@ -1,13 +1,14 @@
 /**
  * Skill execution block — phase card with timeline
  */
-import { memo } from 'react';
+import { useTheme, spinKeyframes, type Theme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Sparkles, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
-import type { BlockProps, SkillBlockMetadata } from '../types.js';
-import { useTheme, spinKeyframes, type Theme } from '@agentskillmania/skill-ui-theme';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { NAMESPACE } from '../locales/index.js';
+import type { BlockProps, SkillBlockMetadata } from '../types.js';
 
 type TFunction = (key: string, params?: Record<string, unknown>) => string;
 

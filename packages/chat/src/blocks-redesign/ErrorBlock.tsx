@@ -1,13 +1,14 @@
 /**
  * Error display block — alert style, not all-red
  */
-import { memo } from 'react';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { AlertTriangle, Info } from 'lucide-react';
-import type { BlockProps, ErrorMetadata } from '../types.js';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
+
 import { NAMESPACE } from '../locales/index.js';
+import type { BlockProps, ErrorMetadata } from '../types.js';
 
 export const ErrorBlock = memo(function ErrorBlock({ block }: BlockProps) {
   const theme = useTheme();
