@@ -152,8 +152,13 @@ describe('animations', () => {
 
   it('spin returns valid styles', () => {
     const s = spin(lightTheme);
-    expect(s.styles).toContain('@keyframes spin');
+    // After dedup, spin() references spinKeyframes (an emotion keyframes
+    // reference) rather than inlining @keyframes. The serialized output
+    // contains an animation property pointing at the hashed keyframes name.
     expect(s.styles).toContain('animation');
+    expect(s.styles).toContain('1s');
+    expect(s.styles).toContain('linear');
+    expect(s.styles).toContain('infinite');
   });
 
   it('scaleActive returns valid styles', () => {

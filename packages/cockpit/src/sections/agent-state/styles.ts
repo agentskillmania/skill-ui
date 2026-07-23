@@ -2,13 +2,6 @@
 import type { Theme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 
-/** Empty state text — muted, centered. */
-export const emptyTextStyle = (theme: Theme) => css`
-  color: ${theme.color.textTertiary};
-  font-size: ${theme.font.size.sm};
-  padding: ${theme.spacing[1]} 0;
-`;
-
 /** Monospace text block — truncated by default, scrollable on expand. */
 export const codeBlockStyle = (theme: Theme, isExpanded: boolean) => css`
   padding: ${theme.spacing[2]};

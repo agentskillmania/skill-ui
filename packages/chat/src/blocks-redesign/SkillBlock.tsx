@@ -2,17 +2,12 @@
  * Skill execution block — phase card with timeline
  */
 import { memo } from 'react';
-import { css, keyframes } from '@emotion/react';
+import { css } from '@emotion/react';
 import { Sparkles, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import type { BlockProps, SkillBlockMetadata } from '../types.js';
-import { useTheme, type Theme } from '@agentskillmania/skill-ui-theme';
+import { useTheme, spinKeyframes, type Theme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../locales/index.js';
-
-const spin = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`;
 
 type TFunction = (key: string, params?: Record<string, unknown>) => string;
 
@@ -154,7 +149,7 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
             ${isSpinning
               ? css`
                   & > * {
-                    animation: ${spin} 1s linear infinite;
+                    animation: ${spinKeyframes} 1s linear infinite;
                   }
                   @media (prefers-reduced-motion: reduce) {
                     & > * {

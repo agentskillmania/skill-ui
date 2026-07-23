@@ -2,19 +2,14 @@
  * A2UI block — renders AGenUI protocol surface inside standard block card.
  */
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { css, keyframes } from '@emotion/react';
+import { css } from '@emotion/react';
 import { Monitor, Loader2, Clock, Maximize2 } from 'lucide-react';
 import { Modal } from 'antd';
 import { AGenUI, SurfaceManager, AGenUISurface } from '@agentskillmania/agenui';
 import type { BlockProps, A2UIBlockMetadata, BlockAction } from '../types.js';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
+import { useTheme, spinKeyframes } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../locales/index.js';
-
-const spin = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`;
 
 export function A2UIBlock({ block, onAction }: BlockProps) {
   const theme = useTheme();
@@ -190,7 +185,7 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
             <Loader2
               size={14}
               css={css`
-                animation: ${spin} 1s linear infinite;
+                animation: ${spinKeyframes} 1s linear infinite;
                 color: ${theme.color.textTertiary};
               `}
             />
@@ -281,7 +276,7 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
             <Loader2
               size={16}
               css={css`
-                animation: ${spin} 1s linear infinite;
+                animation: ${spinKeyframes} 1s linear infinite;
               `}
             />
             <span>{t('a2ui.initializing')}</span>

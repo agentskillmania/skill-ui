@@ -5,9 +5,9 @@ import { Tag, Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../../locales/index.js';
-import { emptyTextStyle, tagRowStyle, titleRowStyle } from './styles.js';
+import { tagRowStyle, titleRowStyle } from './styles.js';
 import type { RunnerFeatureFlags } from './types.js';
-import { CollapsibleCard, useToggle } from '@agentskillmania/skill-ui-shared';
+import { CollapsibleCard, useToggle, emptyTextStyle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for FeatureTagsCard. */
 export interface FeatureTagsCardProps {

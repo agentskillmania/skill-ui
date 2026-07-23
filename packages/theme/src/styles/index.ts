@@ -12,7 +12,7 @@ export { glassEffect, card, borderDefault, borderAccent } from './effects.js';
 export { hoverPrimary, hoverBg, disabled, focusVisible } from './interactions.js';
 
 // Transitions & animations
-export { transition, spin, scaleActive } from './animations.js';
+export { transition, spin, spinKeyframes, scaleActive } from './animations.js';
 
 // Text
 export { textTruncate, textSecondary } from './text.js';

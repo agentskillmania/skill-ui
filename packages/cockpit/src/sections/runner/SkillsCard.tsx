@@ -6,9 +6,9 @@ import { Typography } from 'antd';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../../locales/index.js';
-import { emptyTextStyle, titleRowStyle, itemNameStyle, sourcePathStyle } from './styles.js';
+import { titleRowStyle, itemNameStyle, sourcePathStyle } from './styles.js';
 import type { RunnerSkillInfo } from './types.js';
-import { CollapsibleCard, useToggle, ExpandableRow } from '@agentskillmania/skill-ui-shared';
+import { CollapsibleCard, useToggle, ExpandableRow, emptyTextStyle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for SkillsCard. */
 export interface SkillsCardProps {

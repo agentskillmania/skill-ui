@@ -7,8 +7,7 @@ import { useTheme, flexRow } from '@agentskillmania/skill-ui-theme';
 
 import { NAMESPACE } from '../../locales/index.js';
 import type { SkillStateData } from './types.js';
-import { emptyTextStyle } from './styles.js';
-import { CollapsibleCard, useToggle } from '@agentskillmania/skill-ui-shared';
+import { CollapsibleCard, useToggle, emptyTextStyle } from '@agentskillmania/skill-ui-shared';
 
 /** Props for ActiveSkillCard. */
 export interface ActiveSkillCardProps {

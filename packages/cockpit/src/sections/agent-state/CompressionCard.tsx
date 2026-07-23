@@ -7,7 +7,7 @@ import { useTheme, flexRow } from '@agentskillmania/skill-ui-theme';
 
 import { NAMESPACE } from '../../locales/index.js';
 import type { CompressionData } from './types.js';
-import { emptyTextStyle, textBlockStyle } from './styles.js';
+import { textBlockStyle } from './styles.js';
 import {
   CollapsibleCard,
   useToggle,
@@ -16,6 +16,7 @@ import {
   formatRelativeTime,
   formatTokens,
   metricGrid,
+  emptyTextStyle,
 } from '@agentskillmania/skill-ui-shared';
 
 /** Props for CompressionCard. */

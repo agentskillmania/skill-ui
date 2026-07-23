@@ -1,17 +1,22 @@
 /**
- * Format a unix timestamp (ms) as a relative time string.
- * Returns "Xs ago", "Xm ago", or "Xh ago" relative to Date.now().
- * Returns "-" for undefined/null input.
+ * Format a timestamp as a relative time string.
+ * Accepts a unix timestamp (ms) or an ISO date string.
+ * Returns "just now", "Xm ago", "Xh ago", or "Xd ago" relative to Date.now().
+ * Returns "-" for undefined/null/invalid input.
  */
-export function formatRelativeTime(timestamp: number | undefined): string {
+export function formatRelativeTime(timestamp: number | string | undefined): string {
   if (timestamp == null) return '-';
-  const diff = Date.now() - timestamp;
+  const ms = typeof timestamp === 'string' ? new Date(timestamp).getTime() : timestamp;
+  if (Number.isNaN(ms)) return '-';
+  const diff = Date.now() - ms;
   const seconds = Math.floor(diff / 1000);
-  if (seconds < 60) return `${seconds}s ago`;
+  if (seconds < 60) return 'just now';
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
-  return `${hours}h ago`;
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
 }
 
 /**
@@ -32,6 +37,14 @@ export function formatTokens(value: number | undefined): string {
 export function formatNumber(value: number | undefined): string {
   if (value == null) return '-';
   return value.toLocaleString();
+}
+
+/**
+ * Format a duration in milliseconds.
+ * >= 1000ms → "X.Xs", otherwise "Xms".
+ */
+export function formatDuration(ms: number): string {
+  return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`;
 }
 
 /**

@@ -7,8 +7,8 @@ import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../../locales/index.js';
+import { emptyTextStyle } from '@agentskillmania/skill-ui-shared';
 import {
-  emptyTextStyle,
   titleRowStyle,
   toolRowTopStyle,
   toolNameStyle,

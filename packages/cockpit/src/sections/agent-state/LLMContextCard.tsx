@@ -6,12 +6,13 @@ import { useTranslation } from 'react-i18next';
 import { useTheme, flexRow } from '@agentskillmania/skill-ui-theme';
 
 import { NAMESPACE } from '../../locales/index.js';
-import { emptyTextStyle, codeBlockStyle } from './styles.js';
+import { codeBlockStyle } from './styles.js';
 import {
   CollapsibleCard,
   useToggle,
   MetricTile,
   SectionLabel,
+  emptyTextStyle,
   metricGrid,
 } from '@agentskillmania/skill-ui-shared';
 

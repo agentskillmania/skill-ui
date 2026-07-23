@@ -2,13 +2,6 @@
 import type { Theme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 
-/** Empty state text — muted, centered. */
-export const emptyTextStyle = (theme: Theme) => css`
-  color: ${theme.color.textTertiary};
-  font-size: ${theme.font.size.sm};
-  padding: ${theme.spacing[1]} 0;
-`;
-
 /** Tag row — horizontal flex wrap for feature tags. */
 export const tagRowStyle = (theme: Theme) => css`
   display: flex;

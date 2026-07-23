@@ -21,9 +21,9 @@ describe('formatRelativeTime', () => {
     expect(formatRelativeTime(undefined)).toBe('-');
   });
 
-  it('formats seconds ago', () => {
+  it('formats seconds ago as "just now"', () => {
     const now = Date.now();
-    expect(formatRelativeTime(now - 30_000)).toBe('30s ago');
+    expect(formatRelativeTime(now - 30_000)).toBe('just now');
   });
 
   it('formats minutes ago', () => {
@@ -36,9 +36,23 @@ describe('formatRelativeTime', () => {
     expect(formatRelativeTime(now - 2 * 60 * 60 * 1000)).toBe('2h ago');
   });
 
-  it('rounds down seconds', () => {
+  it('formats days ago', () => {
     const now = Date.now();
-    expect(formatRelativeTime(now - 59_999)).toBe('59s ago');
+    expect(formatRelativeTime(now - 3 * 24 * 60 * 60 * 1000)).toBe('3d ago');
+  });
+
+  it('accepts ISO date string', () => {
+    // 2026-06-10T11:55:00Z is 5 minutes before the faked now
+    expect(formatRelativeTime('2026-06-10T11:55:00Z')).toBe('5m ago');
+  });
+
+  it('returns "-" for invalid date string', () => {
+    expect(formatRelativeTime('not-a-date')).toBe('-');
+  });
+
+  it('sub-60s rounds to "just now"', () => {
+    const now = Date.now();
+    expect(formatRelativeTime(now - 59_999)).toBe('just now');
   });
 });
 

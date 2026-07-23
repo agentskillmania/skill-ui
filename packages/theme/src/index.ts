@@ -56,6 +56,7 @@ export {
   focusVisible,
   transition,
   spin,
+  spinKeyframes,
   scaleActive,
   textTruncate,
   textSecondary,

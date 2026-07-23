@@ -9,7 +9,7 @@ import { css } from '@emotion/react';
 import { Play, Loader, CheckCircle2, XCircle } from 'lucide-react';
 import { useTheme, interactiveItem } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
-import { ExpandableRow, SectionLabel, EmptyState } from '@agentskillmania/skill-ui-shared';
+import { ExpandableRow, SectionLabel, EmptyState, formatDuration } from '@agentskillmania/skill-ui-shared';
 import { NAMESPACE } from '../../locales/index.js';
 import type { TestCasePanelProps, TestCaseStatus } from '../../types.js';
 import type { TestCase as TestCaseType } from '../../types.js';
@@ -20,10 +20,6 @@ const STATUS_ICON: Record<TestCaseStatus, { icon: typeof CheckCircle2; color: st
   passed: { icon: CheckCircle2, color: 'success' },
   failed: { icon: XCircle, color: 'error' },
 };
-
-function formatDuration(ms: number): string {
-  return ms >= 1000 ? `${(ms / 1000).toFixed(1)}s` : `${ms}ms`;
-}
 
 function TestCaseRow({ tc, onRunCase }: { tc: TestCaseType; onRunCase?: (id: string) => void }) {
   const theme = useTheme();

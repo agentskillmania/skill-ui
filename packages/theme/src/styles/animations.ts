@@ -1,8 +1,16 @@
 /**
  * Transition and animation style utilities
  */
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import type { Theme } from '../types.js';
+
+/** Bare spin keyframes — use when you need the keyframes reference inside a
+ * custom css block (e.g. `& > * { animation: ${spinKeyframes} 1s linear infinite; }`).
+ * For the common "just spin this element" case, use `spin(theme)` instead. */
+export const spinKeyframes = keyframes`
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+`;
 
 /**
  * Common transition animation
@@ -41,16 +49,7 @@ export function spin(
   timing = 'linear'
 ) {
   return css`
-    @keyframes spin {
-      from {
-        transform: rotate(0deg);
-      }
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    animation: spin ${duration} ${timing} ${iterationCount};
+    animation: ${spinKeyframes} ${duration} ${timing} ${iterationCount};
   `;
 }
 
