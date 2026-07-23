@@ -48,6 +48,10 @@ export function getEventCategory(type: CockpitEventType): EventCategory {
       return 'skill';
     case 'subagent:start':
     case 'subagent:end':
+    case 'subagent:token':
+    case 'subagent:thinking':
+    case 'subagent:tool:start':
+    case 'subagent:tool:end':
       return 'subagent';
     case 'compressing':
     case 'compressed':

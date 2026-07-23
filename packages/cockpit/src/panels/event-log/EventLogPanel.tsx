@@ -19,7 +19,12 @@ import type { CockpitEvent, EventLogPanelProps, EventCategory } from './types.js
 import { NAMESPACE } from '../../locales/index.js';
 
 /** Event types that should be merged when consecutive */
-const MERGEABLE_TYPES: ReadonlySet<string> = new Set(['token', 'thinking']);
+const MERGEABLE_TYPES: ReadonlySet<string> = new Set([
+  'token',
+  'thinking',
+  'subagent:token',
+  'subagent:thinking',
+]);
 
 /**
  * Merge consecutive streaming events into single CockpitEvent rows.
@@ -37,8 +42,8 @@ function mergeStreamingEvents(events: CockpitEvent[]): CockpitEvent[] {
         last.payload?.text ?? last.payload?.content ?? last.payload?.token ?? ''
       );
       const currText =
-        event.type === 'token'
-          ? String(event.payload?.token ?? '')
+        event.type === 'token' || event.type === 'subagent:token'
+          ? String(event.payload?.token ?? event.payload?.delta ?? '')
           : String(event.payload?.content ?? '');
       last.payload = {
         ...last.payload,

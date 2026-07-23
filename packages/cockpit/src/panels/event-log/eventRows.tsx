@@ -60,6 +60,20 @@ export function renderEventContent(event: CockpitEvent, expanded: boolean): stri
       return `${p.name ?? '?'}: ${truncate(String(p.task ?? ''), 40)}`;
     case 'subagent:end':
       return String(p.name ?? '?');
+    case 'subagent:token': {
+      const text = String(p.text ?? p.token ?? '');
+      return expanded ? text : truncate(text, 60);
+    }
+    case 'subagent:thinking':
+      return expanded ? String(p.content ?? '...') : truncate(String(p.content ?? '...'), 60);
+    case 'subagent:tool:start': {
+      const action = p.action as { name?: string; tool?: string } | undefined;
+      return `[${p.name ?? p.subagentName ?? '?'}] ${action?.name ?? action?.tool ?? '?'}`;
+    }
+    case 'subagent:tool:end': {
+      const result = String(p.result ?? '');
+      return `[${p.name ?? p.subagentName ?? '?'}] ${truncate(result, 50)}`;
+    }
     case 'compressing':
       return '...';
     case 'compressed':
