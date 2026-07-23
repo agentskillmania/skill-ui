@@ -10,6 +10,7 @@ import { ErrorBlock } from './ErrorBlock.js';
 import { HumanInputBlock } from './HumanInputBlock.js';
 import { PlanBlock } from './PlanBlock.js';
 import { SkillBlock } from './SkillBlock.js';
+import { SubAgentBlock } from './SubAgentBlock.js';
 import { ThinkingBlock } from './ThinkingBlock.js';
 import { ToolCallBlock } from './ToolCallBlock.js';
 
@@ -37,6 +38,7 @@ const builtinBlockRenderers: Record<string, React.ComponentType<BlockProps>> = {
   human_input: HumanInputBlock,
   skill: SkillBlock,
   a2ui: A2UIBlock,
+  subagent: SubAgentBlock,
 };
 
 export function BlocksRenderer({

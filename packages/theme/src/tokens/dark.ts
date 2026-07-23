@@ -89,6 +89,7 @@ export const darkBlockColor: Theme['blockColor'] = {
   humanInput: { text: '#fb923c', bg: 'rgba(251, 146, 60, 0.15)' },
   skill: { text: '#a78bfa', bg: 'rgba(167, 139, 250, 0.15)' },
   a2ui: { text: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)' },
+  subagent: { text: '#22d3ee', bg: 'rgba(34, 211, 238, 0.15)' },
 };
 
 export const darkEventStatusColor: Theme['eventStatusColor'] = {

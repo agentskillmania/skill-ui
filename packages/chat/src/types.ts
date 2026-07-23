@@ -112,6 +112,28 @@ export interface A2UIBlockMetadata {
   maxHeight?: string;
 }
 
+/** Sub-agent delegation block metadata */
+export interface SubAgentBlockMetadata {
+  /** Sub-agent name */
+  name?: string;
+  /** Delegation task description */
+  task?: string;
+  /** Step count */
+  steps?: number;
+  /** Input token count */
+  inputTokens?: number;
+  /** Output token count */
+  outputTokens?: number;
+  /** Duration in milliseconds */
+  duration?: number;
+  /** Sub-agent's conversation messages (for modal display) */
+  messages?: Message[];
+  /** Final result status */
+  resultStatus?: 'success' | 'max_steps' | 'error' | 'abort' | 'timeout';
+  /** Error message (when resultStatus is error) */
+  error?: string;
+}
+
 /** Structured action emitted by interactive blocks (e.g. A2UI surface) */
 export interface BlockAction {
   /** Action type (e.g. 'a2ui-action') */

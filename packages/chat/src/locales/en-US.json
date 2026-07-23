@@ -117,5 +117,19 @@
     "waiting": "Waiting for interaction",
     "expand": "Expand view",
     "expandTitle": "Full view"
+  },
+  "subagent": {
+    "title": "Sub-agent",
+    "steps": "{{count}} steps",
+    "tokens": "↑{{input}} ↓{{output}} tok",
+    "duration": "{{duration}}",
+    "streaming": "running",
+    "completed": "completed",
+    "error": "error",
+    "maxSteps": "max steps",
+    "timeout": "timeout",
+    "aborted": "aborted",
+    "details": "Details",
+    "noMessages": "No conversation recorded"
   }
 }

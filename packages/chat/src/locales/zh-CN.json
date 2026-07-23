@@ -117,5 +117,19 @@
     "waiting": "等待交互",
     "expand": "展开查看",
     "expandTitle": "完整视图"
+  },
+  "subagent": {
+    "title": "子智能体",
+    "steps": "{{count}} 步",
+    "tokens": "↑{{input}} ↓{{output}} tok",
+    "duration": "{{duration}}",
+    "streaming": "运行中",
+    "completed": "已完成",
+    "error": "错误",
+    "maxSteps": "达到上限",
+    "timeout": "超时",
+    "aborted": "已中止",
+    "details": "详情",
+    "noMessages": "无对话记录"
   }
 }

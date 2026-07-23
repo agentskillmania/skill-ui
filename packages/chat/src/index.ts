@@ -19,6 +19,9 @@ export { ErrorBlock } from './blocks-redesign/ErrorBlock.js';
 export { HumanInputBlock } from './blocks-redesign/HumanInputBlock.js';
 export { SkillBlock } from './blocks-redesign/SkillBlock.js';
 export { A2UIBlock } from './blocks-redesign/A2UIBlock.js';
+export { SubAgentBlock } from './blocks-redesign/SubAgentBlock.js';
+export { SubAgentModal } from './blocks-redesign/SubAgentModal.js';
+export type { SubAgentModalProps } from './blocks-redesign/SubAgentModal.js';
 export { MarkdownRenderer } from './content/MarkdownRenderer.js';
 export { QuickCommands } from './commands/QuickCommands.js';
 export { CommandAutocomplete } from './commands/CommandAutocomplete.js';
@@ -43,6 +46,7 @@ export type {
   ErrorMetadata,
   SkillBlockMetadata,
   A2UIBlockMetadata,
+  SubAgentBlockMetadata,
   BlockAction,
 } from './types.js';
 
