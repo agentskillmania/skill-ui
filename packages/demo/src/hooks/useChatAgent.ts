@@ -34,15 +34,6 @@ interface SSEData {
   questions?: Array<{ id: string; question: string; type: string; options?: string[] }>;
   context?: string;
   response?: unknown;
-  // tokens + duration (from llm-response, step-end, done, subagent-end)
-  tokens?: { input: number; output: number; cacheRead: number; cacheWrite: number };
-  duration?: number;
-  totalSteps?: number;
-  // subagent events
-  subtaskId?: string;
-  status?: string;
-  answer?: string;
-  error?: string;
 }
 
 export function useChatAgent(sessionId: string) {
@@ -112,10 +103,6 @@ export function useChatAgent(sessionId: string) {
         let skillBlockId: string | null = null;
         // Current tool_call blocks mapping name → blockId
         const toolBlockIds = new Map<string, string>();
-        // Sub-agent blocks: subtaskId → blockId
-        const subAgentBlockIds = new Map<string, string>();
-        // Sub-agent start times: subtaskId → Date.now() (for live duration)
-        const subAgentStartTimes = new Map<string, number>();
 
         // eslint-disable-next-line no-constant-condition
         while (true) {
@@ -436,176 +423,6 @@ export function useChatAgent(sessionId: string) {
                             }
                           : b
                       ),
-                    };
-                  })
-                );
-                break;
-              }
-
-              // ── Sub-agent delegation events ──
-
-              case 'subagent-start': {
-                thinkingBlockId = null;
-                const subtaskId = data.subtaskId ?? data.name ?? `sa-${Date.now()}`;
-                const blockId = genBlockId();
-                subAgentBlockIds.set(subtaskId, blockId);
-                subAgentStartTimes.set(subtaskId, Date.now());
-                const block: Block = {
-                  id: blockId,
-                  type: 'subagent',
-                  status: 'streaming',
-                  content: '',
-                  metadata: {
-                    name: data.name,
-                    task: data.task,
-                  },
-                };
-                setMessages((prev) =>
-                  prev.map((m) =>
-                    m.id === aid ? { ...m, blocks: [...(m.blocks ?? []), block] } : m
-                  )
-                );
-                break;
-              }
-
-              case 'subagent-token': {
-                const subtaskId = data.subtaskId ?? '';
-                const blockId = subAgentBlockIds.get(subtaskId);
-                if (!blockId) break;
-                const delta = data.delta ?? '';
-                setMessages((prev) =>
-                  prev.map((m) => {
-                    if (m.id !== aid) return m;
-                    return {
-                      ...m,
-                      blocks: (m.blocks ?? []).map((b) => {
-                        if (b.id !== blockId) return b;
-                        const meta = (b.metadata ?? {}) as Record<string, unknown>;
-                        const messages = (meta.messages as Message[] | undefined) ?? [];
-                        // Append to last assistant message, or create one
-                        const updatedMessages =
-                          messages.length > 0 && messages[messages.length - 1]?.role === 'assistant'
-                            ? messages.map((msg, i) =>
-                                i === messages.length - 1
-                                  ? { ...msg, content: msg.content + delta }
-                                  : msg
-                              )
-                            : [
-                                ...messages,
-                                {
-                                  id: `${blockId}-msg-${messages.length}`,
-                                  role: 'assistant' as const,
-                                  content: delta,
-                                  status: 'streaming' as const,
-                                },
-                              ];
-                        return {
-                          ...b,
-                          metadata: { ...meta, messages: updatedMessages },
-                        };
-                      }),
-                    };
-                  })
-                );
-                break;
-              }
-
-              case 'subagent-thinking': {
-                const subtaskId = data.subtaskId ?? '';
-                const blockId = subAgentBlockIds.get(subtaskId);
-                if (!blockId) break;
-                const thinkContent = data.content ?? '';
-                setMessages((prev) =>
-                  prev.map((m) => {
-                    if (m.id !== aid) return m;
-                    return {
-                      ...m,
-                      blocks: (m.blocks ?? []).map((b) => {
-                        if (b.id !== blockId) return b;
-                        const meta = (b.metadata ?? {}) as Record<string, unknown>;
-                        const existing = (meta.thinking as string | undefined) ?? '';
-                        return {
-                          ...b,
-                          metadata: { ...meta, thinking: existing + thinkContent },
-                        };
-                      }),
-                    };
-                  })
-                );
-                break;
-              }
-
-              case 'subagent-tool-start': {
-                const subtaskId = data.subtaskId ?? '';
-                const blockId = subAgentBlockIds.get(subtaskId);
-                if (!blockId) break;
-                const action = data.args ?? (data as Record<string, unknown>).action;
-                setMessages((prev) =>
-                  prev.map((m) => {
-                    if (m.id !== aid) return m;
-                    return {
-                      ...m,
-                      blocks: (m.blocks ?? []).map((b) => {
-                        if (b.id !== blockId) return b;
-                        const meta = (b.metadata ?? {}) as Record<string, unknown>;
-                        const messages = (meta.messages as Message[] | undefined) ?? [];
-                        // Close current assistant message and add a tool message
-                        const closedMessages = messages.map((msg) =>
-                          msg.status === 'streaming' ? { ...msg, status: 'completed' as const } : msg
-                        );
-                        const toolMsg: Message = {
-                          id: `${blockId}-tool-${closedMessages.length}`,
-                          role: 'tool',
-                          content: JSON.stringify(action),
-                          status: 'completed',
-                        };
-                        return {
-                          ...b,
-                          metadata: { ...meta, messages: [...closedMessages, toolMsg] },
-                        };
-                      }),
-                    };
-                  })
-                );
-                break;
-              }
-
-              case 'subagent-tool-end': {
-                // For simplicity, tool results are not individually rendered in the sub-agent modal.
-                // The conversation flow (user task → assistant thinking/tokens → tool calls) is
-                // the primary display. Tool results could be added as tool messages if needed.
-                break;
-              }
-
-              case 'subagent-end': {
-                const subtaskId = data.subtaskId ?? '';
-                const blockId = subAgentBlockIds.get(subtaskId);
-                subAgentStartTimes.delete(subtaskId);
-                if (!blockId) break;
-                const resultStatus =
-                  (data.status as 'success' | 'max_steps' | 'error' | 'abort' | 'timeout') ??
-                  'success';
-                setMessages((prev) =>
-                  prev.map((m) => {
-                    if (m.id !== aid) return m;
-                    return {
-                      ...m,
-                      blocks: (m.blocks ?? []).map((b) => {
-                        if (b.id !== blockId) return b;
-                        const meta = (b.metadata ?? {}) as Record<string, unknown>;
-                        return {
-                          ...b,
-                          status: resultStatus === 'error' ? ('error' as const) : ('completed' as const),
-                          metadata: {
-                            ...meta,
-                            resultStatus,
-                            steps: data.totalSteps,
-                            tokens: data.tokens,
-                            duration: data.duration,
-                            error: data.error,
-                          },
-                        };
-                      }),
                     };
                   })
                 );
