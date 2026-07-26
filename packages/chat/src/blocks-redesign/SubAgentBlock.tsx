@@ -6,7 +6,7 @@
  * tokens, duration). Clicking opens SubAgentModal which embeds a
  * MessageList showing the sub-agent's full conversation.
  */
-import { memo, useState } from 'react';
+import { memo, useState, lazy, Suspense } from 'react';
 import { css } from '@emotion/react';
 import { Bot, Loader2, CheckCircle2, XCircle, AlertTriangle, Clock } from 'lucide-react';
 import { useTheme, spinKeyframes } from '@agentskillmania/skill-ui-theme';
@@ -14,7 +14,16 @@ import { formatTokens, formatDuration } from '@agentskillmania/skill-ui-shared';
 import { useTranslation } from 'react-i18next';
 import type { BlockProps, SubAgentBlockMetadata, BlockStatus } from '../types.js';
 import { NAMESPACE } from '../locales/index.js';
-import { SubAgentModal } from './SubAgentModal.js';
+
+/**
+ * SubAgentModal is lazy-loaded to break a circular dependency:
+ * BlocksRenderer → SubAgentBlock → SubAgentModal → MessageList →
+ * AssistantMessage → BlocksRenderer. The modal is only needed on click,
+ * so deferring its import also avoids loading MessageList until then.
+ */
+const SubAgentModal = lazy(() =>
+  import('./SubAgentModal.js').then((m) => ({ default: m.SubAgentModal }))
+);
 
 type TFunction = (key: string, params?: Record<string, unknown>) => string;
 
@@ -187,16 +196,18 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
         </div>
       </div>
 
-      <SubAgentModal
-        open={modalOpen}
-        name={name}
-        messages={meta?.messages}
-        steps={meta?.steps}
-        inputTokens={meta?.inputTokens}
-        outputTokens={meta?.outputTokens}
-        duration={meta?.duration}
-        onClose={() => setModalOpen(false)}
-      />
+      <Suspense fallback={null}>
+        <SubAgentModal
+          open={modalOpen}
+          name={name}
+          messages={meta?.messages}
+          steps={meta?.steps}
+          inputTokens={meta?.inputTokens}
+          outputTokens={meta?.outputTokens}
+          duration={meta?.duration}
+          onClose={() => setModalOpen(false)}
+        />
+      </Suspense>
     </>
   );
 });

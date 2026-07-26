@@ -11,7 +11,6 @@ import {
   lightAntdXTokens,
   GlobalStyles,
 } from '@agentskillmania/skill-ui-theme';
-import { ChatContext } from '../src/context.js';
 import { NAMESPACE, resources } from '../src/locales/index.js';
 
 const i18n = createInstance();
@@ -68,10 +67,8 @@ const preview: Preview = {
         <I18nextProvider i18n={i18n}>
           <ConfigProvider theme={lightAntdConfig}>
             <ThemeProvider theme={lightTheme}>
-              <ChatContext.Provider value={{ renderers: {} }}>
-                <GlobalStyles />
-                <Story />
-              </ChatContext.Provider>
+              <GlobalStyles />
+              <Story />
             </ThemeProvider>
           </ConfigProvider>
         </I18nextProvider>
