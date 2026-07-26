@@ -1,0 +1,44 @@
+{
+  "name": "@agentskillmania/skill-ui-state",
+  "version": "0.1.0",
+  "description": "Event reducer state machine for agent runtime state — consumes SSE events, produces structured AgentRunState for chat and cockpit UIs.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:unit": "vitest run test/unit",
+    "test:watch": "vitest watch test/unit"
+  },
+  "author": {
+    "name": "yusangeng",
+    "email": "yusangeng@outlook.com"
+  },
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agentskillmania/skill-ui.git",
+    "directory": "packages/state"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.0.0",
+    "react": "^19.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
