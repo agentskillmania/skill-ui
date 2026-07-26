@@ -165,18 +165,6 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
                 background: ${accent.bg};
                 color: ${accent.text};
                 flex-shrink: 0;
-                ${isStreaming
-                  ? css`
-                      & > * {
-                        animation: ${spinKeyframes} 1s linear infinite;
-                      }
-                      @media (prefers-reduced-motion: reduce) {
-                        & > * {
-                          animation: none;
-                        }
-                      }
-                    `
-                  : ''}
               `}
             >
               <Bot size={16} />
