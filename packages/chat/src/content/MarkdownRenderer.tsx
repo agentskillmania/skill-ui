@@ -9,7 +9,7 @@ import { CodeHighlighter } from '@ant-design/x';
 import _XMarkdown from '@ant-design/x-markdown';
 import type { ComponentProps, XMarkdownProps } from '@ant-design/x-markdown';
 import { css, keyframes } from '@emotion/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 // React 19 type compatibility: XMarkdown declared as FC but TS cannot recognize it as JSX component
 const XMarkdown = _XMarkdown as unknown as React.ComponentType<XMarkdownProps>;
@@ -25,19 +25,32 @@ export interface MarkdownRendererProps {
   streaming?: boolean;
 }
 
-/** Code block rendering: integrates CodeHighlighter */
-function CodeComponent({ className, children, block }: ComponentProps) {
-  if (!block) {
-    return <code className={className}>{children}</code>;
-  }
+/** Code block rendering: integrates CodeHighlighter (skipped during streaming) */
+function makeCodeComponent(isStreaming: boolean) {
+  return function CodeComponent({ className, children, block }: ComponentProps) {
+    if (!block) {
+      return <code className={className}>{children}</code>;
+    }
 
-  const lang = className?.match(/language-(\w+)/)?.[1] ?? '';
+    const lang = className?.match(/language-(\w+)/)?.[1] ?? '';
 
-  if (typeof children !== 'string') {
-    return <code className={className}>{children}</code>;
-  }
+    if (typeof children !== 'string') {
+      return <code className={className}>{children}</code>;
+    }
 
-  return <CodeHighlighter lang={lang}>{children}</CodeHighlighter>;
+    // During streaming, code blocks are incomplete — CodeHighlighter's
+    // lazy language loading + re-parsing on every token causes flicker.
+    // Render plain <pre><code> until streaming is done.
+    if (isStreaming) {
+      return (
+        <pre>
+          <code className={className}>{children}</code>
+        </pre>
+      );
+    }
+
+    return <CodeHighlighter lang={lang}>{children}</CodeHighlighter>;
+  };
 }
 
 /** Streaming cursor rendered inside x-markdown tail */
@@ -60,6 +73,13 @@ function StreamingCursor() {
 
 export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps) {
   const theme = useTheme();
+
+  // Memoize the code component so it doesn't recreate on every token —
+  // only changes when streaming flag flips.
+  const codeComponent = useMemo(
+    () => makeCodeComponent(streaming ?? false),
+    [streaming]
+  );
 
   return (
     <div
@@ -175,7 +195,7 @@ export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps)
     >
       <XMarkdown
         content={children}
-        components={{ code: CodeComponent }}
+        components={{ code: codeComponent }}
         streaming={
           streaming
             ? {

@@ -5,9 +5,9 @@
  * package's reducer via EventFeed, and exposes mapped state for the
  * chat and cockpit UI components.
  */
-import type { Message, Block, ChatCommand } from '@agentskillmania/skill-ui-chat';
+import type { Message, ChatCommand } from '@agentskillmania/skill-ui-chat';
 import type { CockpitEvent } from '@agentskillmania/skill-ui-cockpit';
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
   useSessionState,
   selectMainMessages,
@@ -17,23 +17,16 @@ import {
   selectStepCount,
   fromHistory,
 } from '@agentskillmania/skill-ui-state';
-import type { AgentMessage, AgentEvent, ColtsMessageInput } from '@agentskillmania/skill-ui-state';
+import type { AgentEvent, ColtsMessageInput } from '@agentskillmania/skill-ui-state';
 
 type ChatStatus = 'idle' | 'streaming' | 'error';
 
 // ─── Mapping: state types → UI package types ──────────────────────
 
-/** Map state package AgentMessage → chat package Message (shapes are compatible) */
-function mapMessages(agentMessages: AgentMessage[]): Message[] {
-  return agentMessages.map((m) => ({
-    id: m.id,
-    role: m.role,
-    content: m.content,
-    blocks: m.blocks as Block[] | undefined,
-    status: m.status,
-    createdAt: m.createdAt,
-  }));
-}
+// AgentMessage and Message are structurally identical (same fields, same
+// Block shape). We cast directly instead of shallow-copying each object —
+// copying would create new references on every token, breaking memo() on
+// MessageItem/AssistantMessage and causing full re-renders per token.
 
 /** Map state package AgentEvent → cockpit package CockpitEvent */
 function mapEvents(agentEvents: AgentEvent[]): CockpitEvent[] {
@@ -56,6 +49,45 @@ export function useChatSession(sessionId: string) {
   const [inputValue, setInputValue] = useState('');
   const [commands, setCommands] = useState<ChatCommand[]>([]);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Batch SSE events via requestAnimationFrame so fast token streams
+  // (e.g. 50 tokens per HTTP chunk) don't trigger 50 React re-renders.
+  // Events accumulate in a buffer and flush once per animation frame.
+  const pendingEventsRef = useRef<import('@agentskillmania/skill-ui-state').SSEEvent[]>([]);
+  const rafIdRef = useRef<number | null>(null);
+
+  const flushEvents = useCallback(() => {
+    rafIdRef.current = null;
+    const batch = pendingEventsRef.current;
+    if (batch.length === 0) return;
+    pendingEventsRef.current = [];
+    // Dispatch all batched events — the reducer processes them sequentially,
+    // but React only re-renders once (useReducer batches dispatches in rAF).
+    for (const evt of batch) {
+      feed.push(evt);
+    }
+  }, [feed]);
+
+  const batchedPush = useCallback(
+    (evt: import('@agentskillmania/skill-ui-state').SSEEvent) => {
+      // Non-token events (done, error, phase-change, etc.) flush immediately
+      // so lifecycle transitions aren't delayed by a frame.
+      if (evt.event !== 'token' && evt.event !== 'thinking') {
+        // Flush any pending tokens first, then push this event
+        if (rafIdRef.current !== null) {
+          cancelAnimationFrame(rafIdRef.current);
+          flushEvents();
+        }
+        feed.push(evt);
+        return;
+      }
+      pendingEventsRef.current.push(evt);
+      if (rafIdRef.current === null) {
+        rafIdRef.current = requestAnimationFrame(flushEvents);
+      }
+    },
+    [feed, flushEvents]
+  );
 
   // Fetch command list + session history on mount (and when sessionId changes)
   useEffect(() => {
@@ -84,8 +116,8 @@ export function useChatSession(sessionId: string) {
 
   const sendMessage = useCallback(
     async (content: string) => {
-      // Add user message to state
-      feed.push({
+      // Add user message to state (flushes immediately, not batched)
+      batchedPush({
         event: 'user-message',
         data: { content },
       });
@@ -145,23 +177,28 @@ export function useChatSession(sessionId: string) {
               continue;
             }
 
-            // Push every SSE event into the state reducer
-            feed.push({ event: eventType, data });
+            // Push SSE event into the batched reducer feed
+            batchedPush({ event: eventType, data });
           }
         }
       } catch (err: unknown) {
         if (err instanceof Error && err.name === 'AbortError') {
           // User stopped — mark streaming blocks as completed
-          feed.push({ event: 'done', data: { aborted: true } });
+          batchedPush({ event: 'done', data: { aborted: true } });
         } else {
           setStatus('error');
         }
       } finally {
+        // Flush any pending batched tokens before resetting status
+        if (rafIdRef.current !== null) {
+          cancelAnimationFrame(rafIdRef.current);
+          flushEvents();
+        }
         setStatus('idle');
         abortRef.current = null;
       }
     },
-    [sessionId, feed]
+    [sessionId, batchedPush, flushEvents]
   );
 
   const stop = useCallback(() => {
@@ -180,9 +217,14 @@ export function useChatSession(sessionId: string) {
     [sessionId]
   );
 
-  // Map state for consumers
-  const messages = mapMessages(selectMainMessages(state));
-  const cockpitEvents = mapEvents(selectEvents(state));
+  // Pass messages directly to chat UI — AgentMessage and Message are
+  // structurally identical, so we cast without copying to preserve
+  // referential stability for memo() on MessageItem/AssistantMessage.
+  const messages = selectMainMessages(state) as unknown as Message[];
+
+  // Cockpit events: memoize so cockpit panel doesn't re-render on every
+  // chat token (events array only changes when a new event is appended).
+  const cockpitEvents = useMemo(() => mapEvents(selectEvents(state)), [state.events]);
   const totalTokens = selectTotalTokens(state);
   const stepCount = selectStepCount(state);
 
