@@ -123,7 +123,7 @@ export interface AgentRunState {
 /**
  * Sub-agent run — extends AgentRunState with identity and parent linkage.
  */
-export interface SubAgentRun extends AgentRunState {
+export interface SubAgentRunState extends AgentRunState {
   name: string;
   task: string;
   parentBlockId: string;
@@ -136,7 +136,7 @@ export interface SubAgentRun extends AgentRunState {
  */
 export interface SessionRunState {
   main: AgentRunState;
-  subAgents: Map<string, SubAgentRun>;
+  subAgents: Map<string, SubAgentRunState>;
   events: AgentEvent[];
 }
 

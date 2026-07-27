@@ -17,7 +17,7 @@ import type {
   AgentMessage,
   AgentBlock,
   ColtsMessageInput,
-  SubAgentRun,
+  SubAgentRunState,
 } from './types.js';
 import { createEmptySessionState, createEmptyRunState } from './types.js';
 
@@ -41,7 +41,7 @@ const DELEGATE_TOOL = 'delegate';
 export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
   const state = createEmptySessionState();
   const agentMessages: AgentMessage[] = [];
-  const subAgents = new Map<string, SubAgentRun>();
+  const subAgents = new Map<string, SubAgentRunState>();
 
   // Index tool results by toolCallId for pairing
   const toolResults = new Map<string, ColtsMessageInput>();
@@ -145,15 +145,15 @@ export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
                 error: delegateResult.error,
               },
             });
-            // Create a minimal SubAgentRun with summary data (no internal conversation)
+            // Create a minimal SubAgentRunState with summary data (no internal conversation)
             if (delegateResult.status === 'success' || delegateResult.answer) {
-              const subRun: SubAgentRun = {
+              const subRun: SubAgentRunState = {
                 ...createEmptyRunState(),
                 status: 'idle',
                 name: (tc.arguments.agent as string) ?? '',
                 task: (tc.arguments.task as string) ?? '',
                 parentBlockId: blocks[blocks.length - 1].id,
-                resultStatus: delegateResult.status as SubAgentRun['resultStatus'],
+                resultStatus: delegateResult.status as SubAgentRunState['resultStatus'],
                 totalSteps: delegateResult.totalSteps,
                 tokens: delegateResult.tokens ?? { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
                 duration: delegateResult.duration ?? 0,

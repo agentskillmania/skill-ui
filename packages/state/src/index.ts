@@ -18,7 +18,7 @@ export type {
   EventCategory,
   AgentEvent,
   AgentRunState,
-  SubAgentRun,
+  SubAgentRunState,
   SessionRunState,
   EventFeed,
   ColtsMessageInput,

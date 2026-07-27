@@ -16,7 +16,7 @@ import type {
   EventCategory,
   SSEEvent,
   TokenStats,
-  SubAgentRun,
+  SubAgentRunState,
 } from './types.js';
 import { ZERO_TOKENS, createEmptyRunState } from './types.js';
 
@@ -499,17 +499,17 @@ function reduceMainEvent(state: AgentRunState, eventName: string, data: Record<s
 // ─── Sub-agent event handlers ─────────────────────────────────────
 
 function reduceSubAgentEvent(
-  subAgents: Map<string, SubAgentRun>,
+  subAgents: Map<string, SubAgentRunState>,
   eventName: string,
   data: Record<string, unknown>
-): Map<string, SubAgentRun> {
+): Map<string, SubAgentRunState> {
   const subtaskId = (data.subtaskId as string) ?? '';
 
   switch (eventName) {
     case 'subagent-start': {
-      // Create new SubAgentRun + add subagent block to parent message
+      // Create new SubAgentRunState + add subagent block to parent message
       // Note: the block is added to main agent's messages in the top-level reducer
-      const subRun: SubAgentRun = {
+      const subRun: SubAgentRunState = {
         ...createEmptyRunState(),
         status: 'streaming',
         startedAt: Date.now(),
@@ -612,7 +612,7 @@ function reduceSubAgentEvent(
       const sub = subAgents.get(subtaskId);
       if (!sub) return subAgents;
       const tokens = extractTokens(data);
-      const resultStatus = (data.status as SubAgentRun['resultStatus']) ?? 'success';
+      const resultStatus = (data.status as SubAgentRunState['resultStatus']) ?? 'success';
       return new Map(subAgents).set(subtaskId, {
         ...sub,
         status: resultStatus === 'error' ? 'error' : 'idle',

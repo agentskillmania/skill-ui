@@ -6,7 +6,7 @@
  * layer on top of these (e.g. AgentMessage → chat package's Message).
  */
 
-import type { SessionRunState, SubAgentRun, AgentMessage, AgentEvent } from './types.js';
+import type { SessionRunState, SubAgentRunState, AgentMessage, AgentEvent } from './types.js';
 
 /** Get the main agent's structured messages (for chat UI) */
 export function selectMainMessages(state: SessionRunState): AgentMessage[] {
@@ -14,7 +14,7 @@ export function selectMainMessages(state: SessionRunState): AgentMessage[] {
 }
 
 /** Get a sub-agent by subtaskId */
-export function selectSubAgent(state: SessionRunState, subtaskId: string): SubAgentRun | undefined {
+export function selectSubAgent(state: SessionRunState, subtaskId: string): SubAgentRunState | undefined {
   return state.subAgents.get(subtaskId);
 }
 
@@ -46,7 +46,7 @@ export function selectSubAgentMetrics(
 }
 
 /** List all sub-agents */
-export function selectAllSubAgents(state: SessionRunState): SubAgentRun[] {
+export function selectAllSubAgents(state: SessionRunState): SubAgentRunState[] {
   return Array.from(state.subAgents.values());
 }
 
