@@ -11,66 +11,73 @@ import type { CockpitEvent } from './types.js';
 export function renderEventContent(event: CockpitEvent, expanded: boolean): string {
   const p = event.payload ?? {};
   switch (event.type) {
-    case 'step:start':
-    case 'step:end':
+    case 'step-start':
+    case 'step-end':
       return `#${p.step ?? '?'}`;
     case 'complete':
+    case 'done':
       return '✓';
     case 'abort':
       return `✕ @ step ${p.step ?? '?'}`;
-    case 'phase-change':
-      return `${p.from ?? '?'} → ${p.to ?? '?'}`;
+    case 'phase-change': {
+      // from/to may be a string ("idle") or an object ({ type: 'idle' })
+      const fromVal = p.from as { type?: string } | string | undefined;
+      const toVal = p.to as { type?: string } | string | undefined;
+      const fromStr = typeof fromVal === 'string' ? fromVal : fromVal?.type ?? '?';
+      const toStr = typeof toVal === 'string' ? toVal : toVal?.type ?? '?';
+      return `${fromStr} → ${toStr}`;
+    }
     case 'thinking':
       return expanded ? String(p.content ?? '...') : truncate(String(p.content ?? '...'), 60);
     case 'token': {
       // After merging, payload.text holds accumulated text
-      const text = String(p.text ?? p.token ?? '');
+      const text = String(p.text ?? p.delta ?? p.token ?? '');
       return expanded ? text : truncate(text, 60);
     }
-    case 'llm:request': {
+    case 'llm-request': {
       const skill = p.skill as { current: string | null } | null;
       return skill?.current
         ? `${skill.current} · ${Array.isArray(p.messages) ? p.messages.length : '?'} msgs`
         : `${Array.isArray(p.messages) ? p.messages.length : '?'} messages`;
     }
-    case 'llm:response': {
+    case 'llm-response': {
       const text = String(p.text ?? '');
       const tcCount = Array.isArray(p.toolCalls) ? (p.toolCalls as unknown[]).length : 0;
       return text ? truncate(text, 50) : `${tcCount} tool call${tcCount !== 1 ? 's' : ''}`;
     }
-    case 'tool:start':
+    case 'tool-start':
       return String(p.name ?? '?');
-    case 'tool:end': {
+    case 'tool-end': {
       const result = String(p.result ?? '');
       return truncate(result, 60);
     }
-    case 'tools:start':
+    case 'tools-start':
       return `${Array.isArray(p.actions) ? p.actions.length : '?'} tools`;
-    case 'tools:end':
+    case 'tools-end':
       return `${Array.isArray(p.results) ? Object.keys(p.results as unknown as Record<string, unknown>).length : '?'} results`;
-    case 'skill:loading':
+    case 'skill-loading':
       return String(p.name ?? '?');
-    case 'skill:loaded':
+    case 'skill-loaded':
       return `${p.name ?? '?'} · ${p.tokenCount ?? '?'} tokens`;
-    case 'skill:start':
+    case 'skill-start':
       return `${p.name ?? '?'}: ${truncate(String(p.task ?? ''), 40)}`;
-    case 'skill:end':
+    case 'skill-end':
       return String(p.name ?? '?');
-    case 'subagent:start':
+    case 'subagent-start':
       return `${p.name ?? '?'}: ${truncate(String(p.task ?? ''), 40)}`;
-    case 'subagent:end':
+    case 'subagent-end':
       return String(p.name ?? '?');
-    case 'subagent:token': {
-      const text = String(p.text ?? p.token ?? '');
+    case 'subagent-token': {
+      const text = String(p.text ?? p.delta ?? p.token ?? '');
       return expanded ? text : truncate(text, 60);
     }
-    case 'subagent:thinking':
+    case 'subagent-thinking':
       return expanded ? String(p.content ?? '...') : truncate(String(p.content ?? '...'), 60);
-    case 'subagent:tool:start': {
+    case 'subagent-tool-start': {
       const action = p.action as { name?: string; tool?: string } | undefined;
       return `[${p.name ?? p.subagentName ?? '?'}] ${action?.name ?? action?.tool ?? '?'}`;
     }
-    case 'subagent:tool:end': {
+    case 'subagent-tool-end': {
       const result = String(p.result ?? '');
       return `[${p.name ?? p.subagentName ?? '?'}] ${truncate(result, 50)}`;
     }
@@ -79,7 +86,12 @@ export function renderEventContent(event: CockpitEvent, expanded: boolean): stri
     case 'compressed':
       return `-${p.removedCount ?? '?'} msgs`;
     case 'waiting-human':
+    case 'human-input':
       return '⏸';
+    case 'human-input-resolved':
+      return '▶';
+    case 'user-message':
+      return truncate(String(p.content ?? ''), 60);
     case 'error':
       return String(p.message ?? p.error ?? 'Unknown');
     default:

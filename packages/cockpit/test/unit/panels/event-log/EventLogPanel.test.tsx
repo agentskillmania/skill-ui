@@ -19,15 +19,15 @@ function createEvent(type: CockpitEvent['type'], overrides?: Partial<CockpitEven
     timestamp: Date.now(),
     type,
     label: `Test ${type} event`,
-    payload: type === 'step:start' ? { step: 1 } : undefined,
+    payload: type === 'step-start' ? { step: 1 } : undefined,
     ...overrides,
   };
 }
 
 describe('EventLogPanel', () => {
   const mockEvents: CockpitEvent[] = [
-    createEvent('step:start'),
-    createEvent('tool:start'),
+    createEvent('step-start'),
+    createEvent('tool-start'),
     createEvent('thinking', { payload: { content: 'thinking content' } }),
     createEvent('error', { payload: { message: 'error message' } }),
   ];
@@ -42,8 +42,8 @@ describe('EventLogPanel', () => {
     const virtualItems = container.querySelectorAll('[data-index]');
     expect(virtualItems.length).toBe(mockEvents.length);
     // Verify specific event content is findable
-    expect(screen.getByText('step:start')).toBeInTheDocument();
-    expect(screen.getByText('tool:start')).toBeInTheDocument();
+    expect(screen.getByText('step-start')).toBeInTheDocument();
+    expect(screen.getByText('tool-start')).toBeInTheDocument();
     expect(screen.getByText('thinking content')).toBeInTheDocument();
   });
 

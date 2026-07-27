@@ -22,8 +22,8 @@ import { NAMESPACE } from '../../locales/index.js';
 const MERGEABLE_TYPES: ReadonlySet<string> = new Set([
   'token',
   'thinking',
-  'subagent:token',
-  'subagent:thinking',
+  'subagent-token',
+  'subagent-thinking',
 ]);
 
 /**
@@ -42,7 +42,7 @@ function mergeStreamingEvents(events: CockpitEvent[]): CockpitEvent[] {
         last.payload?.text ?? last.payload?.content ?? last.payload?.token ?? ''
       );
       const currText =
-        event.type === 'token' || event.type === 'subagent:token'
+        event.type === 'token' || event.type === 'subagent-token'
           ? String(event.payload?.token ?? event.payload?.delta ?? '')
           : String(event.payload?.content ?? '');
       last.payload = {

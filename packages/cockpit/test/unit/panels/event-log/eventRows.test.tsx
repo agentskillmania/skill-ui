@@ -22,17 +22,17 @@ describe('renderEventContent', () => {
   describe('step:start / step:end', () => {
     it('returns step number when payload has step', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'step:start', payload: { step: 3 } }), false)
+        renderEventContent(makeEvent({ type: 'step-start', payload: { step: 3 } }), false)
       ).toBe('#3');
     });
 
     it('returns fallback when step is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'step:end', payload: {} }), false)).toBe('#?');
+      expect(renderEventContent(makeEvent({ type: 'step-end', payload: {} }), false)).toBe('#?');
     });
 
     it('returns fallback when step is nullish', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'step:start', payload: { step: null } }), false)
+        renderEventContent(makeEvent({ type: 'step-start', payload: { step: null } }), false)
       ).toBe('#?');
     });
   });
@@ -67,7 +67,19 @@ describe('renderEventContent', () => {
 
   // ── phase-change ───────────────────────────────────────────────────
   describe('phase-change', () => {
-    it('returns from → to', () => {
+    it('returns from → to for object payloads (colts phase shape)', () => {
+      expect(
+        renderEventContent(
+          makeEvent({
+            type: 'phase-change',
+            payload: { from: { type: 'idle' }, to: { type: 'calling-llm' } },
+          }),
+          false
+        )
+      ).toBe('idle → calling-llm');
+    });
+
+    it('returns from → to for string payloads', () => {
       expect(
         renderEventContent(
           makeEvent({ type: 'phase-change', payload: { from: 'idle', to: 'running' } }),
@@ -89,9 +101,9 @@ describe('renderEventContent', () => {
     });
 
     it('falls back when both are missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'phase-change', payload: {} }), false)).toBe(
-        '? → ?'
-      );
+      expect(
+        renderEventContent(makeEvent({ type: 'phase-change', payload: {} }), false)
+      ).toBe('? → ?');
     });
   });
 
@@ -165,10 +177,10 @@ describe('renderEventContent', () => {
   });
 
   // ── llm:request ────────────────────────────────────────────────────
-  describe('llm:request', () => {
+  describe('llm-request', () => {
     it('includes skill name when skill.current is set', () => {
       const event = makeEvent({
-        type: 'llm:request',
+        type: 'llm-request',
         payload: {
           skill: { current: 'code-writer' },
           messages: [{ role: 'user' }, { role: 'assistant' }],
@@ -179,7 +191,7 @@ describe('renderEventContent', () => {
 
     it('uses generic message when skill.current is null', () => {
       const event = makeEvent({
-        type: 'llm:request',
+        type: 'llm-request',
         payload: { skill: { current: null }, messages: [{ role: 'user' }] },
       });
       expect(renderEventContent(event, false)).toBe('1 messages');
@@ -187,7 +199,7 @@ describe('renderEventContent', () => {
 
     it('uses generic message when skill is absent', () => {
       const event = makeEvent({
-        type: 'llm:request',
+        type: 'llm-request',
         payload: { messages: [{ role: 'user' }] },
       });
       expect(renderEventContent(event, false)).toBe('1 messages');
@@ -195,7 +207,7 @@ describe('renderEventContent', () => {
 
     it('handles messages not being an array', () => {
       const event = makeEvent({
-        type: 'llm:request',
+        type: 'llm-request',
         payload: { skill: { current: 'coder' }, messages: 'not-an-array' },
       });
       expect(renderEventContent(event, false)).toBe('coder · ? msgs');
@@ -203,7 +215,7 @@ describe('renderEventContent', () => {
 
     it('handles absent messages field', () => {
       const event = makeEvent({
-        type: 'llm:request',
+        type: 'llm-request',
         payload: { skill: { current: 'coder' } },
       });
       expect(renderEventContent(event, false)).toBe('coder · ? msgs');
@@ -211,7 +223,7 @@ describe('renderEventContent', () => {
 
     it('uses generic format when skill is absent and messages is not an array', () => {
       const event = makeEvent({
-        type: 'llm:request',
+        type: 'llm-request',
         payload: { skill: { current: null }, messages: 'not-an-array' },
       });
       expect(renderEventContent(event, false)).toBe('? messages');
@@ -219,10 +231,10 @@ describe('renderEventContent', () => {
   });
 
   // ── llm:response ───────────────────────────────────────────────────
-  describe('llm:response', () => {
+  describe('llm-response', () => {
     it('returns truncated text when text is present', () => {
       const event = makeEvent({
-        type: 'llm:response',
+        type: 'llm-response',
         payload: {
           text: 'Here is a very long response that should be truncated to fifty characters exactly',
         },
@@ -233,7 +245,7 @@ describe('renderEventContent', () => {
 
     it('returns tool call count when text is empty', () => {
       const event = makeEvent({
-        type: 'llm:response',
+        type: 'llm-response',
         payload: { text: '', toolCalls: [{ name: 'read' }, { name: 'write' }] },
       });
       expect(renderEventContent(event, false)).toBe('2 tool calls');
@@ -241,7 +253,7 @@ describe('renderEventContent', () => {
 
     it('uses singular for single tool call', () => {
       const event = makeEvent({
-        type: 'llm:response',
+        type: 'llm-response',
         payload: { toolCalls: [{ name: 'read' }], text: '' },
       });
       expect(renderEventContent(event, false)).toBe('1 tool call');
@@ -249,7 +261,7 @@ describe('renderEventContent', () => {
 
     it('handles zero tool calls', () => {
       const event = makeEvent({
-        type: 'llm:response',
+        type: 'llm-response',
         payload: { toolCalls: [] },
       });
       expect(renderEventContent(event, false)).toBe('0 tool calls');
@@ -257,37 +269,37 @@ describe('renderEventContent', () => {
 
     it('handles toolCalls not being an array', () => {
       const event = makeEvent({
-        type: 'llm:response',
+        type: 'llm-response',
         payload: { toolCalls: 'invalid' },
       });
       expect(renderEventContent(event, false)).toBe('0 tool calls');
     });
 
     it('handles empty payload', () => {
-      const event = makeEvent({ type: 'llm:response', payload: {} });
+      const event = makeEvent({ type: 'llm-response', payload: {} });
       expect(renderEventContent(event, false)).toBe('0 tool calls');
     });
   });
 
   // ── tool:start ─────────────────────────────────────────────────────
-  describe('tool:start', () => {
+  describe('tool-start', () => {
     it('returns tool name when present', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'tool:start', payload: { name: 'read_file' } }), false)
+        renderEventContent(makeEvent({ type: 'tool-start', payload: { name: 'read_file' } }), false)
       ).toBe('read_file');
     });
 
     it('falls back when name is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'tool:start', payload: {} }), false)).toBe('?');
+      expect(renderEventContent(makeEvent({ type: 'tool-start', payload: {} }), false)).toBe('?');
     });
   });
 
   // ── tool:end ───────────────────────────────────────────────────────
-  describe('tool:end', () => {
+  describe('tool-end', () => {
     it('returns truncated result', () => {
       const longResult = 'c'.repeat(100);
       const result = renderEventContent(
-        makeEvent({ type: 'tool:end', payload: { result: longResult } }),
+        makeEvent({ type: 'tool-end', payload: { result: longResult } }),
         false
       );
       // truncate appends '...' within maxLength, so 57 chars + '...' = 60
@@ -296,28 +308,28 @@ describe('renderEventContent', () => {
     });
 
     it('handles empty result', () => {
-      expect(renderEventContent(makeEvent({ type: 'tool:end', payload: {} }), false)).toBe('');
+      expect(renderEventContent(makeEvent({ type: 'tool-end', payload: {} }), false)).toBe('');
     });
 
     it('converts non-string result to string', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'tool:end', payload: { result: 42 } }), false)
+        renderEventContent(makeEvent({ type: 'tool-end', payload: { result: 42 } }), false)
       ).toBe('42');
     });
   });
 
   // ── tools:start ────────────────────────────────────────────────────
-  describe('tools:start', () => {
+  describe('tools-start', () => {
     it('returns action count when actions is an array', () => {
       const event = makeEvent({
-        type: 'tools:start',
+        type: 'tools-start',
         payload: { actions: [{ name: 'read' }, { name: 'write' }, { name: 'exec' }] },
       });
       expect(renderEventContent(event, false)).toBe('3 tools');
     });
 
     it('falls back when actions is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'tools:start', payload: {} }), false)).toBe(
+      expect(renderEventContent(makeEvent({ type: 'tools-start', payload: {} }), false)).toBe(
         '? tools'
       );
     });
@@ -325,7 +337,7 @@ describe('renderEventContent', () => {
     it('falls back when actions is not an array', () => {
       expect(
         renderEventContent(
-          makeEvent({ type: 'tools:start', payload: { actions: 'string' } }),
+          makeEvent({ type: 'tools-start', payload: { actions: 'string' } }),
           false
         )
       ).toBe('? tools');
@@ -333,24 +345,24 @@ describe('renderEventContent', () => {
   });
 
   // ── tools:end ──────────────────────────────────────────────────────
-  describe('tools:end', () => {
+  describe('tools-end', () => {
     it('returns results count when results is an array', () => {
       const event = makeEvent({
-        type: 'tools:end',
+        type: 'tools-end',
         payload: { results: [{ name: 'read' }, { name: 'write' }, { name: 'exec' }] },
       });
       expect(renderEventContent(event, false)).toBe('3 results');
     });
 
     it('falls back when results is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'tools:end', payload: {} }), false)).toBe(
+      expect(renderEventContent(makeEvent({ type: 'tools-end', payload: {} }), false)).toBe(
         '? results'
       );
     });
 
     it('falls back when results is not an object', () => {
       const event = makeEvent({
-        type: 'tools:end',
+        type: 'tools-end',
         payload: { results: 'not-an-object' },
       });
       expect(renderEventContent(event, false)).toBe('? results');
@@ -358,28 +370,28 @@ describe('renderEventContent', () => {
   });
 
   // ── skill:loading ──────────────────────────────────────────────────
-  describe('skill:loading', () => {
+  describe('skill-loading', () => {
     it('returns skill name', () => {
       expect(
         renderEventContent(
-          makeEvent({ type: 'skill:loading', payload: { name: 'code-review' } }),
+          makeEvent({ type: 'skill-loading', payload: { name: 'code-review' } }),
           false
         )
       ).toBe('code-review');
     });
 
     it('falls back when name is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'skill:loading', payload: {} }), false)).toBe(
+      expect(renderEventContent(makeEvent({ type: 'skill-loading', payload: {} }), false)).toBe(
         '?'
       );
     });
   });
 
   // ── skill:loaded ───────────────────────────────────────────────────
-  describe('skill:loaded', () => {
+  describe('skill-loaded', () => {
     it('returns name and token count', () => {
       const event = makeEvent({
-        type: 'skill:loaded',
+        type: 'skill-loaded',
         payload: { name: 'code-review', tokenCount: 15000 },
       });
       expect(renderEventContent(event, false)).toBe('code-review · 15000 tokens');
@@ -387,22 +399,22 @@ describe('renderEventContent', () => {
 
     it('falls back when name is missing', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'skill:loaded', payload: { tokenCount: 500 } }), false)
+        renderEventContent(makeEvent({ type: 'skill-loaded', payload: { tokenCount: 500 } }), false)
       ).toBe('? · 500 tokens');
     });
 
     it('falls back when tokenCount is missing', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'skill:loaded', payload: { name: 'coder' } }), false)
+        renderEventContent(makeEvent({ type: 'skill-loaded', payload: { name: 'coder' } }), false)
       ).toBe('coder · ? tokens');
     });
   });
 
   // ── skill:start ────────────────────────────────────────────────────
-  describe('skill:start', () => {
+  describe('skill-start', () => {
     it('returns name and truncated task', () => {
       const event = makeEvent({
-        type: 'skill:start',
+        type: 'skill-start',
         payload: { name: 'code-review', task: 'Review this PR for bugs' },
       });
       expect(renderEventContent(event, false)).toBe('code-review: Review this PR for bugs');
@@ -410,20 +422,20 @@ describe('renderEventContent', () => {
 
     it('falls back when name is missing', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'skill:start', payload: { task: 'do work' } }), false)
+        renderEventContent(makeEvent({ type: 'skill-start', payload: { task: 'do work' } }), false)
       ).toBe('?: do work');
     });
 
     it('handles missing task', () => {
       expect(
-        renderEventContent(makeEvent({ type: 'skill:start', payload: { name: 'tester' } }), false)
+        renderEventContent(makeEvent({ type: 'skill-start', payload: { name: 'tester' } }), false)
       ).toBe('tester: ');
     });
 
     it('truncates long task to 40 chars', () => {
       const longTask = 'd'.repeat(100);
       const result = renderEventContent(
-        makeEvent({ type: 'skill:start', payload: { name: 'x', task: longTask } }),
+        makeEvent({ type: 'skill-start', payload: { name: 'x', task: longTask } }),
         false
       );
       // truncate with maxLength=40 => 37 chars + '...' = 40
@@ -432,26 +444,26 @@ describe('renderEventContent', () => {
   });
 
   // ── skill:end ──────────────────────────────────────────────────────
-  describe('skill:end', () => {
+  describe('skill-end', () => {
     it('returns skill name', () => {
       expect(
         renderEventContent(
-          makeEvent({ type: 'skill:end', payload: { name: 'code-review' } }),
+          makeEvent({ type: 'skill-end', payload: { name: 'code-review' } }),
           false
         )
       ).toBe('code-review');
     });
 
     it('falls back when name is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'skill:end', payload: {} }), false)).toBe('?');
+      expect(renderEventContent(makeEvent({ type: 'skill-end', payload: {} }), false)).toBe('?');
     });
   });
 
   // ── subagent:start ─────────────────────────────────────────────────
-  describe('subagent:start', () => {
+  describe('subagent-start', () => {
     it('returns name and truncated task', () => {
       const event = makeEvent({
-        type: 'subagent:start',
+        type: 'subagent-start',
         payload: { name: 'researcher', task: 'Find relevant sources' },
       });
       expect(renderEventContent(event, false)).toBe('researcher: Find relevant sources');
@@ -460,7 +472,7 @@ describe('renderEventContent', () => {
     it('falls back when name is missing', () => {
       expect(
         renderEventContent(
-          makeEvent({ type: 'subagent:start', payload: { task: 'research' } }),
+          makeEvent({ type: 'subagent-start', payload: { task: 'research' } }),
           false
         )
       ).toBe('?: research');
@@ -469,7 +481,7 @@ describe('renderEventContent', () => {
     it('handles missing task', () => {
       expect(
         renderEventContent(
-          makeEvent({ type: 'subagent:start', payload: { name: 'helper' } }),
+          makeEvent({ type: 'subagent-start', payload: { name: 'helper' } }),
           false
         )
       ).toBe('helper: ');
@@ -477,18 +489,18 @@ describe('renderEventContent', () => {
   });
 
   // ── subagent:end ───────────────────────────────────────────────────
-  describe('subagent:end', () => {
+  describe('subagent-end', () => {
     it('returns subagent name', () => {
       expect(
         renderEventContent(
-          makeEvent({ type: 'subagent:end', payload: { name: 'researcher' } }),
+          makeEvent({ type: 'subagent-end', payload: { name: 'researcher' } }),
           false
         )
       ).toBe('researcher');
     });
 
     it('falls back when name is missing', () => {
-      expect(renderEventContent(makeEvent({ type: 'subagent:end', payload: {} }), false)).toBe('?');
+      expect(renderEventContent(makeEvent({ type: 'subagent-end', payload: {} }), false)).toBe('?');
     });
   });
 

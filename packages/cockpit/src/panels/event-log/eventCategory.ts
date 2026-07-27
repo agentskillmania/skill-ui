@@ -22,9 +22,10 @@ import type { CockpitEventType, EventCategory } from './types.js';
 /** Map raw event type to UI filter category */
 export function getEventCategory(type: CockpitEventType): EventCategory {
   switch (type) {
-    case 'step:start':
-    case 'step:end':
+    case 'step-start':
+    case 'step-end':
     case 'complete':
+    case 'done':
     case 'abort':
       return 'lifecycle';
     case 'phase-change':
@@ -33,30 +34,33 @@ export function getEventCategory(type: CockpitEventType): EventCategory {
       return 'thinking';
     case 'token':
       return 'token';
-    case 'llm:request':
-    case 'llm:response':
+    case 'llm-request':
+    case 'llm-response':
       return 'llm';
-    case 'tool:start':
-    case 'tool:end':
-    case 'tools:start':
-    case 'tools:end':
+    case 'tool-start':
+    case 'tool-end':
+    case 'tools-start':
+    case 'tools-end':
       return 'tool';
-    case 'skill:loading':
-    case 'skill:loaded':
-    case 'skill:start':
-    case 'skill:end':
+    case 'skill-loading':
+    case 'skill-loaded':
+    case 'skill-start':
+    case 'skill-end':
       return 'skill';
-    case 'subagent:start':
-    case 'subagent:end':
-    case 'subagent:token':
-    case 'subagent:thinking':
-    case 'subagent:tool:start':
-    case 'subagent:tool:end':
+    case 'subagent-start':
+    case 'subagent-end':
+    case 'subagent-token':
+    case 'subagent-thinking':
+    case 'subagent-tool-start':
+    case 'subagent-tool-end':
       return 'subagent';
     case 'compressing':
     case 'compressed':
       return 'compressing';
     case 'waiting-human':
+    case 'human-input':
+    case 'human-input-resolved':
+    case 'user-message':
       return 'human';
     case 'error':
       return 'error';

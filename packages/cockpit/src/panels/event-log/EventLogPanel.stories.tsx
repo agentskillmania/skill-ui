@@ -87,23 +87,23 @@ const WIDTH = '480px';
 const HEIGHT = '600px';
 
 const ALL_EVENT_TYPES: CockpitEventType[] = [
-  'step:start',
-  'step:end',
+  'step-start',
+  'step-end',
   'phase-change',
   'thinking',
   'token',
-  'llm:request',
-  'llm:response',
-  'tool:start',
-  'tool:end',
-  'skill:start',
-  'skill:end',
-  'subagent:start',
-  'subagent:end',
-  'subagent:token',
-  'subagent:thinking',
-  'subagent:tool:start',
-  'subagent:tool:end',
+  'llm-request',
+  'llm-response',
+  'tool-start',
+  'tool-end',
+  'skill-start',
+  'skill-end',
+  'subagent-start',
+  'subagent-end',
+  'subagent-token',
+  'subagent-thinking',
+  'subagent-tool-start',
+  'subagent-tool-end',
   'compressing',
   'compressed',
   'waiting-human',
@@ -132,11 +132,11 @@ function generateEvents(count: number): CockpitEvent[] {
     let payload: Record<string, unknown> | undefined;
 
     switch (type) {
-      case 'step:start':
+      case 'step-start':
         label = `Step ${(i % 5) + 1}`;
         payload = { step: (i % 5) + 1, name: `step-${(i % 5) + 1}` };
         break;
-      case 'step:end':
+      case 'step-end':
         label = `Step ${(i % 5) + 1} done`;
         payload = { step: (i % 5) + 1, duration: Math.floor(Math.random() * 5000) };
         break;
@@ -153,7 +153,7 @@ function generateEvents(count: number): CockpitEvent[] {
       case 'token':
         payload = { token: `word_${i}` };
         break;
-      case 'tool:start':
+      case 'tool-start':
         label = ['read_file', 'write_file', 'search_web', 'run_command'][
           Math.floor(Math.random() * 4)
         ];
@@ -279,19 +279,19 @@ export const LiveStreaming = {
         payload?: Record<string, unknown>;
       }> = [
         { type: 'phase-change', label: '', payload: { from: 'idle', to: 'processing' } },
-        { type: 'step:start', label: 'Step 1', payload: { step: 1, name: 'analyze' } },
+        { type: 'step-start', label: 'Step 1', payload: { step: 1, name: 'analyze' } },
         {
           type: 'thinking',
           label: 'Analyzing the request...',
           payload: { content: 'Analyzing the request...' },
         },
         {
-          type: 'tool:start',
+          type: 'tool-start',
           label: 'read_file',
           payload: { name: 'read_file', args: 'src/main.ts' },
         },
         {
-          type: 'tool:end',
+          type: 'tool-end',
           label: 'read_file done',
           payload: { name: 'read_file', duration: 320 },
         },
@@ -301,12 +301,12 @@ export const LiveStreaming = {
           payload: { content: 'Checking available tools...' },
         },
         {
-          type: 'tool:start',
+          type: 'tool-start',
           label: 'search_web',
           payload: { name: 'search_web', query: 'react-virtual' },
         },
         {
-          type: 'tool:end',
+          type: 'tool-end',
           label: 'search_web done',
           payload: { name: 'search_web', duration: 1500 },
         },
@@ -315,11 +315,11 @@ export const LiveStreaming = {
           label: 'Synthesizing results...',
           payload: { content: 'Synthesizing results...' },
         },
-        { type: 'step:end', label: 'Step 1 done', payload: { step: 1, duration: 2800 } },
-        { type: 'step:start', label: 'Step 2', payload: { step: 2, name: 'implement' } },
+        { type: 'step-end', label: 'Step 1 done', payload: { step: 1, duration: 2800 } },
+        { type: 'step-start', label: 'Step 2', payload: { step: 2, name: 'implement' } },
         { type: 'compressing', label: '', payload: {} },
         { type: 'compressed', label: '', payload: { tokensBefore: 4520, tokensAfter: 2100 } },
-        { type: 'step:end', label: 'Step 2 done', payload: { step: 2, duration: 1500 } },
+        { type: 'step-end', label: 'Step 2 done', payload: { step: 2, duration: 1500 } },
         {
           type: 'error',
           label: 'Error: rate_limit',

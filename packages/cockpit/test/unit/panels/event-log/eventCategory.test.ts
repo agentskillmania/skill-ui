@@ -13,11 +13,11 @@ import type { CockpitEventType } from '../../../../src/panels/event-log/types.js
 
 describe('getEventCategory', () => {
   it('returns lifecycle for step:start', () => {
-    expect(getEventCategory('step:start')).toBe('lifecycle');
+    expect(getEventCategory('step-start')).toBe('lifecycle');
   });
 
   it('returns lifecycle for step:end', () => {
-    expect(getEventCategory('step:end')).toBe('lifecycle');
+    expect(getEventCategory('step-end')).toBe('lifecycle');
   });
 
   it('returns lifecycle for complete', () => {
@@ -41,47 +41,47 @@ describe('getEventCategory', () => {
   });
 
   it('returns llm for llm:request', () => {
-    expect(getEventCategory('llm:request')).toBe('llm');
+    expect(getEventCategory('llm-request')).toBe('llm');
   });
 
   it('returns llm for llm:response', () => {
-    expect(getEventCategory('llm:response')).toBe('llm');
+    expect(getEventCategory('llm-response')).toBe('llm');
   });
 
   it('returns tool for tool:start', () => {
-    expect(getEventCategory('tool:start')).toBe('tool');
+    expect(getEventCategory('tool-start')).toBe('tool');
   });
 
   it('returns tool for tool:end', () => {
-    expect(getEventCategory('tool:end')).toBe('tool');
+    expect(getEventCategory('tool-end')).toBe('tool');
   });
 
   it('returns tool for tools:start', () => {
-    expect(getEventCategory('tools:start')).toBe('tool');
+    expect(getEventCategory('tools-start')).toBe('tool');
   });
 
   it('returns skill for skill:loading', () => {
-    expect(getEventCategory('skill:loading')).toBe('skill');
+    expect(getEventCategory('skill-loading')).toBe('skill');
   });
 
   it('returns skill for skill:loaded', () => {
-    expect(getEventCategory('skill:loaded')).toBe('skill');
+    expect(getEventCategory('skill-loaded')).toBe('skill');
   });
 
   it('returns skill for skill:start', () => {
-    expect(getEventCategory('skill:start')).toBe('skill');
+    expect(getEventCategory('skill-start')).toBe('skill');
   });
 
   it('returns skill for skill:end', () => {
-    expect(getEventCategory('skill:end')).toBe('skill');
+    expect(getEventCategory('skill-end')).toBe('skill');
   });
 
   it('returns subagent for subagent:start', () => {
-    expect(getEventCategory('subagent:start')).toBe('subagent');
+    expect(getEventCategory('subagent-start')).toBe('subagent');
   });
 
   it('returns subagent for subagent:end', () => {
-    expect(getEventCategory('subagent:end')).toBe('subagent');
+    expect(getEventCategory('subagent-end')).toBe('subagent');
   });
 
   it('returns compressing for compressing', () => {

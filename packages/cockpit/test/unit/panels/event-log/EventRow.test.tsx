@@ -12,7 +12,7 @@ function wrapper({ children }: { children: React.ReactNode }) {
 // tool:start renders payload.name, so this produces predictable text "read_file"
 const baseEvent: CockpitEvent = {
   id: 'e1',
-  type: 'tool:start',
+  type: 'tool-start',
   timestamp: Date.now(),
   label: 'read_file',
   payload: { name: 'read_file' },
@@ -26,7 +26,7 @@ describe('EventRow', () => {
 
   it('renders event type tag', () => {
     render(<EventRow event={baseEvent} />, { wrapper });
-    expect(screen.getByText('tool:start')).toBeInTheDocument();
+    expect(screen.getByText('tool-start')).toBeInTheDocument();
   });
 
   it('does not show payload when collapsed', () => {
