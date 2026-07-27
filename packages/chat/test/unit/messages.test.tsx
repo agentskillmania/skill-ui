@@ -91,6 +91,60 @@ describe('AssistantMessage', () => {
     expect(container.textContent).toBe('');
   });
 
+  it('shows typing indicator when streaming with empty content and no blocks', () => {
+    const msg: Message = { id: 'at1', role: 'assistant', content: '', status: 'streaming' };
+    render(
+      <ChatWrapper>
+        <AssistantMessage message={msg} />
+      </ChatWrapper>
+    );
+    expect(screen.getByRole('status')).toBeInTheDocument();
+    expect(screen.getByLabelText('AI is typing')).toBeInTheDocument();
+  });
+
+  it('does not show typing indicator when streaming but content exists', () => {
+    const msg: Message = {
+      id: 'at2',
+      role: 'assistant',
+      content: 'partial response',
+      status: 'streaming',
+    };
+    render(
+      <ChatWrapper>
+        <AssistantMessage message={msg} />
+      </ChatWrapper>
+    );
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.getByText('partial response')).toBeInTheDocument();
+  });
+
+  it('does not show typing indicator when streaming with blocks but no content', () => {
+    const msg: Message = {
+      id: 'at3',
+      role: 'assistant',
+      content: '',
+      status: 'streaming',
+      blocks: [{ id: 'b1', type: 'thinking', status: 'streaming', content: 'thinking...' }],
+    };
+    render(
+      <ChatWrapper>
+        <AssistantMessage message={msg} />
+      </ChatWrapper>
+    );
+    // Blocks render, typing indicator should NOT appear
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('does not show typing indicator when completed with empty content', () => {
+    const msg: Message = { id: 'at4', role: 'assistant', content: '', status: 'completed' };
+    render(
+      <ChatWrapper>
+        <AssistantMessage message={msg} />
+      </ChatWrapper>
+    );
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
   it('passes streaming prop when status is streaming', () => {
     const msg: Message = {
       id: 'as1',

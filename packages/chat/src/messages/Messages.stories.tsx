@@ -70,6 +70,22 @@ export const AssistantStreaming: Story = {
   },
 };
 
+export const AssistantTyping: Story = {
+  render: () => {
+    const msg: Message = {
+      id: 'typing',
+      role: 'assistant',
+      content: '',
+      status: 'streaming',
+    };
+    return (
+      <Wrapper>
+        <AssistantMessage message={msg} />
+      </Wrapper>
+    );
+  },
+};
+
 export const AssistantWithBlocks: Story = {
   render: () => {
     const msg: Message = {
