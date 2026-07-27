@@ -9,16 +9,19 @@ import path from 'path';
 /**
  * Create an Express router for workspace file CRUD operations.
  *
- * @param workspaceRoot - Absolute path to the workspace root directory
+ * @param workspaceRoot - Path to the workspace root (relative or absolute)
  * @returns Express Router mounted at /api/files
  */
 export function createFilesRouter(workspaceRoot: string): Router {
   const router = Router();
 
+  // Normalize to absolute once — workspaceRoot may be relative ("./workspace")
+  const absoluteRoot = path.resolve(workspaceRoot);
+
   /** Resolve and validate a path is within workspace */
   function resolvePath(relativePath: string): string {
-    const resolved = path.resolve(workspaceRoot, relativePath);
-    if (!resolved.startsWith(workspaceRoot)) {
+    const resolved = path.resolve(absoluteRoot, relativePath);
+    if (!resolved.startsWith(absoluteRoot)) {
       throw new Error('Path outside workspace');
     }
     return resolved;
@@ -27,7 +30,7 @@ export function createFilesRouter(workspaceRoot: string): Router {
   /** GET /tree — return directory tree */
   router.get('/tree', async (_req: Request, res: Response) => {
     try {
-      const tree = await buildFileTree(workspaceRoot, workspaceRoot);
+      const tree = await buildFileTree(absoluteRoot, absoluteRoot);
       res.json(tree);
     } catch (err) {
       res.status(500).json({ error: String(err) });

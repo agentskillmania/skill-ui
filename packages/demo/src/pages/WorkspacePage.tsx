@@ -113,6 +113,14 @@ export function WorkspacePage({ session, viewMode }: WorkspacePageProps) {
           onEditorFileChange={(_path, content) => editor.updateContent(content)}
           onEditorActiveFileChange={handleActiveFileChange}
           onEditorSave={handleSave}
+          // Copilot panel shares the same chat session as Cockpit
+          copilotMessages={chat.messages}
+          copilotStatus={chat.status}
+          copilotCommands={chat.commands}
+          copilotInputValue={chat.inputValue}
+          onCopilotInputChange={chat.onInputChange}
+          onCopilotSend={chat.sendMessage}
+          onCopilotStop={chat.stop}
         />
       )}
     </div>
