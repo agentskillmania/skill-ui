@@ -155,6 +155,18 @@ function closeOpenBlocks(blocks: AgentBlock[]): AgentBlock[] {
 
 function reduceMainEvent(state: AgentRunState, eventName: string, data: Record<string, unknown>): AgentRunState {
   switch (eventName) {
+    // ── User message (not from colts — injected by the consumer hook) ──
+    case 'user-message': {
+      const userMsg: AgentMessage = {
+        id: `user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        role: 'user',
+        content: (data.content as string) ?? '',
+        status: 'completed',
+        createdAt: Date.now(),
+      };
+      return { ...state, messages: [...state.messages, userMsg] };
+    }
+
     // ── Streaming tokens ──
     case 'token': {
       const { run, messageId } = ensureStreamingMessage(state);
