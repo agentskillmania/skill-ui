@@ -68,14 +68,16 @@ export const Completed: Story = {
             id: 'm1',
             role: 'user',
             content: '调研 TypeScript 5.0 新特性',
-            timestamp: Date.now(),
+            status: 'completed',
+            createdAt: Date.now(),
           },
           {
             id: 'm2',
             role: 'assistant',
             content:
               'TypeScript 5.0 的主要新特性包括：\n\n1. **新的 `--moduleResolution bundler` 选项**\n2. **`verbatimModuleSyntax` 标志**\n3. **支持 `export type *`**\n4. **枚举类型改进**\n5. **`const` 类型参数**\n\n详细说明见调研报告。',
-            timestamp: Date.now(),
+            status: 'completed',
+            createdAt: Date.now(),
           },
         ] as Message[],
       },

@@ -7,6 +7,7 @@ import { memo } from 'react';
 
 import { BlocksRenderer } from '../blocks-redesign/BlocksRenderer.js';
 import { MarkdownRenderer } from '../content/MarkdownRenderer.js';
+import { TypingIndicator } from './TypingIndicator.js';
 import type { MessageProps } from '../types.js';
 
 export const AssistantMessage = memo(function AssistantMessage({
@@ -17,6 +18,11 @@ export const AssistantMessage = memo(function AssistantMessage({
 }: MessageProps) {
   const theme = useTheme();
 
+  const hasBlocks = message.blocks && message.blocks.length > 0;
+  const hasContent = Boolean(message.content);
+  // Empty streaming bubble — show typing dots before the first token arrives
+  const showTyping = message.status === 'streaming' && !hasBlocks && !hasContent;
+
   return (
     <div
       css={css`
@@ -26,25 +32,26 @@ export const AssistantMessage = memo(function AssistantMessage({
         border-radius: ${theme.radius.xs} ${theme.radius.lg} ${theme.radius.lg} ${theme.radius.lg};
       `}
     >
-      {message.blocks && message.blocks.length > 0 && (
+      {hasBlocks && (
         <div
           css={css`
             margin-bottom: ${theme.spacing[3]};
           `}
         >
           <BlocksRenderer
-            blocks={message.blocks}
+            blocks={message.blocks!}
             renderers={renderers}
             onConfirmHumanRequest={onConfirmHumanRequest}
             onBlockAction={onBlockAction}
           />
         </div>
       )}
-      {message.content && (
+      {hasContent && (
         <MarkdownRenderer streaming={message.status === 'streaming'}>
           {message.content}
         </MarkdownRenderer>
       )}
+      {showTyping && <TypingIndicator />}
     </div>
   );
 });
