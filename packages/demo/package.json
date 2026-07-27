@@ -20,6 +20,7 @@
     "@agentskillmania/skill-ui-cockpit": "workspace:*",
     "@agentskillmania/skill-ui-editor": "workspace:*",
     "@agentskillmania/skill-ui-frame": "workspace:*",
+    "@agentskillmania/skill-ui-state": "workspace:*",
     "@agentskillmania/skill-ui-theme": "workspace:*",
     "@ant-design/x": "^2.4.0",
     "antd": "^6.3.3",

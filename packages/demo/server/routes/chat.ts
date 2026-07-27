@@ -126,6 +126,22 @@ export function createChatRouter(manager: SessionManager): Router {
     }
   });
 
+  /**
+   * GET /api/chat/:sessionId/messages
+   *
+   * Returns conversation history as raw colts Message[]. Used by the client
+   * to rebuild SessionRunState via skill-ui-state's fromHistory() when a
+   * session is resumed.
+   */
+  router.get('/chat/:sessionId/messages', (req: Request, res: Response) => {
+    try {
+      const messages = manager.getAgentSession(req.params.sessionId as string).getMessages();
+      res.json({ messages });
+    } catch {
+      res.status(404).json({ error: 'Session not found' });
+    }
+  });
+
   /** GET /api/chat/commands */
   router.get('/chat/commands', (_req: Request, res: Response) => {
     res.json(COMMANDS);

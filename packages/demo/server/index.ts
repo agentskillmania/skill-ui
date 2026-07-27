@@ -21,7 +21,7 @@ const manager = new SessionManager();
 
 // API routes — all receive SessionManager
 app.use('/api', createLauncherRouter(manager));
-app.use('/api', createSessionsRouter(manager));
+app.use('/api/sessions', createSessionsRouter(manager));
 app.use('/api', createChatRouter(manager));
 app.use('/api', createAgentStateRouter(manager));
 

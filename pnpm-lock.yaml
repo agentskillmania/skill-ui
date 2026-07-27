@@ -259,6 +259,9 @@ importers:
       '@agentskillmania/skill-ui-frame':
         specifier: workspace:*
         version: link:../frame
+      '@agentskillmania/skill-ui-state':
+        specifier: workspace:*
+        version: link:../state
       '@agentskillmania/skill-ui-theme':
         specifier: workspace:*
         version: link:../theme

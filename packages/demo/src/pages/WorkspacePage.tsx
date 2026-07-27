@@ -1,29 +1,34 @@
 /**
- * Workspace page — Cockpit view with Chat + Panels, Editor with ProjectEditor
+ * Workspace page — Cockpit view (chat + event-log) or Editor view
+ *
+ * Uses useChatSession (backed by skill-ui-state) for all real-time data.
+ * Cockpit and ProjectEditor receive props via the state package's selectors.
  */
-import type { ChatCommand } from '@agentskillmania/skill-ui-chat';
 import { Cockpit } from '@agentskillmania/skill-ui-cockpit';
 import { ProjectEditor } from '@agentskillmania/skill-ui-editor';
+import type { ChatCommand } from '@agentskillmania/skill-ui-chat';
+import type { ProjectFile, FileTab, EditMode, EditorPanel } from '@agentskillmania/skill-ui-editor';
 import { css } from '@emotion/react';
-import { useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 import type { SessionInfo } from '../../server/types.js';
-import { useChatAgent } from '../hooks/useChatAgent.js';
-import { useCockpitEvents } from '../hooks/useCockpitEvents.js';
+import { useChatSession } from '../hooks/useChatSession.js';
 import { useEditor } from '../hooks/useEditor.js';
 import type { ViewMode } from '../types.js';
 
 interface WorkspacePageProps {
   session: SessionInfo;
   viewMode: ViewMode;
-  onViewModeChange: (mode: ViewMode) => void;
-  onGoHome: () => void;
 }
 
 export function WorkspacePage({ session, viewMode }: WorkspacePageProps) {
-  const chat = useChatAgent(session.id);
-  const cockpit = useCockpitEvents(session.id);
+  const chat = useChatSession(session.id);
   const editor = useEditor(session.id);
+
+  // Editor controlled state
+  const [openTabs, setOpenTabs] = useState<FileTab[]>([]);
+  const [editMode, setEditMode] = useState<EditMode>('code');
+  const [activePanel, setActivePanel] = useState<EditorPanel>('files');
 
   const handleCommand = useCallback(
     (cmd: ChatCommand) => {
@@ -32,15 +37,43 @@ export function WorkspacePage({ session, viewMode }: WorkspacePageProps) {
     [chat]
   );
 
-  // Reload file tree when agent completes a tool call (may have modified files)
+  const handleActiveFileChange = useCallback(
+    (path: string | null) => {
+      if (path) {
+        editor.openFile(path);
+        // Add to tabs if not already there
+        const existing = openTabs.find((t) => t.path === path);
+        if (!existing) {
+          const fileName = path.split('/').pop() ?? path;
+          setOpenTabs((prev) => [...prev, { path, label: fileName }]);
+        }
+      }
+    },
+    [editor, openTabs]
+  );
+
+  const handleSave = useCallback(
+    (path: string, content: string) => {
+      editor.saveFile(path, content);
+    },
+    [editor]
+  );
+
+  // Reload file tree when agent completes a tool call
   useEffect(() => {
-    if (viewMode === 'editor' && cockpit.events.length > 0) {
-      const lastEvent = cockpit.events[cockpit.events.length - 1];
-      if (lastEvent.type === 'tool' && lastEvent.subtype === 'end') {
+    if (viewMode === 'editor' && chat.cockpitEvents.length > 0) {
+      const lastEvent = chat.cockpitEvents[chat.cockpitEvents.length - 1];
+      // CockpitEventType uses colon names, but our events use hyphenated SSE names
+      // Check the raw type string for tool-end events
+      const eventType = (lastEvent as { type: string }).type;
+      if (eventType === 'tool-end') {
         editor.loadTree();
       }
     }
-  }, [cockpit.events, viewMode, editor]);
+  }, [chat.cockpitEvents, viewMode, editor]);
+
+  // Convert editor files to ProjectFile format
+  const projectFiles: ProjectFile[] = editor.files as ProjectFile[];
 
   return (
     <div
@@ -53,27 +86,33 @@ export function WorkspacePage({ session, viewMode }: WorkspacePageProps) {
     >
       {viewMode === 'cockpit' && (
         <Cockpit
-          messages={chat.messages}
-          onSendMessage={chat.sendMessage}
-          status={chat.status}
-          commands={chat.commands}
-          onCommand={handleCommand}
-          events={cockpit.events}
-          agentState={cockpit.agentState ?? undefined}
+          chatMessages={chat.messages}
+          onChatSendMessage={chat.sendMessage}
+          onChatStop={chat.stop}
+          onChatConfirmHumanRequest={chat.respondHumanInput}
+          chatInputValue={chat.inputValue}
+          onChatInputChange={chat.onInputChange}
+          chatStatus={chat.status}
+          chatCommands={chat.commands}
+          onChatCommand={handleCommand}
+          eventLogEvents={chat.cockpitEvents}
         />
       )}
 
       {viewMode === 'editor' && (
         <ProjectEditor
-          files={editor.files}
-          activeFilePath={editor.activeFilePath}
-          editMode="code"
-          activePanel="files"
-          onFileChange={(_path, content) => editor.updateContent(content)}
-          onActiveFileChange={(path) => path && editor.openFile(path)}
-          onEditModeChange={() => {}}
-          onPanelChange={() => {}}
-          onSave={(path, content) => editor.saveFile(path, content)}
+          editorFiles={projectFiles}
+          editorActiveFilePath={editor.activeFilePath}
+          editorActiveFileContent={editor.activeFileContent}
+          editorOpenTabs={openTabs}
+          onEditorOpenTabsChange={setOpenTabs}
+          editorEditMode={editMode}
+          onEditorEditModeChange={setEditMode}
+          editorActivePanel={activePanel}
+          onEditorPanelChange={setActivePanel}
+          onEditorFileChange={(_path, content) => editor.updateContent(content)}
+          onEditorActiveFileChange={handleActiveFileChange}
+          onEditorSave={handleSave}
         />
       )}
     </div>

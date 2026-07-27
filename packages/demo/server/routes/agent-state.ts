@@ -29,23 +29,24 @@ export function createAgentStateRouter(manager: SessionManager): Router {
     res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders();
 
-    // Send initial state snapshot
+    // Send initial state snapshot (from real AgentState, not hardcoded zeros)
     const state = session.getState();
+    const tokens = state.context.totalTokens;
     writeSSE(res, {
       event: 'agent-state',
       data: {
         agentName: state.config.name,
-        model: 'current',
+        model: session.model,
         status: 'idle' as const,
-        tokensIn: 0,
-        tokensOut: 0,
-        tokensTotal: 0,
+        tokensIn: tokens?.input ?? 0,
+        tokensOut: tokens?.output ?? 0,
+        tokensTotal: (tokens?.input ?? 0) + (tokens?.output ?? 0),
         contextLimit: 200000,
         messageCount: state.context.messages.length,
         stepCount: state.context.stepCount,
         skills: [],
         tools: [],
-        estimatedContextSize: 0,
+        estimatedContextSize: state.context.estimatedContextSize ?? 0,
         compressionHistory: [],
       },
     });

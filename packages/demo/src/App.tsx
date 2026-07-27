@@ -120,8 +120,6 @@ export function App() {
             <WorkspacePage
               session={sessionManager.activeSession}
               viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              onGoHome={goHome}
             />
           ) : (
             <div

@@ -1,7 +1,6 @@
 /**
  * Shared types for chat-demo client
  */
-import type { AgentCard, SkillCard, SessionCard } from '@agentskillmania/skill-ui-frame';
 
 /** Route state for client-side navigation */
 export type Route = { page: 'launcher' } | { page: 'workspace'; sessionId: string };
@@ -9,14 +8,34 @@ export type Route = { page: 'launcher' } | { page: 'workspace'; sessionId: strin
 /** View mode within a workspace */
 export type ViewMode = 'cockpit' | 'editor';
 
-/** Agent info from launcher API — maps to AgentCard */
-export type DemoAgent = AgentCard;
+/** Agent info from launcher API */
+export interface DemoAgent {
+  id: string;
+  name: string;
+  description: string;
+  path: string;
+  toolCount: number;
+  skillCount: number;
+}
 
-/** Skill info from launcher API — maps to SkillCard */
-export type DemoSkill = SkillCard;
+/** Skill info from launcher API */
+export interface DemoSkill {
+  id: string;
+  name: string;
+  description: string;
+  path: string;
+}
 
-/** Session info from launcher API — maps to SessionCard */
-export type DemoSession = SessionCard;
+/** Session info from launcher API */
+export interface DemoSession {
+  id: string;
+  agentName: string;
+  model: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  messageCount: number;
+}
 
 /** Launcher API response */
 export interface LauncherData {
