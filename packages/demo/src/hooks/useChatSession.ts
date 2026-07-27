@@ -40,7 +40,9 @@ function mapEvents(agentEvents: AgentEvent[]): CockpitEvent[] {
   return agentEvents.map((e) => ({
     id: e.id,
     timestamp: e.timestamp,
-    type: e.type as never, // hyphenated SSE names map to CockpitEventType union
+    // AgentEvent.type is a loose string; the demo's SSE stream only emits
+    // names in the CockpitEventType union, so the cast is safe here.
+    type: e.type as CockpitEvent['type'],
     label: e.label,
     payload: e.payload,
   }));
