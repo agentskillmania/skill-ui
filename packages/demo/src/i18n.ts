@@ -4,10 +4,12 @@
  * Each UI package exports its own NAMESPACE + resources; the consumer
  * (this demo) is responsible for bundling them into one i18next instance.
  * Packages do NOT self-register.
+ *
+ * This is a pure config module (no JSX). main.tsx wraps the app with
+ * react-i18next's <I18nextProvider i18n={i18n} />.
  */
 import { createInstance, type i18n as I18nInstance } from 'i18next';
-import { initReactI18next, I18nextProvider } from 'react-i18next';
-import type { ReactNode } from 'react';
+import { initReactI18next } from 'react-i18next';
 
 import {
   NAMESPACE as chatNS,
@@ -50,7 +52,7 @@ const mergedResources = {
   },
 } as const;
 
-/** Configured i18next instance (singleton) */
+/** Configured i18next instance (singleton). Import this in main.tsx. */
 export const i18n: I18nInstance = createInstance();
 i18n.use(initReactI18next).init({
   resources: mergedResources,
@@ -61,10 +63,3 @@ i18n.use(initReactI18next).init({
   interpolation: { escapeValue: false },
 });
 
-/**
- * Provider wrapper — wraps the app with the configured i18next instance.
- * Usage: <I18nProvider><App /></I18nProvider>
- */
-export function I18nProvider({ children }: { children: ReactNode }) {
-  return <I18nextProvider i18n={i18n}>{children}</I18nextProvider>;
-}
