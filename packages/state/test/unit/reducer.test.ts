@@ -206,3 +206,50 @@ describe('reducer — sub-agent events', () => {
     expect(subBlock!.metadata?.steps).toBe(3);
   });
 });
+
+describe('reducer — negative paths', () => {
+  it('handles unknown event types without crashing', () => {
+    const state = pushEvents([
+      { event: 'unknown-event', data: { foo: 'bar' } },
+    ]);
+    // Unknown events should be appended to event log but not modify state
+    expect(state.events).toHaveLength(1);
+    expect(state.events[0].type).toBe('unknown-event');
+    expect(state.main.messages).toHaveLength(0);
+  });
+
+  it('handles events with empty data', () => {
+    const state = pushEvents([
+      { event: 'token', data: {} },
+      { event: 'done', data: {} },
+    ]);
+    // Empty token delta → empty content but no crash
+    expect(state.main.status).toBe('idle');
+    const lastMsg = state.main.messages[state.main.messages.length - 1];
+    expect(lastMsg.content).toBe('');
+  });
+
+  it('handles llm-response with undefined tokens', () => {
+    const state = pushEvents([
+      { event: 'llm-response', data: { text: 'hi' } }, // no tokens field
+    ]);
+    // Tokens should remain at zero, not crash
+    expect(state.main.tokens).toEqual({ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
+  });
+
+  it('handles subagent-token for unknown subtaskId', () => {
+    const state = pushEvents([
+      { event: 'subagent-token', data: { subtaskId: 'nonexistent', delta: 'hello' } },
+    ]);
+    // Should not crash, sub-agent not created
+    expect(state.subAgents.size).toBe(0);
+  });
+
+  it('handles tool-end with no matching callId', () => {
+    const state = pushEvents([
+      { event: 'tool-end', data: { callId: 'nonexistent', result: 'data' } },
+    ]);
+    // Should not crash — no tool block to update
+    expect(state.main.messages).toHaveLength(0);
+  });
+});
