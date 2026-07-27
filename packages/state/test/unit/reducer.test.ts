@@ -253,3 +253,48 @@ describe('reducer — negative paths', () => {
     expect(state.main.messages).toHaveLength(0);
   });
 });
+
+describe('reducer — extractTokens boundary', () => {
+  it('llm-response with null tokens leaves state tokens unchanged', () => {
+    const state = pushEvents([
+      { event: 'llm-response', data: { text: 'hi', tokens: null } },
+    ]);
+    expect(state.main.tokens).toEqual({ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
+  });
+
+  it('llm-response with partial tokens fills missing fields with zero', () => {
+    const state = pushEvents([
+      { event: 'llm-response', data: { text: 'hi', tokens: { input: 50 } } },
+    ]);
+    // output, cacheRead, cacheWrite should default to 0
+    expect(state.main.tokens).toEqual({ input: 50, output: 0, cacheRead: 0, cacheWrite: 0 });
+  });
+
+  it('step-end without tokens field leaves tokens unchanged', () => {
+    const state = pushEvents([
+      { event: 'step-end', data: { step: 0, duration: 100 } },
+    ]);
+    expect(state.main.tokens).toEqual({ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
+    expect(state.main.duration).toBe(100);
+  });
+
+  it('step-end with tokens accumulates both tokens and duration', () => {
+    const state = pushEvents([
+      { event: 'step-end', data: { step: 0, tokens: { input: 30, output: 10, cacheRead: 5, cacheWrite: 0 }, duration: 200 } },
+      { event: 'step-end', data: { step: 1, tokens: { input: 20, output: 5, cacheRead: 0, cacheWrite: 2 }, duration: 300 } },
+    ]);
+    expect(state.main.tokens).toEqual({ input: 50, output: 15, cacheRead: 5, cacheWrite: 2 });
+    expect(state.main.duration).toBe(500);
+  });
+
+  it('done with tokens sets final totals', () => {
+    const state = pushEvents([
+      { event: 'token', data: { delta: 'answer' } },
+      { event: 'done', data: { type: 'success', totalSteps: 3, tokens: { input: 200, output: 80, cacheRead: 10, cacheWrite: 5 }, duration: 5000 } },
+    ]);
+    expect(state.main.status).toBe('idle');
+    expect(state.main.tokens).toEqual({ input: 200, output: 80, cacheRead: 10, cacheWrite: 5 });
+    expect(state.main.totalSteps).toBe(3);
+    expect(state.main.duration).toBe(5000);
+  });
+});

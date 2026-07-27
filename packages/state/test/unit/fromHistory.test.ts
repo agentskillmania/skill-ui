@@ -171,3 +171,90 @@ describe('fromHistory', () => {
     expect(answerMsg!.content).toBe('Research complete.');
   });
 });
+
+describe('fromHistory — boundary cases', () => {
+  it('handles empty message array', () => {
+    const state = fromHistory([]);
+    expect(state.main.messages).toHaveLength(0);
+    expect(state.subAgents.size).toBe(0);
+    expect(state.main.status).toBe('idle');
+  });
+
+  it('handles delegate tool result that is non-JSON string', () => {
+    const messages: ColtsMessageInput[] = [
+      {
+        role: 'assistant',
+        content: '',
+        toolCalls: [{ id: 'd1', name: 'delegate', arguments: { agent: 'worker', task: 'do it' } }],
+        timestamp: 1000,
+      },
+      {
+        role: 'tool',
+        content: 'plain text result not json',
+        toolCallId: 'd1',
+        toolName: 'delegate',
+        timestamp: 2000,
+      },
+    ];
+    const state = fromHistory(messages);
+    const msgs = selectMainMessages(state);
+    const subBlock = msgs[0].blocks?.find((b) => b.type === 'subagent');
+    expect(subBlock).toBeDefined();
+    // Non-JSON → parseDelegateResult catches, status='success', answer=raw text
+    expect(subBlock!.metadata?.resultStatus).toBe('success');
+  });
+
+  it('handles delegate result missing tokens/duration (fallback to zero)', () => {
+    const messages: ColtsMessageInput[] = [
+      {
+        role: 'assistant',
+        content: '',
+        toolCalls: [{ id: 'd2', name: 'delegate', arguments: { agent: 'worker', task: 'task' } }],
+        timestamp: 1000,
+      },
+      {
+        role: 'tool',
+        content: JSON.stringify({ status: 'success', answer: 'done', totalSteps: 1 }),
+        // Note: no tokens or duration fields
+        toolCallId: 'd2',
+        toolName: 'delegate',
+        timestamp: 2000,
+      },
+    ];
+    const state = fromHistory(messages);
+    const subBlock = state.main.messages[0].blocks?.find((b) => b.type === 'subagent');
+    const subtaskId = subBlock!.metadata?.subtaskId as string;
+    const sub = selectSubAgent(state, subtaskId);
+    expect(sub).toBeDefined();
+    // Missing tokens/duration should fallback to zero values
+    expect(sub!.tokens).toEqual({ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
+    expect(sub!.duration).toBe(0);
+  });
+
+  it('skips assistant messages with no toolCalls and no content', () => {
+    const messages: ColtsMessageInput[] = [
+      { role: 'user', content: 'Hello', timestamp: 1000 },
+      { role: 'assistant', content: '', timestamp: 2000 }, // empty assistant
+      { role: 'assistant', content: 'Real reply', type: 'action', timestamp: 3000 },
+    ];
+    const state = fromHistory(messages);
+    const msgs = selectMainMessages(state);
+    // The empty assistant message should be skipped
+    expect(msgs).toHaveLength(2);
+    expect(msgs[0].role).toBe('user');
+    expect(msgs[1].role).toBe('assistant');
+    expect(msgs[1].content).toBe('Real reply');
+  });
+
+  it('reconstructs system messages', () => {
+    const messages: ColtsMessageInput[] = [
+      { role: 'system', content: 'System instructions', timestamp: 1000 },
+      { role: 'user', content: 'Hello', timestamp: 2000 },
+    ];
+    const state = fromHistory(messages);
+    const msgs = selectMainMessages(state);
+    expect(msgs).toHaveLength(2);
+    expect(msgs[0].role).toBe('system');
+    expect(msgs[0].content).toBe('System instructions');
+  });
+});
