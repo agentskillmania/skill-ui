@@ -91,6 +91,9 @@ export function useChatSession(sessionId: string) {
 
   // Fetch command list + session history on mount (and when sessionId changes)
   useEffect(() => {
+    // Skip fetching when sessionId is a placeholder (e.g. copilot session
+    // not yet created). The effect re-runs when the real ID arrives.
+    if (!sessionId || sessionId.startsWith('__')) return;
     let cancelled = false;
     fetch('/api/chat/commands')
       .then((res) => res.json())
@@ -116,6 +119,8 @@ export function useChatSession(sessionId: string) {
 
   const sendMessage = useCallback(
     async (content: string) => {
+      // Guard: don't send when sessionId is a placeholder
+      if (!sessionId || sessionId.startsWith('__')) return;
       // Add user message to state (flushes immediately, not batched)
       batchedPush({
         event: 'user-message',

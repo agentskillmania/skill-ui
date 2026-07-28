@@ -25,6 +25,26 @@ export function WorkspacePage({ session, viewMode }: WorkspacePageProps) {
   const chat = useChatSession(session.id);
   const editor = useEditor(session.id);
 
+  // Copilot has its own independent chat session — separate conversation
+  // history from the Cockpit's main agent dialogue. Created lazily on
+  // first access via a separate workspace session.
+  const [copilotSessionId, setCopilotSessionId] = useState<string | null>(null);
+  const copilot = useChatSession(copilotSessionId ?? '__pending__');
+
+  // Lazy-create the copilot session when user first opens the editor view
+  useEffect(() => {
+    if (viewMode === 'editor' && !copilotSessionId) {
+      fetch('/api/sessions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workspacePath: session.workspacePath }),
+      })
+        .then((res) => res.json())
+        .then((info: { id: string }) => setCopilotSessionId(info.id))
+        .catch(() => {});
+    }
+  }, [viewMode, copilotSessionId, session.workspacePath]);
+
   // Editor controlled state
   const [openTabs, setOpenTabs] = useState<FileTab[]>([]);
   const [editMode, setEditMode] = useState<EditMode>('code');
@@ -113,14 +133,14 @@ export function WorkspacePage({ session, viewMode }: WorkspacePageProps) {
           onEditorFileChange={(_path, content) => editor.updateContent(content)}
           onEditorActiveFileChange={handleActiveFileChange}
           onEditorSave={handleSave}
-          // Copilot panel shares the same chat session as Cockpit
-          copilotMessages={chat.messages}
-          copilotStatus={chat.status}
-          copilotCommands={chat.commands}
-          copilotInputValue={chat.inputValue}
-          onCopilotInputChange={chat.onInputChange}
-          onCopilotSend={chat.sendMessage}
-          onCopilotStop={chat.stop}
+          // Copilot panel has its own independent chat session
+          copilotMessages={copilot.messages}
+          copilotStatus={copilot.status}
+          copilotCommands={copilot.commands}
+          copilotInputValue={copilot.inputValue}
+          onCopilotInputChange={copilot.onInputChange}
+          onCopilotSend={copilot.sendMessage}
+          onCopilotStop={copilot.stop}
         />
       )}
     </div>
