@@ -24,4 +24,12 @@ export default defineConfig({
       '@agentskillmania/skill-ui-theme': path.resolve(__dirname, '../theme/src/index.ts'),
     },
   },
+  optimizeDeps: {
+    // Pre-bundle react-syntax-highlighter so @ant-design/x's CodeHighlighter
+    // can resolve its template-literal dynamic imports
+    // (import(`react-syntax-highlighter/dist/esm/languages/prism/${lang}`))
+    // in dev mode. Without this, Vite's ESM resolver fails with
+    // "Failed to resolve module specifier" for each language module.
+    include: ['react-syntax-highlighter'],
+  },
 });
