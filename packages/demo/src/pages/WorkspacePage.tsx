@@ -24,10 +24,11 @@ interface WorkspacePageProps {
 }
 
 export function WorkspacePage({ session, viewMode, onNavigate }: WorkspacePageProps) {
+  // Guard: session may be partially constructed during async load
+  const sessionId = session?.id ?? '__pending__';
   // Main chat session — may start with a placeholder ID (pending-*),
   // resolved to a real daemon session on first message.
-  const isPending = session.id.startsWith('pending-');
-  const chat = useChatSession(session.id, {
+  const chat = useChatSession(sessionId, {
     agentName: session.agentName || 'coder',
     workspacePath: session.workspacePath,
   });
