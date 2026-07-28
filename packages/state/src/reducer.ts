@@ -164,7 +164,16 @@ function reduceMainEvent(state: AgentRunState, eventName: string, data: Record<s
         status: 'completed',
         createdAt: Date.now(),
       };
-      return { ...state, messages: [...state.messages, userMsg] };
+      // Pre-create an empty streaming assistant message so the typing
+      // indicator shows immediately, before the first token/thinking event.
+      const pendingAssistant: AgentMessage = {
+        id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        role: 'assistant',
+        content: '',
+        status: 'streaming',
+        createdAt: Date.now(),
+      };
+      return { ...state, messages: [...state.messages, userMsg, pendingAssistant] };
     }
 
     // ── Streaming tokens ──
