@@ -53,7 +53,11 @@ export function App() {
 
   // Auto-load session when navigating to workspace
   useEffect(() => {
-    if (route.page === 'workspace' && sessionManager.activeSession?.id !== route.sessionId) {
+    if (
+      route.page === 'workspace' &&
+      sessionManager.activeSession?.id !== route.sessionId &&
+      !route.sessionId.startsWith('pending-') // pending sessions are created on first message, not loaded from daemon
+    ) {
       sessionManager.loadSession(route.sessionId);
     }
   }, [route, sessionManager]);
@@ -119,6 +123,23 @@ export function App() {
           ) : sessionManager.activeSession ? (
             <WorkspacePage
               session={sessionManager.activeSession}
+              viewMode={viewMode}
+              onNavigate={navigate}
+            />
+          ) : route.page === 'workspace' && route.sessionId.startsWith('pending-') ? (
+            // Pending session (from page refresh) — render workspace directly,
+            // real session will be established on first message
+            <WorkspacePage
+              session={{
+                id: route.sessionId,
+                workspacePath: './workspace',
+                agentName: 'coder',
+                model: '',
+                status: 'idle',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                messageCount: 0,
+              }}
               viewMode={viewMode}
               onNavigate={navigate}
             />
