@@ -1,9 +1,13 @@
 /**
  * useChatSession — SSE connection hook backed by skill-ui-state
  *
- * Consumes the daemon/demo SSE stream, pushes every event into the state
- * package's reducer via EventFeed, and exposes mapped state for the
- * chat and cockpit UI components.
+ * Two-phase session model matching wrangler-daemon's API:
+ * 1. First message: POST /api/agents/:name/chat → creates session,
+ *    first SSE event is `session-start { sessionId }`.
+ * 2. Subsequent messages: POST /api/chat/:sessionId (resume).
+ *
+ * For sessions resumed from history (sessionId already known), phase 2
+ * is used directly.
  */
 import type { Message, ChatCommand } from '@agentskillmania/skill-ui-chat';
 import type { CockpitEvent } from '@agentskillmania/skill-ui-cockpit';
@@ -12,48 +16,50 @@ import {
   useSessionState,
   selectMainMessages,
   selectEvents,
-  selectStatus,
   selectTotalTokens,
   selectStepCount,
   fromHistory,
 } from '@agentskillmania/skill-ui-state';
-import type { AgentEvent, ColtsMessageInput } from '@agentskillmania/skill-ui-state';
+import type { AgentEvent, ColtsMessageInput, SSEEvent } from '@agentskillmania/skill-ui-state';
 
 type ChatStatus = 'idle' | 'streaming' | 'error';
 
-// ─── Mapping: state types → UI package types ──────────────────────
+// ─── Mapping ─────────────────────────────────────────────────────
 
-// AgentMessage and Message are structurally identical (same fields, same
-// Block shape). We cast directly instead of shallow-copying each object —
-// copying would create new references on every token, breaking memo() on
-// MessageItem/AssistantMessage and causing full re-renders per token.
-
-/** Map state package AgentEvent → cockpit package CockpitEvent */
 function mapEvents(agentEvents: AgentEvent[]): CockpitEvent[] {
   return agentEvents.map((e) => ({
     id: e.id,
     timestamp: e.timestamp,
-    // AgentEvent.type is a loose string; the demo's SSE stream only emits
-    // names in the CockpitEventType union, so the cast is safe here.
     type: e.type as CockpitEvent['type'],
     label: e.label,
     payload: e.payload,
   }));
 }
 
-// ─── Hook ─────────────────────────────────────────────────────────
+export interface UseChatSessionOptions {
+  /** Agent name for daemon's /api/agents/:name/chat (first message). */
+  agentName?: string;
+  /** Workspace path passed to daemon on session creation. */
+  workspacePath?: string;
+}
 
-export function useChatSession(sessionId: string) {
-  const { state, feed, reset, loadHistory } = useSessionState();
+// ─── Hook ────────────────────────────────────────────────────────
+
+export function useChatSession(
+  sessionId: string,
+  options?: UseChatSessionOptions
+) {
+  const { state, feed, loadHistory } = useSessionState();
   const [status, setStatus] = useState<ChatStatus>('idle');
   const [inputValue, setInputValue] = useState('');
   const [commands, setCommands] = useState<ChatCommand[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(
+    sessionId.startsWith('__') || sessionId.startsWith('pending-') ? null : sessionId
+  );
   const abortRef = useRef<AbortController | null>(null);
 
-  // Batch SSE events via requestAnimationFrame so fast token streams
-  // (e.g. 50 tokens per HTTP chunk) don't trigger 50 React re-renders.
-  // Events accumulate in a buffer and flush once per animation frame.
-  const pendingEventsRef = useRef<import('@agentskillmania/skill-ui-state').SSEEvent[]>([]);
+  // rAF batching
+  const pendingEventsRef = useRef<SSEEvent[]>([]);
   const rafIdRef = useRef<number | null>(null);
 
   const flushEvents = useCallback(() => {
@@ -61,19 +67,14 @@ export function useChatSession(sessionId: string) {
     const batch = pendingEventsRef.current;
     if (batch.length === 0) return;
     pendingEventsRef.current = [];
-    // Dispatch all batched events — the reducer processes them sequentially,
-    // but React only re-renders once (useReducer batches dispatches in rAF).
     for (const evt of batch) {
       feed.push(evt);
     }
   }, [feed]);
 
   const batchedPush = useCallback(
-    (evt: import('@agentskillmania/skill-ui-state').SSEEvent) => {
-      // Non-token events (done, error, phase-change, etc.) flush immediately
-      // so lifecycle transitions aren't delayed by a frame.
+    (evt: SSEEvent) => {
       if (evt.event !== 'token' && evt.event !== 'thinking') {
-        // Flush any pending tokens first, then push this event
         if (rafIdRef.current !== null) {
           cancelAnimationFrame(rafIdRef.current);
           flushEvents();
@@ -89,22 +90,24 @@ export function useChatSession(sessionId: string) {
     [feed, flushEvents]
   );
 
-  // Fetch command list + session history on mount (and when sessionId changes)
+  // Sync external sessionId changes (e.g. copilot session created)
   useEffect(() => {
-    // Skip fetching when sessionId is a placeholder (e.g. copilot session
-    // not yet created). The effect re-runs when the real ID arrives.
-    if (!sessionId || sessionId.startsWith('__')) return;
-    let cancelled = false;
+    const isReal = !sessionId.startsWith('__') && !sessionId.startsWith('pending-');
+    if (isReal && sessionId !== activeSessionId) {
+      setActiveSessionId(sessionId);
+    }
+  }, [sessionId, activeSessionId]);
+
+  // Fetch commands + history when we have a real session
+  useEffect(() => {
     fetch('/api/chat/commands')
       .then((res) => res.json())
-      .then((data: ChatCommand[]) => {
-        if (!cancelled) setCommands(data);
-      })
+      .then((data: ChatCommand[]) => setCommands(data))
       .catch(() => {});
 
-    // Rebuild state from server-side conversation history so resumed
-    // sessions show their prior messages instead of a blank slate.
-    fetch(`/api/chat/${sessionId}/messages`)
+    if (!activeSessionId) return;
+    let cancelled = false;
+    fetch(`/api/chat/${activeSessionId}/messages`)
       .then((res) => (res.ok ? res.json() : null))
       .then((data: { messages?: ColtsMessageInput[] } | null) => {
         if (cancelled || !data?.messages?.length) return;
@@ -115,17 +118,67 @@ export function useChatSession(sessionId: string) {
     return () => {
       cancelled = true;
     };
-  }, [sessionId, loadHistory]);
+  }, [activeSessionId, loadHistory]);
+
+  // ─── SSE stream reader (shared by both phases) ──
+
+  const readSSEStream = useCallback(
+    async (response: Response, onSessionStart?: (id: string) => void) => {
+      if (!response.ok || !response.body) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split('\n\n');
+        buffer = parts.pop() ?? '';
+
+        for (const part of parts) {
+          const lines = part.split('\n');
+          let eventType = '';
+          let dataStr = '';
+
+          for (const line of lines) {
+            if (line.startsWith('event: ')) {
+              eventType = line.slice(7);
+            } else if (line.startsWith('data: ')) {
+              dataStr = line.slice(6);
+            }
+          }
+
+          if (!eventType) continue;
+
+          let data: Record<string, unknown> = {};
+          try {
+            data = JSON.parse(dataStr);
+          } catch {
+            continue;
+          }
+
+          // Capture sessionId from session-start event (phase 1 only)
+          if (eventType === 'session-start' && onSessionStart) {
+            const sid = (data as { sessionId?: string }).sessionId;
+            if (sid) onSessionStart(sid);
+            continue; // don't push to reducer
+          }
+
+          batchedPush({ event: eventType, data });
+        }
+      }
+    },
+    [batchedPush]
+  );
 
   const sendMessage = useCallback(
     async (content: string) => {
-      // Guard: don't send when sessionId is a placeholder
-      if (!sessionId || sessionId.startsWith('__')) return;
-      // Add user message to state (flushes immediately, not batched)
-      batchedPush({
-        event: 'user-message',
-        data: { content },
-      });
+      // Add user message to state
+      batchedPush({ event: 'user-message', data: { content } });
 
       setStatus('streaming');
       setInputValue('');
@@ -134,67 +187,38 @@ export function useChatSession(sessionId: string) {
       abortRef.current = abortController;
 
       try {
-        const response = await fetch(`/api/chat/${sessionId}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: content }),
-          signal: abortController.signal,
-        });
+        let response: Response;
 
-        if (!response.ok || !response.body) {
-          throw new Error(`Request failed: ${response.status}`);
-        }
-
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-
-          // Parse SSE format
-          const parts = buffer.split('\n\n');
-          buffer = parts.pop() ?? '';
-
-          for (const part of parts) {
-            const lines = part.split('\n');
-            let eventType = '';
-            let dataStr = '';
-
-            for (const line of lines) {
-              if (line.startsWith('event: ')) {
-                eventType = line.slice(7);
-              } else if (line.startsWith('data: ')) {
-                dataStr = line.slice(6);
-              }
-            }
-
-            if (!eventType) continue;
-
-            let data: Record<string, unknown> = {};
-            try {
-              data = JSON.parse(dataStr);
-            } catch {
-              continue;
-            }
-
-            // Push SSE event into the batched reducer feed
-            batchedPush({ event: eventType, data });
-          }
+        if (activeSessionId) {
+          // Phase 2: resume existing session
+          response = await fetch(`/api/chat/${activeSessionId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: content }),
+            signal: abortController.signal,
+          });
+          await readSSEStream(response);
+        } else {
+          // Phase 1: create new session via agent chat
+          const agentName = options?.agentName ?? 'coder';
+          const workspacePath = options?.workspacePath ?? '.';
+          response = await fetch(`/api/agents/${agentName}/chat`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: content, workspacePath }),
+            signal: abortController.signal,
+          });
+          await readSSEStream(response, (sid) => {
+            setActiveSessionId(sid);
+          });
         }
       } catch (err: unknown) {
         if (err instanceof Error && err.name === 'AbortError') {
-          // User stopped — mark streaming blocks as completed
           batchedPush({ event: 'done', data: { aborted: true } });
         } else {
           setStatus('error');
         }
       } finally {
-        // Flush any pending batched tokens before resetting status
         if (rafIdRef.current !== null) {
           cancelAnimationFrame(rafIdRef.current);
           flushEvents();
@@ -203,38 +227,36 @@ export function useChatSession(sessionId: string) {
         abortRef.current = null;
       }
     },
-    [sessionId, batchedPush, flushEvents]
+    [activeSessionId, options, batchedPush, flushEvents, readSSEStream]
   );
 
   const stop = useCallback(() => {
     abortRef.current?.abort();
-    fetch(`/api/chat/${sessionId}/stop`, { method: 'POST' }).catch(() => {});
-  }, [sessionId]);
+    if (activeSessionId) {
+      fetch(`/api/chat/${activeSessionId}/stop`, { method: 'POST' }).catch(() => {});
+    }
+  }, [activeSessionId]);
 
   const respondHumanInput = useCallback(
     (requestId: string, response: unknown) => {
-      fetch(`/api/chat/${sessionId}/respond`, {
+      if (!activeSessionId) return;
+      fetch(`/api/chat/${activeSessionId}/respond`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ requestId, response }),
       }).catch(() => {});
     },
-    [sessionId]
+    [activeSessionId]
   );
 
-  // Pass messages directly to chat UI — AgentMessage and Message are
-  // structurally identical, so we cast without copying to preserve
-  // referential stability for memo() on MessageItem/AssistantMessage.
-  const messages = selectMainMessages(state) as unknown as Message[];
+  // ─── Selectors ──
 
-  // Cockpit events: memoize so cockpit panel doesn't re-render on every
-  // chat token (events array only changes when a new event is appended).
+  const messages = selectMainMessages(state) as unknown as Message[];
   const cockpitEvents = useMemo(() => mapEvents(selectEvents(state)), [state.events]);
   const totalTokens = selectTotalTokens(state);
   const stepCount = selectStepCount(state);
 
   return {
-    // Chat
     messages,
     status: status as ChatStatus,
     inputValue,
@@ -243,9 +265,10 @@ export function useChatSession(sessionId: string) {
     stop,
     commands,
     respondHumanInput,
-    // Cockpit
     cockpitEvents,
     totalTokens,
     stepCount,
+    /** The real session ID once established (null before first message). */
+    resolvedSessionId: activeSessionId,
   };
 }

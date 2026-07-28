@@ -2,7 +2,8 @@
  * Workspace page — Cockpit view (chat + event-log) or Editor view
  *
  * Uses useChatSession (backed by skill-ui-state) for all real-time data.
- * Cockpit and ProjectEditor receive props via the state package's selectors.
+ * The session may be "pending" (placeholder ID) on first visit — the real
+ * daemon session ID is established when the user sends their first message.
  */
 import { Cockpit } from '@agentskillmania/skill-ui-cockpit';
 import { ProjectEditor } from '@agentskillmania/skill-ui-editor';
@@ -11,7 +12,7 @@ import type { ProjectFile, FileTab, EditMode, EditorPanel } from '@agentskillman
 import { css } from '@emotion/react';
 import { useState, useCallback, useEffect } from 'react';
 
-import type { SessionInfo } from '../../server/types.js';
+import type { SessionInfo } from '../types.js';
 import { useChatSession } from '../hooks/useChatSession.js';
 import { useEditor } from '../hooks/useEditor.js';
 import type { ViewMode } from '../types.js';
@@ -22,28 +23,24 @@ interface WorkspacePageProps {
 }
 
 export function WorkspacePage({ session, viewMode }: WorkspacePageProps) {
-  const chat = useChatSession(session.id);
-  const editor = useEditor(session.id);
+  // Main chat session — may start with a placeholder ID (pending-*),
+  // resolved to a real daemon session on first message.
+  const isPending = session.id.startsWith('pending-');
+  const chat = useChatSession(session.id, {
+    agentName: session.agentName || 'coder',
+    workspacePath: session.workspacePath,
+  });
 
-  // Copilot has its own independent chat session — separate conversation
-  // history from the Cockpit's main agent dialogue. Created lazily on
-  // first access via a separate workspace session.
-  const [copilotSessionId, setCopilotSessionId] = useState<string | null>(null);
-  const copilot = useChatSession(copilotSessionId ?? '__pending__');
+  // File editor uses the resolved session ID (files API needs real session).
+  // Before the session is established, editor starts empty.
+  const editor = useEditor(chat.resolvedSessionId ?? '__pending__');
 
-  // Lazy-create the copilot session when user first opens the editor view
-  useEffect(() => {
-    if (viewMode === 'editor' && !copilotSessionId) {
-      fetch('/api/sessions', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ workspacePath: session.workspacePath }),
-      })
-        .then((res) => res.json())
-        .then((info: { id: string }) => setCopilotSessionId(info.id))
-        .catch(() => {});
-    }
-  }, [viewMode, copilotSessionId, session.workspacePath]);
+  // Copilot has its own independent chat session — also uses the
+  // two-phase model (placeholder until first message).
+  const copilot = useChatSession('__pending__', {
+    agentName: session.agentName || 'coder',
+    workspacePath: session.workspacePath,
+  });
 
   // Editor controlled state
   const [openTabs, setOpenTabs] = useState<FileTab[]>([]);
@@ -61,7 +58,6 @@ export function WorkspacePage({ session, viewMode }: WorkspacePageProps) {
     (path: string | null) => {
       if (path) {
         editor.openFile(path);
-        // Add to tabs if not already there
         const existing = openTabs.find((t) => t.path === path);
         if (!existing) {
           const fileName = path.split('/').pop() ?? path;
@@ -83,8 +79,6 @@ export function WorkspacePage({ session, viewMode }: WorkspacePageProps) {
   useEffect(() => {
     if (viewMode === 'editor' && chat.cockpitEvents.length > 0) {
       const lastEvent = chat.cockpitEvents[chat.cockpitEvents.length - 1];
-      // CockpitEventType uses colon names, but our events use hyphenated SSE names
-      // Check the raw type string for tool-end events
       const eventType = (lastEvent as { type: string }).type;
       if (eventType === 'tool-end') {
         editor.loadTree();
@@ -92,13 +86,13 @@ export function WorkspacePage({ session, viewMode }: WorkspacePageProps) {
     }
   }, [chat.cockpitEvents, viewMode, editor]);
 
-  // Convert editor files to ProjectFile format
   const projectFiles: ProjectFile[] = editor.files as ProjectFile[];
 
   return (
     <div
       css={css`
         flex: 1;
+        height: 100%;
         display: flex;
         flex-direction: column;
         overflow: hidden;

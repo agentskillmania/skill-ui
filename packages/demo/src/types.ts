@@ -26,12 +26,13 @@ export interface DemoSkill {
   path: string;
 }
 
-/** Session info from launcher API */
-export interface DemoSession {
+/** Session info returned by sessions API */
+export interface SessionInfo {
   id: string;
+  workspacePath: string;
   agentName: string;
   model: string;
-  status: string;
+  status: 'idle' | 'running' | 'error' | 'completed';
   createdAt: string;
   updatedAt: string;
   messageCount: number;
@@ -41,5 +42,5 @@ export interface DemoSession {
 export interface LauncherData {
   agents: DemoAgent[];
   skills: DemoSkill[];
-  sessions: DemoSession[];
+  sessions: SessionInfo[];
 }

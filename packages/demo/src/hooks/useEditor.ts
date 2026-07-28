@@ -28,6 +28,8 @@ export function useEditor(sessionId: string): UseEditorReturn {
   const isDirty = activeFileContent !== savedContent;
 
   const loadTree = useCallback(async () => {
+    // Skip when session not yet established (placeholder ID)
+    if (!sessionId || sessionId.startsWith('__') || sessionId.startsWith('pending-')) return;
     setLoading(true);
     try {
       const res = await fetch(`/api/files/${sessionId}/tree`);
