@@ -56,6 +56,7 @@ export function Cockpit(props: CockpitProps) {
     onChatCommand,
     chatMaxQuickCommands,
     chatCommandTrigger,
+    onChatNewSession,
 
     // Cockpit-specific props
     eventLogEvents,
@@ -134,6 +135,7 @@ export function Cockpit(props: CockpitProps) {
         onCommand={onChatCommand}
         maxQuickCommands={chatMaxQuickCommands}
         commandTrigger={chatCommandTrigger}
+        onChatNewSession={onChatNewSession}
       />
 
       {/* Middle: SplitDivider */}

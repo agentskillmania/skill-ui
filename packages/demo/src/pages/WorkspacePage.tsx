@@ -12,7 +12,7 @@ import type { ProjectFile, FileTab, EditMode, EditorPanel } from '@agentskillman
 import { css } from '@emotion/react';
 import { useState, useCallback, useEffect } from 'react';
 
-import type { SessionInfo } from '../types.js';
+import type { SessionInfo, Route } from '../types.js';
 import { useChatSession } from '../hooks/useChatSession.js';
 import { useEditor } from '../hooks/useEditor.js';
 import type { ViewMode } from '../types.js';
@@ -20,9 +20,10 @@ import type { ViewMode } from '../types.js';
 interface WorkspacePageProps {
   session: SessionInfo;
   viewMode: ViewMode;
+  onNavigate?: (route: Route) => void;
 }
 
-export function WorkspacePage({ session, viewMode }: WorkspacePageProps) {
+export function WorkspacePage({ session, viewMode, onNavigate }: WorkspacePageProps) {
   // Main chat session — may start with a placeholder ID (pending-*),
   // resolved to a real daemon session on first message.
   const isPending = session.id.startsWith('pending-');
@@ -46,6 +47,43 @@ export function WorkspacePage({ session, viewMode }: WorkspacePageProps) {
   const [openTabs, setOpenTabs] = useState<FileTab[]>([]);
   const [editMode, setEditMode] = useState<EditMode>('code');
   const [activePanel, setActivePanel] = useState<EditorPanel>('files');
+
+  // Sessions list for cockpit sidebar
+  const [sessionsList, setSessionsList] = useState<SessionInfo[]>([]);
+  useEffect(() => {
+    fetch('/api/sessions')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data: SessionInfo[]) => setSessionsList(data))
+      .catch(() => {});
+  }, [chat.status]); // refresh when chat status changes
+
+  // Session board data for cockpit metrics panel
+  const sessionBoardState = {
+    session: {
+      overview: {
+        agentName: session.agentName || 'coder',
+        model: session.model || 'glm-5.1',
+        stepCount: chat.stepCount,
+        messageCount: chat.messages.length,
+        tokensIn: chat.totalTokens?.input,
+        tokensOut: chat.totalTokens?.output,
+        status: (chat.status === 'streaming' ? 'running' : chat.status === 'error' ? 'error' : 'idle') as 'running' | 'error' | 'idle',
+        createdAt: session.createdAt,
+        updatedAt: session.updatedAt,
+      },
+      info: {
+        sessionId: chat.resolvedSessionId ?? session.id,
+        agentName: session.agentName || 'coder',
+        model: session.model || 'glm-5.1',
+        workspacePath: session.workspacePath,
+        skillDirs: [] as string[],
+        mcpConfigPaths: [] as string[],
+      },
+    },
+    agent: {},
+    llm: null,
+    runner: {},
+  } as const;
 
   const handleCommand = useCallback(
     (cmd: ChatCommand) => {
@@ -109,7 +147,12 @@ export function WorkspacePage({ session, viewMode }: WorkspacePageProps) {
           chatStatus={chat.status}
           chatCommands={chat.commands}
           onChatCommand={handleCommand}
+          onChatNewSession={onNavigate ? () => onNavigate({ page: 'launcher' }) : undefined}
           eventLogEvents={chat.cockpitEvents}
+          sessionsSessions={sessionsList}
+          sessionsActiveId={chat.resolvedSessionId ?? undefined}
+          onSessionsSelect={(id) => onNavigate?.({ page: 'workspace', sessionId: id })}
+          sessionBoardState={sessionBoardState}
         />
       )}
 

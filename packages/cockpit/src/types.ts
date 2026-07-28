@@ -111,6 +111,8 @@ export interface CockpitProps {
   onChatCommand?: (command: ChatCommand) => void;
   chatMaxQuickCommands?: number;
   chatCommandTrigger?: string;
+  /** Callback for the "new session" button in the chat panel header */
+  onChatNewSession?: () => void;
 
   // --- Cockpit-specific props (prefixed per panel) ---
 
