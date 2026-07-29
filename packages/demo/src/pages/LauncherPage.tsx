@@ -132,13 +132,7 @@ export function LauncherPage({ onNavigate, onCreateSession }: LauncherPageProps)
                 <List.Item.Meta
                   title={a.name}
                   description={
-                    <div>
-                      <Text type="secondary">{a.description}</Text>
-                      <div css={css`margin-top: 4px;`}>
-                        <Tag>{a.toolCount} tools</Tag>
-                        <Tag>{a.skillCount} skills</Tag>
-                      </div>
-                    </div>
+                    <Text type="secondary">{a.description}</Text>
                   }
                 />
               </List.Item>

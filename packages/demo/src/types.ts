@@ -14,8 +14,6 @@ export interface DemoAgent {
   name: string;
   description: string;
   path: string;
-  toolCount: number;
-  skillCount: number;
 }
 
 /** Skill info from launcher API */
