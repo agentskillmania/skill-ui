@@ -8,7 +8,7 @@
     "dev:server": "echo 'Server is now wrangler-daemon — run from wrangler/packages/wrangler-daemon'",
     "dev:client": "pnpm exec vite",
     "test": "vitest run",
-    "test:unit": "vitest run test/unit",
+    "test:unit": "vitest run test/unit --passWithNoTests",
     "test:intg": "vitest run test/integration",
     "test:watch": "vitest"
   },

@@ -14,11 +14,11 @@ import type {
   AgentBlock,
   AgentEvent,
   EventCategory,
-  SSEEvent,
   TokenStats,
   SubAgentRunState,
 } from './types.js';
-import { ZERO_TOKENS, createEmptyRunState } from './types.js';
+import { createEmptyRunState } from './types.js';
+import type { SSEEvent } from '../types.js';
 
 // ─── ID generation ────────────────────────────────────────────────
 
@@ -59,30 +59,54 @@ function categorize(eventName: string): EventCategory {
 function labelFor(eventName: string, data: Record<string, unknown>): string {
   const name = (data.name as string) ?? (data.subagentName as string) ?? '';
   switch (eventName) {
-    case 'step-start': return `Step ${data.step}`;
-    case 'step-end': return `Step ${data.step} done`;
-    case 'done': return 'Completed';
-    case 'thinking': return 'Thinking';
-    case 'token': return 'Token';
-    case 'tool-start': return `Tool: ${data.name ?? 'unknown'}`;
-    case 'tool-end': return `Tool result: ${data.callId ?? ''}`;
-    case 'skill-loading': return `Loading skill: ${name}`;
-    case 'skill-loaded': return `Skill loaded: ${name}`;
-    case 'skill-start': return `Skill executing: ${name}`;
-    case 'skill-end': return `Skill done: ${name}`;
-    case 'subagent-start': return `Sub-agent: ${name}`;
-    case 'subagent-end': return `Sub-agent done: ${name}`;
-    case 'subagent-token': return `Sub-agent token: ${name}`;
-    case 'subagent-thinking': return `Sub-agent thinking: ${name}`;
-    case 'llm-request': return 'LLM request';
-    case 'llm-response': return 'LLM response';
-    case 'phase-change': return `Phase: → ${(data.to as { type?: string })?.type ?? ''}`;
-    case 'compressing': return 'Compressing context';
-    case 'compressed': return `Compressed: -${data.removedCount ?? 0} messages`;
-    case 'human-input': return 'Human input needed';
-    case 'human-input-resolved': return 'Human input resolved';
-    case 'error': return `Error: ${data.message ?? ''}`;
-    default: return eventName;
+    case 'step-start':
+      return `Step ${data.step}`;
+    case 'step-end':
+      return `Step ${data.step} done`;
+    case 'done':
+      return 'Completed';
+    case 'thinking':
+      return 'Thinking';
+    case 'token':
+      return 'Token';
+    case 'tool-start':
+      return `Tool: ${data.name ?? 'unknown'}`;
+    case 'tool-end':
+      return `Tool result: ${data.callId ?? ''}`;
+    case 'skill-loading':
+      return `Loading skill: ${name}`;
+    case 'skill-loaded':
+      return `Skill loaded: ${name}`;
+    case 'skill-start':
+      return `Skill executing: ${name}`;
+    case 'skill-end':
+      return `Skill done: ${name}`;
+    case 'subagent-start':
+      return `Sub-agent: ${name}`;
+    case 'subagent-end':
+      return `Sub-agent done: ${name}`;
+    case 'subagent-token':
+      return `Sub-agent token: ${name}`;
+    case 'subagent-thinking':
+      return `Sub-agent thinking: ${name}`;
+    case 'llm-request':
+      return 'LLM request';
+    case 'llm-response':
+      return 'LLM response';
+    case 'phase-change':
+      return `Phase: → ${(data.to as { type?: string })?.type ?? ''}`;
+    case 'compressing':
+      return 'Compressing context';
+    case 'compressed':
+      return `Compressed: -${data.removedCount ?? 0} messages`;
+    case 'human-input':
+      return 'Human input needed';
+    case 'human-input-resolved':
+      return 'Human input resolved';
+    case 'error':
+      return `Error: ${data.message ?? ''}`;
+    default:
+      return eventName;
   }
 }
 
@@ -146,14 +170,16 @@ function ensureStreamingMessage(run: AgentRunState): { run: AgentRunState; messa
 
 /** Close any open thinking block on a message */
 function closeOpenBlocks(blocks: AgentBlock[]): AgentBlock[] {
-  return blocks.map((b) =>
-    b.status === 'streaming' ? { ...b, status: 'completed' as const } : b
-  );
+  return blocks.map((b) => (b.status === 'streaming' ? { ...b, status: 'completed' as const } : b));
 }
 
 // ─── Main agent event handlers ────────────────────────────────────
 
-function reduceMainEvent(state: AgentRunState, eventName: string, data: Record<string, unknown>): AgentRunState {
+function reduceMainEvent(
+  state: AgentRunState,
+  eventName: string,
+  data: Record<string, unknown>
+): AgentRunState {
   switch (eventName) {
     // ── User message (not from colts — injected by the consumer hook) ──
     case 'user-message': {
@@ -203,7 +229,9 @@ function reduceMainEvent(state: AgentRunState, eventName: string, data: Record<s
           if (m.id !== messageId) return m;
           const blocks = m.blocks ?? [];
           // Find an open thinking block
-          const openThinking = blocks.find((b) => b.type === 'thinking' && b.status === 'streaming');
+          const openThinking = blocks.find(
+            (b) => b.type === 'thinking' && b.status === 'streaming'
+          );
           if (openThinking) {
             return {
               ...m,
@@ -242,9 +270,7 @@ function reduceMainEvent(state: AgentRunState, eventName: string, data: Record<s
       return {
         ...run,
         messages: run.messages.map((m) =>
-          m.id === messageId
-            ? { ...m, blocks: [...closeOpenBlocks(m.blocks ?? []), block] }
-            : m
+          m.id === messageId ? { ...m, blocks: [...closeOpenBlocks(m.blocks ?? []), block] } : m
         ),
       };
     }
@@ -259,7 +285,9 @@ function reduceMainEvent(state: AgentRunState, eventName: string, data: Record<s
           const targetBlock = m.blocks.find((b) => b.id === callId && b.status === 'streaming');
           if (!targetBlock) {
             // Fallback: match first streaming tool_call (backward compat)
-            const fallback = m.blocks.find((b) => b.type === 'tool_call' && b.status === 'streaming');
+            const fallback = m.blocks.find(
+              (b) => b.type === 'tool_call' && b.status === 'streaming'
+            );
             if (!fallback) return m;
             return {
               ...m,
@@ -305,9 +333,7 @@ function reduceMainEvent(state: AgentRunState, eventName: string, data: Record<s
         ...run,
         activeSkill: (data.name as string) ?? run.activeSkill,
         messages: run.messages.map((m) =>
-          m.id === messageId
-            ? { ...m, blocks: [...closeOpenBlocks(m.blocks ?? []), block] }
-            : m
+          m.id === messageId ? { ...m, blocks: [...closeOpenBlocks(m.blocks ?? []), block] } : m
         ),
       };
     }
@@ -319,7 +345,9 @@ function reduceMainEvent(state: AgentRunState, eventName: string, data: Record<s
         ...state,
         messages: state.messages.map((m) => {
           if (!m.blocks) return m;
-          const skillBlock = [...m.blocks].reverse().find((b) => b.type === 'skill' && b.status === 'streaming');
+          const skillBlock = [...m.blocks]
+            .reverse()
+            .find((b) => b.type === 'skill' && b.status === 'streaming');
           if (!skillBlock) return m;
           return {
             ...m,
@@ -348,7 +376,9 @@ function reduceMainEvent(state: AgentRunState, eventName: string, data: Record<s
         activeSkill: null,
         messages: state.messages.map((m) => {
           if (!m.blocks) return m;
-          const skillBlock = [...m.blocks].reverse().find((b) => b.type === 'skill' && b.status === 'streaming');
+          const skillBlock = [...m.blocks]
+            .reverse()
+            .find((b) => b.type === 'skill' && b.status === 'streaming');
           if (!skillBlock) return m;
           const resultStr =
             typeof data.result === 'string' ? data.result : JSON.stringify(data.result);
@@ -372,7 +402,13 @@ function reduceMainEvent(state: AgentRunState, eventName: string, data: Record<s
     // ── Human input ──
     case 'human-input': {
       const { run, messageId } = ensureStreamingMessage(state);
-      const questions = (data.questions as Array<{ id: string; question: string; type: string; options?: string[] }>) ?? [];
+      const questions =
+        (data.questions as Array<{
+          id: string;
+          question: string;
+          type: string;
+          options?: string[];
+        }>) ?? [];
       const firstQ = questions[0];
       let inputType: string = 'input';
       let options: Array<{ label: string; value: string }> | undefined;
@@ -398,9 +434,7 @@ function reduceMainEvent(state: AgentRunState, eventName: string, data: Record<s
       return {
         ...run,
         messages: run.messages.map((m) =>
-          m.id === messageId
-            ? { ...m, blocks: [...closeOpenBlocks(m.blocks ?? []), block] }
-            : m
+          m.id === messageId ? { ...m, blocks: [...closeOpenBlocks(m.blocks ?? []), block] } : m
         ),
       };
     }
@@ -415,7 +449,11 @@ function reduceMainEvent(state: AgentRunState, eventName: string, data: Record<s
             ...m,
             blocks: m.blocks.map((b) =>
               b.type === 'human_input' && b.metadata?.requestId === reqId
-                ? { ...b, status: 'completed' as const, metadata: { ...b.metadata, response: data.response } }
+                ? {
+                    ...b,
+                    status: 'completed' as const,
+                    metadata: { ...b.metadata, response: data.response },
+                  }
                 : b
             ),
           };
@@ -568,7 +606,9 @@ function reduceSubAgentEvent(
         messages: run.messages.map((m) => {
           if (m.id !== messageId) return m;
           const blocks = m.blocks ?? [];
-          const openThinking = blocks.find((b) => b.type === 'thinking' && b.status === 'streaming');
+          const openThinking = blocks.find(
+            (b) => b.type === 'thinking' && b.status === 'streaming'
+          );
           if (openThinking) {
             return {
               ...m,
@@ -577,7 +617,12 @@ function reduceSubAgentEvent(
               ),
             };
           }
-          const block: AgentBlock = { id: genBlockId(), type: 'thinking', status: 'streaming', content };
+          const block: AgentBlock = {
+            id: genBlockId(),
+            type: 'thinking',
+            status: 'streaming',
+            content,
+          };
           return { ...m, blocks: [...blocks, block] };
         }),
       });
@@ -586,7 +631,8 @@ function reduceSubAgentEvent(
     case 'subagent-tool-start': {
       const sub = subAgents.get(subtaskId);
       if (!sub) return subAgents;
-      const action = (data.action as { id?: string; tool?: string; name?: string; arguments?: unknown }) ?? {};
+      const action =
+        (data.action as { id?: string; tool?: string; name?: string; arguments?: unknown }) ?? {};
       const toolName = action.tool ?? action.name ?? 'unknown';
       const callId = action.id ?? genBlockId();
       const { run, messageId } = ensureStreamingMessage(sub);
@@ -601,9 +647,7 @@ function reduceSubAgentEvent(
         ...sub,
         ...run,
         messages: run.messages.map((m) =>
-          m.id === messageId
-            ? { ...m, blocks: [...closeOpenBlocks(m.blocks ?? []), block] }
-            : m
+          m.id === messageId ? { ...m, blocks: [...closeOpenBlocks(m.blocks ?? []), block] } : m
         ),
       });
     }
@@ -621,7 +665,11 @@ function reduceSubAgentEvent(
             ...m,
             blocks: m.blocks.map((b) =>
               b.id === target.id
-                ? { ...b, status: 'completed' as const, metadata: { ...b.metadata, toolResult: data.result ?? '' } }
+                ? {
+                    ...b,
+                    status: 'completed' as const,
+                    metadata: { ...b.metadata, toolResult: data.result ?? '' },
+                  }
                 : b
             ),
           };
@@ -644,7 +692,11 @@ function reduceSubAgentEvent(
         duration: (data.duration as number) ?? sub.duration,
         messages: sub.messages.map((m) =>
           m.status === 'streaming'
-            ? { ...m, status: 'completed' as const, blocks: m.blocks ? closeOpenBlocks(m.blocks) : m.blocks }
+            ? {
+                ...m,
+                status: 'completed' as const,
+                blocks: m.blocks ? closeOpenBlocks(m.blocks) : m.blocks,
+              }
             : m
         ),
       });
@@ -691,9 +743,7 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
         run: {
           ...run,
           messages: run.messages.map((m) =>
-            m.id === messageId
-              ? { ...m, blocks: [...closeOpenBlocks(m.blocks ?? []), block] }
-              : m
+            m.id === messageId ? { ...m, blocks: [...closeOpenBlocks(m.blocks ?? []), block] } : m
           ),
         },
       };
@@ -728,7 +778,8 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
                 if (b.type !== 'subagent' || b.metadata?.subtaskId !== subtaskId) return b;
                 return {
                   ...b,
-                  status: sub.resultStatus === 'error' ? ('error' as const) : ('completed' as const),
+                  status:
+                    sub.resultStatus === 'error' ? ('error' as const) : ('completed' as const),
                   metadata: {
                     ...b.metadata,
                     resultStatus: sub.resultStatus,

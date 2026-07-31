@@ -1,14 +1,20 @@
 /**
  * @fileoverview @agentskillmania/skill-ui-state
  *
- * Event reducer state machine for agent runtime state.
- * Consumes SSE events via EventFeed, produces structured SessionRunState
- * for chat and cockpit UIs. No dependencies on daemon/colts/chat/cockpit.
+ * State layer for skill-studio frontends. Transport-agnostic — consumers
+ * fetch data and push it in via hooks. No dependency on daemon/colts/chat.
+ *
+ * Slices:
+ * - conversation: event reducer for chat (token/thinking/tool/skill/...)
+ * - diagnostics: event reducer for agent-diagnostics snapshots
+ * - resources: typed normalizers for agents/skills/crews/sessions/files
  */
 
-// Types
+// ─── Shared types (cross-slice) ───────────────────────────────────
+export type { SSEEvent, EventFeed, ColtsMessageInput } from './core/types.js';
+
+// ─── Conversation slice: types ────────────────────────────────────
 export type {
-  SSEEvent,
   TokenStats,
   BlockStatus,
   MessageStatus,
@@ -20,16 +26,18 @@ export type {
   AgentRunState,
   SubAgentRunState,
   SessionRunState,
-  EventFeed,
-  ColtsMessageInput,
-} from './types.js';
+} from './core/conversation/types.js';
 
-export { ZERO_TOKENS, createEmptyRunState, createEmptySessionState } from './types.js';
+export {
+  ZERO_TOKENS,
+  createEmptyRunState,
+  createEmptySessionState,
+} from './core/conversation/types.js';
 
-// Reducer
-export { reducer } from './reducer.js';
+// ─── Conversation slice: reducer ──────────────────────────────────
+export { reducer } from './core/conversation/reducer.js';
 
-// Selectors
+// ─── Conversation slice: selectors ────────────────────────────────
 export {
   selectMainMessages,
   selectSubAgent,
@@ -41,11 +49,69 @@ export {
   selectStatus,
   selectStepCount,
   selectActiveSkill,
-} from './selectors.js';
+} from './core/conversation/selectors.js';
 
-// History loading
-export { fromHistory } from './fromHistory.js';
+// ─── Conversation slice: history loading ──────────────────────────
+export { fromHistory } from './core/conversation/fromHistory.js';
 
-// React hook
-export { useSessionState } from './useSessionState.js';
-export type { UseSessionStateReturn } from './useSessionState.js';
+// ─── Diagnostics slice: types ─────────────────────────────────────
+export type {
+  DiagnosticsState,
+  DiagnosticsFeatureFlags,
+  DiagnosticsToolMeta,
+  DiagnosticsSkillMeta,
+  DiagnosticsRunnerState,
+  DiagnosticsSessionOverview,
+  DiagnosticsSessionInfo,
+} from './core/diagnostics/types.js';
+
+export { createEmptyDiagnosticsState, DIAGNOSTICS_EVENT } from './core/diagnostics/types.js';
+
+// ─── Diagnostics slice: reducer ───────────────────────────────────
+export { diagnosticsReducer } from './core/diagnostics/reducer.js';
+
+// ─── Diagnostics slice: selectors ─────────────────────────────────
+export {
+  selectDiagnosticsRunner,
+  selectDiagnosticsTools,
+  selectDiagnosticsSkills,
+  selectDiagnosticsFeatures,
+  selectDiagnosticsOverview,
+  selectDiagnosticsInfo,
+  selectDiagnosticsLLM,
+  selectDiagnosticsSystemPrompt,
+  selectDiagnosticsAgent,
+} from './core/diagnostics/selectors.js';
+
+// ─── Resources: types + normalizers ───────────────────────────────
+export type {
+  SessionMeta,
+  AgentResource,
+  SkillResource,
+  CrewResource,
+  RawResource,
+} from './core/resources/types.js';
+
+export { normalizeSession, normalizeSessionList, findSession } from './core/resources/sessions.js';
+export { normalizeAgent, normalizeAgentList } from './core/resources/agents.js';
+export { normalizeSkill, normalizeSkillList } from './core/resources/skills.js';
+export { normalizeCrew, normalizeCrewList } from './core/resources/crews.js';
+
+// ─── Resources: file tree helpers ─────────────────────────────────
+export type { FileNode } from './core/resources/files.js';
+export { findFileNode, toggleDirExpanded, flattenTree } from './core/resources/files.js';
+
+// ─── React hook ───────────────────────────────────────────────────
+// `useConversationState` is the primary name; `useSessionState` is kept
+// as a backward-compatible alias so existing consumers keep working.
+export { useConversationState } from './hooks/useConversationState.js';
+export { useConversationState as useSessionState } from './hooks/useConversationState.js';
+export type { UseConversationStateReturn } from './hooks/useConversationState.js';
+export type { UseConversationStateReturn as UseSessionStateReturn } from './hooks/useConversationState.js';
+
+export { useDiagnosticsState } from './hooks/useDiagnosticsState.js';
+export type { UseDiagnosticsStateReturn } from './hooks/useDiagnosticsState.js';
+
+// ─── React hook: generic resource list state ─────────────────────
+export { useResourceState } from './hooks/useResourceState.js';
+export type { UseResourceStateReturn } from './hooks/useResourceState.js';

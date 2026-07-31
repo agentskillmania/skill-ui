@@ -2,9 +2,10 @@
  * @fileoverview Reducer unit tests — SSE event → SessionRunState
  */
 import { describe, it, expect } from 'vitest';
-import { reducer } from '../../src/reducer.js';
-import { createEmptySessionState } from '../../src/types.js';
-import type { SSEEvent, SessionRunState } from '../../src/types.js';
+import { reducer } from '../../../src/core/conversation/reducer.js';
+import { createEmptySessionState } from '../../../src/core/conversation/types.js';
+import type { SessionRunState } from '../../../src/core/conversation/types.js';
+import type { SSEEvent } from '../../../src/core/types.js';
 
 function pushEvents(events: SSEEvent[]): SessionRunState {
   return events.reduce(reducer, createEmptySessionState());
@@ -94,8 +95,14 @@ describe('reducer — main agent events', () => {
 
   it('accumulates tokens from llm-response events', () => {
     const state = pushEvents([
-      { event: 'llm-response', data: { text: 'hi', tokens: { input: 100, output: 50, cacheRead: 10, cacheWrite: 5 } } },
-      { event: 'llm-response', data: { text: 'bye', tokens: { input: 200, output: 30, cacheRead: 0, cacheWrite: 0 } } },
+      {
+        event: 'llm-response',
+        data: { text: 'hi', tokens: { input: 100, output: 50, cacheRead: 10, cacheWrite: 5 } },
+      },
+      {
+        event: 'llm-response',
+        data: { text: 'bye', tokens: { input: 200, output: 30, cacheRead: 0, cacheWrite: 0 } },
+      },
     ]);
     expect(state.main.tokens).toEqual({ input: 300, output: 80, cacheRead: 10, cacheWrite: 5 });
   });
@@ -103,9 +110,23 @@ describe('reducer — main agent events', () => {
   it('records step count and duration from step events', () => {
     const state = pushEvents([
       { event: 'step-start', data: { step: 0 } },
-      { event: 'step-end', data: { step: 0, tokens: { input: 10, output: 5, cacheRead: 0, cacheWrite: 0 }, duration: 1500 } },
+      {
+        event: 'step-end',
+        data: {
+          step: 0,
+          tokens: { input: 10, output: 5, cacheRead: 0, cacheWrite: 0 },
+          duration: 1500,
+        },
+      },
       { event: 'step-start', data: { step: 1 } },
-      { event: 'step-end', data: { step: 1, tokens: { input: 20, output: 10, cacheRead: 0, cacheWrite: 0 }, duration: 2000 } },
+      {
+        event: 'step-end',
+        data: {
+          step: 1,
+          tokens: { input: 20, output: 10, cacheRead: 0, cacheWrite: 0 },
+          duration: 2000,
+        },
+      },
     ]);
     expect(state.main.stepCount).toBe(1);
     expect(state.main.tokens.input).toBe(30);
@@ -145,7 +166,10 @@ describe('reducer — sub-agent events', () => {
   it('creates sub-agent on subagent-start and block on parent message', () => {
     const state = pushEvents([
       { event: 'token', data: { delta: 'Let me delegate.' } },
-      { event: 'subagent-start', data: { name: 'researcher', task: 'find papers', subtaskId: 'sa-1' } },
+      {
+        event: 'subagent-start',
+        data: { name: 'researcher', task: 'find papers', subtaskId: 'sa-1' },
+      },
     ]);
     // Sub-agent created
     expect(state.subAgents.size).toBe(1);
@@ -209,9 +233,7 @@ describe('reducer — sub-agent events', () => {
 
 describe('reducer — negative paths', () => {
   it('handles unknown event types without crashing', () => {
-    const state = pushEvents([
-      { event: 'unknown-event', data: { foo: 'bar' } },
-    ]);
+    const state = pushEvents([{ event: 'unknown-event', data: { foo: 'bar' } }]);
     // Unknown events should be appended to event log but not modify state
     expect(state.events).toHaveLength(1);
     expect(state.events[0].type).toBe('unknown-event');
@@ -256,9 +278,7 @@ describe('reducer — negative paths', () => {
 
 describe('reducer — extractTokens boundary', () => {
   it('llm-response with null tokens leaves state tokens unchanged', () => {
-    const state = pushEvents([
-      { event: 'llm-response', data: { text: 'hi', tokens: null } },
-    ]);
+    const state = pushEvents([{ event: 'llm-response', data: { text: 'hi', tokens: null } }]);
     expect(state.main.tokens).toEqual({ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
   });
 
@@ -271,17 +291,29 @@ describe('reducer — extractTokens boundary', () => {
   });
 
   it('step-end without tokens field leaves tokens unchanged', () => {
-    const state = pushEvents([
-      { event: 'step-end', data: { step: 0, duration: 100 } },
-    ]);
+    const state = pushEvents([{ event: 'step-end', data: { step: 0, duration: 100 } }]);
     expect(state.main.tokens).toEqual({ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
     expect(state.main.duration).toBe(100);
   });
 
   it('step-end with tokens accumulates both tokens and duration', () => {
     const state = pushEvents([
-      { event: 'step-end', data: { step: 0, tokens: { input: 30, output: 10, cacheRead: 5, cacheWrite: 0 }, duration: 200 } },
-      { event: 'step-end', data: { step: 1, tokens: { input: 20, output: 5, cacheRead: 0, cacheWrite: 2 }, duration: 300 } },
+      {
+        event: 'step-end',
+        data: {
+          step: 0,
+          tokens: { input: 30, output: 10, cacheRead: 5, cacheWrite: 0 },
+          duration: 200,
+        },
+      },
+      {
+        event: 'step-end',
+        data: {
+          step: 1,
+          tokens: { input: 20, output: 5, cacheRead: 0, cacheWrite: 2 },
+          duration: 300,
+        },
+      },
     ]);
     expect(state.main.tokens).toEqual({ input: 50, output: 15, cacheRead: 5, cacheWrite: 2 });
     expect(state.main.duration).toBe(500);
@@ -290,7 +322,15 @@ describe('reducer — extractTokens boundary', () => {
   it('done with tokens sets final totals', () => {
     const state = pushEvents([
       { event: 'token', data: { delta: 'answer' } },
-      { event: 'done', data: { type: 'success', totalSteps: 3, tokens: { input: 200, output: 80, cacheRead: 10, cacheWrite: 5 }, duration: 5000 } },
+      {
+        event: 'done',
+        data: {
+          type: 'success',
+          totalSteps: 3,
+          tokens: { input: 200, output: 80, cacheRead: 10, cacheWrite: 5 },
+          duration: 5000,
+        },
+      },
     ]);
     expect(state.main.status).toBe('idle');
     expect(state.main.tokens).toEqual({ input: 200, output: 80, cacheRead: 10, cacheWrite: 5 });

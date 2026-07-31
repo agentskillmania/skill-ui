@@ -5,9 +5,9 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { memo } from 'react';
 
+import { TypingIndicator } from './TypingIndicator.js';
 import { BlocksRenderer } from '../blocks-redesign/BlocksRenderer.js';
 import { MarkdownRenderer } from '../content/MarkdownRenderer.js';
-import { TypingIndicator } from './TypingIndicator.js';
 import type { MessageProps } from '../types.js';
 
 export const AssistantMessage = memo(function AssistantMessage({

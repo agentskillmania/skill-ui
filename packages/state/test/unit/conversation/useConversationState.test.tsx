@@ -1,15 +1,15 @@
 /**
- * @fileoverview useSessionState hook tests — React rendering lifecycle
+ * @fileoverview useConversationState hook tests — React rendering lifecycle
  */
 import { renderHook, act } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import { useSessionState } from '../../src/useSessionState.js';
-import { fromHistory } from '../../src/fromHistory.js';
-import type { ColtsMessageInput, SSEEvent } from '../../src/types.js';
+import { useConversationState } from '../../../src/hooks/useConversationState.js';
+import { fromHistory } from '../../../src/core/conversation/fromHistory.js';
+import type { ColtsMessageInput, SSEEvent } from '../../../src/core/types.js';
 
-describe('useSessionState', () => {
+describe('useConversationState', () => {
   it('returns empty initial state', () => {
-    const { result } = renderHook(() => useSessionState());
+    const { result } = renderHook(() => useConversationState());
     expect(result.current.state.main.messages).toHaveLength(0);
     expect(result.current.state.subAgents.size).toBe(0);
     expect(result.current.state.events).toHaveLength(0);
@@ -20,7 +20,7 @@ describe('useSessionState', () => {
   });
 
   it('feed.push updates state (token accumulation)', () => {
-    const { result } = renderHook(() => useSessionState());
+    const { result } = renderHook(() => useConversationState());
     act(() => {
       result.current.feed.push({ event: 'token', data: { delta: 'Hello' } });
     });
@@ -30,7 +30,7 @@ describe('useSessionState', () => {
   });
 
   it('multiple pushes accumulate state (token + thinking + done)', () => {
-    const { result } = renderHook(() => useSessionState());
+    const { result } = renderHook(() => useConversationState());
     act(() => {
       result.current.feed.push({ event: 'thinking', data: { content: 'Let me think...' } });
       result.current.feed.push({ event: 'token', data: { delta: 'Answer' } });
@@ -47,7 +47,7 @@ describe('useSessionState', () => {
   });
 
   it('reset clears state back to empty', () => {
-    const { result } = renderHook(() => useSessionState());
+    const { result } = renderHook(() => useConversationState());
     act(() => {
       result.current.feed.push({ event: 'token', data: { delta: 'data' } });
       result.current.feed.push({ event: 'thinking', data: { content: 'hmm' } });
@@ -62,7 +62,7 @@ describe('useSessionState', () => {
   });
 
   it('loadHistory injects pre-built state', () => {
-    const { result } = renderHook(() => useSessionState());
+    const { result } = renderHook(() => useConversationState());
     const history: ColtsMessageInput[] = [
       { role: 'user', content: 'Hi', timestamp: 1000 },
       { role: 'assistant', content: 'Hello!', type: 'action', timestamp: 2000 },
@@ -78,7 +78,7 @@ describe('useSessionState', () => {
   });
 
   it('feed reference is stable across re-renders', () => {
-    const { result, rerender } = renderHook(() => useSessionState());
+    const { result, rerender } = renderHook(() => useConversationState());
     const feed1 = result.current.feed;
     rerender();
     const feed2 = result.current.feed;
@@ -86,7 +86,7 @@ describe('useSessionState', () => {
   });
 
   it('reset and loadHistory references are stable across re-renders', () => {
-    const { result, rerender } = renderHook(() => useSessionState());
+    const { result, rerender } = renderHook(() => useConversationState());
     const reset1 = result.current.reset;
     const loadHistory1 = result.current.loadHistory;
     rerender();

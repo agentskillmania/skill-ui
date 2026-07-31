@@ -2,9 +2,9 @@
  * @fileoverview fromHistory unit tests — colts Message[] → SessionRunState
  */
 import { describe, it, expect } from 'vitest';
-import { fromHistory } from '../../src/fromHistory.js';
-import { selectSubAgent, selectMainMessages } from '../../src/selectors.js';
-import type { ColtsMessageInput } from '../../src/types.js';
+import { fromHistory } from '../../../src/core/conversation/fromHistory.js';
+import { selectSubAgent, selectMainMessages } from '../../../src/core/conversation/selectors.js';
+import type { ColtsMessageInput } from '../../../src/core/types.js';
 
 describe('fromHistory', () => {
   it('reconstructs user + assistant messages', () => {
@@ -132,7 +132,11 @@ describe('fromHistory', () => {
         role: 'assistant',
         content: '',
         toolCalls: [
-          { id: 'call-d1', name: 'delegate', arguments: { agent: 'researcher', task: 'find papers' } },
+          {
+            id: 'call-d1',
+            name: 'delegate',
+            arguments: { agent: 'researcher', task: 'find papers' },
+          },
         ],
         timestamp: 1000,
       },
@@ -256,5 +260,137 @@ describe('fromHistory — boundary cases', () => {
     expect(msgs).toHaveLength(2);
     expect(msgs[0].role).toBe('system');
     expect(msgs[0].content).toBe('System instructions');
+  });
+
+  // ── Branch coverage ──
+
+  it('creates wrapper message when thought has no preceding assistant message', () => {
+    // Thought without a prior completed assistant msg → else branch (line 75)
+    const messages: ColtsMessageInput[] = [
+      { role: 'user', content: 'hi', timestamp: 1000 },
+      { role: 'assistant', content: 'thinking...', type: 'thought', timestamp: 2000 },
+    ];
+    const state = fromHistory(messages);
+    const msgs = selectMainMessages(state);
+    // Should create a wrapper assistant message with thinking block
+    const wrapper = msgs.find(
+      (m) => m.role === 'assistant' && m.blocks?.some((b) => b.type === 'thinking')
+    );
+    expect(wrapper).toBeDefined();
+    expect(wrapper!.content).toBe('');
+  });
+
+  it('attaches thinking to existing assistant message that already has blocks (?? [] branch)', () => {
+    // First a thought → creates wrapper. Then another thought → attaches to existing (blocks ?? [])
+    const messages: ColtsMessageInput[] = [
+      { role: 'assistant', content: 'first thought', type: 'thought', timestamp: 1000 },
+      { role: 'assistant', content: 'second thought', type: 'thought', timestamp: 2000 },
+    ];
+    const state = fromHistory(messages);
+    const msgs = selectMainMessages(state);
+    const assistantMsg = msgs.find((m) => m.role === 'assistant');
+    expect(assistantMsg).toBeDefined();
+    // Should have 2 thinking blocks
+    const thinkingBlocks = assistantMsg!.blocks?.filter((b) => b.type === 'thinking');
+    expect(thinkingBlocks).toHaveLength(2);
+  });
+
+  it('handles delegate result without answer (ternary false branch)', () => {
+    const messages: ColtsMessageInput[] = [
+      {
+        role: 'assistant',
+        content: '',
+        toolCalls: [
+          {
+            id: 'call-del',
+            name: 'delegate',
+            arguments: { agent: 'coder', task: 'do something' },
+          },
+        ],
+        timestamp: 1000,
+      },
+      {
+        role: 'tool',
+        content: JSON.stringify({ status: 'success', totalSteps: 2 }),
+        toolCallId: 'call-del',
+        toolName: 'delegate',
+        timestamp: 2000,
+      },
+    ];
+    const state = fromHistory(messages);
+    // Should create subagent block + sub-agent state without answer message
+    const subAgents = state.subAgents;
+    expect(subAgents.size).toBe(1);
+    const sub = subAgents.get('hist-call-del');
+    expect(sub).toBeDefined();
+    // No answer → only task message, no answer message
+    expect(sub!.messages).toHaveLength(1);
+    expect(sub!.messages[0].role).toBe('user');
+  });
+
+  it('handles assistant message with content but no tool calls', () => {
+    const messages: ColtsMessageInput[] = [
+      { role: 'user', content: 'hi', timestamp: 1000 },
+      { role: 'assistant', content: 'just text', type: 'action', timestamp: 2000 },
+    ];
+    const state = fromHistory(messages);
+    const msgs = selectMainMessages(state);
+    const assistant = msgs.find((m) => m.role === 'assistant');
+    expect(assistant).toBeDefined();
+    expect(assistant!.content).toBe('just text');
+  });
+
+  it('skips empty assistant message (no content, no toolCalls)', () => {
+    const messages: ColtsMessageInput[] = [
+      { role: 'user', content: 'hi', timestamp: 1000 },
+      { role: 'assistant', content: '', type: 'action', timestamp: 2000 },
+      { role: 'assistant', content: 'real reply', type: 'action', timestamp: 3000 },
+    ];
+    const state = fromHistory(messages);
+    const msgs = selectMainMessages(state);
+    // Empty assistant should be skipped
+    const assistants = msgs.filter((m) => m.role === 'assistant');
+    expect(assistants).toHaveLength(1);
+    expect(assistants[0].content).toBe('real reply');
+  });
+
+  it('handles tool message with missing toolCallId pairing', () => {
+    const messages: ColtsMessageInput[] = [
+      { role: 'tool', content: 'orphan', toolCallId: 'nonexistent', timestamp: 1000 },
+    ];
+    const state = fromHistory(messages);
+    // Should not crash, orphan tool message is skipped
+    const msgs = selectMainMessages(state);
+    expect(msgs).toHaveLength(0);
+  });
+
+  it('handles human_input tool with no questions array', () => {
+    const messages: ColtsMessageInput[] = [
+      {
+        role: 'assistant',
+        content: '',
+        toolCalls: [
+          {
+            id: 'call-human',
+            name: 'ask_human',
+            arguments: { context: 'Need input' },
+          },
+        ],
+        timestamp: 1000,
+      },
+      {
+        role: 'tool',
+        content: 'user response',
+        toolCallId: 'call-human',
+        toolName: 'ask_human',
+        timestamp: 2000,
+      },
+    ];
+    const state = fromHistory(messages);
+    const msgs = selectMainMessages(state);
+    const humanBlock = msgs[0].blocks?.find((b) => b.type === 'human_input');
+    expect(humanBlock).toBeDefined();
+    // questions defaults to [] → message is empty string
+    expect(humanBlock!.metadata?.message).toBe('');
   });
 });

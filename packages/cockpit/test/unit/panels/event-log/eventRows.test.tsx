@@ -101,9 +101,9 @@ describe('renderEventContent', () => {
     });
 
     it('falls back when both are missing', () => {
-      expect(
-        renderEventContent(makeEvent({ type: 'phase-change', payload: {} }), false)
-      ).toBe('? → ?');
+      expect(renderEventContent(makeEvent({ type: 'phase-change', payload: {} }), false)).toBe(
+        '? → ?'
+      );
     });
   });
 

@@ -9,7 +9,7 @@ import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../../locales/index.js';
-import type { StatusBarProps, EditMode } from '../../types.js';
+import type { StatusBarProps } from '../../types.js';
 import { VISUAL_EDITOR_EXTENSIONS, getExtension } from '../../utils/file-extensions.js';
 
 /** Check whether a file path is supported by the visual editor */
