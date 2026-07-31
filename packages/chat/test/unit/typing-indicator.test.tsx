@@ -9,7 +9,11 @@ function Wrap({ children }: { children: React.ReactNode }) {
 
 describe('TypingIndicator', () => {
   it('renders three dots with status role', () => {
-    const { container } = render(<Wrap><TypingIndicator /></Wrap>);
+    const { container } = render(
+      <Wrap>
+        <TypingIndicator />
+      </Wrap>
+    );
     const status = container.querySelector('[role="status"]');
     expect(status).toBeTruthy();
     const dots = status?.querySelectorAll('span');
@@ -17,7 +21,11 @@ describe('TypingIndicator', () => {
   });
 
   it('has aria-label for accessibility', () => {
-    const { container } = render(<Wrap><TypingIndicator /></Wrap>);
+    const { container } = render(
+      <Wrap>
+        <TypingIndicator />
+      </Wrap>
+    );
     const labeled = container.querySelector('[aria-label="AI is typing"]');
     expect(labeled).toBeTruthy();
   });

@@ -8,13 +8,8 @@
  * This is a pure config module (no JSX). main.tsx wraps the app with
  * react-i18next's <I18nextProvider i18n={i18n} />.
  */
-import { createInstance, type i18n as I18nInstance } from 'i18next';
-import { initReactI18next } from 'react-i18next';
 
-import {
-  NAMESPACE as chatNS,
-  resources as chatResources,
-} from '@agentskillmania/skill-ui-chat';
+import { NAMESPACE as chatNS, resources as chatResources } from '@agentskillmania/skill-ui-chat';
 import {
   NAMESPACE as cockpitNS,
   resources as cockpitResources,
@@ -23,14 +18,13 @@ import {
   NAMESPACE as editorNS,
   resources as editorResources,
 } from '@agentskillmania/skill-ui-editor';
-import {
-  NAMESPACE as frameNS,
-  resources as frameResources,
-} from '@agentskillmania/skill-ui-frame';
+import { NAMESPACE as frameNS, resources as frameResources } from '@agentskillmania/skill-ui-frame';
 import {
   NAMESPACE as sharedNS,
   resources as sharedResources,
 } from '@agentskillmania/skill-ui-shared';
+import { createInstance, type i18n as I18nInstance } from 'i18next';
+import { initReactI18next } from 'react-i18next';
 
 const ALL_NAMESPACES = [chatNS, cockpitNS, editorNS, frameNS, sharedNS];
 
@@ -62,4 +56,3 @@ i18n.use(initReactI18next).init({
   defaultNS: cockpitNS,
   interpolation: { escapeValue: false },
 });
-

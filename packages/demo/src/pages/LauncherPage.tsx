@@ -3,8 +3,6 @@
  * Uses antd components directly (skill-ui-frame has no Launcher component)
  */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { css } from '@emotion/react';
-import { Spin, Empty, Card, List, Typography, Tag, Button } from 'antd';
 import {
   RobotOutlined,
   BookOutlined,
@@ -12,6 +10,8 @@ import {
   PlusOutlined,
   ReloadOutlined,
 } from '@ant-design/icons';
+import { css } from '@emotion/react';
+import { Spin, Empty, Card, List, Typography, Button } from 'antd';
 
 import { useLauncher } from '../hooks/useLauncher.js';
 import type { Route } from '../types.js';
@@ -32,7 +32,14 @@ export function LauncherPage({ onNavigate, onCreateSession }: LauncherPageProps)
 
   if (loading) {
     return (
-      <div css={css`display: flex; align-items: center; justify-content: center; height: 100%;`}>
+      <div
+        css={css`
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+        `}
+      >
         <Spin size="large" />
       </div>
     );
@@ -40,7 +47,15 @@ export function LauncherPage({ onNavigate, onCreateSession }: LauncherPageProps)
 
   if (error) {
     return (
-      <div css={css`display: flex; align-items: center; justify-content: center; height: 100%; color: ${theme.color.error};`}>
+      <div
+        css={css`
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          color: ${theme.color.error};
+        `}
+      >
         Failed to load: {error}
       </div>
     );
@@ -48,7 +63,14 @@ export function LauncherPage({ onNavigate, onCreateSession }: LauncherPageProps)
 
   if (!data) {
     return (
-      <div css={css`display: flex; align-items: center; justify-content: center; height: 100%;`}>
+      <div
+        css={css`
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+        `}
+      >
         <Empty description="No data" />
       </div>
     );
@@ -83,17 +105,39 @@ export function LauncherPage({ onNavigate, onCreateSession }: LauncherPageProps)
         margin: 0 auto;
       `}
     >
-      <div css={css`display: flex; justify-content: space-between; align-items: center; margin-bottom: ${theme.spacing[6]};`}>
-        <Title level={3} css={css`margin: 0;`}>Skill UI Demo</Title>
-        <Button icon={<PlusOutlined />} onClick={handleNewSession}>New Session</Button>
+      <div
+        css={css`
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: ${theme.spacing[6]};
+        `}
+      >
+        <Title
+          level={3}
+          css={css`
+            margin: 0;
+          `}
+        >
+          Skill UI Demo
+        </Title>
+        <Button icon={<PlusOutlined />} onClick={handleNewSession}>
+          New Session
+        </Button>
       </div>
 
       {/* Sessions */}
       {data.sessions.length > 0 && (
         <Card
-          title={<><MessageOutlined /> Sessions</>}
+          title={
+            <>
+              <MessageOutlined /> Sessions
+            </>
+          }
           size="small"
-          css={css`margin-bottom: ${theme.spacing[4]};`}
+          css={css`
+            margin-bottom: ${theme.spacing[4]};
+          `}
           extra={<Button size="small" type="text" icon={<ReloadOutlined />} onClick={refresh} />}
         >
           <List
@@ -101,7 +145,9 @@ export function LauncherPage({ onNavigate, onCreateSession }: LauncherPageProps)
             renderItem={(s) => (
               <List.Item
                 actions={[
-                  <Button size="small" onClick={() => handleSessionResume(s.id)}>Resume</Button>,
+                  <Button size="small" onClick={() => handleSessionResume(s.id)}>
+                    Resume
+                  </Button>,
                 ]}
               >
                 <List.Item.Meta
@@ -120,20 +166,30 @@ export function LauncherPage({ onNavigate, onCreateSession }: LauncherPageProps)
 
       {/* Agents */}
       {data.agents.length > 0 && (
-        <Card title={<><RobotOutlined /> Agents</>} size="small" css={css`margin-bottom: ${theme.spacing[4]};`}>
+        <Card
+          title={
+            <>
+              <RobotOutlined /> Agents
+            </>
+          }
+          size="small"
+          css={css`
+            margin-bottom: ${theme.spacing[4]};
+          `}
+        >
           <List
             dataSource={data.agents}
             renderItem={(a) => (
               <List.Item
                 actions={[
-                  <Button size="small" onClick={() => handleAgentChat(a.id)}>Chat</Button>,
+                  <Button size="small" onClick={() => handleAgentChat(a.id)}>
+                    Chat
+                  </Button>,
                 ]}
               >
                 <List.Item.Meta
                   title={a.name}
-                  description={
-                    <Text type="secondary">{a.description}</Text>
-                  }
+                  description={<Text type="secondary">{a.description}</Text>}
                 />
               </List.Item>
             )}
@@ -143,7 +199,14 @@ export function LauncherPage({ onNavigate, onCreateSession }: LauncherPageProps)
 
       {/* Skills */}
       {data.skills.length > 0 && (
-        <Card title={<><BookOutlined /> Skills</>} size="small">
+        <Card
+          title={
+            <>
+              <BookOutlined /> Skills
+            </>
+          }
+          size="small"
+        >
           <List
             dataSource={data.skills}
             renderItem={(s) => (

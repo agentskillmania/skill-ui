@@ -51,7 +51,13 @@ export function ChatPanel(props: ChatPanelProps) {
           {t('chatPanel.title')}
         </span>
         <Tooltip title={t('chatPanel.newSession')}>
-          <Button type="text" size="small" icon={<Plus size={14} />} onClick={props.onChatNewSession} disabled={!props.onChatNewSession} />
+          <Button
+            type="text"
+            size="small"
+            icon={<Plus size={14} />}
+            onClick={props.onChatNewSession}
+            disabled={!props.onChatNewSession}
+          />
         </Tooltip>
       </div>
 

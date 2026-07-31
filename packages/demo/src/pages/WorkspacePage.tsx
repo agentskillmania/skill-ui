@@ -5,16 +5,16 @@
  * The session may be "pending" (placeholder ID) on first visit — the real
  * daemon session ID is established when the user sends their first message.
  */
+import type { ChatCommand } from '@agentskillmania/skill-ui-chat';
 import { Cockpit } from '@agentskillmania/skill-ui-cockpit';
 import { ProjectEditor } from '@agentskillmania/skill-ui-editor';
-import type { ChatCommand } from '@agentskillmania/skill-ui-chat';
 import type { ProjectFile, FileTab, EditMode, EditorPanel } from '@agentskillmania/skill-ui-editor';
 import { css } from '@emotion/react';
 import { useState, useCallback, useEffect } from 'react';
 
-import type { SessionInfo, Route } from '../types.js';
 import { useChatSession } from '../hooks/useChatSession.js';
 import { useEditor } from '../hooks/useEditor.js';
+import type { SessionInfo, Route } from '../types.js';
 import type { ViewMode } from '../types.js';
 
 interface WorkspacePageProps {
@@ -68,7 +68,11 @@ export function WorkspacePage({ session, viewMode, onNavigate }: WorkspacePagePr
         messageCount: chat.messages.length,
         tokensIn: chat.totalTokens?.input,
         tokensOut: chat.totalTokens?.output,
-        status: (chat.status === 'streaming' ? 'running' : chat.status === 'error' ? 'error' : 'idle') as 'running' | 'error' | 'idle',
+        status: (chat.status === 'streaming'
+          ? 'running'
+          : chat.status === 'error'
+            ? 'error'
+            : 'idle') as 'running' | 'error' | 'idle',
         createdAt: session.createdAt,
         updatedAt: session.updatedAt,
       },

@@ -76,10 +76,7 @@ export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps)
 
   // Memoize the code component so it doesn't recreate on every token —
   // only changes when streaming flag flips.
-  const codeComponent = useMemo(
-    () => makeCodeComponent(streaming ?? false),
-    [streaming]
-  );
+  const codeComponent = useMemo(() => makeCodeComponent(streaming ?? false), [streaming]);
 
   return (
     <div

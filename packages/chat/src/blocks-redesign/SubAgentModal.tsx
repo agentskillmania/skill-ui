@@ -7,15 +7,16 @@
  * MessageList no longer needs ChatContext (removed in earlier refactor),
  * so it works standalone inside the modal without any provider wrapper.
  */
+import { formatTokens, formatDuration } from '@agentskillmania/skill-ui-shared';
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Modal } from 'antd';
 import { Bot, X } from 'lucide-react';
-import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { formatTokens, formatDuration } from '@agentskillmania/skill-ui-shared';
 import { useTranslation } from 'react-i18next';
-import type { Message } from '../types.js';
-import { MessageList } from '../MessageList/index.js';
+
 import { NAMESPACE } from '../locales/index.js';
+import { MessageList } from '../MessageList/index.js';
+import type { Message } from '../types.js';
 
 export interface SubAgentModalProps {
   open: boolean;
