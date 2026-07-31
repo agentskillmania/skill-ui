@@ -23,13 +23,7 @@ import { ReviewPanel } from '../panels/review/index.js';
 import { TestCase } from '../panels/test-case/index.js';
 import { FileTabs } from '../sections/file-tabs/index.js';
 import { StatusBar } from '../sections/status-bar/index.js';
-import type {
-  ProjectEditorProps,
-  FileTab,
-  CursorPosition,
-  EditorPanel,
-  ProjectFile,
-} from '../types.js';
+import type { ProjectEditorProps, EditorPanel, ProjectFile } from '../types.js';
 import { getFileLabel } from '../utils/file-utils.js';
 
 export function ProjectEditor({

@@ -13,8 +13,8 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "vitest run",
-    "test:unit": "vitest run test/unit",
-    "test:watch": "vitest watch test/unit"
+    "test:unit": "vitest run",
+    "test:watch": "vitest watch"
   },
   "author": {
     "name": "yusangeng",

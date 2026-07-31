@@ -23,8 +23,8 @@ export function renderEventContent(event: CockpitEvent, expanded: boolean): stri
       // from/to may be a string ("idle") or an object ({ type: 'idle' })
       const fromVal = p.from as { type?: string } | string | undefined;
       const toVal = p.to as { type?: string } | string | undefined;
-      const fromStr = typeof fromVal === 'string' ? fromVal : fromVal?.type ?? '?';
-      const toStr = typeof toVal === 'string' ? toVal : toVal?.type ?? '?';
+      const fromStr = typeof fromVal === 'string' ? fromVal : (fromVal?.type ?? '?');
+      const toStr = typeof toVal === 'string' ? toVal : (toVal?.type ?? '?');
       return `${fromStr} → ${toStr}`;
     }
     case 'thinking':

@@ -14,7 +14,10 @@ export function selectMainMessages(state: SessionRunState): AgentMessage[] {
 }
 
 /** Get a sub-agent by subtaskId */
-export function selectSubAgent(state: SessionRunState, subtaskId: string): SubAgentRunState | undefined {
+export function selectSubAgent(
+  state: SessionRunState,
+  subtaskId: string
+): SubAgentRunState | undefined {
   return state.subAgents.get(subtaskId);
 }
 

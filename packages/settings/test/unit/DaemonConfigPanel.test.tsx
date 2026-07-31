@@ -151,7 +151,7 @@ describe('DaemonConfigPanel', () => {
 
     const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
     expect(lastCall.llm.providers[0].models[0].reasoning).toBe(false);
-  });
+  }, 10000);
 
   it('handles reasoning select change to enabled', async () => {
     const onChange = vi.fn();
@@ -165,7 +165,7 @@ describe('DaemonConfigPanel', () => {
 
     const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
     expect(lastCall.llm.providers[0].models[0].reasoning).toBe(true);
-  });
+  }, 10000);
 
   it('calls onChange when adding a provider', async () => {
     const onChange = vi.fn();

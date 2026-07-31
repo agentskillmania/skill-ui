@@ -7,14 +7,15 @@
  * background + bottom border, body rows below. Clicking opens SubAgentModal
  * which embeds a MessageList showing the sub-agent's full conversation.
  */
-import { memo, useState, lazy, Suspense } from 'react';
+import { formatTokens, formatDuration } from '@agentskillmania/skill-ui-shared';
+import { useTheme, spinKeyframes } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Bot, Loader2, CheckCircle2, XCircle, AlertTriangle, Clock } from 'lucide-react';
-import { useTheme, spinKeyframes } from '@agentskillmania/skill-ui-theme';
-import { formatTokens, formatDuration } from '@agentskillmania/skill-ui-shared';
+import { memo, useState, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { BlockProps, SubAgentBlockMetadata, BlockStatus } from '../types.js';
+
 import { NAMESPACE } from '../locales/index.js';
+import type { BlockProps, SubAgentBlockMetadata, BlockStatus } from '../types.js';
 
 /**
  * SubAgentModal is lazy-loaded to break a circular dependency:
@@ -99,8 +100,6 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
   const name = meta?.name ?? t('subagent.title');
   const statusConfig = getStatusConfig(block.status, meta, t);
   const StatusIcon = statusConfig.icon;
-  const statusColor =
-    theme.color[statusConfig.colorKey as keyof typeof theme.color] ?? theme.color.primary;
   const accent = theme.blockColor.subagent ?? { text: theme.color.primary, bg: 'transparent' };
   const isStreaming = block.status === 'streaming';
   const isError = block.status === 'error' || meta?.resultStatus === 'error';
@@ -251,9 +250,7 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
                   color: ${theme.color.textTertiary};
                 `}
               >
-                {meta?.steps != null && (
-                  <span>{t('subagent.steps', { count: meta.steps })}</span>
-                )}
+                {meta?.steps != null && <span>{t('subagent.steps', { count: meta.steps })}</span>}
                 {meta?.inputTokens != null && meta?.outputTokens != null && (
                   <span>
                     {t('subagent.tokens', {

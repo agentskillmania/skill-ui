@@ -11,15 +11,9 @@
  * animations are runtime-only and cannot be reconstructed.
  */
 
-import type {
-  SessionRunState,
-  AgentRunState,
-  AgentMessage,
-  AgentBlock,
-  ColtsMessageInput,
-  SubAgentRunState,
-} from './types.js';
+import type { SessionRunState, AgentMessage, AgentBlock, SubAgentRunState } from './types.js';
 import { createEmptySessionState, createEmptyRunState } from './types.js';
+import type { ColtsMessageInput } from '../types.js';
 
 let histBlockIdCounter = 0;
 function genHistBlockId(): string {
@@ -111,7 +105,12 @@ export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
             });
           } else if (tc.name === HUMAN_TOOL) {
             // Parse questions from tool arguments
-            const questions = (tc.arguments.questions as Array<{ question: string; type: string; options?: string[] }>) ?? [];
+            const questions =
+              (tc.arguments.questions as Array<{
+                question: string;
+                type: string;
+                options?: string[];
+              }>) ?? [];
             blocks.push({
               id: tc.id,
               type: 'human_input',
@@ -155,7 +154,12 @@ export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
                 parentBlockId: blocks[blocks.length - 1].id,
                 resultStatus: delegateResult.status as SubAgentRunState['resultStatus'],
                 totalSteps: delegateResult.totalSteps,
-                tokens: delegateResult.tokens ?? { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+                tokens: delegateResult.tokens ?? {
+                  input: 0,
+                  output: 0,
+                  cacheRead: 0,
+                  cacheWrite: 0,
+                },
                 duration: delegateResult.duration ?? 0,
                 error: delegateResult.error,
                 messages: [
@@ -166,12 +170,14 @@ export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
                     status: 'completed',
                   },
                   ...(delegateResult.answer
-                    ? [{
-                        id: `hist-sub-${subtaskId}-answer`,
-                        role: 'assistant' as const,
-                        content: delegateResult.answer,
-                        status: 'completed' as const,
-                      }]
+                    ? [
+                        {
+                          id: `hist-sub-${subtaskId}-answer`,
+                          role: 'assistant' as const,
+                          content: delegateResult.answer,
+                          status: 'completed' as const,
+                        },
+                      ]
                     : []),
                 ],
               };

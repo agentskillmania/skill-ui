@@ -44,10 +44,7 @@ export function useSession(): UseSessionReturn {
   const [error, setError] = useState<string | null>(null);
 
   const createSession = useCallback(
-    async (options: {
-      workspacePath: string;
-      agentPath?: string;
-    }): Promise<SessionInfo | null> => {
+    async (options: { workspacePath: string; agentPath?: string }): Promise<SessionInfo | null> => {
       setCreating(true);
       setError(null);
       try {

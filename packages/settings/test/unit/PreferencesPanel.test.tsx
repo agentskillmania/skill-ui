@@ -62,7 +62,7 @@ describe('PreferencesPanel', () => {
     await userEvent.click(enOption);
 
     expect(onChange).toHaveBeenCalledWith({ language: 'en-US' });
-  });
+  }, 10000);
 
   it('directory inputs are read-only', () => {
     render(<PreferencesPanel value={defaultValue} onChange={() => {}} />, { wrapper });

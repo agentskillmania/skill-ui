@@ -11,7 +11,6 @@
  */
 import type { Message, ChatCommand } from '@agentskillmania/skill-ui-chat';
 import type { CockpitEvent } from '@agentskillmania/skill-ui-cockpit';
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import {
   useSessionState,
   selectMainMessages,
@@ -21,6 +20,7 @@ import {
   fromHistory,
 } from '@agentskillmania/skill-ui-state';
 import type { AgentEvent, ColtsMessageInput, SSEEvent } from '@agentskillmania/skill-ui-state';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 
 type ChatStatus = 'idle' | 'streaming' | 'error';
 
@@ -45,10 +45,7 @@ export interface UseChatSessionOptions {
 
 // ─── Hook ────────────────────────────────────────────────────────
 
-export function useChatSession(
-  sessionId: string,
-  options?: UseChatSessionOptions
-) {
+export function useChatSession(sessionId: string, options?: UseChatSessionOptions) {
   const { state, feed, loadHistory } = useSessionState();
   const [status, setStatus] = useState<ChatStatus>('idle');
   const [inputValue, setInputValue] = useState('');
@@ -131,7 +128,7 @@ export function useChatSession(
       const decoder = new TextDecoder();
       let buffer = '';
 
-      while (true) {
+      for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
 
