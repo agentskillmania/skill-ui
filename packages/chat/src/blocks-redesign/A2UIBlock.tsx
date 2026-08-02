@@ -1,7 +1,7 @@
 /**
- * A2UI block — renders AGenUI protocol surface inside standard block card.
+ * A2UI block — renders GenUI protocol surface inside standard block card.
  */
-import { AGenUI, SurfaceManager, AGenUISurface } from '@agentskillmania/agenui';
+import { Genui, SurfaceManager, GenUISurface } from '@agentskillmania/genui';
 import { useTheme, spinKeyframes } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Modal } from 'antd';
@@ -33,8 +33,8 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
     let cancelled = false;
 
     async function init() {
-      if (!AGenUI.isInitialized()) {
-        await AGenUI.initialize();
+      if (!Genui.isInitialized()) {
+        await Genui.initialize();
       }
       if (cancelled) return;
 
@@ -90,7 +90,7 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
 
   // Theme sync
   useEffect(() => {
-    AGenUI.setDayNightMode(theme.mode);
+    Genui.setDayNightMode(theme.mode);
   }, [theme.mode]);
 
   // Action handler
@@ -289,7 +289,7 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
               padding: ${theme.spacing[3]} ${theme.spacing[4]};
             `}
           >
-            <AGenUISurface
+            <GenUISurface
               surfaceManager={smRef.current}
               width="100%"
               height="100%"
@@ -361,7 +361,7 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
         styles={{ body: { height: '70vh', padding: 0, overflow: 'hidden' } }}
       >
         {engineReady && smRef.current && (
-          <AGenUISurface
+          <GenUISurface
             surfaceManager={smRef.current}
             width="100%"
             height="100%"

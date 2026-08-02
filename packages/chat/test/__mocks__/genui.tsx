@@ -1,5 +1,5 @@
 /**
- * Mock for @agentskillmania/agenui used in tests.
+ * Mock for @agentskillmania/genui used in tests.
  * Vitest resolve.alias redirects the static import to this file.
  */
 
@@ -11,7 +11,7 @@ export const mockSurfaceManager = {
   destroy: vi.fn(),
 };
 
-export const AGenUI = {
+export const Genui = {
   initialize: vi.fn().mockResolvedValue(undefined),
   isInitialized: vi.fn().mockReturnValue(true),
   setDayNightMode: vi.fn(),
@@ -25,7 +25,7 @@ export class SurfaceManager {
   destroy = mockSurfaceManager.destroy;
 }
 
-export function AGenUISurface({
+export function GenUISurface({
   surfaceManager,
   onAction,
 }: {
@@ -36,11 +36,11 @@ export function AGenUISurface({
 }) {
   return (
     <div
-      data-testid="agenui-surface"
+      data-testid="genui-surface"
       data-onaction={!!onAction}
       onClick={() => onAction?.({ sourceComponentId: 'btn-1', context: { click: true } })}
     >
-      AGenUI Surface Mock
+      GenUI Surface Mock
     </div>
   );
 }
