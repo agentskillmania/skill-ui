@@ -8,9 +8,9 @@ dotenv.config({ path: '.env' });
 export default defineConfig({
   resolve: {
     alias: {
-      '@agentskillmania/agenui': path.resolve(
+      '@agentskillmania/genui': path.resolve(
         __dirname,
-        'packages/chat/test/__mocks__/agenui.tsx',
+        'packages/chat/test/__mocks__/genui.tsx',
       ),
     },
   },

@@ -44,7 +44,7 @@ export default defineConfig({
       '@agentskillmania/skill-ui-editor': path.resolve(__dirname, '../editor/src/index.ts'),
       '@agentskillmania/skill-ui-theme': path.resolve(__dirname, '../theme/src/index.ts'),
       '@agentskillmania/skill-ui-frame': path.resolve(__dirname, '../frame/src/index.ts'),
-      '@agentskillmania/agenui': path.resolve(__dirname, '../chat/test/__mocks__/agenui.tsx'),
+      '@agentskillmania/genui': path.resolve(__dirname, '../chat/test/__mocks__/genui.tsx'),
     },
   },
 });

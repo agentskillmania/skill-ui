@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { ThemeProvider } from '@agentskillmania/skill-ui-theme';
 import { ChatWrapper } from './testUtils.js';
 import type { Block, A2UIBlockMetadata } from '../../src/types.js';
-import { mockSurfaceManager, AGenUI } from '@agentskillmania/agenui';
+import { mockSurfaceManager, Genui } from '@agentskillmania/genui';
 import { A2UIBlock } from '../../src/blocks-redesign/A2UIBlock.js';
 import { useState } from 'react';
 import userEvent from '@testing-library/user-event';
@@ -49,10 +49,10 @@ describe('A2UIBlock', () => {
     });
   });
 
-  it('renders AGenUI surface when engine ready', async () => {
+  it('renders Genui surface when engine ready', async () => {
     renderBlock();
     await waitFor(() => {
-      expect(screen.getByTestId('agenui-surface')).toBeInTheDocument();
+      expect(screen.getByTestId('genui-surface')).toBeInTheDocument();
     });
   });
 
@@ -64,13 +64,13 @@ describe('A2UIBlock', () => {
     });
   });
 
-  it('calls AGenUI.initialize when not yet initialized', async () => {
-    vi.mocked(AGenUI.isInitialized).mockReturnValueOnce(false);
+  it('calls Genui.initialize when not yet initialized', async () => {
+    vi.mocked(Genui.isInitialized).mockReturnValueOnce(false);
     renderBlock();
     await waitFor(() => {
-      expect(AGenUI.initialize).toHaveBeenCalled();
+      expect(Genui.initialize).toHaveBeenCalled();
     });
-    vi.mocked(AGenUI.isInitialized).mockReturnValue(true);
+    vi.mocked(Genui.isInitialized).mockReturnValue(true);
   });
 
   it('streams initial content to SurfaceManager', async () => {
@@ -325,12 +325,12 @@ describe('A2UIBlock', () => {
       expect(screen.getByText('A2UI Surface')).toBeInTheDocument();
     });
 
-    vi.mocked(AGenUI.setDayNightMode).mockClear();
+    vi.mocked(Genui.setDayNightMode).mockClear();
 
     await userEvent.click(screen.getByTestId('toggle-theme'));
 
     await waitFor(() => {
-      expect(AGenUI.setDayNightMode).toHaveBeenCalledWith('dark');
+      expect(Genui.setDayNightMode).toHaveBeenCalledWith('dark');
     });
   });
 
@@ -347,7 +347,7 @@ describe('A2UIBlock', () => {
         <A2UIBlock block={block} />
       </ChatWrapper>
     );
-    const surface = await screen.findByTestId('agenui-surface');
+    const surface = await screen.findByTestId('genui-surface');
     // Click the surface — handleSurfaceAction runs but returns early (no onAction)
     surface.click();
     expect(surface).toBeInTheDocument();
@@ -357,7 +357,7 @@ describe('A2UIBlock', () => {
     const onAction = vi.fn();
     renderBlock({ onAction });
 
-    const surface = await screen.findByTestId('agenui-surface');
+    const surface = await screen.findByTestId('genui-surface');
     surface.click();
 
     expect(onAction).toHaveBeenCalledWith({
@@ -372,11 +372,11 @@ describe('A2UIBlock', () => {
     const { rerender } = renderBlock();
 
     await waitFor(() => {
-      expect(screen.getByTestId('agenui-surface')).toBeInTheDocument();
+      expect(screen.getByTestId('genui-surface')).toBeInTheDocument();
     });
 
     // Simulate overflow by making scrollHeight > clientHeight on the content element
-    const surfaceEl = screen.getByTestId('agenui-surface');
+    const surfaceEl = screen.getByTestId('genui-surface');
     const contentEl = surfaceEl.parentElement?.parentElement;
     Object.defineProperty(contentEl!, 'scrollHeight', { configurable: true, value: 1000 });
     Object.defineProperty(contentEl!, 'clientHeight', { configurable: true, value: 100 });
@@ -403,20 +403,20 @@ describe('A2UIBlock', () => {
     });
   });
 
-  it('opens full-view modal with AGenUI surface when header expand button is clicked', async () => {
+  it('opens full-view modal with Genui surface when header expand button is clicked', async () => {
     renderBlock();
 
     await waitFor(() => {
-      expect(screen.getByTestId('agenui-surface')).toBeInTheDocument();
+      expect(screen.getByTestId('genui-surface')).toBeInTheDocument();
     });
 
     // Click the header expand button (has title attribute '展开查看')
     const expandButton = screen.getByTitle('展开查看');
     await userEvent.click(expandButton);
 
-    // Modal should now be open with a second AGenUISurface inside
+    // Modal should now be open with a second GenUISurface inside
     await waitFor(() => {
-      const surfaces = screen.getAllByTestId('agenui-surface');
+      const surfaces = screen.getAllByTestId('genui-surface');
       expect(surfaces).toHaveLength(2);
     });
   });
@@ -425,14 +425,14 @@ describe('A2UIBlock', () => {
     renderBlock();
 
     await waitFor(() => {
-      expect(screen.getByTestId('agenui-surface')).toBeInTheDocument();
+      expect(screen.getByTestId('genui-surface')).toBeInTheDocument();
     });
 
     // Open modal first
     await userEvent.click(screen.getByTitle('展开查看'));
 
     await waitFor(() => {
-      expect(screen.getAllByTestId('agenui-surface')).toHaveLength(2);
+      expect(screen.getAllByTestId('genui-surface')).toHaveLength(2);
     });
 
     // Click the modal close button (aria-label="Close")
@@ -442,7 +442,7 @@ describe('A2UIBlock', () => {
 
     // After close, the modal content may remain in DOM (no destroyOnClose),
     // but the component is still rendered — the onCancel function was called
-    const surfaces = screen.getAllByTestId('agenui-surface');
+    const surfaces = screen.getAllByTestId('genui-surface');
     expect(surfaces.length).toBeGreaterThanOrEqual(1);
   });
 
@@ -450,11 +450,11 @@ describe('A2UIBlock', () => {
     const { rerender } = renderBlock();
 
     await waitFor(() => {
-      expect(screen.getByTestId('agenui-surface')).toBeInTheDocument();
+      expect(screen.getByTestId('genui-surface')).toBeInTheDocument();
     });
 
     // Simulate overflow
-    const surfaceEl = screen.getByTestId('agenui-surface');
+    const surfaceEl = screen.getByTestId('genui-surface');
     const contentEl = surfaceEl.parentElement?.parentElement;
     Object.defineProperty(contentEl!, 'scrollHeight', { configurable: true, value: 1000 });
     Object.defineProperty(contentEl!, 'clientHeight', { configurable: true, value: 100 });
@@ -483,20 +483,20 @@ describe('A2UIBlock', () => {
     await userEvent.click(screen.getByText('展开查看'));
 
     await waitFor(() => {
-      const surfaces = screen.getAllByTestId('agenui-surface');
+      const surfaces = screen.getAllByTestId('genui-surface');
       expect(surfaces).toHaveLength(2);
     });
   });
 
-  it('cancels init early when unmounted during AGenUI initialization', async () => {
-    // Make AGenUI.isInitialized return false so init enters the initialize block
-    vi.mocked(AGenUI.isInitialized).mockReturnValueOnce(false);
+  it('cancels init early when unmounted during Genui initialization', async () => {
+    // Make Genui.isInitialized return false so init enters the initialize block
+    vi.mocked(Genui.isInitialized).mockReturnValueOnce(false);
 
-    // Make AGenUI.initialize return a controllable promise
-    let resolveAGenUIInit!: () => void;
-    vi.mocked(AGenUI.initialize).mockReturnValueOnce(
+    // Make Genui.initialize return a controllable promise
+    let resolveGenuiInit!: () => void;
+    vi.mocked(Genui.initialize).mockReturnValueOnce(
       new Promise<void>((resolve) => {
-        resolveAGenUIInit = resolve;
+        resolveGenuiInit = resolve;
       })
     );
 
@@ -514,11 +514,11 @@ describe('A2UIBlock', () => {
       </ChatWrapper>
     );
 
-    // Unmount before AGenUI.initialize resolves
+    // Unmount before Genui.initialize resolves
     unmount();
 
     // Now resolve — the cancelled check should prevent SurfaceManager creation
-    resolveAGenUIInit();
+    resolveGenuiInit();
 
     await waitFor(() => {
       // SurfaceManager.initialize should NOT have been called
@@ -526,7 +526,7 @@ describe('A2UIBlock', () => {
     });
 
     // Restore default mock behavior for other tests
-    vi.mocked(AGenUI.isInitialized).mockReturnValue(true);
+    vi.mocked(Genui.isInitialized).mockReturnValue(true);
   });
 
   it('destroys SurfaceManager if unmounted during init', async () => {
