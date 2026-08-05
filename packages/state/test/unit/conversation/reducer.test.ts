@@ -338,3 +338,58 @@ describe('reducer — extractTokens boundary', () => {
     expect(state.main.duration).toBe(5000);
   });
 });
+
+describe('reducer — empty token events', () => {
+  it('empty token must not close a streaming thinking block (LLM emits empty content deltas between reasoning segments)', () => {
+    const state = pushEvents([
+      { event: 'thinking', data: { content: 'First segment' } },
+      { event: 'token', data: { delta: '' } }, // empty delta — segment boundary
+      { event: 'thinking', data: { content: 'Second segment' } },
+      { event: 'token', data: { delta: 'Answer' } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    const thinkingBlocks = msg.blocks?.filter((b) => b.type === 'thinking') ?? [];
+    expect(thinkingBlocks).toHaveLength(1); // segments merged into one block
+    expect(thinkingBlocks[0].content).toBe('First segmentSecond segment');
+    // Only the REAL token closes the block
+    expect(thinkingBlocks[0].status).toBe('completed');
+    expect(msg.content).toBe('Answer');
+  });
+
+  it('empty token does not close open blocks but keeps them streaming', () => {
+    const state = pushEvents([
+      { event: 'thinking', data: { content: 'Hmm' } },
+      { event: 'token', data: { delta: '' } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    const thinkingBlock = msg.blocks?.find((b) => b.type === 'thinking');
+    expect(thinkingBlock?.status).toBe('streaming');
+    expect(msg.content).toBe('');
+  });
+});
+
+describe('reducer — empty thinking events', () => {
+  it('empty thinking must not create a block (LLM streams an empty reasoning_content first)', () => {
+    const state = pushEvents([
+      { event: 'thinking', data: { content: '' } },
+      { event: 'token', data: { delta: '你好' } },
+      { event: 'done', data: { status: 'success' } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    expect(msg.blocks ?? []).toHaveLength(0);
+    expect(msg.content).toBe('你好');
+  });
+
+  it('empty thinking appends nothing to an open block and never creates one', () => {
+    const state = pushEvents([
+      { event: 'thinking', data: { content: '' } }, // empty first — no block
+      { event: 'thinking', data: { content: 'Hi' } }, // real reasoning — creates the block
+      { event: 'thinking', data: { content: '' } }, // empty again — appends nothing
+      { event: 'token', data: { delta: 'ok' } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    const thinkingBlocks = msg.blocks?.filter((b) => b.type === 'thinking') ?? [];
+    expect(thinkingBlocks).toHaveLength(1);
+    expect(thinkingBlocks[0].content).toBe('Hi');
+  });
+});

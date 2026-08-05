@@ -36,6 +36,10 @@ export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
   const state = createEmptySessionState();
   const agentMessages: AgentMessage[] = [];
   const subAgents = new Map<string, SubAgentRunState>();
+  // The assistant bubble currently being built. One turn spans multiple
+  // persisted rows (per LLM call), so consecutive assistant rows without an
+  // intervening user message merge into this single bubble.
+  let current: AgentMessage | null = null;
 
   // Index tool results by toolCallId for pairing
   const toolResults = new Map<string, ColtsMessageInput>();
@@ -54,32 +58,35 @@ export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
         status: 'completed',
         createdAt: msg.timestamp,
       });
+      // A user message starts a new turn: later assistant rows must not
+      // merge into the previous turn's bubble.
+      current = null;
       continue;
     }
 
     if (msg.role === 'assistant') {
       // Check for thinking (type='thought')
       if (msg.type === 'thought') {
-        // Find the next non-thought assistant message to attach this thinking to
         const thinkingBlock: AgentBlock = {
           id: genHistBlockId(),
           type: 'thinking',
           status: 'completed',
           content: msg.content,
         };
-        // Attach to the last assistant message, or create a wrapper
-        const lastMsg = agentMessages[agentMessages.length - 1];
-        if (lastMsg && lastMsg.role === 'assistant' && lastMsg.status === 'completed') {
-          lastMsg.blocks = [thinkingBlock, ...(lastMsg.blocks ?? [])];
+        // Attach to the current turn's bubble (thinking blocks come first),
+        // or create a wrapper message for it.
+        if (current) {
+          current.blocks = [thinkingBlock, ...(current.blocks ?? [])];
         } else {
-          agentMessages.push({
+          current = {
             id: `hist-msg-${agentMessages.length}`,
             role: 'assistant',
             content: '',
             status: 'completed',
             createdAt: msg.timestamp,
             blocks: [thinkingBlock],
-          });
+          };
+          agentMessages.push(current);
         }
         continue;
       }
@@ -203,14 +210,24 @@ export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
       // If there are blocks, attach to an assistant message
       // If there's also text content, it's the assistant's reasoning/answer
       if (blocks.length > 0 || msg.content) {
-        agentMessages.push({
-          id: `hist-msg-${agentMessages.length}`,
-          role: 'assistant',
-          content: msg.content ?? '',
-          status: 'completed',
-          createdAt: msg.timestamp,
-          blocks: blocks.length > 0 ? blocks : undefined,
-        });
+        // Merge into the current turn's bubble when one exists (the storage
+        // layer splits one turn into one row per LLM call — action/text/
+        // thought — so the reconstructed view must rejoin them into a single
+        // bubble to match the live reducer, which merges a whole run).
+        if (current) {
+          current.blocks = [...(current.blocks ?? []), ...blocks];
+          current.content = current.content + (msg.content ?? '');
+        } else {
+          current = {
+            id: `hist-msg-${agentMessages.length}`,
+            role: 'assistant',
+            content: msg.content ?? '',
+            status: 'completed',
+            createdAt: msg.timestamp,
+            blocks: blocks.length > 0 ? blocks : undefined,
+          };
+          agentMessages.push(current);
+        }
       }
       continue;
     }
@@ -227,6 +244,7 @@ export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
         status: 'completed',
         createdAt: msg.timestamp,
       });
+      current = null;
       continue;
     }
   }

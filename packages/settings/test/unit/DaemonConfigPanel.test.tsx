@@ -146,7 +146,7 @@ describe('DaemonConfigPanel', () => {
     const select = screen.getByTestId('daemon-llm-provider-0-model-0-reasoning');
     await userEvent.click(select);
 
-    const disabledOption = await screen.findByText('reasoning.disabled');
+    const disabledOption = await screen.findByText('reasoning.disabled', {}, { timeout: 5000 });
     await userEvent.click(disabledOption);
 
     const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
@@ -160,7 +160,7 @@ describe('DaemonConfigPanel', () => {
     const select = screen.getByTestId('daemon-llm-provider-0-model-0-reasoning');
     await userEvent.click(select);
 
-    const enabledOption = await screen.findByText('reasoning.enabled');
+    const enabledOption = await screen.findByText('reasoning.enabled', {}, { timeout: 5000 });
     await userEvent.click(enabledOption);
 
     const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];

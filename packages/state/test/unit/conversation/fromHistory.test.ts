@@ -394,3 +394,115 @@ describe('fromHistory — boundary cases', () => {
     expect(humanBlock!.metadata?.message).toBe('');
   });
 });
+
+describe('fromHistory — turn-level bubble merging', () => {
+  /**
+   * The persistence layer stores one row per LLM call (protocol-mandated:
+   * assistant-with-toolCalls → tool result → next assistant), so a
+   * tool-using turn arrives as MULTIPLE rows. The reconstructed view must
+   * merge them back into ONE assistant bubble — matching the live reducer,
+   * which merges a whole run into a single streaming message.
+   */
+  it('merges a tool-calling turn (action + tool + text) into ONE assistant bubble', () => {
+    const messages: ColtsMessageInput[] = [
+      { role: 'user', content: 'hi', timestamp: 1000 },
+      {
+        role: 'assistant',
+        content: '',
+        type: 'action',
+        toolCalls: [{ id: 'call-1', name: 'shell', arguments: { cmd: 'ls' } }],
+        timestamp: 2000,
+      },
+      {
+        role: 'tool',
+        content: 'file list',
+        toolCallId: 'call-1',
+        toolName: 'shell',
+        timestamp: 3000,
+      },
+      { role: 'assistant', content: 'final answer', type: 'text', timestamp: 4000 },
+    ];
+    const state = fromHistory(messages);
+    const msgs = selectMainMessages(state);
+    expect(msgs).toHaveLength(2); // user + ONE assistant bubble
+    const assistant = msgs[1];
+    expect(assistant.role).toBe('assistant');
+    expect(assistant.content).toBe('final answer');
+    expect(assistant.blocks).toHaveLength(1);
+    expect(assistant.blocks![0]).toMatchObject({
+      type: 'tool_call',
+      metadata: { toolName: 'shell', toolResult: 'file list' },
+    });
+  });
+
+  it('merges thought + action + text into one bubble with thinking + tool blocks', () => {
+    const messages: ColtsMessageInput[] = [
+      { role: 'user', content: 'hi', timestamp: 1000 },
+      { role: 'assistant', content: 'Let me think', type: 'thought', timestamp: 2000 },
+      {
+        role: 'assistant',
+        content: '',
+        type: 'action',
+        toolCalls: [{ id: 'call-1', name: 'shell', arguments: { cmd: 'ls' } }],
+        timestamp: 3000,
+      },
+      { role: 'tool', content: 'ok', toolCallId: 'call-1', toolName: 'shell', timestamp: 4000 },
+      { role: 'assistant', content: 'done', type: 'text', timestamp: 5000 },
+    ];
+    const state = fromHistory(messages);
+    const msgs = selectMainMessages(state);
+    expect(msgs).toHaveLength(2);
+    const assistant = msgs[1];
+    expect(assistant.content).toBe('done');
+    const blockTypes = assistant.blocks?.map((b) => b.type) ?? [];
+    expect(blockTypes).toEqual(['thinking', 'tool_call']);
+  });
+
+  it('keeps separate turns in separate bubbles', () => {
+    const messages: ColtsMessageInput[] = [
+      { role: 'user', content: 'q1', timestamp: 1000 },
+      { role: 'assistant', content: 'a1', type: 'text', timestamp: 2000 },
+      { role: 'user', content: 'q2', timestamp: 3000 },
+      { role: 'assistant', content: 'a2', type: 'text', timestamp: 4000 },
+    ];
+    const state = fromHistory(messages);
+    const msgs = selectMainMessages(state);
+    expect(msgs.map((m) => m.role)).toEqual(['user', 'assistant', 'user', 'assistant']);
+    expect(msgs[1].content).toBe('a1');
+    expect(msgs[3].content).toBe('a2');
+  });
+
+  it('merges consecutive text rows of one turn (multi-LLM-call turn)', () => {
+    const messages: ColtsMessageInput[] = [
+      { role: 'user', content: 'hi', timestamp: 1000 },
+      { role: 'assistant', content: 'First note', type: 'text', timestamp: 2000 },
+      { role: 'assistant', content: 'Second note', type: 'text', timestamp: 3000 },
+    ];
+    const state = fromHistory(messages);
+    const msgs = selectMainMessages(state);
+    expect(msgs).toHaveLength(2);
+    expect(msgs[1].content).toBe('First noteSecond note');
+  });
+
+  it('concatenates text that follows a tool call in the same turn', () => {
+    const messages: ColtsMessageInput[] = [
+      { role: 'user', content: 'hi', timestamp: 1000 },
+      {
+        role: 'assistant',
+        content: '',
+        type: 'action',
+        toolCalls: [{ id: 'c1', name: 'file_read', arguments: { path: 'a' } }],
+        timestamp: 2000,
+      },
+      { role: 'tool', content: '42', toolCallId: 'c1', toolName: 'file_read', timestamp: 3000 },
+      { role: 'assistant', content: 'The value is 42', type: 'text', timestamp: 4000 },
+      { role: 'assistant', content: ' Does that help?', type: 'text', timestamp: 5000 },
+    ];
+    const state = fromHistory(messages);
+    const msgs = selectMainMessages(state);
+    expect(msgs).toHaveLength(2);
+    const assistant = msgs[1];
+    expect(assistant.blocks).toHaveLength(1);
+    expect(assistant.content).toBe('The value is 42 Does that help?');
+  });
+});

@@ -3,15 +3,12 @@
  */
 import { css } from '@emotion/react';
 import JsonViewPkg from '@microlink/react-json-view';
-import EditorPkg from '@monaco-editor/react';
 import { Modal, Tabs, Input } from 'antd';
 import { Wrench, X } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const JsonView = JsonViewPkg as unknown as React.ComponentType<any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const Editor = EditorPkg as unknown as React.ComponentType<any>;
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { useTranslation } from 'react-i18next';
 
@@ -60,6 +57,105 @@ function buildJsonViewTheme(theme: ReturnType<typeof useTheme>) {
   };
 }
 
+/**
+ * Monaco raw view — engine loaded LAZILY from the local `monaco-editor`
+ * package (never the CDN: `@monaco-editor/react` defaults to jsdelivr, which
+ * hangs forever in offline/restricted webviews such as the Tauri host).
+ *
+ * Loading is deferred until the tab is actually opened, so jsdom tests and
+ * app startup never import monaco (it crashes in jsdom and is ~MBs of code).
+ */
+/** Props the lazy Monaco editor component accepts. */
+type MonacoEditorComponent = React.ComponentType<{
+  height: string;
+  defaultLanguage: string;
+  value: string;
+  theme: string;
+  options: Record<string, unknown>;
+}>;
+
+function MonacoRawView({
+  active,
+  value,
+  isJson,
+  themeMode,
+}: {
+  active: boolean;
+  value: string;
+  isJson: boolean;
+  themeMode: 'dark' | 'light';
+}) {
+  const theme = useTheme();
+  const [Editor, setEditor] = useState<MonacoEditorComponent | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!active || Editor) return;
+    let cancelled = false;
+    Promise.all([import('@monaco-editor/react'), import('monaco-editor')])
+      .then(([mod, monaco]) => {
+        // Point @monaco-editor/react's loader at the local engine.
+        mod.loader.config({ monaco });
+        const editorCtor = (mod as unknown as { default: MonacoEditorComponent }).default;
+        if (!cancelled) setEditor(editorCtor);
+        if (!cancelled) setEditor(editorCtor);
+      })
+      .catch((e) => {
+        if (!cancelled) setFailed(String(e));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [active, Editor]);
+
+  if (failed) {
+    return (
+      <div
+        css={css`
+          padding: ${theme.spacing[3]};
+          font-size: ${theme.font.size.sm};
+          color: ${theme.color.error};
+        `}
+      >
+        Monaco 加载失败: {failed}
+      </div>
+    );
+  }
+  if (!Editor) {
+    return (
+      <div
+        css={css`
+          padding: ${theme.spacing[3]};
+          font-size: ${theme.font.size.sm};
+          color: ${theme.color.textTertiary};
+        `}
+      >
+        加载编辑器…
+      </div>
+    );
+  }
+  return (
+    <Editor
+      height="400px"
+      defaultLanguage={isJson ? 'json' : 'plaintext'}
+      value={value}
+      theme={themeMode === 'dark' ? 'vs-dark' : 'vs'}
+      options={{
+        readOnly: true,
+        minimap: { enabled: false },
+        lineNumbers: 'on',
+        folding: true,
+        scrollBeyondLastLine: false,
+        wordWrap: 'on',
+        fontSize: parseInt(theme.font.size.base),
+        fontFamily: theme.font.familyMono,
+        padding: { top: 12, bottom: 12 },
+        automaticLayout: true,
+      }}
+    />
+  );
+}
+
 export function ToolCallDetailModal({
   open,
   toolName,
@@ -82,8 +178,6 @@ export function ToolCallDetailModal({
 
   const accentBg =
     theme.blockColor[colorKey as keyof typeof theme.blockColor]?.bg ?? theme.color.primaryBg;
-
-  const monacoTheme = theme.mode === 'dark' ? 'vs-dark' : 'vs';
 
   const tabItems = [
     ...(resultParsed.isJson
@@ -127,23 +221,11 @@ export function ToolCallDetailModal({
             overflow: hidden;
           `}
         >
-          <Editor
-            height="400px"
-            defaultLanguage={resultParsed.isJson ? 'json' : 'plaintext'}
+          <MonacoRawView
+            active={activeTab === 'raw'}
             value={result ?? ''}
-            theme={monacoTheme}
-            options={{
-              readOnly: true,
-              minimap: { enabled: false },
-              lineNumbers: 'on',
-              folding: true,
-              scrollBeyondLastLine: false,
-              wordWrap: 'on',
-              fontSize: parseInt(theme.font.size.base),
-              fontFamily: theme.font.familyMono,
-              padding: { top: 12, bottom: 12 },
-              automaticLayout: true,
-            }}
+            isJson={resultParsed.isJson}
+            themeMode={theme.mode}
           />
         </div>
       ),

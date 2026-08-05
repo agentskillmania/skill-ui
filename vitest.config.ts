@@ -1,9 +1,5 @@
 import { defineConfig } from 'vitest/config';
-import dotenv from 'dotenv';
 import path from 'path';
-
-// Load env from root .env
-dotenv.config({ path: '.env' });
 
 export default defineConfig({
   resolve: {
@@ -17,6 +13,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
+    setupFiles: ['./test/setup.ts'],
     include: ['packages/*/test/**/*.test.{ts,tsx}'],
     coverage: {
       provider: 'v8',

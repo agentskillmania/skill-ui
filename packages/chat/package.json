@@ -37,7 +37,8 @@
   },
   "dependencies": {
     "@agentskillmania/skill-ui-theme": "workspace:*",
-    "@emotion/react": "^11.14.0"
+    "@emotion/react": "^11.14.0",
+    "monaco-editor": "^0.55.1"
   },
   "peerDependencies": {
     "@agentskillmania/genui": "^0.1.0",

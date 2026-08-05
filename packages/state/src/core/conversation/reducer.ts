@@ -213,7 +213,11 @@ function reduceMainEvent(
             ? {
                 ...m,
                 content: m.content + delta,
-                blocks: m.blocks ? closeOpenBlocks(m.blocks) : m.blocks,
+                // Only close open blocks when REAL content arrives. LLM
+                // streams emit empty `token` events between reasoning
+                // segments; closing on those would flip a streaming thinking
+                // block to completed mid-reasoning (visually "disappearing").
+                blocks: delta ? (m.blocks ? closeOpenBlocks(m.blocks) : m.blocks) : m.blocks,
               }
             : m
         ),
@@ -240,6 +244,10 @@ function reduceMainEvent(
               ),
             };
           }
+          // An empty delta with no open block means the model produced no
+          // reasoning at all (LLM streams start with an empty
+          // `reasoning_content` chunk) — never create an empty thinking block.
+          if (!content) return m;
           // Create new thinking block
           const block: AgentBlock = {
             id: genBlockId(),

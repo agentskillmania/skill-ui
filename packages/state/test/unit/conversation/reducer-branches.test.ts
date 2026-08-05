@@ -82,18 +82,16 @@ describe('reducer — streaming with null/missing fields', () => {
     expect(lastMsg(state).content).toBe('');
   });
 
-  it('thinking with null content creates streaming thinking block with empty content', () => {
+  it('thinking with null content does not create an empty block', () => {
+    // LLM streams start with an empty reasoning_content chunk — an empty
+    // thinking event must not surface an empty thinking block.
     const state = run([s('thinking', { content: null })]);
-    const block = lastMsg(state).blocks?.find((b) => b.type === 'thinking');
-    expect(block).toBeDefined();
-    expect(block!.content).toBe('');
-    expect(block!.status).toBe('streaming');
+    expect(lastMsg(state).blocks ?? []).toHaveLength(0);
   });
 
-  it('thinking with missing content creates streaming thinking block with empty content', () => {
+  it('thinking with missing content does not create an empty block', () => {
     const state = run([s('thinking', {})]);
-    const block = lastMsg(state).blocks?.find((b) => b.type === 'thinking');
-    expect(block!.content).toBe('');
+    expect(lastMsg(state).blocks ?? []).toHaveLength(0);
   });
 
   it('user-message with null content defaults to empty string', () => {
