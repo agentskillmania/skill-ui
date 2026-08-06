@@ -79,7 +79,7 @@ describe('reducer — main agent events', () => {
     // daemon splits ToolsStart into per-call tool-start frames), followed by
     // a burst of tool-end frames. Each block must stay streaming until its
     // own tool-end matches by call id — an earlier tool-start must not close
-    // the previously created blocks (regression: closeOpenBlocks used to
+    // the previously created blocks (regression: closeThinkingBlocks used to
     // close every streaming block, so only the LAST tool_call completed).
     const state = pushEvents([
       {

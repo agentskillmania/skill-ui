@@ -177,7 +177,7 @@ function ensureStreamingMessage(run: AgentRunState): { run: AgentRunState; messa
  * never match by call id — leaving earlier blocks spinning forever without
  * their result.
  */
-function closeOpenBlocks(blocks: AgentBlock[]): AgentBlock[] {
+function closeThinkingBlocks(blocks: AgentBlock[]): AgentBlock[] {
   return blocks.map((b) =>
     b.type === 'thinking' && b.status === 'streaming' ? { ...b, status: 'completed' as const } : b
   );
@@ -232,7 +232,7 @@ function reduceMainEvent(
                 // streams emit empty `token` events between reasoning
                 // segments; closing on those would flip a streaming thinking
                 // block to completed mid-reasoning (visually "disappearing").
-                blocks: delta ? (m.blocks ? closeOpenBlocks(m.blocks) : m.blocks) : m.blocks,
+                blocks: delta ? (m.blocks ? closeThinkingBlocks(m.blocks) : m.blocks) : m.blocks,
               }
             : m
         ),
@@ -293,7 +293,7 @@ function reduceMainEvent(
       return {
         ...run,
         messages: run.messages.map((m) =>
-          m.id === messageId ? { ...m, blocks: [...closeOpenBlocks(m.blocks ?? []), block] } : m
+          m.id === messageId ? { ...m, blocks: [...closeThinkingBlocks(m.blocks ?? []), block] } : m
         ),
       };
     }
@@ -356,7 +356,7 @@ function reduceMainEvent(
         ...run,
         activeSkill: (data.name as string) ?? run.activeSkill,
         messages: run.messages.map((m) =>
-          m.id === messageId ? { ...m, blocks: [...closeOpenBlocks(m.blocks ?? []), block] } : m
+          m.id === messageId ? { ...m, blocks: [...closeThinkingBlocks(m.blocks ?? []), block] } : m
         ),
       };
     }
@@ -457,7 +457,7 @@ function reduceMainEvent(
       return {
         ...run,
         messages: run.messages.map((m) =>
-          m.id === messageId ? { ...m, blocks: [...closeOpenBlocks(m.blocks ?? []), block] } : m
+          m.id === messageId ? { ...m, blocks: [...closeThinkingBlocks(m.blocks ?? []), block] } : m
         ),
       };
     }
@@ -670,7 +670,7 @@ function reduceSubAgentEvent(
         ...sub,
         ...run,
         messages: run.messages.map((m) =>
-          m.id === messageId ? { ...m, blocks: [...closeOpenBlocks(m.blocks ?? []), block] } : m
+          m.id === messageId ? { ...m, blocks: [...closeThinkingBlocks(m.blocks ?? []), block] } : m
         ),
       });
     }
@@ -766,7 +766,9 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
         run: {
           ...run,
           messages: run.messages.map((m) =>
-            m.id === messageId ? { ...m, blocks: [...closeOpenBlocks(m.blocks ?? []), block] } : m
+            m.id === messageId
+              ? { ...m, blocks: [...closeThinkingBlocks(m.blocks ?? []), block] }
+              : m
           ),
         },
       };
