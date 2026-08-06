@@ -32,7 +32,6 @@ export interface AgentResource {
   description?: string;
   model?: string;
   thinking?: { enabled: boolean };
-  sandbox?: boolean;
   instructions?: string;
   skillDirs?: string[];
   mcpPaths?: string[];
@@ -52,7 +51,6 @@ export interface CrewResource {
   name: string;
   description?: string;
   primaryAgent: string;
-  sandbox?: boolean;
   memory?: string;
   agentDefs: string[];
   skillDirs?: string[];

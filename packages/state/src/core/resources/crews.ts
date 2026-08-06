@@ -8,7 +8,6 @@ export function normalizeCrew(raw: RawResource): CrewResource {
     name: String(raw.name ?? ''),
     description: raw.description as string | undefined,
     primaryAgent: String(raw.primaryAgent ?? raw.primary_agent ?? ''),
-    sandbox: raw.sandbox as boolean | undefined,
     memory: raw.memory as string | undefined,
     agentDefs: Array.isArray(raw.agentDefs) ? (raw.agentDefs as string[]) : [],
     skillDirs: raw.skillDirs as string[] | undefined,

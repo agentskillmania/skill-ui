@@ -9,7 +9,6 @@ export function normalizeAgent(raw: RawResource): AgentResource {
     description: raw.description as string | undefined,
     model: raw.model as string | undefined,
     thinking: raw.thinking as AgentResource['thinking'],
-    sandbox: raw.sandbox as boolean | undefined,
     instructions: raw.instructions as string | undefined,
     skillDirs: raw.skillDirs as string[] | undefined,
     mcpPaths: raw.mcpPaths as string[] | undefined,

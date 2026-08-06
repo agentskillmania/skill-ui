@@ -53,13 +53,11 @@ describe('normalizeCrew', () => {
       name: 'demo-crew',
       description: 'A crew',
       primaryAgent: 'orchestrator',
-      sandbox: true,
       agentDefs: ['orchestrator', 'coder'],
       configPath: '/crews/demo',
     });
     expect(result.name).toBe('demo-crew');
     expect(result.primaryAgent).toBe('orchestrator');
-    expect(result.sandbox).toBe(true);
     expect(result.agentDefs).toEqual(['orchestrator', 'coder']);
   });
 
