@@ -168,8 +168,23 @@ function ensureStreamingMessage(run: AgentRunState): { run: AgentRunState; messa
   };
 }
 
-/** Close any open thinking block on a message */
+/**
+ * Close open THINKING blocks on a message.
+ *
+ * Only thinking blocks are closed: a new tool-start must not flip previously
+ * created streaming tool_call blocks (parallel tool invocations arrive as a
+ * burst of tool-start events) to completed, or their tool-end results would
+ * never match by call id — leaving earlier blocks spinning forever without
+ * their result.
+ */
 function closeOpenBlocks(blocks: AgentBlock[]): AgentBlock[] {
+  return blocks.map((b) =>
+    b.type === 'thinking' && b.status === 'streaming' ? { ...b, status: 'completed' as const } : b
+  );
+}
+
+/** Close every still-streaming block (terminal events: done, sub-agent end). */
+function closeAllBlocks(blocks: AgentBlock[]): AgentBlock[] {
   return blocks.map((b) => (b.status === 'streaming' ? { ...b, status: 'completed' as const } : b));
 }
 
@@ -535,7 +550,7 @@ function reduceMainEvent(
             ? {
                 ...m,
                 status: 'completed' as const,
-                blocks: m.blocks ? closeOpenBlocks(m.blocks) : m.blocks,
+                blocks: m.blocks ? closeAllBlocks(m.blocks) : m.blocks,
               }
             : m
         ),
@@ -703,7 +718,7 @@ function reduceSubAgentEvent(
             ? {
                 ...m,
                 status: 'completed' as const,
-                blocks: m.blocks ? closeOpenBlocks(m.blocks) : m.blocks,
+                blocks: m.blocks ? closeAllBlocks(m.blocks) : m.blocks,
               }
             : m
         ),

@@ -74,6 +74,39 @@ describe('reducer — main agent events', () => {
     expect(state.main.activeSkill).toBeNull();
   });
 
+  it('completes ALL parallel tool_call blocks with their own results', () => {
+    // Parallel tool invocations arrive as a burst of tool-start events (the
+    // daemon splits ToolsStart into per-call tool-start frames), followed by
+    // a burst of tool-end frames. Each block must stay streaming until its
+    // own tool-end matches by call id — an earlier tool-start must not close
+    // the previously created blocks (regression: closeOpenBlocks used to
+    // close every streaming block, so only the LAST tool_call completed).
+    const state = pushEvents([
+      {
+        event: 'tool-start',
+        data: { id: 'call-1', name: 'web_search', args: { query: 'AI 新闻' } },
+      },
+      {
+        event: 'tool-start',
+        data: { id: 'call-2', name: 'web_search', args: { query: 'AI news' } },
+      },
+      { event: 'tool-start', data: { id: 'call-3', name: 'web_search', args: { query: 'GPT' } } },
+      { event: 'tool-end', data: { callId: 'call-1', result: 'results-1' } },
+      { event: 'tool-end', data: { callId: 'call-2', result: 'results-2' } },
+      { event: 'tool-end', data: { callId: 'call-3', result: 'results-3' } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    const toolBlocks = msg.blocks?.filter((b) => b.type === 'tool_call') ?? [];
+    expect(toolBlocks).toHaveLength(3);
+    for (const b of toolBlocks) {
+      expect(b.status).toBe('completed');
+    }
+    const byId = new Map(toolBlocks.map((b) => [b.id, b.metadata?.toolResult]));
+    expect(byId.get('call-1')).toBe('results-1');
+    expect(byId.get('call-2')).toBe('results-2');
+    expect(byId.get('call-3')).toBe('results-3');
+  });
+
   it('creates human_input block and resolves it', () => {
     const state = pushEvents([
       {
