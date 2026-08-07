@@ -16,6 +16,8 @@ import type {
   EventCategory,
   TokenStats,
   SubAgentRunState,
+  TodoItem,
+  TodoListSnapshot,
 } from './types.js';
 import { createEmptyRunState } from './types.js';
 import type { SSEEvent } from '../types.js';
@@ -502,6 +504,36 @@ function reduceMainEvent(
         ...state,
         tokens: tokens ? addTokens(state.tokens, tokens) : state.tokens,
       };
+    }
+
+    // ── Todo list (live snapshot from either daemon) ──
+    case 'todo-list': {
+      const rawItems = Array.isArray(data.items) ? (data.items as unknown[]) : [];
+      const todoList: TodoListSnapshot = {
+        items: rawItems
+          .filter(
+            (i): i is Record<string, unknown> =>
+              !!i &&
+              typeof i === 'object' &&
+              (typeof (i as Record<string, unknown>).id === 'number' ||
+                typeof (i as Record<string, unknown>).id === 'string')
+          )
+          .map((i) => ({
+            id: typeof i.id === 'number' ? i.id : Number(i.id),
+            subject: String(i.subject ?? ''),
+            status: (['pending', 'in_progress', 'completed'].includes(String(i.status))
+              ? String(i.status)
+              : 'pending') as TodoItem['status'],
+            ...(i.description !== undefined ? { description: String(i.description) } : {}),
+            ...(Array.isArray(i.blocks) && i.blocks.length > 0
+              ? { blocks: i.blocks.map(Number) }
+              : {}),
+            ...(Array.isArray(i.blocked_by) && i.blocked_by.length > 0
+              ? { blocked_by: i.blocked_by.map(Number) }
+              : {}),
+          })),
+      };
+      return { ...state, todoList };
     }
 
     // ── Step lifecycle ──

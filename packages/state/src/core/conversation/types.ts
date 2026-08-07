@@ -86,6 +86,26 @@ export interface AgentEvent {
   relatedMessageId?: string;
 }
 
+/**
+ * A single todo item. Wire shape shared by both daemons (TS & Rust emit
+ * identical JSON — snake_case `blocked_by`, empty arrays omitted).
+ */
+export interface TodoItem {
+  id: number;
+  subject: string;
+  description?: string;
+  status: 'pending' | 'in_progress' | 'completed';
+  /** Ids of todo items this one blocks */
+  blocks?: number[];
+  /** Ids of todo items that block this one */
+  blocked_by?: number[];
+}
+
+/** Live todo-list snapshot, fed by the `todo-list` SSE event. */
+export interface TodoListSnapshot {
+  items: TodoItem[];
+}
+
 // ─── Agent Run State ──────────────────────────────────────────────
 
 /**
@@ -100,6 +120,8 @@ export interface AgentRunState {
   totalSteps?: number;
   messages: AgentMessage[];
   lastLLMRequest?: { messages: unknown[]; tools: string[]; skill: string | null };
+  /** Latest todo-list snapshot (updated only when the list changes) */
+  todoList?: TodoListSnapshot;
   activeSkill: string | null;
   compression?: { summary: string; removedCount: number };
 }

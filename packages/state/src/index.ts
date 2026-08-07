@@ -26,6 +26,8 @@ export type {
   AgentRunState,
   SubAgentRunState,
   SessionRunState,
+  TodoItem,
+  TodoListSnapshot,
 } from './core/conversation/types.js';
 
 export {
@@ -49,6 +51,7 @@ export {
   selectStatus,
   selectStepCount,
   selectActiveSkill,
+  selectTodoList,
 } from './core/conversation/selectors.js';
 
 // ─── Conversation slice: history loading ──────────────────────────

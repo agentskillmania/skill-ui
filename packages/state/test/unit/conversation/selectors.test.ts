@@ -10,6 +10,7 @@ import {
   selectStatus,
   selectStepCount,
   selectActiveSkill,
+  selectTodoList,
 } from '../../../src/core/conversation/selectors.js';
 import { createEmptySessionState } from '../../../src/core/conversation/types.js';
 import type { SessionRunState, SubAgentRunState } from '../../../src/core/conversation/types.js';
@@ -189,6 +190,20 @@ describe('conversation selectors', () => {
 
     it('returns null when no active skill', () => {
       expect(selectActiveSkill(makeState())).toBeNull();
+    });
+  });
+
+  describe('selectTodoList', () => {
+    it('returns the latest todo snapshot', () => {
+      const state = makeState();
+      state.main.todoList = {
+        items: [{ id: 1, subject: 'a', status: 'in_progress' }],
+      };
+      expect(selectTodoList(state)?.items).toHaveLength(1);
+    });
+
+    it('returns undefined before the first todo-list event', () => {
+      expect(selectTodoList(makeState())).toBeUndefined();
     });
   });
 });

@@ -87,3 +87,8 @@ export function selectStepCount(state: SessionRunState): number {
 export function selectActiveSkill(state: SessionRunState): string | null {
   return state.main.activeSkill;
 }
+
+/** Latest todo-list snapshot (undefined until the first todo-list event) */
+export function selectTodoList(state: SessionRunState) {
+  return state.main.todoList;
+}

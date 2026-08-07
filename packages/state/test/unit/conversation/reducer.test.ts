@@ -195,6 +195,54 @@ describe('reducer — main agent events', () => {
   });
 });
 
+describe('reducer — todo-list events', () => {
+  it('stores the todo-list snapshot (Rust wire shape)', () => {
+    const state = pushEvents([
+      {
+        event: 'todo-list',
+        data: {
+          items: [
+            { id: 1, subject: 'search', status: 'completed' },
+            {
+              id: 2,
+              subject: 'write report',
+              status: 'in_progress',
+              description: 'md',
+              blocks: [3],
+            },
+            { id: 3, subject: 'review', status: 'pending', blocked_by: [2] },
+          ],
+        },
+      },
+    ]);
+    expect(state.main.todoList?.items).toEqual([
+      { id: 1, subject: 'search', status: 'completed' },
+      { id: 2, subject: 'write report', status: 'in_progress', description: 'md', blocks: [3] },
+      { id: 3, subject: 'review', status: 'pending', blocked_by: [2] },
+    ]);
+    // Todo events are also recorded in the event log
+    expect(state.events.at(-1)?.type).toBe('todo-list');
+  });
+
+  it('replaces the previous snapshot when the list changes', () => {
+    const state = pushEvents([
+      { event: 'todo-list', data: { items: [{ id: 1, subject: 'a', status: 'pending' }] } },
+      { event: 'todo-list', data: { items: [{ id: 1, subject: 'a', status: 'in_progress' }] } },
+    ]);
+    expect(state.main.todoList?.items).toEqual([{ id: 1, subject: 'a', status: 'in_progress' }]);
+  });
+
+  it('tolerates malformed todo-list payloads', () => {
+    const state = pushEvents([
+      { event: 'todo-list', data: { items: 'nope' } },
+      { event: 'todo-list', data: {} },
+      { event: 'todo-list', data: { items: [{ subject: 'no-id' }, 'junk', null] } },
+    ]);
+    // Invalid payloads produce an empty list without crashing
+    expect(state.main.todoList?.items).toEqual([]);
+  });
+});
+
 describe('reducer — sub-agent events', () => {
   it('creates sub-agent on subagent-start and block on parent message', () => {
     const state = pushEvents([
