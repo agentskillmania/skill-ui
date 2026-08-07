@@ -6,6 +6,18 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./test/setup.ts'],
+    server: {
+      deps: {
+        /**
+         * Same as the workspace root config: file:-linked skill-ui packages are
+         * materialized as .pnpm store copies; externalizing them would (a) load
+         * @emotion/react twice (ESM vs CJS) splitting the ThemeContext and
+         * (b) bypass the genui alias, loading the real genui with its bundled
+         * lottie that needs a canvas at import time. Inline keeps one identity.
+         */
+        inline: [/@agentskillmania\/skill-ui-/],
+      },
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

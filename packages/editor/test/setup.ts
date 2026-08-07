@@ -58,3 +58,22 @@ Object.defineProperty(window, 'matchMedia', {
     dispatchEvent: vi.fn(),
   })),
 });
+
+// genui's bundled lottie grabs a 2D context at import time; jsdom has none
+HTMLCanvasElement.prototype.getContext = vi.fn(
+  () =>
+    ({
+      fillStyle: '',
+      strokeStyle: '',
+      lineWidth: 1,
+      fillRect: () => {},
+      strokeRect: () => {},
+      clearRect: () => {},
+      beginPath: () => {},
+      arc: () => {},
+      fill: () => {},
+      stroke: () => {},
+      measureText: () => ({ width: 0 }),
+      getImageData: () => ({ data: new Uint8ClampedArray(0) }),
+    }) as unknown as CanvasRenderingContext2D
+) as unknown as typeof HTMLCanvasElement.prototype.getContext;

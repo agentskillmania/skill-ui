@@ -44,10 +44,9 @@ Object.defineProperty(window, 'matchMedia', {
 // Each package setup mocks react-i18next with its OWN zh-CN translations.
 // For root-level runs we merge every package's locale file so keys resolve
 // regardless of which package's components the test imports.
-const translationModules = import.meta.glob(
-  '../packages/*/src/locales/zh-CN.json',
-  { eager: true },
-) as Record<string, Record<string, unknown>>;
+const translationModules = import.meta.glob('../packages/*/src/locales/zh-CN.json', {
+  eager: true,
+}) as Record<string, Record<string, unknown>>;
 const mergedTranslations: Record<string, unknown> = {};
 for (const mod of Object.values(translationModules)) {
   Object.assign(mergedTranslations, mod);
@@ -69,7 +68,8 @@ vi.mock('react-i18next', () => ({
     t: (key: string, params?: Record<string, unknown>) => {
       if (KEYS_AS_TEXT) return key;
       // Portal keys live under a `portal` namespace (useTranslation('skill-ui-portal')).
-      const base = ns === 'skill-ui-portal' ? (mergedTranslations.portal ?? {}) : mergedTranslations;
+      const base =
+        ns === 'skill-ui-portal' ? (mergedTranslations.portal ?? {}) : mergedTranslations;
       let result = resolveTranslation(base, key);
       if (params) {
         for (const [k, v] of Object.entries(params)) {
@@ -116,6 +116,31 @@ vi.mock('@agentskillmania/skill-ui-chat', async (importOriginal) => {
     },
   };
 });
+
+// genui (and lottie code paths it pulls in) renders to a 2d canvas context,
+// which jsdom does not implement — provide a minimal no-op context.
+HTMLCanvasElement.prototype.getContext = vi.fn(() => ({
+  fillStyle: '',
+  strokeStyle: '',
+  lineWidth: 1,
+  fillRect() {},
+  strokeRect() {},
+  clearRect() {},
+  beginPath() {},
+  closePath() {},
+  moveTo() {},
+  lineTo() {},
+  arc() {},
+  fill() {},
+  stroke() {},
+  save() {},
+  restore() {},
+  translate() {},
+  scale() {},
+  measureText: () => ({ width: 0 }),
+  createLinearGradient: () => ({ addColorStop() {} }),
+  getImageData: () => ({ data: new Uint8ClampedArray(0) }),
+})) as never;
 
 // lottie-web needs canvas context unavailable in jsdom (editor setup)
 vi.mock('lottie-web', () => ({
