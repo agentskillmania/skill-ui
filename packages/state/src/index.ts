@@ -52,6 +52,7 @@ export {
   selectStepCount,
   selectActiveSkill,
   selectTodoList,
+  selectLastInputTokens,
   selectActivityTimeline,
 } from './core/conversation/selectors.js';
 

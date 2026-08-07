@@ -93,6 +93,12 @@ export function selectTodoList(state: SessionRunState) {
   return state.main.todoList;
 }
 
+/** Input tokens of the last LLM call — the context window currently in use.
+ *  Distinct from cumulative `selectTotalTokens` (billing total). */
+export function selectLastInputTokens(state: SessionRunState): number | undefined {
+  return state.main.lastInputTokens;
+}
+
 // ─── Activity timeline ────────────────────────────────────────────
 
 /** One entry in the derived activity timeline (a structured block). */

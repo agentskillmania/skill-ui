@@ -120,6 +120,10 @@ export interface AgentRunState {
   totalSteps?: number;
   messages: AgentMessage[];
   lastLLMRequest?: { messages: unknown[]; tools: string[]; skill: string | null };
+  /** Input tokens of the LAST llm-response — the size of the context window
+   *  actually in use (system prompt + history + this turn). Distinct from
+   *  cumulative `tokens` which is the billing total across all turns. */
+  lastInputTokens?: number;
   /** Latest todo-list snapshot (updated only when the list changes) */
   todoList?: TodoListSnapshot;
   activeSkill: string | null;

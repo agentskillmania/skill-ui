@@ -503,6 +503,9 @@ function reduceMainEvent(
       return {
         ...state,
         tokens: tokens ? addTokens(state.tokens, tokens) : state.tokens,
+        // lastInputTokens = the input size of the most recent LLM call =
+        // the context window currently in use (NOT cumulative).
+        ...(tokens?.input !== undefined ? { lastInputTokens: tokens.input } : {}),
       };
     }
 
