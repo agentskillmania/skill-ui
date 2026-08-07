@@ -92,3 +92,67 @@ export function selectActiveSkill(state: SessionRunState): string | null {
 export function selectTodoList(state: SessionRunState) {
   return state.main.todoList;
 }
+
+// ─── Activity timeline ────────────────────────────────────────────
+
+/** One entry in the derived activity timeline (a structured block). */
+export interface ActivityTimelineEntry {
+  id: string;
+  type: 'thinking' | 'tool' | 'subagent';
+  /** Tool name / sub-agent name; empty for thinking (UI supplies the label). */
+  label: string;
+  /** First string-ish tool argument, truncated (tools only). */
+  detail?: string;
+  status: 'running' | 'done' | 'error';
+}
+
+/**
+ * Flatten the main agent's message blocks into an ordered activity timeline —
+ * the "what is the agent doing" list (thinking → tools → sub-agents, in the
+ * order they appear in the conversation). Derived from blocks, so it always
+ * matches what the chat view renders. Consumers own the i18n.
+ */
+export function selectActivityTimeline(state: SessionRunState): ActivityTimelineEntry[] {
+  const out: ActivityTimelineEntry[] = [];
+  for (const m of state.main.messages) {
+    for (const b of m.blocks ?? []) {
+      if (b.type === 'thinking') {
+        out.push({
+          id: b.id,
+          type: 'thinking',
+          label: '',
+          status: b.status === 'streaming' ? 'running' : 'done',
+        });
+      } else if (b.type === 'tool_call') {
+        const rawArgs = typeof b.metadata?.toolArgs === 'string' ? b.metadata.toolArgs : '';
+        let detail: string | undefined;
+        if (rawArgs) {
+          try {
+            const parsed = JSON.parse(rawArgs) as Record<string, unknown>;
+            const first = Object.values(parsed).find((v) => typeof v === 'string' && v.length > 0);
+            if (typeof first === 'string') {
+              detail = first.length > 80 ? `${first.slice(0, 80)}…` : first;
+            }
+          } catch {
+            detail = rawArgs.length > 80 ? `${rawArgs.slice(0, 80)}…` : rawArgs;
+          }
+        }
+        out.push({
+          id: b.id,
+          type: 'tool',
+          label: String(b.metadata?.toolName ?? 'tool'),
+          ...(detail !== undefined ? { detail } : {}),
+          status: b.status === 'error' ? 'error' : b.status === 'streaming' ? 'running' : 'done',
+        });
+      } else if (b.type === 'subagent') {
+        out.push({
+          id: b.id,
+          type: 'subagent',
+          label: String(b.metadata?.name ?? 'sub-agent'),
+          status: b.status === 'error' ? 'error' : b.status === 'streaming' ? 'running' : 'done',
+        });
+      }
+    }
+  }
+  return out;
+}

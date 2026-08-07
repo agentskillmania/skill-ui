@@ -11,6 +11,7 @@ import {
   selectStepCount,
   selectActiveSkill,
   selectTodoList,
+  selectActivityTimeline,
 } from '../../../src/core/conversation/selectors.js';
 import { createEmptySessionState } from '../../../src/core/conversation/types.js';
 import type { SessionRunState, SubAgentRunState } from '../../../src/core/conversation/types.js';
@@ -190,6 +191,56 @@ describe('conversation selectors', () => {
 
     it('returns null when no active skill', () => {
       expect(selectActiveSkill(makeState())).toBeNull();
+    });
+  });
+
+  describe('selectActivityTimeline', () => {
+    it('flattens thinking/tool/subagent blocks in order', () => {
+      const state = makeState();
+      state.main.messages = [
+        {
+          id: 'm1',
+          role: 'assistant',
+          content: '',
+          status: 'completed',
+          blocks: [
+            { id: 'b1', type: 'thinking', status: 'completed', content: 'hmm' },
+            {
+              id: 'b2',
+              type: 'tool_call',
+              status: 'streaming',
+              content: '',
+              metadata: {
+                toolName: 'shell',
+                toolArgs: JSON.stringify({ cmd: 'ls -la /tmp/very/long/path/here' }),
+              },
+            },
+            {
+              id: 'b3',
+              type: 'subagent',
+              status: 'completed',
+              content: '',
+              metadata: { name: 'researcher' },
+            },
+          ],
+        },
+      ];
+      const tl = selectActivityTimeline(state);
+      expect(tl).toEqual([
+        { id: 'b1', type: 'thinking', label: '', status: 'done' },
+        {
+          id: 'b2',
+          type: 'tool',
+          label: 'shell',
+          detail: 'ls -la /tmp/very/long/path/here',
+          status: 'running',
+        },
+        { id: 'b3', type: 'subagent', label: 'researcher', status: 'done' },
+      ]);
+    });
+
+    it('returns empty when there are no activity blocks', () => {
+      expect(selectActivityTimeline(makeState())).toEqual([]);
     });
   });
 

@@ -52,6 +52,7 @@ export {
   selectStepCount,
   selectActiveSkill,
   selectTodoList,
+  selectActivityTimeline,
 } from './core/conversation/selectors.js';
 
 // ─── Conversation slice: history loading ──────────────────────────
