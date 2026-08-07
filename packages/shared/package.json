@@ -35,7 +35,7 @@
     "directory": "packages/shared"
   },
   "dependencies": {
-    "@agentskillmania/skill-ui-theme": "workspace:*",
+    "@agentskillmania/skill-ui-theme": "file:../theme",
     "@emotion/react": "^11.14.0"
   },
   "peerDependencies": {

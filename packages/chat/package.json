@@ -36,8 +36,9 @@
     "directory": "packages/chat"
   },
   "dependencies": {
-    "@agentskillmania/skill-ui-theme": "workspace:*",
+    "@agentskillmania/skill-ui-theme": "file:../theme",
     "@emotion/react": "^11.14.0",
+    "@microlink/react-json-view": "^1.31.18",
     "monaco-editor": "^0.55.1"
   },
   "peerDependencies": {
@@ -55,7 +56,6 @@
     "@ant-design/x": "^2.4.0",
     "@ant-design/x-markdown": "^2.4.0",
     "@chromatic-com/storybook": "^5.0.2",
-    "@microlink/react-json-view": "^1.31.18",
     "@monaco-editor/react": "^4.7.0",
     "@storybook/addon-a11y": "^10.3.3",
     "@storybook/addon-docs": "^10.3.3",

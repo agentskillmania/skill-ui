@@ -36,9 +36,9 @@
     "directory": "packages/editor"
   },
   "dependencies": {
-    "@agentskillmania/skill-ui-chat": "workspace:*",
-    "@agentskillmania/skill-ui-shared": "workspace:*",
-    "@agentskillmania/skill-ui-theme": "workspace:*",
+    "@agentskillmania/skill-ui-chat": "file:../chat",
+    "@agentskillmania/skill-ui-shared": "file:../shared",
+    "@agentskillmania/skill-ui-theme": "file:../theme",
     "@emotion/react": "^11.14.0",
     "@milkdown/crepe": "^7.20.0",
     "@milkdown/utils": "^7.20.0",
