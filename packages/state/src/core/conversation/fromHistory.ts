@@ -135,6 +135,26 @@ export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
             // Parse DelegateResult from tool result
             const delegateResult = parseDelegateResult(resultContent);
             const subtaskId = `hist-${tc.id}`;
+            // Minimal sub-run conversation (task + final answer) shared by the
+            // parent block metadata (SubAgentModal) and the SubAgentRunState.
+            const histMessages = [
+              {
+                id: `hist-sub-${subtaskId}-task`,
+                role: 'user' as const,
+                content: (tc.arguments.task as string) ?? '',
+                status: 'completed' as const,
+              },
+              ...(delegateResult.answer
+                ? [
+                    {
+                      id: `hist-sub-${subtaskId}-answer`,
+                      role: 'assistant' as const,
+                      content: delegateResult.answer,
+                      status: 'completed' as const,
+                    },
+                  ]
+                : []),
+            ];
             blocks.push({
               id: genHistBlockId(),
               type: 'subagent',
@@ -146,9 +166,12 @@ export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
                 task: tc.arguments.task ?? '',
                 resultStatus: delegateResult.status,
                 steps: delegateResult.totalSteps,
-                tokens: delegateResult.tokens,
+                // Flat token fields — matches SubAgentBlockMetadata / chat UI.
+                inputTokens: delegateResult.tokens?.input,
+                outputTokens: delegateResult.tokens?.output,
                 duration: delegateResult.duration,
                 error: delegateResult.error,
+                messages: histMessages,
               },
             });
             // Create a minimal SubAgentRunState with summary data (no internal conversation)
@@ -169,24 +192,7 @@ export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
                 },
                 duration: delegateResult.duration ?? 0,
                 error: delegateResult.error,
-                messages: [
-                  {
-                    id: `hist-sub-${subtaskId}-task`,
-                    role: 'user',
-                    content: (tc.arguments.task as string) ?? '',
-                    status: 'completed',
-                  },
-                  ...(delegateResult.answer
-                    ? [
-                        {
-                          id: `hist-sub-${subtaskId}-answer`,
-                          role: 'assistant' as const,
-                          content: delegateResult.answer,
-                          status: 'completed' as const,
-                        },
-                      ]
-                    : []),
-                ],
+                messages: histMessages,
               };
               subAgents.set(subtaskId, subRun);
             }

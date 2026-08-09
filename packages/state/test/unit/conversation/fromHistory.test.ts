@@ -157,6 +157,10 @@ describe('fromHistory', () => {
     expect(subBlock!.metadata?.name).toBe('researcher');
     expect(subBlock!.metadata?.resultStatus).toBe('success');
     expect(subBlock!.metadata?.steps).toBe(3);
+    // Flat token fields (SubAgentBlockMetadata shape) + messages for the modal
+    expect(subBlock!.metadata?.inputTokens).toBe(500);
+    expect(subBlock!.metadata?.outputTokens).toBe(200);
+    expect(subBlock!.metadata?.messages).toHaveLength(2);
 
     // Check sub-agent state
     const subtaskId = subBlock!.metadata?.subtaskId as string;
