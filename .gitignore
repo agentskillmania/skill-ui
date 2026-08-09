@@ -57,3 +57,4 @@ tmp/
 storybook-static/
 workspace/
 .superpowers/
+.zcode/

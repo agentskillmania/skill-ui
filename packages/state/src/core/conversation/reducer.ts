@@ -309,11 +309,16 @@ function reduceMainEvent(
           // Match by block id (which was set to callId at tool-start time)
           const targetBlock = m.blocks.find((b) => b.id === callId && b.status === 'streaming');
           if (!targetBlock) {
-            // Fallback: match first streaming tool_call (backward compat)
-            const fallback = m.blocks.find(
+            // Fallback: match the sole streaming tool_call (backward compat).
+            // Only safe when there is exactly one candidate — with parallel
+            // tool calls (or duplicate tool-end frames) the callId is the
+            // only reliable discriminator; matching the first block would
+            // misattribute results and leave blocks spinning forever.
+            const streaming = m.blocks.filter(
               (b) => b.type === 'tool_call' && b.status === 'streaming'
             );
-            if (!fallback) return m;
+            if (streaming.length !== 1) return m;
+            const fallback = streaming[0];
             return {
               ...m,
               blocks: m.blocks.map((b) =>
@@ -713,12 +718,33 @@ function reduceSubAgentEvent(
     case 'subagent-tool-end': {
       const sub = subAgents.get(subtaskId);
       if (!sub) return subAgents;
+      const callId = (data.callId as string) ?? '';
       return new Map(subAgents).set(subtaskId, {
         ...sub,
         messages: sub.messages.map((m) => {
           if (!m.blocks) return m;
-          const target = m.blocks.find((b) => b.type === 'tool_call' && b.status === 'streaming');
-          if (!target) return m;
+          // Match by block id (which was set to callId at subagent-tool-start time)
+          const target = m.blocks.find((b) => b.id === callId && b.status === 'streaming');
+          if (!target) {
+            // Fallback: only safe with a single streaming tool_call (parallel
+            // calls cannot be disambiguated without callId)
+            const streaming = m.blocks.filter(
+              (b) => b.type === 'tool_call' && b.status === 'streaming'
+            );
+            if (streaming.length !== 1) return m;
+            return {
+              ...m,
+              blocks: m.blocks.map((b) =>
+                b.id === streaming[0].id
+                  ? {
+                      ...b,
+                      status: 'completed' as const,
+                      metadata: { ...b.metadata, toolResult: data.result ?? '' },
+                    }
+                  : b
+              ),
+            };
+          }
           return {
             ...m,
             blocks: m.blocks.map((b) =>
@@ -844,9 +870,16 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
                     ...b.metadata,
                     resultStatus: sub.resultStatus,
                     steps: sub.totalSteps,
-                    tokens: sub.tokens,
+                    // Flat token fields — the shape SubAgentBlockMetadata
+                    // declares and the chat UI reads (inputTokens/outputTokens).
+                    inputTokens: sub.tokens.input,
+                    outputTokens: sub.tokens.output,
                     duration: sub.duration,
                     error: sub.error,
+                    // Full sub-run conversation for the SubAgentModal.
+                    // AgentMessage is structurally compatible with chat's
+                    // Message (same role/content/status/createdAt shape).
+                    messages: sub.messages,
                   },
                 };
               }),

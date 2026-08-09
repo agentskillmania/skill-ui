@@ -107,6 +107,39 @@ describe('reducer — main agent events', () => {
     expect(byId.get('call-3')).toBe('results-3');
   });
 
+  it('does NOT fall back to first streaming tool_call when callId is missing during parallel calls', () => {
+    // Regression: with parallel tool calls and no callId (e.g. a provider
+    // that omits it), the old fallback matched the FIRST streaming block,
+    // misattributing results and leaving the real target spinning forever.
+    // Now the fallback only fires when there is a single candidate.
+    const state = pushEvents([
+      { event: 'tool-start', data: { id: 'call-1', name: 'web_search', args: { q: 'a' } } },
+      { event: 'tool-start', data: { id: 'call-2', name: 'file_read', args: { p: '/x' } } },
+      // No callId — cannot disambiguate, must skip rather than misattribute
+      { event: 'tool-end', data: { result: 'early-result' } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    const toolBlocks = msg.blocks?.filter((b) => b.type === 'tool_call') ?? [];
+    expect(toolBlocks).toHaveLength(2);
+    for (const b of toolBlocks) {
+      expect(b.status).toBe('streaming');
+      expect(b.metadata?.toolResult).toBeUndefined();
+    }
+  });
+
+  it('single streaming tool_call still completes via fallback when callId is missing', () => {
+    // Backward compat: providers that omit callId on tool-end must still work
+    // for sequential (non-parallel) tool calls.
+    const state = pushEvents([
+      { event: 'tool-start', data: { id: 'call-1', name: 'file_read', args: { path: '/x' } } },
+      { event: 'tool-end', data: { result: 'file content' } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    const block = msg.blocks?.find((b) => b.type === 'tool_call');
+    expect(block?.status).toBe('completed');
+    expect(block?.metadata?.toolResult).toBe('file content');
+  });
+
   it('creates human_input block and resolves it', () => {
     const state = pushEvents([
       {
@@ -309,6 +342,13 @@ describe('reducer — sub-agent events', () => {
     expect(subBlock!.status).toBe('completed');
     expect(subBlock!.metadata?.resultStatus).toBe('success');
     expect(subBlock!.metadata?.steps).toBe(3);
+    // Flat token fields (SubAgentBlockMetadata shape) + conversation messages
+    expect(subBlock!.metadata?.inputTokens).toBe(500);
+    expect(subBlock!.metadata?.outputTokens).toBe(200);
+    const blockMessages = subBlock!.metadata?.messages as Array<{ role: string; content: string }>;
+    expect(blockMessages).toHaveLength(1);
+    expect(blockMessages[0].role).toBe('assistant');
+    expect(blockMessages[0].content).toBe('result');
   });
 });
 

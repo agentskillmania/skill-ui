@@ -580,6 +580,30 @@ describe('reducer — sub-agent lifecycle', () => {
     expect(msg.blocks?.find((b) => b.type === 'tool_call')?.status).toBe('completed');
   });
 
+  it('subagent-tool-end without callId during parallel calls does NOT misattribute', () => {
+    const state = run([
+      s('subagent-start', { subtaskId: 's1', name: 'h', task: 't' }),
+      s('subagent-tool-start', {
+        subtaskId: 's1',
+        action: { id: 'tc1', tool: 'shell', arguments: {} },
+      }),
+      s('subagent-tool-start', {
+        subtaskId: 's1',
+        action: { id: 'tc2', tool: 'read', arguments: {} },
+      }),
+      // Missing callId + two streaming blocks — must skip, not match first
+      s('subagent-tool-end', { subtaskId: 's1', result: 'orphan' }),
+    ]);
+    const sub = state.subAgents.get('s1')!;
+    const msg = sub.messages[sub.messages.length - 1];
+    const toolBlocks = msg.blocks?.filter((b) => b.type === 'tool_call') ?? [];
+    expect(toolBlocks).toHaveLength(2);
+    for (const b of toolBlocks) {
+      expect(b.status).toBe('streaming');
+      expect(b.metadata?.toolResult).toBeUndefined();
+    }
+  });
+
   it('subagent-tool-end with unknown callId uses fallback match', () => {
     const state = run([
       s('subagent-start', { subtaskId: 's1', name: 'h', task: 't' }),
