@@ -119,7 +119,15 @@ export interface AgentRunState {
   startedAt?: number;
   totalSteps?: number;
   messages: AgentMessage[];
-  lastLLMRequest?: { messages: unknown[]; tools: string[]; skill: string | null };
+  lastLLMRequest?: {
+    messages: unknown[];
+    tools: string[];
+    skill: string | null;
+    /** Model used for this LLM call (may differ from session default if overridden per-request). */
+    model?: string;
+    /** Context window (tokens) of the model — from llm:request event. */
+    contextWindow?: number;
+  };
   /** Input tokens of the LAST llm-response — the size of the context window
    *  actually in use (system prompt + history + this turn). Distinct from
    *  cumulative `tokens` which is the billing total across all turns. */

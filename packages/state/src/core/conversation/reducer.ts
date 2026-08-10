@@ -499,6 +499,8 @@ function reduceMainEvent(
           messages: (data.messages as unknown[]) ?? [],
           tools: (data.tools as string[]) ?? [],
           skill: (data.skill as { current: string | null } | null)?.current ?? null,
+          model: data.model as string | undefined,
+          contextWindow: typeof data.contextWindow === 'number' ? data.contextWindow : undefined,
         },
       };
     }

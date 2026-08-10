@@ -283,6 +283,17 @@ describe('reducer — llm-request defaults', () => {
     const state = run([s('llm-request', { skill: { current: null } })]);
     expect(state.main.lastLLMRequest?.skill).toBeNull();
   });
+
+  it('llm-request with no model/contextWindow leaves them undefined', () => {
+    const state = run([s('llm-request', {})]);
+    expect(state.main.lastLLMRequest?.model).toBeUndefined();
+    expect(state.main.lastLLMRequest?.contextWindow).toBeUndefined();
+  });
+
+  it('llm-request with non-number contextWindow is ignored', () => {
+    const state = run([s('llm-request', { contextWindow: 'huge' })]);
+    expect(state.main.lastLLMRequest?.contextWindow).toBeUndefined();
+  });
 });
 
 describe('reducer — sub-agent defaults', () => {

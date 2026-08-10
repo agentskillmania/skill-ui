@@ -32,11 +32,15 @@ describe('reducer — uncovered event branches', () => {
         messages: [{ role: 'system', content: 'You are...' }],
         tools: ['file_read', 'shell'],
         skill: null,
+        model: 'claude-sonnet-4-5',
+        contextWindow: 200000,
       },
     });
     expect(state.main.lastLLMRequest).toBeDefined();
     expect(state.main.lastLLMRequest?.tools).toEqual(['file_read', 'shell']);
     expect(state.main.lastLLMRequest?.skill).toBeNull();
+    expect(state.main.lastLLMRequest?.model).toBe('claude-sonnet-4-5');
+    expect(state.main.lastLLMRequest?.contextWindow).toBe(200000);
   });
 
   it('handles llm-request with skill name', () => {
