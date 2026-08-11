@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
-import type { BlockProps, HumanInputMetadata } from '../types.js';
+import type { BlockProps, HumanInputMetadata, HumanInputQuestion } from '../types.js';
 
 /**
  * Shared button base — layout, typography, transition, and active-state
@@ -77,6 +77,173 @@ function formatResponse(response: unknown, t: (key: string) => string): string {
   }
   if (Array.isArray(response)) return response.join(', ');
   return String(response);
+}
+
+/** Input control for a single question. Reports its answer up via onChange. */
+function QuestionInput({
+  q,
+  theme,
+  t,
+  onChange,
+}: {
+  q: HumanInputQuestion;
+  theme: Theme;
+  t: (key: string) => string;
+  onChange: (answer: { type: 'direct' | 'free-text'; value: unknown } | undefined) => void;
+}) {
+  const [text, setText] = useState('');
+  const [single, setSingle] = useState<string | undefined>();
+  const [multi, setMulti] = useState<string[]>([]);
+
+  const labelCss = css`
+    font-size: ${theme.font.size.sm};
+    font-weight: ${theme.font.weight.medium};
+    color: ${theme.color.textSecondary};
+    margin-bottom: ${theme.spacing[2]};
+  `;
+  const inputCss = css`
+    width: 100%;
+    padding: ${theme.spacing[2]} ${theme.spacing[3]};
+    border-radius: ${theme.radius.md};
+    border: 1px solid ${theme.color.border};
+    background: ${theme.color.bgContainer};
+    color: ${theme.color.text};
+    font-family: ${theme.font.family};
+    font-size: ${theme.font.size.base};
+    outline: none;
+    &:focus {
+      border-color: ${theme.color.primary};
+      box-shadow: 0 0 0 3px ${theme.color.primaryBg};
+    }
+  `;
+  const optionCss = (selected: boolean) => css`
+    display: flex;
+    align-items: center;
+    gap: ${theme.spacing[3]};
+    padding: ${theme.spacing[2]} ${theme.spacing[3]};
+    border-radius: ${theme.radius.md};
+    border: 1px solid ${selected ? theme.color.primary : theme.color.border};
+    background: ${selected ? theme.color.primaryBg : theme.color.bgContainer};
+    cursor: pointer;
+    transition: all ${theme.motion.duration.fast} ${theme.motion.easing.out};
+    &:hover {
+      border-color: ${theme.color.primary};
+      background: ${selected ? theme.color.primaryBg : theme.color.fillSubtle};
+    }
+  `;
+
+  return (
+    <div>
+      <div css={labelCss}>{q.question}</div>
+      {(q.type === 'text' || q.type === 'number') && (
+        <input
+          type={q.type === 'number' ? 'number' : 'text'}
+          value={text}
+          onChange={(e) => {
+            const v = e.target.value;
+            setText(v);
+            onChange({ type: 'free-text', value: q.type === 'number' ? Number(v) : v });
+          }}
+          placeholder={t('humanInput.placeholder')}
+          css={inputCss}
+        />
+      )}
+      {q.type === 'single-select' && (
+        <div css={css`display: flex; flex-direction: column; gap: ${theme.spacing[2]};`}>
+          {(q.options ?? []).map((opt) => (
+            <div
+              key={opt}
+              css={optionCss(single === opt)}
+              onClick={() => {
+                setSingle(opt);
+                onChange({ type: 'direct', value: opt });
+              }}
+            >
+              <span css={css`width:18px;height:18px;border-radius:${theme.radius.full};border:2px solid ${single === opt ? theme.color.primary : theme.color.border};display:flex;align-items:center;justify-content:center;flex-shrink:0;`}>
+                {single === opt && <span css={css`width:8px;height:8px;border-radius:${theme.radius.full};background:${theme.color.primary};`} />}
+              </span>
+              <span css={css`font-size:${theme.font.size.base};color:${theme.color.text};`}>{opt}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {q.type === 'multi-select' && (
+        <div css={css`display: flex; flex-direction: column; gap: ${theme.spacing[2]};`}>
+          {(q.options ?? []).map((opt) => {
+            const checked = multi.includes(opt);
+            return (
+              <div
+                key={opt}
+                css={optionCss(checked)}
+                onClick={() => {
+                  const next = checked ? multi.filter((v) => v !== opt) : [...multi, opt];
+                  setMulti(next);
+                  onChange(next.length ? { type: 'direct', value: next } : undefined);
+                }}
+              >
+                <span css={css`width:18px;height:18px;border-radius:${theme.radius.sm};border:2px solid ${checked ? theme.color.primary : theme.color.border};display:flex;align-items:center;justify-content:center;flex-shrink:0;`}>
+                  {checked && <Check size={12} color={theme.color.primary} />}
+                </span>
+                <span css={css`font-size:${theme.font.size.base};color:${theme.color.text};`}>{opt}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/** Multi-question form: renders one QuestionInput per question, collects all
+ * answers into a { [questionId]: { type, value } } object on submit. */
+function MultiQuestionForm({
+  questions,
+  theme,
+  t,
+  onSubmit,
+}: {
+  questions: HumanInputQuestion[];
+  theme: Theme;
+  t: (key: string) => string;
+  onSubmit: (response: Record<string, unknown>) => void;
+}) {
+  // answers[qId] = { type, value } | undefined (undefined = not yet answered)
+  const [answers, setAnswers] = useState<Record<string, { type: 'direct' | 'free-text'; value: unknown } | undefined>>({});
+
+  const allAnswered = questions.every((q) => answers[q.id] !== undefined);
+
+  const handleSubmit = () => {
+    const result: Record<string, unknown> = {};
+    for (const q of questions) {
+      const a = answers[q.id];
+      if (a) result[q.id] = a;
+    }
+    onSubmit(result);
+  };
+
+  return (
+    <div css={css`display: flex; flex-direction: column; gap: ${theme.spacing[4]};`}>
+      {questions.map((q) => (
+        <QuestionInput
+          key={q.id}
+          q={q}
+          theme={theme}
+          t={t}
+          onChange={(ans) => setAnswers((prev) => ({ ...prev, [q.id]: ans }))}
+        />
+      ))}
+      <div css={css`display: flex; justify-content: flex-end;`}>
+        <button
+          css={[buttonBaseCss(theme), solidButtonCss(theme), disabledButtonCss]}
+          disabled={!allAnswered}
+          onClick={handleSubmit}
+        >
+          <SendHorizontal size={14} />
+          {t('common.submit')}
+        </button>
+      </div>
+    </div>
+  );
 }
 
 export function HumanInputBlock({ block, onConfirm }: BlockProps) {
@@ -210,7 +377,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
             padding: ${theme.spacing[4]};
           `}
         >
-          {meta?.message && (
+          {meta?.message && !meta?.questions && (
             <div
               css={css`
                 font-size: ${theme.font.size.base};
@@ -223,8 +390,18 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
             </div>
           )}
 
-          {/* Confirmation */}
-          {inputType === 'confirmation' && (
+          {/* Multi-question form (ask_human with >1 questions) */}
+          {meta?.questions && meta.questions.length > 0 && (
+            <MultiQuestionForm
+              questions={meta.questions}
+              theme={theme}
+              t={t}
+              onSubmit={(response) => handleSubmit(response)}
+            />
+          )}
+
+          {/* Single-question controls — only when no multi-question form */}
+          {!meta?.questions && inputType === 'confirmation' && (
             <div
               css={css`
                 display: flex;
@@ -260,7 +437,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
           )}
 
           {/* Text input */}
-          {inputType === 'input' && (
+          {!meta?.questions && inputType === 'input' && (
             <div
               css={css`
                 display: flex;
@@ -304,7 +481,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
           )}
 
           {/* Single select */}
-          {inputType === 'single-select' && meta?.options && (
+          {!meta?.questions && inputType === 'single-select' && meta?.options && (
             <>
               <div
                 css={css`
@@ -392,7 +569,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
           )}
 
           {/* Multi select */}
-          {inputType === 'multi-select' && meta?.options && (
+          {!meta?.questions && inputType === 'multi-select' && meta?.options && (
             <>
               <div
                 css={css`

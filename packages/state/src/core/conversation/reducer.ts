@@ -52,6 +52,7 @@ function categorize(eventName: string): EventCategory {
   if (eventName.startsWith('skill-')) return 'skill';
   if (eventName.startsWith('subagent')) return 'subagent';
   if (eventName === 'compressing' || eventName === 'compressed') return 'compressing';
+  if (eventName === 'session-cleared') return 'lifecycle';
   if (eventName.startsWith('human')) return 'human';
   if (eventName === 'error') return 'error';
   return 'lifecycle';
@@ -101,6 +102,8 @@ function labelFor(eventName: string, data: Record<string, unknown>): string {
       return 'Compressing context';
     case 'compressed':
       return `Compressed: -${data.removedCount ?? 0} messages`;
+    case 'session-cleared':
+      return 'Session cleared';
     case 'human-input':
       return 'Human input needed';
     case 'human-input-resolved':
@@ -459,6 +462,9 @@ function reduceMainEvent(
           title: data.context ?? 'AI needs your input',
           message: questions.map((q) => q.question).join('\n'),
           options,
+          // Full question list — HumanInputBlock renders one input per
+          // question when this is present (multi-question ask_human).
+          questions,
         },
       };
       return {
@@ -573,6 +579,18 @@ function reduceMainEvent(
           summary: (data.summary as string) ?? '',
           removedCount: (data.removedCount as number) ?? 0,
         },
+      };
+    }
+
+    case 'session-cleared': {
+      // `/clear` reset the conversation on the backend. Drop every message
+      // from the local view (the backend state is already empty). The command
+      // echo ("Session cleared.") arrives as a subsequent `token` event, which
+      // creates a fresh streaming assistant message via `ensureStreamingMessage`.
+      return {
+        ...state,
+        messages: [],
+        compression: undefined,
       };
     }
 

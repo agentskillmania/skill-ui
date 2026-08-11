@@ -71,6 +71,15 @@ export interface PlanMetadata {
 }
 
 /** Human interaction metadata */
+/** A single question in a multi-question human-input request (mirrors the
+ * daemon's HumanQuestion). */
+export interface HumanInputQuestion {
+  id: string;
+  question: string;
+  type: 'text' | 'number' | 'single-select' | 'multi-select';
+  options?: string[];
+}
+
 export interface HumanInputMetadata {
   requestId?: string;
   inputType?: HumanInputType;
@@ -79,6 +88,9 @@ export interface HumanInputMetadata {
   options?: Array<{ label: string; value: string }>;
   defaultValue?: string;
   response?: unknown;
+  /** Full question list (multi-question ask_human). When present, the block
+   * renders one input per question instead of a single input. */
+  questions?: HumanInputQuestion[];
 }
 
 /** Error metadata */
