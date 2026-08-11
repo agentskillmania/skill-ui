@@ -60,9 +60,22 @@ function formatResponse(response: unknown, t: (key: string) => string): string {
   if (response === true) return t('humanInput.confirmed');
   if (response === false) return t('humanInput.cancelled');
   if (typeof response === 'string') return response;
-  if (Array.isArray(response)) return response.join(', ');
   if (typeof response === 'number') return String(response);
   if (response === null || response === undefined) return '';
+  // The daemon serializes HumanResponse as a tagged enum, e.g.
+  // { "Question": { "answers": ... } } or { "ToolConfirm": { "approved": ... } }.
+  // Unwrap one level so we display the inner value, not "[object Object]".
+  if (typeof response === 'object' && !Array.isArray(response)) {
+    const obj = response as Record<string, unknown>;
+    const tag = Object.keys(obj)[0];
+    if (tag && typeof obj[tag] === 'object' && obj[tag] !== null) {
+      return formatResponse(obj[tag], t);
+    }
+    const answers = (obj as { answers?: unknown }).answers;
+    if (answers !== undefined) return formatResponse(answers, t);
+    return JSON.stringify(obj);
+  }
+  if (Array.isArray(response)) return response.join(', ');
   return String(response);
 }
 

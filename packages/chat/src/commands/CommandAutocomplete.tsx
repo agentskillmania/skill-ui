@@ -100,25 +100,31 @@ export function CommandAutocomplete({
               css={css`
                 display: flex;
                 align-items: center;
-                justify-content: space-between;
                 gap: ${theme.spacing[2]};
-                min-width: 200px;
+                width: 100%;
               `}
             >
               <span
                 css={css`
                   font-weight: ${theme.font.weight.medium};
                   font-size: ${theme.font.size.sm};
+                  white-space: nowrap;
+                  flex-shrink: 0;
                 `}
               >
                 {cmd.label}
               </span>
               {cmd.description && (
                 <span
+                  title={cmd.description}
                   css={css`
                     color: ${theme.color.textTertiary};
                     font-size: ${theme.font.size.xs};
                     white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    flex: 1;
+                    text-align: right;
                   `}
                 >
                   {cmd.description}
@@ -144,9 +150,9 @@ export function CommandAutocomplete({
     <Dropdown
       open={open && visible}
       onOpenChange={setOpen}
-      menu={{ items: menuItems }}
+      menu={{ items: menuItems, style: { maxHeight: '50vh', overflowY: 'auto' } }}
       trigger={[]}
-      styles={{ root: { minWidth: 280 } }}
+      styles={{ root: { width: 320 } }}
     >
       <div>{children}</div>
     </Dropdown>
