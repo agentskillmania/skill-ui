@@ -14,8 +14,11 @@ export interface ScrollContainerOptions {
 
 /**
  * Scroll container with optional max-height and padding.
+ *
+ * 第一个参数 `_theme` 保留是为了与其它样式工具（card/container 等）
+ * 的 `(theme, options)` 签名风格一致；当前实现未使用主题值。
  */
-export function scrollContainer(theme: Theme, options: ScrollContainerOptions = {}) {
+export function scrollContainer(_theme: Theme, options: ScrollContainerOptions = {}) {
   const { maxHeight, overflow = 'auto', padding } = options;
   return css`
     overflow-y: ${overflow};
