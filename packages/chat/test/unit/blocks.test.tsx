@@ -709,7 +709,7 @@ describe('HumanInputBlock', () => {
     expect(screen.getByText('等待中')).toBeInTheDocument();
   });
 
-  it('completed with object response shows String() fallback', () => {
+  it('completed with object response shows JSON.stringify fallback', () => {
     const completedWithObj: Block = {
       ...humanBlock,
       status: 'completed',
@@ -720,8 +720,8 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={completedWithObj} />
       </ChatWrapper>
     );
-    // formatResponse falls through to String(response) for objects
-    expect(screen.getByText('[object Object]')).toBeInTheDocument();
+    // plain objects (not tagged enums / answers) are JSON.stringified
+    expect(screen.getByText('{"text":"hello"}')).toBeInTheDocument();
   });
 
   it('completed with number response shows stringified number', () => {

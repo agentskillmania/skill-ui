@@ -186,4 +186,123 @@ describe('ChatInput', () => {
     );
     expect(screen.getByDisplayValue('updated')).toBeInTheDocument();
   });
+
+  // ---- Toolbar (model / thinking / context / quick commands) ----
+
+  it('does not render toolbar without commands or new props', () => {
+    render(
+      <ChatWrapper>
+        <ChatInput value="" onChange={() => {}} />
+      </ChatWrapper>
+    );
+    expect(screen.queryByTestId('chat-input-toolbar')).toBeNull();
+  });
+
+  it('toolbar shows quick-command capsules and click triggers onCommand', () => {
+    const onCommand = vi.fn();
+    render(
+      <ChatWrapper>
+        <ChatInput value="" onChange={() => {}} commands={mockCommands} onCommand={onCommand} />
+      </ChatWrapper>
+    );
+    expect(screen.getByTestId('chat-input-toolbar')).toBeInTheDocument();
+    const capsules = screen.getAllByTestId('quick-command');
+    expect(capsules).toHaveLength(2);
+    fireEvent.click(capsules[0]);
+    expect(onCommand).toHaveBeenCalledWith(expect.objectContaining({ id: '1' }));
+  });
+
+  it('model selector shows selectedModel label and selecting calls onModelChange', async () => {
+    const onModelChange = vi.fn();
+    const { waitFor } = await import('@testing-library/react');
+    render(
+      <ChatWrapper>
+        <ChatInput
+          value=""
+          onChange={() => {}}
+          models={[
+            {
+              key: 'openai',
+              label: 'OpenAI',
+              models: [
+                { id: 'gpt-4o', label: 'GPT-4o' },
+                { id: 'gpt-4o-mini', label: 'GPT-4o mini' },
+              ],
+            },
+          ]}
+          selectedModel={{ id: 'gpt-4o', label: 'GPT-4o' }}
+          onModelChange={onModelChange}
+        />
+      </ChatWrapper>
+    );
+    const trigger = screen.getByTestId('model-selector');
+    expect(trigger.textContent).toContain('GPT-4o');
+    fireEvent.click(trigger);
+    const item = await waitFor(() => {
+      const el = Array.from(document.querySelectorAll('.ant-dropdown-menu-item')).find((e) =>
+        e.textContent?.includes('mini')
+      );
+      expect(el).toBeDefined();
+      return el!;
+    });
+    fireEvent.click(item);
+    expect(onModelChange).toHaveBeenCalledWith(expect.objectContaining({ id: 'gpt-4o-mini' }));
+  });
+
+  it('thinking toggle cycles null → true → false → null', () => {
+    const onThinkingChange = vi.fn();
+    const { rerender } = render(
+      <ChatWrapper>
+        <ChatInput
+          value=""
+          onChange={() => {}}
+          thinking={null}
+          onThinkingChange={onThinkingChange}
+        />
+      </ChatWrapper>
+    );
+
+    let toggle = screen.getByTestId('thinking-toggle');
+    fireEvent.click(toggle);
+    expect(onThinkingChange).toHaveBeenLastCalledWith(true);
+
+    rerender(
+      <ChatWrapper>
+        <ChatInput
+          value=""
+          onChange={() => {}}
+          thinking={true}
+          onThinkingChange={onThinkingChange}
+        />
+      </ChatWrapper>
+    );
+    toggle = screen.getByTestId('thinking-toggle');
+    fireEvent.click(toggle);
+    expect(onThinkingChange).toHaveBeenLastCalledWith(false);
+
+    rerender(
+      <ChatWrapper>
+        <ChatInput
+          value=""
+          onChange={() => {}}
+          thinking={false}
+          onThinkingChange={onThinkingChange}
+        />
+      </ChatWrapper>
+    );
+    toggle = screen.getByTestId('thinking-toggle');
+    fireEvent.click(toggle);
+    expect(onThinkingChange).toHaveBeenLastCalledWith(null);
+  });
+
+  it('context usage renders used / total', () => {
+    render(
+      <ChatWrapper>
+        <ChatInput value="" onChange={() => {}} contextUsage={{ used: 12000, total: 200000 }} />
+      </ChatWrapper>
+    );
+    const usage = screen.getByTestId('context-usage');
+    expect(usage.textContent).toContain('12k');
+    expect(usage.textContent).toContain('200k');
+  });
 });

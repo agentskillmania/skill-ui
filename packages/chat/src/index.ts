@@ -26,6 +26,11 @@ export { MarkdownRenderer } from './content/MarkdownRenderer.js';
 export { QuickCommands } from './commands/QuickCommands.js';
 export { CommandAutocomplete } from './commands/CommandAutocomplete.js';
 
+// ChatInput toolbar sub-components
+export { ModelSelector } from './ChatInput/ModelSelector.js';
+export { ThinkingToggle } from './ChatInput/ThinkingToggle.js';
+export { ContextUsage, formatTokens } from './ChatInput/ContextUsage.js';
+
 // Types
 export type {
   Message,
@@ -37,6 +42,9 @@ export type {
   ChatCommand,
   ChatProps,
   ChatRenderers,
+  ChatModelOption,
+  ChatModelGroup,
+  ChatContextUsage,
   MessageProps,
   BlockProps,
   ToolCallMetadata,
@@ -59,6 +67,9 @@ export type { BlocksRendererProps } from './blocks-redesign/BlocksRenderer.js';
 export type { MarkdownRendererProps } from './content/MarkdownRenderer.js';
 export type { QuickCommandsProps } from './commands/QuickCommands.js';
 export type { CommandAutocompleteProps } from './commands/CommandAutocomplete.js';
+export type { ModelSelectorProps } from './ChatInput/ModelSelector.js';
+export type { ThinkingToggleProps } from './ChatInput/ThinkingToggle.js';
+export type { ContextUsageProps } from './ChatInput/ContextUsage.js';
 
 // Locales
 export { NAMESPACE, resources } from './locales/index.js';

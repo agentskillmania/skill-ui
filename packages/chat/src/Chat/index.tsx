@@ -6,7 +6,6 @@ import { css } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
 import { ChatInput } from '../ChatInput/index.js';
-import { QuickCommands } from '../commands/QuickCommands.js';
 import { NAMESPACE } from '../locales/index.js';
 import { MessageList } from '../MessageList/index.js';
 import type { ChatProps } from '../types.js';
@@ -38,6 +37,12 @@ export function Chat({
   onCommand,
   maxQuickCommands = 5,
   commandTrigger = '/',
+  models,
+  selectedModel,
+  onModelChange,
+  thinking,
+  onThinkingChange,
+  contextUsage,
 }: ChatProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
@@ -101,14 +106,6 @@ export function Chat({
             gap: ${theme.spacing[2]};
           `}
         >
-          {commands && commands.length > 0 && onCommand && (
-            <QuickCommands
-              commands={commands}
-              onCommand={onCommand}
-              maxCommands={maxQuickCommands}
-              disabled={disabled}
-            />
-          )}
           <ChatInput
             value={inputValue}
             onChange={onInputChange}
@@ -122,6 +119,13 @@ export function Chat({
             commands={commands}
             onCommand={onCommand}
             commandTrigger={commandTrigger}
+            maxQuickCommands={maxQuickCommands}
+            models={models}
+            selectedModel={selectedModel}
+            onModelChange={onModelChange}
+            thinking={thinking}
+            onThinkingChange={onThinkingChange}
+            contextUsage={contextUsage}
           />
         </div>
       </div>

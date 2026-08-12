@@ -178,6 +178,34 @@ export interface ChatCommand {
   keywords?: string[];
 }
 
+// ---- Model & Context (input toolbar) ----
+
+/** Model option — a leaf in the model tree, also the selected-value shape */
+export interface ChatModelOption {
+  /** Model id, e.g. "gpt-4o" */
+  id: string;
+  /** Display label (defaults to id) */
+  label?: string;
+}
+
+/** Ordered model group (array order = display order). Typically one per provider. */
+export interface ChatModelGroup {
+  /** Group identifier */
+  key: string;
+  /** Group title (defaults to key) */
+  label?: string;
+  /** Models in this group */
+  models: ChatModelOption[];
+}
+
+/** Context window usage (display-only) */
+export interface ChatContextUsage {
+  /** Tokens used */
+  used: number;
+  /** Context window limit */
+  total: number;
+}
+
 // ---- Component Props ----
 
 /** Message rendering component props */
@@ -299,4 +327,18 @@ export interface ChatProps {
   maxQuickCommands?: number;
   /** Slash trigger character (default "/") */
   commandTrigger?: string;
+
+  // Model / thinking / context — input toolbar (all optional & controlled)
+  /** Available model groups (enables model selector when paired with onModelChange) */
+  models?: ChatModelGroup[];
+  /** Currently selected model */
+  selectedModel?: ChatModelOption;
+  /** Select model callback */
+  onModelChange?: (model: ChatModelOption) => void;
+  /** Thinking state: null=Auto, true=on, false=off */
+  thinking?: boolean | null;
+  /** Thinking state change callback (enables thinking toggle) */
+  onThinkingChange?: (value: boolean | null) => void;
+  /** Context window usage (enables context indicator) */
+  contextUsage?: ChatContextUsage;
 }

@@ -56,6 +56,14 @@
     "noMatch": "No matching commands",
     "defaultGroup": "Common"
   },
+  "chatInput": {
+    "model": "Model",
+    "thinking": {
+      "auto": "Auto",
+      "on": "Thinking",
+      "off": "Off"
+    }
+  },
   "debugger": {
     "panelTitle": "Debugger",
     "execution": "Execution",

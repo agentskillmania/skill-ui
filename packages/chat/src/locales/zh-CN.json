@@ -56,6 +56,14 @@
     "noMatch": "无匹配指令",
     "defaultGroup": "常用"
   },
+  "chatInput": {
+    "model": "模型",
+    "thinking": {
+      "auto": "自动",
+      "on": "思考",
+      "off": "关闭"
+    }
+  },
   "debugger": {
     "panelTitle": "调试面板",
     "execution": "当前执行",

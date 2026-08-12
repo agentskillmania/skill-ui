@@ -2,6 +2,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import React from 'react';
 import { ChatInput } from './index.js';
+import type { ChatModelOption } from '../types.js';
 
 function ChatInputWrapper(props: React.ComponentProps<typeof ChatInput>) {
   return (
@@ -91,4 +92,59 @@ const WithAffixesComponent = () => {
 
 export const WithAffixes: Story = {
   render: () => <WithAffixesComponent />,
+};
+
+/** 工具条：快捷指令 + 模型选择 + 思考 + 上下文占用 */
+const ToolbarComponent = () => {
+  const [value, setValue] = React.useState('');
+  const [model, setModel] = React.useState<ChatModelOption>({ id: 'gpt-4o', label: 'GPT-4o' });
+  const [thinking, setThinking] = React.useState<boolean | null>(null);
+
+  return (
+    <ChatInputWrapper
+      value={value}
+      onChange={setValue}
+      onSubmit={(msg) => {
+        alert(`发送: ${msg}`);
+        setValue('');
+      }}
+      placeholder="输入 / 试试命令补全"
+      commands={[
+        { id: 'search', label: '搜索', command: 'search' },
+        { id: 'analyze', label: '分析', command: 'analyze' },
+        { id: 'new', label: '新建', command: 'new' },
+      ]}
+      onCommand={(cmd) => {
+        alert(`命令: ${cmd.label}`);
+        setValue('');
+      }}
+      models={[
+        {
+          key: 'openai',
+          label: 'OpenAI',
+          models: [
+            { id: 'gpt-4o', label: 'GPT-4o' },
+            { id: 'gpt-4o-mini', label: 'GPT-4o mini' },
+          ],
+        },
+        {
+          key: 'anthropic',
+          label: 'Anthropic',
+          models: [
+            { id: 'claude-sonnet', label: 'Claude Sonnet' },
+            { id: 'claude-haiku', label: 'Claude Haiku' },
+          ],
+        },
+      ]}
+      selectedModel={model}
+      onModelChange={setModel}
+      thinking={thinking}
+      onThinkingChange={setThinking}
+      contextUsage={{ used: 12400, total: 200000 }}
+    />
+  );
+};
+
+export const Toolbar: Story = {
+  render: () => <ToolbarComponent />,
 };
