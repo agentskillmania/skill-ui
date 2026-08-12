@@ -149,7 +149,13 @@ function QuestionInput({
         />
       )}
       {q.type === 'single-select' && (
-        <div css={css`display: flex; flex-direction: column; gap: ${theme.spacing[2]};`}>
+        <div
+          css={css`
+            display: flex;
+            flex-direction: column;
+            gap: ${theme.spacing[2]};
+          `}
+        >
           {(q.options ?? []).map((opt) => (
             <div
               key={opt}
@@ -159,16 +165,49 @@ function QuestionInput({
                 onChange({ type: 'direct', value: opt });
               }}
             >
-              <span css={css`width:18px;height:18px;border-radius:${theme.radius.full};border:2px solid ${single === opt ? theme.color.primary : theme.color.border};display:flex;align-items:center;justify-content:center;flex-shrink:0;`}>
-                {single === opt && <span css={css`width:8px;height:8px;border-radius:${theme.radius.full};background:${theme.color.primary};`} />}
+              <span
+                css={css`
+                  width: 18px;
+                  height: 18px;
+                  border-radius: ${theme.radius.full};
+                  border: 2px solid ${single === opt ? theme.color.primary : theme.color.border};
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  flex-shrink: 0;
+                `}
+              >
+                {single === opt && (
+                  <span
+                    css={css`
+                      width: 8px;
+                      height: 8px;
+                      border-radius: ${theme.radius.full};
+                      background: ${theme.color.primary};
+                    `}
+                  />
+                )}
               </span>
-              <span css={css`font-size:${theme.font.size.base};color:${theme.color.text};`}>{opt}</span>
+              <span
+                css={css`
+                  font-size: ${theme.font.size.base};
+                  color: ${theme.color.text};
+                `}
+              >
+                {opt}
+              </span>
             </div>
           ))}
         </div>
       )}
       {q.type === 'multi-select' && (
-        <div css={css`display: flex; flex-direction: column; gap: ${theme.spacing[2]};`}>
+        <div
+          css={css`
+            display: flex;
+            flex-direction: column;
+            gap: ${theme.spacing[2]};
+          `}
+        >
           {(q.options ?? []).map((opt) => {
             const checked = multi.includes(opt);
             return (
@@ -181,10 +220,28 @@ function QuestionInput({
                   onChange(next.length ? { type: 'direct', value: next } : undefined);
                 }}
               >
-                <span css={css`width:18px;height:18px;border-radius:${theme.radius.sm};border:2px solid ${checked ? theme.color.primary : theme.color.border};display:flex;align-items:center;justify-content:center;flex-shrink:0;`}>
+                <span
+                  css={css`
+                    width: 18px;
+                    height: 18px;
+                    border-radius: ${theme.radius.sm};
+                    border: 2px solid ${checked ? theme.color.primary : theme.color.border};
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    flex-shrink: 0;
+                  `}
+                >
                   {checked && <Check size={12} color={theme.color.primary} />}
                 </span>
-                <span css={css`font-size:${theme.font.size.base};color:${theme.color.text};`}>{opt}</span>
+                <span
+                  css={css`
+                    font-size: ${theme.font.size.base};
+                    color: ${theme.color.text};
+                  `}
+                >
+                  {opt}
+                </span>
               </div>
             );
           })}
@@ -208,7 +265,9 @@ function MultiQuestionForm({
   onSubmit: (response: Record<string, unknown>) => void;
 }) {
   // answers[qId] = { type, value } | undefined (undefined = not yet answered)
-  const [answers, setAnswers] = useState<Record<string, { type: 'direct' | 'free-text'; value: unknown } | undefined>>({});
+  const [answers, setAnswers] = useState<
+    Record<string, { type: 'direct' | 'free-text'; value: unknown } | undefined>
+  >({});
 
   const allAnswered = questions.every((q) => answers[q.id] !== undefined);
 
@@ -222,7 +281,13 @@ function MultiQuestionForm({
   };
 
   return (
-    <div css={css`display: flex; flex-direction: column; gap: ${theme.spacing[4]};`}>
+    <div
+      css={css`
+        display: flex;
+        flex-direction: column;
+        gap: ${theme.spacing[4]};
+      `}
+    >
       {questions.map((q) => (
         <QuestionInput
           key={q.id}
@@ -232,7 +297,12 @@ function MultiQuestionForm({
           onChange={(ans) => setAnswers((prev) => ({ ...prev, [q.id]: ans }))}
         />
       ))}
-      <div css={css`display: flex; justify-content: flex-end;`}>
+      <div
+        css={css`
+          display: flex;
+          justify-content: flex-end;
+        `}
+      >
         <button
           css={[buttonBaseCss(theme), solidButtonCss(theme), disabledButtonCss]}
           disabled={!allAnswered}

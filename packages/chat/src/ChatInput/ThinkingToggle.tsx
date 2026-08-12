@@ -4,7 +4,7 @@
  */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
-import { Sparkles } from 'lucide-react';
+import { Brain } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -48,7 +48,7 @@ export const ThinkingToggle = memo(function ThinkingToggle({
       ? theme.color.textSecondary
       : theme.color.textTertiary;
   const border = isOn ? theme.color.primary : theme.color.border;
-  const bg = isOn ? theme.color.primaryBg : 'transparent';
+  const bg = isOn ? theme.color.primaryBg : theme.color.bgContainer;
 
   return (
     <button
@@ -82,7 +82,7 @@ export const ThinkingToggle = memo(function ThinkingToggle({
         }
       `}
     >
-      <Sparkles size={14} />
+      <Brain size={14} />
       <span>{displayLabel}</span>
     </button>
   );

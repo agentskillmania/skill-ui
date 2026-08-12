@@ -3,6 +3,7 @@
  */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
+import { Progress } from 'antd';
 import { memo } from 'react';
 
 import type { ChatContextUsage as ChatContextUsageData } from '../types.js';
@@ -44,23 +45,21 @@ export const ContextUsage = memo(function ContextUsage({ usage }: ContextUsagePr
         display: inline-flex;
         align-items: center;
         gap: ${theme.spacing[1]};
-        padding: ${theme.spacing[1]} ${theme.spacing[2]};
+        padding: ${theme.spacing[0.5]} ${theme.spacing[1]};
         font-size: ${theme.font.size.xs};
         color: ${theme.color.textTertiary};
         line-height: 1;
       `}
     >
-      <div
-        css={css`
-          width: 48px;
-          height: 4px;
-          border-radius: ${theme.radius.full};
-          background: ${theme.color.fill};
-          overflow: hidden;
-        `}
-      >
-        <div style={{ width: `${percent}%`, height: '100%', background: color }} />
-      </div>
+      <Progress
+        type="circle"
+        percent={percent}
+        size={20}
+        strokeWidth={6}
+        strokeColor={color}
+        trailColor={theme.color.fill}
+        format={() => `${percent}%`}
+      />
       <span
         css={css`
           white-space: nowrap;
