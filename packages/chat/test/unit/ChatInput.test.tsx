@@ -124,12 +124,12 @@ describe('ChatInput', () => {
         <ChatInput value="/se" onChange={onChange} commands={mockCommands} onCommand={onCommand} />
       </ChatWrapper>
     );
-    // Wait for dropdown menu item to appear (antd renders portal async)
+    // Wait for the autocomplete panel item to appear (portal renders after layout effect)
     const { waitFor } = await import('@testing-library/react');
     const menuItem = await waitFor(() => {
-      const item = Array.from(
-        document.querySelectorAll('[role="menuitem"], .ant-dropdown-menu-item')
-      ).find((el) => el.textContent?.includes('搜索'));
+      const item = Array.from(document.querySelectorAll('[data-testid="cmd-item"]')).find((el) =>
+        el.textContent?.includes('搜索')
+      );
       expect(item).toBeDefined();
       return item!;
     });

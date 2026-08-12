@@ -9,6 +9,7 @@ import type { KeyboardEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { CommandAutocomplete } from '../commands/CommandAutocomplete.js';
+import type { CommandAutocompleteRef } from '../commands/CommandAutocomplete.js';
 import { NAMESPACE } from '../locales/index.js';
 import type { ChatCommand } from '../types.js';
 
@@ -58,12 +59,20 @@ export const ChatInput = memo(function ChatInput({
   // that immediately follows it.
   const lastCompositionEndRef = useRef(0);
 
+  // Command autocomplete panel control. The panel keeps focus in the input and
+  // exposes a keydown handler for navigation; we delegate to it here so
+  // ArrowUp/Down/Enter/Escape drive the panel while the user keeps typing.
+  const cmdRef = useRef<CommandAutocompleteRef>(null);
+
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' && Date.now() - lastCompositionEndRef.current < 80) {
       // Confirm-candidate Enter: neither submit nor insert a newline.
       e.preventDefault();
       return false;
     }
+    // Delegate to the command autocomplete. Returns false on Enter-select so
+    // the Sender skips its submit (see TextArea.js `eventRes === false`).
+    return cmdRef.current?.handleKeyDown(e);
   };
 
   const handleSubmit = (val: string) => {
@@ -134,6 +143,7 @@ export const ChatInput = memo(function ChatInput({
   if (commands && commands.length > 0 && onCommand) {
     return (
       <CommandAutocomplete
+        ref={cmdRef}
         commands={commands}
         onCommand={handleCommandSelect}
         inputValue={value ?? ''}
