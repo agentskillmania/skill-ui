@@ -74,10 +74,18 @@ export const CommandAutocomplete = forwardRef<CommandAutocompleteRef, CommandAut
       maxHeight: number;
     } | null>(null);
 
-    // Closed via Escape: keep the input content but hide the panel until the
-    // input changes (editing the query can re-open it).
+    // Closed via Escape or command select: keep the input content but hide
+    // the panel until the user edits the input (which can re-open it).
     const [dismissed, setDismissed] = useState(false);
+    // The exact value written by a command select. While the input holds that
+    // value the panel stays closed; any user edit resets the dismissal.
+    const selectedValueRef = useRef<string | null>(null);
     useEffect(() => {
+      if (inputValue === selectedValueRef.current) {
+        // Programmatic write from selecting a command — keep it dismissed.
+        selectedValueRef.current = null;
+        return;
+      }
       setDismissed(false);
     }, [inputValue]);
 
@@ -120,9 +128,14 @@ export const CommandAutocomplete = forwardRef<CommandAutocompleteRef, CommandAut
 
     const handleSelect = useCallback(
       (command: ChatCommand) => {
+        // The parent writes `${trigger}${command.command}` into the input
+        // (instead of firing it immediately); keep the panel closed for that
+        // written value until the user edits away from it.
         onCommand(command);
+        setDismissed(true);
+        selectedValueRef.current = `${trigger}${command.command}`;
       },
-      [onCommand]
+      [onCommand, trigger]
     );
 
     const close = useCallback(() => setDismissed(true), []);
@@ -214,6 +227,14 @@ export const CommandAutocomplete = forwardRef<CommandAutocompleteRef, CommandAut
               setActiveIndex((i) => (i - 1 + flatItems.length) % flatItems.length);
               return undefined;
             case 'Enter': {
+              // Input whose first token is already a full command (e.g.
+              // "/search" or "/search args"): let it submit instead of
+              // re-selecting — the parent resolves commands on submit.
+              const token = inputValue.slice(trigger.length).trim().split(/\s+/)[0];
+              const fullMatch = token !== '' && flatItems.some((c) => c.command === token);
+              if (fullMatch) {
+                return undefined;
+              }
               const cmd = flatItems[activeIndex];
               if (cmd) {
                 e.preventDefault();
@@ -231,7 +252,7 @@ export const CommandAutocomplete = forwardRef<CommandAutocompleteRef, CommandAut
           }
         },
       }),
-      [visible, flatItems, activeIndex, handleSelect, close]
+      [visible, flatItems, activeIndex, handleSelect, close, inputValue, trigger]
     );
 
     const groupsRender = useMemo(() => {

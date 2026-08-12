@@ -86,6 +86,15 @@ describe('CommandAutocomplete', () => {
     expect(onCommand).toHaveBeenCalledWith(expect.objectContaining({ id: '1', command: 'search' }));
   });
 
+  it('selecting a command closes the panel', async () => {
+    renderAutocomplete({ inputValue: '/' });
+    await waitFor(() => expect(items().length).toBeGreaterThan(0));
+
+    const searchItem = items().find((el) => el.textContent?.includes('搜索'))!;
+    fireEvent.click(searchItem);
+    await waitFor(() => expect(panel()).toBeNull());
+  });
+
   it('typing search term filters commands to matching subset', async () => {
     renderAutocomplete({ inputValue: '/搜' });
 
@@ -166,6 +175,21 @@ describe('CommandAutocomplete', () => {
     );
     expect(e.preventDefault).toHaveBeenCalled();
     expect(res).toBe(false);
+  });
+
+  it('Enter on an already-full command submits instead of selecting', async () => {
+    const { cmdRef, onCommand } = renderAutocomplete({ inputValue: '/search' });
+    await waitFor(() => expect(items().length).toBeGreaterThan(0));
+
+    const e = key('Enter');
+    let res: boolean | undefined;
+    act(() => {
+      res = cmdRef.current!.handleKeyDown(e);
+    });
+    // Not consumed as a selection → the Sender proceeds to submit.
+    expect(res).toBeUndefined();
+    expect(e.preventDefault).not.toHaveBeenCalled();
+    expect(onCommand).not.toHaveBeenCalled();
   });
 
   it('Escape closes the panel without clearing the input', async () => {

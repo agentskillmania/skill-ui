@@ -116,10 +116,10 @@ describe('ChatInput', () => {
     expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).toBeInTheDocument();
   });
 
-  it('selecting a command calls onCommand and clears input', async () => {
+  it('selecting a command writes it into the input instead of firing it', async () => {
     const onCommand = vi.fn();
     const onChange = vi.fn();
-    const { container } = render(
+    render(
       <ChatWrapper>
         <ChatInput value="/se" onChange={onChange} commands={mockCommands} onCommand={onCommand} />
       </ChatWrapper>
@@ -135,8 +135,9 @@ describe('ChatInput', () => {
     });
     const userEvent = (await import('@testing-library/user-event')).default;
     await userEvent.click(menuItem);
-    expect(onCommand).toHaveBeenCalledWith(expect.objectContaining({ id: '1', command: 'search' }));
-    expect(onChange).toHaveBeenCalledWith('');
+    // Selecting only writes the command — it must NOT execute onCommand.
+    expect(onCommand).not.toHaveBeenCalled();
+    expect(onChange).toHaveBeenCalledWith('/search');
   });
 
   it('renders senderElement directly without commands', () => {
@@ -198,18 +199,78 @@ describe('ChatInput', () => {
     expect(screen.queryByTestId('chat-input-toolbar')).toBeNull();
   });
 
-  it('toolbar shows quick-command capsules and click triggers onCommand', () => {
+  it('toolbar quick-command click writes the command into the input', () => {
     const onCommand = vi.fn();
+    const onChange = vi.fn();
     render(
       <ChatWrapper>
-        <ChatInput value="" onChange={() => {}} commands={mockCommands} onCommand={onCommand} />
+        <ChatInput value="" onChange={onChange} commands={mockCommands} onCommand={onCommand} />
       </ChatWrapper>
     );
     expect(screen.getByTestId('chat-input-toolbar')).toBeInTheDocument();
     const capsules = screen.getAllByTestId('quick-command');
     expect(capsules).toHaveLength(2);
     fireEvent.click(capsules[0]);
-    expect(onCommand).toHaveBeenCalledWith(expect.objectContaining({ id: '1' }));
+    expect(onCommand).not.toHaveBeenCalled();
+    expect(onChange).toHaveBeenCalledWith('/search');
+  });
+
+  it('submitting a slash message fires onCommand instead of onSubmit', () => {
+    const onCommand = vi.fn();
+    const onSubmit = vi.fn();
+    render(
+      <ChatWrapper>
+        <ChatInput
+          value="/search"
+          onChange={() => {}}
+          onSubmit={onSubmit}
+          commands={mockCommands}
+          onCommand={onCommand}
+        />
+      </ChatWrapper>
+    );
+    const textarea = screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)');
+    fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
+    expect(onCommand).toHaveBeenCalledWith(expect.objectContaining({ id: '1', command: 'search' }));
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('slash message with args still resolves the command', () => {
+    const onCommand = vi.fn();
+    const onSubmit = vi.fn();
+    render(
+      <ChatWrapper>
+        <ChatInput
+          value="/search 知识库"
+          onChange={() => {}}
+          onSubmit={onSubmit}
+          commands={mockCommands}
+          onCommand={onCommand}
+        />
+      </ChatWrapper>
+    );
+    const textarea = screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)');
+    fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
+    expect(onCommand).toHaveBeenCalledWith(expect.objectContaining({ id: '1', command: 'search' }));
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
+
+  it('unknown slash message is sent as plain text', () => {
+    const onSubmit = vi.fn();
+    render(
+      <ChatWrapper>
+        <ChatInput
+          value="/unknown"
+          onChange={() => {}}
+          onSubmit={onSubmit}
+          commands={mockCommands}
+          onCommand={() => {}}
+        />
+      </ChatWrapper>
+    );
+    const textarea = screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)');
+    fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
+    expect(onSubmit).toHaveBeenCalledWith('/unknown');
   });
 
   it('model selector shows selectedModel label and selecting calls onModelChange', async () => {

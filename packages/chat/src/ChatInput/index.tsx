@@ -109,15 +109,30 @@ export const ChatInput = memo(function ChatInput({
 
   const handleSubmit = (val: string) => {
     const trimmed = val.trim();
-    if (trimmed) {
-      onSubmit?.(trimmed);
+    if (!trimmed) {
+      return;
     }
+    // A leading trigger (e.g. "/") means a command message: resolve it to a
+    // ChatCommand and fire onCommand instead of sending it as plain text.
+    // This keeps onCommand's "execute the command" semantics — it fires when
+    // the user actually sends the slash prompt, not when they select it.
+    if (trimmed.startsWith(commandTrigger) && commands && commands.length > 0 && onCommand) {
+      const token = trimmed.slice(commandTrigger.length).trim().split(/\s+/)[0];
+      const cmd = commands.find((c) => c.command === token);
+      if (cmd) {
+        onCommand(cmd);
+        onChange?.('');
+        return;
+      }
+    }
+    onSubmit?.(trimmed);
   };
 
   const handleCommandSelect = (command: ChatCommand) => {
-    onCommand?.(command);
-    // Clear input
-    onChange?.('');
+    // Selecting only writes the command into the input (e.g. "/search") — it
+    // does NOT execute it. Execution happens when the user sends the slash
+    // message: handleSubmit resolves it and fires onCommand.
+    onChange?.(`${commandTrigger}${command.command}`);
   };
 
   // ---- Toolbar (above the input) ----
@@ -162,7 +177,7 @@ export const ChatInput = memo(function ChatInput({
               key={cmd.id}
               type="button"
               data-testid="quick-command"
-              onClick={() => onCommand!(cmd)}
+              onClick={() => handleCommandSelect(cmd)}
               css={css`
                 flex-shrink: 0;
                 padding: ${theme.spacing[0.5]} ${theme.spacing[2]};
