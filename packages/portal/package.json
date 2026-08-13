@@ -1,6 +1,6 @@
 {
   "name": "@agentskillmania/skill-ui-portal",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Portal/home page UI components for @agentskillmania — agents, skills, sessions browser.",
   "type": "module",
   "main": "dist/index.js",
@@ -44,7 +44,8 @@
   "dependencies": {
     "@agentskillmania/skill-ui-shared": "workspace:*",
     "@agentskillmania/skill-ui-theme": "workspace:*",
-    "lucide-react": "^0.460.0"
+    "lucide-react": "^0.460.0",
+    "@ant-design/icons": "^6.1.1"
   },
   "peerDependencies": {
     "antd": "^6.0.0",

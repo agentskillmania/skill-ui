@@ -1,6 +1,6 @@
 {
   "name": "@agentskillmania/skill-ui-settings",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Settings UI components for @agentskillmania — configuration panels.",
   "type": "module",
   "main": "dist/index.js",
@@ -42,11 +42,15 @@
     "directory": "packages/settings"
   },
   "dependencies": {
-    "@agentskillmania/skill-ui-theme": "workspace:*"
+    "@agentskillmania/skill-ui-theme": "workspace:*",
+    "lucide-react": "^0.460.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "@emotion/react": "^11.0.0",
+    "antd": "^6.0.0",
+    "react-i18next": "^15.0.0"
   },
   "devDependencies": {
     "@testing-library/react": "^16.3.2",
