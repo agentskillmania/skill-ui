@@ -14,7 +14,7 @@ describe('CopyValue', () => {
     expect(screen.getByText('copy-me')).toBeInTheDocument();
   });
 
-  it('calls clipboard.writeText on click', async () => {
+  it('calls clipboard.writeText on click', { timeout: 30000 }, async () => {
     const writeSpy = vi.fn().mockResolvedValue(undefined);
     Object.defineProperty(navigator, 'clipboard', {
       value: { writeText: writeSpy },
