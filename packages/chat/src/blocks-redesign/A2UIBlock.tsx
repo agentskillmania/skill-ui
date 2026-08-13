@@ -1,7 +1,9 @@
 /**
  * A2UI block — renders GenUI protocol surface inside standard block card.
+ *
+ * genui（及其 echarts 依赖，数 MB）在 mount 时动态 import —— 没有 A2UI block
+ * 渲染时，聊天包的首屏 bundle 完全不含 genui。
  */
-import { Genui, SurfaceManager, GenUISurface } from '@agentskillmania/genui';
 import { useTheme, spinKeyframes } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Modal } from 'antd';
@@ -12,6 +14,9 @@ import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, A2UIBlockMetadata, BlockAction } from '../types.js';
 
+/** Dynamically loaded genui module */
+type GenuiModule = typeof import('@agentskillmania/genui');
+
 export function A2UIBlock({ block, onAction }: BlockProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
@@ -20,16 +25,30 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
   const surfaceId = meta?.surfaceId;
   const maxHeight = meta?.maxHeight ?? '400px';
 
+  const [genui, setGenui] = useState<GenuiModule | null>(null);
   const [engineReady, setEngineReady] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOverflow, setIsOverflow] = useState(false);
-  const smRef = useRef<SurfaceManager | null>(null);
+  const smRef = useRef<InstanceType<GenuiModule['SurfaceManager']> | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const lastLengthRef = useRef(0);
   const endedRef = useRef(false);
 
-  // Initialize engine + SurfaceManager on mount
+  // Load genui engine module on mount (dynamic import — see file header)
   useEffect(() => {
+    let cancelled = false;
+    import('@agentskillmania/genui').then((mod) => {
+      if (!cancelled) setGenui(mod);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Initialize engine + SurfaceManager once the module is loaded
+  useEffect(() => {
+    if (!genui) return;
+    const { Genui, SurfaceManager } = genui;
     let cancelled = false;
 
     async function init() {
@@ -56,7 +75,7 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
       smRef.current?.destroy();
       smRef.current = null;
     };
-  }, []);
+  }, [genui]);
 
   // Stream content diff
   useEffect(() => {
@@ -90,8 +109,8 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
 
   // Theme sync
   useEffect(() => {
-    Genui.setDayNightMode(theme.mode);
-  }, [theme.mode]);
+    genui?.Genui.setDayNightMode(theme.mode);
+  }, [theme.mode, genui]);
 
   // Action handler
   const handleSurfaceAction = useCallback(
@@ -282,14 +301,14 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
             />
             <span>{t('a2ui.initializing')}</span>
           </div>
-        ) : smRef.current ? (
+        ) : genui && smRef.current ? (
           <div
             css={css`
               min-height: 100px;
               padding: ${theme.spacing[3]} ${theme.spacing[4]};
             `}
           >
-            <GenUISurface
+            <genui.GenUISurface
               surfaceManager={smRef.current}
               width="100%"
               height="100%"
@@ -360,8 +379,8 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
         width="80vw"
         styles={{ body: { height: '70vh', padding: 0, overflow: 'hidden' } }}
       >
-        {engineReady && smRef.current && (
-          <GenUISurface
+        {engineReady && genui && smRef.current && (
+          <genui.GenUISurface
             surfaceManager={smRef.current}
             width="100%"
             height="100%"

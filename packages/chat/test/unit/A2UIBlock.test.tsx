@@ -552,7 +552,11 @@ describe('A2UIBlock', () => {
       </ChatWrapper>
     );
 
-    // Unmount before initialize resolves
+    // genui is dynamically imported on mount — wait until the module loaded and
+    // SurfaceManager.initialize() is in flight, then unmount mid-init
+    await waitFor(() => {
+      expect(mockSurfaceManager.initialize).toHaveBeenCalled();
+    });
     unmount();
 
     // Now resolve — component should destroy the SM
