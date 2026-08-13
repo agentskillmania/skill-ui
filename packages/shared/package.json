@@ -5,6 +5,13 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist",
     "README.md",
@@ -35,15 +42,15 @@
     "directory": "packages/shared"
   },
   "dependencies": {
-    "@agentskillmania/skill-ui-theme": "file:../theme",
-    "@emotion/react": "^11.14.0"
+    "@agentskillmania/skill-ui-theme": "workspace:*"
   },
   "peerDependencies": {
     "antd": "^6.0.0",
     "lucide-react": ">=0.400.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-i18next": "^15.0.0"
+    "react-i18next": "^15.0.0",
+    "@emotion/react": "^11.0.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.0",

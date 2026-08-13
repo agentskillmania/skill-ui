@@ -5,6 +5,13 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
   "files": [
     "dist",
     "README.md",
@@ -38,7 +45,6 @@
     "@agentskillmania/skill-ui-chat": "workspace:*",
     "@agentskillmania/skill-ui-shared": "workspace:*",
     "@agentskillmania/skill-ui-theme": "workspace:*",
-    "@emotion/react": "^11.14.0",
     "@tanstack/react-virtual": "^3.14.2",
     "lucide-react": "^0.460.0"
   },
@@ -47,7 +53,8 @@
     "i18next": "^24.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-i18next": "^15.0.0"
+    "react-i18next": "^15.0.0",
+    "@emotion/react": "^11.0.0"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.0.2",
