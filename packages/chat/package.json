@@ -62,7 +62,7 @@
     "@emotion/react": "^11.0.0"
   },
   "devDependencies": {
-    "@agentskillmania/genui": "link:../../../genui",
+    "@agentskillmania/genui": "^0.1.0",
     "@ant-design/x": "^2.4.0",
     "@ant-design/x-markdown": "^2.4.0",
     "@chromatic-com/storybook": "^5.0.2",
