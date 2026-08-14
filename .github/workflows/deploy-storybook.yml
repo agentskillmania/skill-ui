@@ -46,6 +46,11 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # Build all packages first: each package.json entry points at ./dist/index.js,
+      # so cross-package imports (e.g. chat → @agentskillmania/skill-ui-shared) only
+      # resolve once dist/ exists. Mirrors the local pre-commit hook's `pnpm build`.
+      - run: pnpm build
+
       - name: Build every Storybook into its sub-path
         run: |
           mkdir -p site-dist
