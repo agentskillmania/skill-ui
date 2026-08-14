@@ -9,6 +9,8 @@ const config: StorybookConfig = {
   addons: ['@chromatic-com/storybook', '@storybook/addon-docs', '@storybook/addon-a11y'],
   framework: '@storybook/react-vite',
   viteFinal: async (config) => {
+    // Sub-path deployment (e.g. GitHub Pages). Local dev keeps the default '/'.
+    config.base = process.env.STORYBOOK_BASE_PATH ?? '/';
     config.resolve = config.resolve || {};
     config.resolve.alias = {
       ...config.resolve.alias,

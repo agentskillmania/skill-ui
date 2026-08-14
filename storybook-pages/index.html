@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Skill UI · Storybook</title>
+    <style>
+      :root {
+        --bg: #fafafa;
+        --card: #ffffff;
+        --ink: #1f2933;
+        --muted: #6b7280;
+        --line: #e5e7eb;
+        --accent: #ff4785; /* Storybook pink */
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+          "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        color: var(--ink);
+        background: var(--bg);
+        line-height: 1.55;
+      }
+      header {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 72px 24px 32px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+      .badge::before {
+        content: "";
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--accent);
+      }
+      h1 {
+        font-size: clamp(28px, 5vw, 44px);
+        margin: 14px 0 10px;
+        letter-spacing: -0.02em;
+      }
+      .lede {
+        color: var(--muted);
+        font-size: 17px;
+        max-width: 60ch;
+        margin: 0;
+      }
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 24px 24px 64px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 16px;
+      }
+      a.card {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 20px;
+        transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+      }
+      a.card:hover {
+        transform: translateY(-2px);
+        border-color: var(--accent);
+        box-shadow: 0 8px 24px rgba(255, 71, 133, 0.12);
+      }
+      .card .name {
+        font-size: 18px;
+        font-weight: 650;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .card .name::after {
+        content: "→";
+        margin-left: auto;
+        color: var(--muted);
+        font-weight: 400;
+        transition: transform 0.12s ease, color 0.12s ease;
+      }
+      a.card:hover .name::after {
+        transform: translateX(3px);
+        color: var(--accent);
+      }
+      .card .desc {
+        margin: 6px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .card .pkg {
+        margin-top: 12px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+        color: #9ca3af;
+      }
+      footer {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 0 24px 64px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      footer a { color: var(--accent); text-decoration: none; }
+      footer a:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <span class="badge">Storybook Hub</span>
+      <h1>Skill UI — Component Storybooks</h1>
+      <p class="lede">
+        Component library workspaces for the @agentskillmania ecosystem. Each card opens that
+        package&rsquo;s independently built Storybook.
+      </p>
+    </header>
+
+    <main>
+      <div class="grid">
+        <a class="card" href="./shared/">
+          <div class="name">shared</div>
+          <p class="desc">Foundational primitives shared across every package.</p>
+          <div class="pkg">@agentskillmania/skill-ui-shared</div>
+        </a>
+        <a class="card" href="./chat/">
+          <div class="name">chat</div>
+          <p class="desc">Conversation &amp; message surface components.</p>
+          <div class="pkg">@agentskillmania/skill-ui-chat</div>
+        </a>
+        <a class="card" href="./editor/">
+          <div class="name">editor</div>
+          <p class="desc">Rich text &amp; code editing (Milkdown / Monaco).</p>
+          <div class="pkg">@agentskillmania/skill-ui-editor</div>
+        </a>
+        <a class="card" href="./cockpit/">
+          <div class="name">cockpit</div>
+          <p class="desc">Aggregated agent cockpit composing chat + controls.</p>
+          <div class="pkg">@agentskillmania/skill-ui-cockpit</div>
+        </a>
+        <a class="card" href="./frame/">
+          <div class="name">frame</div>
+          <p class="desc">Application shell, layout &amp; framing chrome.</p>
+          <div class="pkg">@agentskillmania/skill-ui-frame</div>
+        </a>
+        <a class="card" href="./portal/">
+          <div class="name">portal</div>
+          <p class="desc">Portal / entry surfaces and routing composition.</p>
+          <div class="pkg">@agentskillmania/skill-ui-portal</div>
+        </a>
+        <a class="card" href="./settings/">
+          <div class="name">settings</div>
+          <p class="desc">Configuration panels and preference UI.</p>
+          <div class="pkg">@agentskillmania/skill-ui-settings</div>
+        </a>
+      </div>
+    </main>
+
+    <footer>
+      Source:
+      <a href="https://github.com/agentskillmania/skill-ui">agentskillmania/skill-ui</a>
+    </footer>
+  </body>
+</html>
