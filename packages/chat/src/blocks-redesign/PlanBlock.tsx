@@ -14,15 +14,15 @@ import type { BlockProps, PlanMetadata, PlanStep } from '../types.js';
 function getStepIcon(step: PlanStep): React.ReactNode {
   switch (step.status) {
     case 'completed':
-      return <Check size={12} strokeWidth={3} />;
+      return <Check size={11} strokeWidth={3} />;
     case 'running':
-      return <CircleDot size={12} />;
+      return <CircleDot size={11} />;
     case 'error':
-      return <XCircle size={12} />;
+      return <XCircle size={11} />;
     case 'skipped':
-      return <Minus size={12} />;
+      return <Minus size={11} />;
     default:
-      return <Circle size={12} />;
+      return <Circle size={11} />;
   }
 }
 
@@ -88,7 +88,7 @@ export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: ${theme.spacing[3]} ${theme.spacing[4]};
+          padding: ${theme.spacing[2]} ${theme.spacing[4]};
           background: ${theme.color.fill};
           border-bottom: 1px solid ${theme.color.borderSecondary};
         `}
@@ -105,18 +105,18 @@ export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
               display: flex;
               align-items: center;
               justify-content: center;
-              width: 28px;
-              height: 28px;
+              width: 22px;
+              height: 22px;
               border-radius: ${theme.radius.md};
               background: ${theme.blockColor.plan.bg};
               color: ${theme.blockColor.plan.text};
             `}
           >
-            <FileText size={14} />
+            <FileText size={13} />
           </div>
           <span
             css={css`
-              font-size: ${theme.font.size.base};
+              font-size: ${theme.font.size.sm};
               font-weight: ${theme.font.weight.semibold};
               color: ${theme.color.text};
             `}
@@ -165,7 +165,7 @@ export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
       {/* Steps */}
       <div
         css={css`
-          padding: ${theme.spacing[3]} ${theme.spacing[4]};
+          padding: ${theme.spacing[2]} ${theme.spacing[4]};
         `}
       >
         {steps.map((step, index) => {
@@ -178,8 +178,8 @@ export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
               css={css`
                 display: flex;
                 align-items: flex-start;
-                gap: ${theme.spacing[3]};
-                padding: ${theme.spacing[2]} 0;
+                gap: ${theme.spacing[2]};
+                padding: ${theme.spacing[1]} 0;
                 position: relative;
               `}
             >
@@ -188,8 +188,8 @@ export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
                 <div
                   css={css`
                     position: absolute;
-                    top: 28px;
-                    left: 11px;
+                    top: 24px;
+                    left: 9px;
                     width: 2px;
                     height: calc(100% - 8px);
                     background: ${theme.color.borderSecondary};
@@ -203,8 +203,8 @@ export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
                   display: flex;
                   align-items: center;
                   justify-content: center;
-                  width: 24px;
-                  height: 24px;
+                  width: 20px;
+                  height: 20px;
                   border-radius: ${theme.radius.full};
                   background: ${iconBg};
                   color: ${color};
@@ -231,7 +231,7 @@ export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
               >
                 <div
                   css={css`
-                    font-size: ${theme.font.size.base};
+                    font-size: ${theme.font.size.sm};
                     font-weight: ${theme.font.weight.medium};
                     color: ${step.status === 'skipped'
                       ? theme.color.textTertiary

@@ -26,7 +26,7 @@ function getPhaseDisplay(
     return {
       title: `${name} ${t('skill.executionFailed')}`,
       tag: t('skill.failed'),
-      icon: <XCircle size={16} />,
+      icon: <XCircle size={13} />,
       accentColor: theme.color.error,
     };
   }
@@ -36,33 +36,33 @@ function getPhaseDisplay(
       return {
         title: t('skill.loading', { name }),
         tag: t('skill.loadingShort'),
-        icon: <Loader2 size={16} />,
+        icon: <Loader2 size={13} />,
         accentColor: skillAccent,
       };
     case 'loaded':
       return {
         title: name,
         tag: t('skill.loaded'),
-        icon: <Sparkles size={16} />,
+        icon: <Sparkles size={13} />,
         accentColor: skillAccent,
       };
     case 'executing':
       return {
         title: t('skill.executing', { name }),
         tag: meta?.task ?? t('skill.executingShort'),
-        icon: <Loader2 size={16} />,
+        icon: <Loader2 size={13} />,
         accentColor: skillAccent,
       };
     case 'completed':
       return {
         title: t('skill.completed', { name }),
-        icon: <CheckCircle2 size={16} />,
+        icon: <CheckCircle2 size={13} />,
         accentColor: theme.color.success,
       };
     default:
       return {
         title: name,
-        icon: <Sparkles size={16} />,
+        icon: <Sparkles size={13} />,
         accentColor: skillAccent,
       };
   }
@@ -124,8 +124,8 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
         css={css`
           display: flex;
           align-items: center;
-          gap: ${theme.spacing[3]};
-          padding: ${theme.spacing[3]} ${theme.spacing[4]};
+          gap: ${theme.spacing[2]};
+          padding: ${theme.spacing[2]} ${theme.spacing[4]};
           border-bottom: 1px solid ${theme.color.borderSecondary};
         `}
       >
@@ -134,8 +134,8 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 32px;
-            height: 32px;
+            width: 22px;
+            height: 22px;
             border-radius: ${theme.radius.md};
             background: ${block.status === 'error'
               ? theme.color.errorBg
@@ -171,7 +171,7 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
         >
           <div
             css={css`
-              font-size: ${theme.font.size.base};
+              font-size: ${theme.font.size.sm};
               font-weight: ${theme.font.weight.semibold};
               color: ${theme.color.text};
             `}
@@ -181,7 +181,7 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
           {meta?.tokenCount && meta.phase !== 'completed' && (
             <div
               css={css`
-                font-size: ${theme.font.size.sm};
+                font-size: ${theme.font.size.xs};
                 color: ${theme.color.textTertiary};
                 margin-top: 1px;
               `}
@@ -196,7 +196,7 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
             css={css`
               font-size: ${theme.font.size.xs};
               font-weight: ${theme.font.weight.semibold};
-              padding: 3px 10px;
+              padding: 2px 8px;
               border-radius: ${theme.radius.full};
               background: ${accentColor}15;
               color: ${accentColor};
@@ -213,8 +213,8 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
       {block.content && (
         <div
           css={css`
-            padding: ${theme.spacing[3]} ${theme.spacing[4]};
-            font-size: ${theme.font.size.base};
+            padding: ${theme.spacing[2]} ${theme.spacing[4]};
+            font-size: ${theme.font.size.sm};
             line-height: ${theme.font.lineHeightRelaxed};
             color: ${theme.color.textSecondary};
           `}
@@ -230,7 +230,7 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
             display: flex;
             align-items: center;
             gap: ${theme.spacing[1]};
-            padding: ${theme.spacing[3]} ${theme.spacing[4]};
+            padding: ${theme.spacing[2]} ${theme.spacing[4]};
             border-top: 1px solid ${theme.color.borderSecondary};
             overflow-x: auto;
           `}
@@ -253,7 +253,7 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
                     gap: ${theme.spacing[1]};
                     font-size: ${theme.font.size.xs};
                     font-weight: ${theme.font.weight.medium};
-                    padding: 3px 8px;
+                    padding: 2px 6px;
                     border-radius: ${theme.radius.sm};
                     white-space: nowrap;
                     transition: all ${theme.motion.duration.normal} ${theme.motion.easing.out};
@@ -272,8 +272,8 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
                           `}
                   `}
                 >
-                  {phaseStatus === 'done' && <CheckCircle2 size={12} style={{ opacity: 0.7 }} />}
-                  {phaseStatus === 'active' && <Loader2 size={12} style={{ opacity: 0.7 }} />}
+                  {phaseStatus === 'done' && <CheckCircle2 size={11} style={{ opacity: 0.7 }} />}
+                  {phaseStatus === 'active' && <Loader2 size={11} style={{ opacity: 0.7 }} />}
                   {phase.label}
                 </span>
                 {index < phases.length - 1 && (

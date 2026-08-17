@@ -32,8 +32,8 @@ function CodeRow({
       css={css`
         display: flex;
         align-items: center;
-        gap: ${theme.spacing[3]};
-        padding: ${theme.spacing[3]} ${theme.spacing[4]};
+        gap: ${theme.spacing[2]};
+        padding: ${theme.spacing[2]} ${theme.spacing[4]};
         cursor: ${onClick ? 'pointer' : 'default'};
         transition: background ${theme.motion.duration.fast} ${theme.motion.easing.out};
         ${onClick
@@ -137,7 +137,7 @@ export const ToolCallBlock = memo(function ToolCallBlock({ block }: BlockProps) 
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: ${theme.spacing[3]} ${theme.spacing[4]};
+            padding: ${theme.spacing[2]} ${theme.spacing[4]};
             background: ${theme.color.fill};
             border-bottom: 1px solid ${theme.color.borderSecondary};
           `}
@@ -154,18 +154,18 @@ export const ToolCallBlock = memo(function ToolCallBlock({ block }: BlockProps) 
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                width: 28px;
-                height: 28px;
+                width: 22px;
+                height: 22px;
                 border-radius: ${theme.radius.md};
                 background: ${accentBg};
                 color: ${accentColor};
               `}
             >
-              <Wrench size={14} />
+              <Wrench size={13} />
             </div>
             <span
               css={css`
-                font-size: ${theme.font.size.base};
+                font-size: ${theme.font.size.sm};
                 font-weight: ${theme.font.weight.semibold};
                 color: ${theme.color.text};
               `}

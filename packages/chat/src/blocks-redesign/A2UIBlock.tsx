@@ -166,7 +166,7 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: ${theme.spacing[3]} ${theme.spacing[4]};
+          padding: ${theme.spacing[2]} ${theme.spacing[4]};
           background: ${theme.color.fill};
           border-bottom: 1px solid ${theme.color.borderSecondary};
         `}
@@ -183,18 +183,18 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
               display: flex;
               align-items: center;
               justify-content: center;
-              width: 28px;
-              height: 28px;
+              width: 22px;
+              height: 22px;
               border-radius: ${theme.radius.md};
               background: ${accentBg};
               color: ${accentColor};
             `}
           >
-            <Monitor size={14} />
+            <Monitor size={13} />
           </div>
           <span
             css={css`
-              font-size: ${theme.font.size.base};
+              font-size: ${theme.font.size.sm};
               font-weight: ${theme.font.weight.semibold};
               color: ${theme.color.text};
             `}
@@ -203,7 +203,7 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
           </span>
           {block.status === 'streaming' && (
             <Loader2
-              size={14}
+              size={12}
               css={css`
                 animation: ${spinKeyframes} 1s linear infinite;
                 color: ${theme.color.textTertiary};
@@ -212,7 +212,7 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
           )}
           {block.status === 'pending' && (
             <Clock
-              size={14}
+              size={12}
               css={css`
                 color: ${theme.color.warning};
               `}
@@ -249,8 +249,8 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
               display: flex;
               align-items: center;
               justify-content: center;
-              width: 28px;
-              height: 28px;
+              width: 24px;
+              height: 24px;
               border: none;
               border-radius: ${theme.radius.md};
               background: transparent;
@@ -267,7 +267,7 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
             title={t('a2ui.expand')}
             type="button"
           >
-            <Maximize2 size={14} />
+            <Maximize2 size={12} />
           </button>
         </div>
       </div>
@@ -305,7 +305,7 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
           <div
             css={css`
               min-height: 100px;
-              padding: ${theme.spacing[3]} ${theme.spacing[4]};
+              padding: ${theme.spacing[2]} ${theme.spacing[4]};
             `}
           >
             <genui.GenUISurface

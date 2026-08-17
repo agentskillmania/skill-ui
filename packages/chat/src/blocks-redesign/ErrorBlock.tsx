@@ -33,8 +33,8 @@ export const ErrorBlock = memo(function ErrorBlock({ block }: BlockProps) {
         css={css`
           display: flex;
           align-items: center;
-          gap: ${theme.spacing[3]};
-          padding: ${theme.spacing[3]} ${theme.spacing[4]};
+          gap: ${theme.spacing[2]};
+          padding: ${theme.spacing[2]} ${theme.spacing[4]};
           background: ${theme.color.errorBg};
           border-bottom: 1px solid ${theme.color.error};
         `}
@@ -44,19 +44,19 @@ export const ErrorBlock = memo(function ErrorBlock({ block }: BlockProps) {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 32px;
-            height: 32px;
+            width: 22px;
+            height: 22px;
             border-radius: ${theme.radius.md};
             background: ${theme.color.error};
             color: ${theme.color.textInverse};
             flex-shrink: 0;
           `}
         >
-          <AlertTriangle size={16} />
+          <AlertTriangle size={13} />
         </div>
         <span
           css={css`
-            font-size: ${theme.font.size.base};
+            font-size: ${theme.font.size.sm};
             font-weight: ${theme.font.weight.semibold};
             color: ${theme.color.error};
             flex: 1;
@@ -86,7 +86,7 @@ export const ErrorBlock = memo(function ErrorBlock({ block }: BlockProps) {
       {/* Body */}
       <pre
         css={css`
-          padding: ${theme.spacing[4]};
+          padding: ${theme.spacing[3]};
           font-family: ${theme.font.familyMono};
           font-size: ${theme.font.size.xs};
           line-height: ${theme.font.lineHeightRelaxed};
@@ -107,13 +107,13 @@ export const ErrorBlock = memo(function ErrorBlock({ block }: BlockProps) {
             display: flex;
             align-items: center;
             gap: ${theme.spacing[2]};
-            padding: ${theme.spacing[3]} ${theme.spacing[4]};
+            padding: ${theme.spacing[2]} ${theme.spacing[4]};
             border-top: 1px solid ${theme.color.borderSecondary};
             font-size: ${theme.font.size.sm};
             color: ${theme.color.textTertiary};
           `}
         >
-          <Info size={14} style={{ opacity: 0.6, flexShrink: 0 }} />
+          <Info size={12} style={{ opacity: 0.6, flexShrink: 0 }} />
           {meta.hint}
         </div>
       )}

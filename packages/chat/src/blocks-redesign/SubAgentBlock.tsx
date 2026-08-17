@@ -139,7 +139,7 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: ${theme.spacing[3]} ${theme.spacing[4]};
+            padding: ${theme.spacing[2]} ${theme.spacing[4]};
             background: ${isError ? theme.color.errorBg : theme.color.fill};
             border-bottom: 1px solid ${isError ? theme.color.error : theme.color.borderSecondary};
           `}
@@ -158,19 +158,19 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                width: 32px;
-                height: 32px;
+                width: 22px;
+                height: 22px;
                 border-radius: ${theme.radius.md};
                 background: ${accent.bg};
                 color: ${accent.text};
                 flex-shrink: 0;
               `}
             >
-              <Bot size={16} />
+              <Bot size={13} />
             </div>
             <span
               css={css`
-                font-size: ${theme.font.size.base};
+                font-size: ${theme.font.size.sm};
                 font-weight: ${theme.font.weight.semibold};
                 color: ${theme.color.text};
                 white-space: nowrap;
@@ -189,7 +189,7 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
               gap: ${theme.spacing[1]};
               font-size: ${theme.font.size.xs};
               font-weight: ${theme.font.weight.semibold};
-              padding: 3px 10px;
+              padding: 2px 8px;
               border-radius: ${theme.radius.sm};
               background: ${tagColors.bg};
               color: ${tagColors.fg};
@@ -220,7 +220,7 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
           meta?.duration != null) && (
           <div
             css={css`
-              padding: ${theme.spacing[2]} ${theme.spacing[4]} ${theme.spacing[3]};
+              padding: ${theme.spacing[2]} ${theme.spacing[4]};
             `}
           >
             {meta?.task && (
@@ -231,7 +231,7 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
                   white-space: nowrap;
                   overflow: hidden;
                   text-overflow: ellipsis;
-                  margin-bottom: ${theme.spacing[2]};
+                  margin-bottom: ${theme.spacing[1]};
                 `}
               >
                 {meta.task}
@@ -245,7 +245,7 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
                 css={css`
                   display: flex;
                   align-items: center;
-                  gap: ${theme.spacing[3]};
+                  gap: ${theme.spacing[2]};
                   font-size: ${theme.font.size.xs};
                   color: ${theme.color.textTertiary};
                 `}
