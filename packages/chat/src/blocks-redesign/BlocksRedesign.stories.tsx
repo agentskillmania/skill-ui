@@ -1,5 +1,6 @@
 /** @jsxImportSource @emotion/react */
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { useEffect, useState } from 'react';
 import { ThinkingBlock } from './ThinkingBlock.js';
 import { ToolCallBlock } from './ToolCallBlock.js';
 import { PlanBlock } from './PlanBlock.js';
@@ -53,6 +54,81 @@ export const ThinkingStreaming: Story = {
       status: 'streaming',
       content:
         '让我想想这个问题应该怎么解决。首先，用户提到了多个来源，我需要并行调用 web_search...',
+    };
+    return (
+      <Wrapper>
+        <ThinkingBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+const LONG_THINKING_CONTENT = `用户想要了解整个项目的结构，这是一个需要多步骤分析的任务。
+
+首先，我需要读取根目录的文件列表，了解 monorepo 的整体布局。项目采用 pnpm workspace 管理，包含多个子包。
+
+接下来分析各个模块的职责：theme 包提供设计令牌和主题上下文；chat 包实现消息渲染和输入框；shared 包存放通用工具函数。
+
+然后我注意到 blocks-redesign 目录下有多种 Block 组件，每种对应不同类型的消息内容，比如工具调用、计划、错误和人类输入。
+
+依赖关系方面，chat 依赖 theme 和 shared，frame 依赖 chat。这种分层让各包职责清晰，便于独立测试。
+
+最后，我需要把这些信息整理成一份清晰的架构说明给用户。`;
+
+// 长内容：超过 4 行后限高，出现滚动条并钉在底部
+export const ThinkingLongContent: Story = {
+  render: () => {
+    const block: Block = {
+      id: 'b3',
+      type: 'thinking',
+      status: 'completed',
+      content: LONG_THINKING_CONTENT,
+    };
+    return (
+      <Wrapper>
+        <ThinkingBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+const STREAMING_CHUNKS = [
+  '用户想要了解项目结构，',
+  '我需要先读取文件目录。\n\n',
+  '看到这是一个 pnpm monorepo，',
+  '包含 theme、chat、shared 等子包。\n\n',
+  'chat 包里的 blocks-redesign 目录',
+  '有多种 Block 组件，',
+  '分别对应不同类型的消息内容。\n\n',
+  '依赖关系上 chat 依赖 theme 和 shared，',
+  '分层清晰，便于独立测试。\n\n',
+  '现在把这些整理成架构说明。',
+];
+
+// 流式模拟：内容逐段填充，滚动条始终钉在底部
+export const ThinkingStreamingLive: Story = {
+  render: () => {
+    const [content, setContent] = useState('');
+    useEffect(() => {
+      let i = 0;
+      const timer = setInterval(() => {
+        if (i >= STREAMING_CHUNKS.length) {
+          clearInterval(timer);
+          return;
+        }
+        // 同步取出当前片段——updater 执行时 i 可能已自增，闭包直读会拿到 undefined
+        const chunk = STREAMING_CHUNKS[i];
+        i += 1;
+        setContent((prev) => prev + chunk);
+      }, 600);
+      return () => clearInterval(timer);
+    }, []);
+
+    const block: Block = {
+      id: 'b4',
+      type: 'thinking',
+      status: 'streaming',
+      content,
     };
     return (
       <Wrapper>
