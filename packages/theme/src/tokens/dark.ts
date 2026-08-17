@@ -86,7 +86,7 @@ export const darkBlockColor: Theme['blockColor'] = {
   toolMcp: { text: '#22d3ee', bg: 'rgba(34, 211, 238, 0.15)' },
   toolScript: { text: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)' },
   toolBuiltin: { text: '#34d399', bg: 'rgba(52, 211, 153, 0.15)' },
-  humanInput: { text: '#fb923c', bg: 'rgba(251, 146, 60, 0.15)' },
+  humanInput: { text: '#facc15', bg: 'rgba(250, 204, 21, 0.15)' },
   skill: { text: '#a78bfa', bg: 'rgba(167, 139, 250, 0.15)' },
   a2ui: { text: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)' },
   subagent: { text: '#22d3ee', bg: 'rgba(34, 211, 238, 0.15)' },

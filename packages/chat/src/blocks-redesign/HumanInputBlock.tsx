@@ -19,7 +19,7 @@ const buttonBaseCss = (theme: Theme) => css`
   display: inline-flex;
   align-items: center;
   gap: ${theme.spacing[1]};
-  padding: ${theme.spacing[2]} ${theme.spacing[4]};
+  padding: ${theme.spacing[1]} ${theme.spacing[3]};
   border-radius: ${theme.radius.md};
   font-size: ${theme.font.size.base};
   font-weight: ${theme.font.weight.semibold};
@@ -103,7 +103,7 @@ function QuestionInput({
   `;
   const inputCss = css`
     width: 100%;
-    padding: ${theme.spacing[2]} ${theme.spacing[3]};
+    padding: ${theme.spacing[1]} ${theme.spacing[3]};
     border-radius: ${theme.radius.md};
     border: 1px solid ${theme.color.border};
     background: ${theme.color.bgContainer};
@@ -119,8 +119,8 @@ function QuestionInput({
   const optionCss = (selected: boolean) => css`
     display: flex;
     align-items: center;
-    gap: ${theme.spacing[3]};
-    padding: ${theme.spacing[2]} ${theme.spacing[3]};
+    gap: ${theme.spacing[2]};
+    padding: ${theme.spacing[1]} ${theme.spacing[2]};
     border-radius: ${theme.radius.md};
     border: 1px solid ${selected ? theme.color.primary : theme.color.border};
     background: ${selected ? theme.color.primaryBg : theme.color.bgContainer};
@@ -167,8 +167,8 @@ function QuestionInput({
             >
               <span
                 css={css`
-                  width: 18px;
-                  height: 18px;
+                  width: 16px;
+                  height: 16px;
                   border-radius: ${theme.radius.full};
                   border: 2px solid ${single === opt ? theme.color.primary : theme.color.border};
                   display: flex;
@@ -180,8 +180,8 @@ function QuestionInput({
                 {single === opt && (
                   <span
                     css={css`
-                      width: 8px;
-                      height: 8px;
+                      width: 7px;
+                      height: 7px;
                       border-radius: ${theme.radius.full};
                       background: ${theme.color.primary};
                     `}
@@ -222,8 +222,8 @@ function QuestionInput({
               >
                 <span
                   css={css`
-                    width: 18px;
-                    height: 18px;
+                    width: 16px;
+                    height: 16px;
                     border-radius: ${theme.radius.sm};
                     border: 2px solid ${checked ? theme.color.primary : theme.color.border};
                     display: flex;
@@ -232,7 +232,7 @@ function QuestionInput({
                     flex-shrink: 0;
                   `}
                 >
-                  {checked && <Check size={12} color={theme.color.primary} />}
+                  {checked && <Check size={11} color={theme.color.primary} />}
                 </span>
                 <span
                   css={css`
@@ -285,7 +285,7 @@ function MultiQuestionForm({
       css={css`
         display: flex;
         flex-direction: column;
-        gap: ${theme.spacing[4]};
+        gap: ${theme.spacing[3]};
       `}
     >
       {questions.map((q) => (
@@ -308,7 +308,7 @@ function MultiQuestionForm({
           disabled={!allAnswered}
           onClick={handleSubmit}
         >
-          <SendHorizontal size={14} />
+          <SendHorizontal size={12} />
           {t('common.submit')}
         </button>
       </div>
@@ -340,13 +340,14 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
       css={css`
         border-radius: ${theme.radius.lg};
         background: ${theme.color.bgContainer};
-        border: 1px solid ${theme.color.border};
+        /* 黄色是 HumanInput 的身份色（同 ErrorBlock 红边先例）；完成与否由绿色 pill/正文表达 */
+        border: 1px solid ${accentColor};
         overflow: hidden;
         transition:
           border-color ${theme.motion.duration.normal} ${theme.motion.easing.out},
           box-shadow ${theme.motion.duration.normal} ${theme.motion.easing.out};
         &:hover {
-          border-color: ${theme.color.borderHover};
+          border-color: ${accentColor};
           box-shadow: ${theme.shadow.sm};
         }
       `}
@@ -356,10 +357,10 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
         css={css`
           display: flex;
           align-items: center;
-          gap: ${theme.spacing[3]};
-          padding: ${theme.spacing[3]} ${theme.spacing[4]};
+          gap: ${theme.spacing[2]};
+          padding: ${theme.spacing[2]} ${theme.spacing[4]};
           background: ${accentBg};
-          border-bottom: 1px solid ${theme.color.borderSecondary};
+          border-bottom: 1px solid ${accentColor};
         `}
       >
         <div
@@ -367,16 +368,15 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 32px;
-            height: 32px;
+            width: 22px;
+            height: 22px;
             border-radius: ${theme.radius.md};
-            background: ${accentBg};
-            color: ${accentColor};
-            border: 1px solid ${theme.color.border};
+            background: ${accentColor};
+            color: ${theme.color.textInverse};
             flex-shrink: 0;
           `}
         >
-          <User size={16} />
+          <User size={13} />
         </div>
         <div
           css={css`
@@ -386,34 +386,23 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
         >
           <div
             css={css`
-              font-size: ${theme.font.size.base};
+              font-size: ${theme.font.size.sm};
               font-weight: ${theme.font.weight.semibold};
               color: ${theme.color.text};
             `}
           >
             {meta?.title ?? t('humanInput.needConfirm')}
           </div>
-          {meta?.message && !isPending && (
-            <div
-              css={css`
-                font-size: ${theme.font.size.sm};
-                color: ${theme.color.textTertiary};
-                margin-top: 1px;
-              `}
-            >
-              {meta.message}
-            </div>
-          )}
         </div>
         <span
           css={css`
             font-size: ${theme.font.size.xs};
             font-weight: ${theme.font.weight.semibold};
-            padding: 3px 10px;
+            padding: ${isPending ? '2px 8px' : '0'};
             border-radius: ${theme.radius.full};
-            background: ${isPending ? accentBg : theme.color.successBg};
+            background: ${isPending ? accentBg : 'transparent'};
             color: ${isPending ? accentColor : theme.color.success};
-            border: 1px solid ${isPending ? theme.color.border : theme.color.success};
+            border: ${isPending ? `1px solid ${accentColor}` : 'none'};
             flex-shrink: 0;
           `}
         >
@@ -423,28 +412,26 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
 
       {/* Body */}
       {!isPending ? (
-        /* Completed state */
+        /* Completed state — green text on the card's own background, no green band */
         <div
           css={css`
             display: flex;
             align-items: center;
             gap: ${theme.spacing[2]};
-            padding: ${theme.spacing[3]} ${theme.spacing[4]};
-            background: ${accentBg};
-            border-top: 1px solid ${theme.color.borderSecondary};
+            padding: ${theme.spacing[2]} ${theme.spacing[4]};
             font-size: ${theme.font.size.base};
-            color: ${accentColor};
+            color: ${theme.color.success};
             font-weight: ${theme.font.weight.medium};
           `}
         >
-          <Check size={14} style={{ opacity: 0.6 }} />
+          <Check size={12} style={{ opacity: 0.6 }} />
           {formatResponse(meta?.response, t) || t('humanInput.completed')}
         </div>
       ) : (
         /* Pending state */
         <div
           css={css`
-            padding: ${theme.spacing[4]};
+            padding: ${theme.spacing[3]};
           `}
         >
           {meta?.message && !meta?.questions && (
@@ -453,7 +440,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                 font-size: ${theme.font.size.base};
                 line-height: ${theme.font.lineHeightRelaxed};
                 color: ${theme.color.textSecondary};
-                margin-bottom: ${theme.spacing[4]};
+                margin-bottom: ${theme.spacing[3]};
               `}
             >
               {meta.message}
@@ -500,7 +487,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                 css={[buttonBaseCss(theme), solidButtonCss(theme)]}
                 onClick={() => handleSubmit(true)}
               >
-                <Check size={14} />
+                <Check size={12} />
                 {t('common.confirm')}
               </button>
             </div>
@@ -520,7 +507,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                 placeholder={t('humanInput.placeholder')}
                 css={css`
                   flex: 1;
-                  padding: ${theme.spacing[2]} ${theme.spacing[3]};
+                  padding: ${theme.spacing[1]} ${theme.spacing[3]};
                   border-radius: ${theme.radius.md};
                   border: 1px solid ${theme.color.border};
                   background: ${theme.color.bgContainer};
@@ -544,7 +531,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                 css={[buttonBaseCss(theme), solidButtonCss(theme)]}
                 onClick={() => handleSubmit(inputValue)}
               >
-                <SendHorizontal size={14} />
+                <SendHorizontal size={12} />
                 {t('common.submit')}
               </button>
             </div>
@@ -568,8 +555,8 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                       css={css`
                         display: flex;
                         align-items: center;
-                        gap: ${theme.spacing[3]};
-                        padding: ${theme.spacing[2]} ${theme.spacing[3]};
+                        gap: ${theme.spacing[2]};
+                        padding: ${theme.spacing[1]} ${theme.spacing[2]};
                         border-radius: ${theme.radius.md};
                         border: 1px solid ${isSelected ? theme.color.primary : theme.color.border};
                         background: ${isSelected ? theme.color.primaryBg : theme.color.bgContainer};
@@ -586,8 +573,8 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                     >
                       <span
                         css={css`
-                          width: 18px;
-                          height: 18px;
+                          width: 16px;
+                          height: 16px;
                           border-radius: ${theme.radius.full};
                           border: 2px solid ${isSelected ? theme.color.primary : theme.color.border};
                           display: flex;
@@ -600,8 +587,8 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                         {isSelected && (
                           <span
                             css={css`
-                              width: 8px;
-                              height: 8px;
+                              width: 7px;
+                              height: 7px;
                               border-radius: ${theme.radius.full};
                               background: ${theme.color.primary};
                             `}
@@ -624,7 +611,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                 css={css`
                   display: flex;
                   justify-content: flex-end;
-                  margin-top: ${theme.spacing[4]};
+                  margin-top: ${theme.spacing[3]};
                 `}
               >
                 <button
@@ -656,8 +643,8 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                       css={css`
                         display: flex;
                         align-items: center;
-                        gap: ${theme.spacing[3]};
-                        padding: ${theme.spacing[2]} ${theme.spacing[3]};
+                        gap: ${theme.spacing[2]};
+                        padding: ${theme.spacing[1]} ${theme.spacing[2]};
                         border-radius: ${theme.radius.md};
                         border: 1px solid ${isSelected ? theme.color.primary : theme.color.border};
                         background: ${isSelected ? theme.color.primaryBg : theme.color.bgContainer};
@@ -680,8 +667,8 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                     >
                       <span
                         css={css`
-                          width: 18px;
-                          height: 18px;
+                          width: 16px;
+                          height: 16px;
                           border-radius: ${theme.radius.sm};
                           border: 2px solid ${isSelected ? theme.color.primary : theme.color.border};
                           display: flex;
@@ -698,7 +685,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                         `}
                       >
                         {isSelected && (
-                          <Check size={12} color={theme.color.textInverse} strokeWidth={3} />
+                          <Check size={11} color={theme.color.textInverse} strokeWidth={3} />
                         )}
                       </span>
                       <span
@@ -717,7 +704,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
                 css={css`
                   display: flex;
                   justify-content: flex-end;
-                  margin-top: ${theme.spacing[4]};
+                  margin-top: ${theme.spacing[3]};
                 `}
               >
                 <button
