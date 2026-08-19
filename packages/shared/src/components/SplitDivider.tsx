@@ -66,6 +66,9 @@ export function SplitDivider({
       document.body.style.cursor = '';
       ds.sidebar.classList.remove('dragging');
       onResize(ds.sidebar.offsetWidth);
+      // 把宽度交还给 React/emotion 驱动：内联样式优先级高于 class，
+      // 残留会导致折叠（42px class）被永久压制
+      ds.sidebar.style.width = '';
       dragState.current = null;
     };
 

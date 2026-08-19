@@ -72,7 +72,7 @@ describe('SearchResultItem', () => {
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
 
-  it('shows delete button when onEdit is provided for session type', () => {
+  it('session delete requires Popconfirm before firing onEdit', async () => {
     const onEdit = vi.fn();
     const sessionItem: SearchResultItemData = {
       type: 'session',
@@ -80,13 +80,23 @@ describe('SearchResultItem', () => {
       title: 'Session One',
     };
     render(<SearchResultItem item={sessionItem} query="" onEdit={onEdit} />, { wrapper });
-    const deleteBtn = document.querySelector('.lucide-trash-2')?.closest('button');
     // Note: Trash2 might render with class lucide-trash-2 or lucide-trash2 depending on version
     const btn =
       document.querySelector('.lucide-trash-2')?.closest('button') ||
       document.querySelector('.lucide-trash2')?.closest('button');
     expect(btn).toBeTruthy();
-    btn?.click();
+
+    // 点垃圾桶只弹确认框，不直接删
+    fireEvent.click(btn!);
+    expect(onEdit).not.toHaveBeenCalled();
+    const confirmBtn = await vi.waitFor(() => {
+      const el = document.querySelector('.ant-popconfirm .ant-btn-primary');
+      if (!el) throw new Error('popconfirm not open');
+      return el as HTMLElement;
+    });
+
+    // 确认后才触发删除回调
+    fireEvent.click(confirmBtn);
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
 

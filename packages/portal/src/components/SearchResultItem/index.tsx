@@ -1,7 +1,8 @@
 /** @jsxImportSource @emotion/react */
-import { Button, Tooltip } from 'antd';
+import { Button, Popconfirm, Tooltip } from 'antd';
 import { Pencil, Trash2 } from 'lucide-react';
 import { memo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import type { SearchResultItemData } from '../../types.js';
 import { HighlightText } from '../HighlightText/index.js';
@@ -18,6 +19,7 @@ export const SearchResultItem = memo(function SearchResultItem({
   query,
   onEdit,
 }: SearchResultItemProps) {
+  const { t } = useTranslation('skill-ui-portal');
   return (
     <div
       css={{
@@ -41,19 +43,38 @@ export const SearchResultItem = memo(function SearchResultItem({
           )}
         </div>
       </div>
-      {onEdit && (
-        <Tooltip title={item.type === 'session' ? '删除' : '编辑'}>
-          <Button
-            type="text"
-            size="small"
-            icon={item.type === 'session' ? <Trash2 size={14} /> : <Pencil size={14} />}
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit();
-            }}
-          />
-        </Tooltip>
-      )}
+      {onEdit &&
+        (item.type === 'session' ? (
+          // 删除与包内其他路径一致：Popconfirm 二次确认后再调回调
+          //（onEdit 回调对 session 类型实为删除，见 Portal.tsx fallback 分支）
+          <Popconfirm
+            title={t('deleteConfirmSession')}
+            onConfirm={onEdit}
+            okText={t('delete')}
+            cancelText={t('cancel')}
+            okButtonProps={{ danger: true }}
+          >
+            <Button
+              type="text"
+              size="small"
+              danger
+              icon={<Trash2 size={14} />}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </Popconfirm>
+        ) : (
+          <Tooltip title={t('edit')}>
+            <Button
+              type="text"
+              size="small"
+              icon={<Pencil size={14} />}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+            />
+          </Tooltip>
+        ))}
     </div>
   );
 });
