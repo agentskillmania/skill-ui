@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Zap } from 'lucide-react';
 import { AppBrand } from './AppBrand.js';
 

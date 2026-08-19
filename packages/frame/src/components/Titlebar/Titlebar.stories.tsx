@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { Settings, User, Zap } from 'lucide-react';
 import { Titlebar } from './Titlebar.js';
 

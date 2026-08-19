@@ -18,14 +18,14 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "dev": "tsc --watch",
     "test": "vitest run",
     "test:unit": "vitest run test/unit",
     "test:coverage": "vitest run test/unit --coverage",
     "test:watch": "vitest watch test/unit",
     "prepublishOnly": "pnpm test:unit && pnpm build",
-    "storybook": "storybook dev -p 6006",
+    "storybook": "storybook dev -p 6010",
     "build-storybook": "storybook build"
   },
   "author": {
@@ -53,8 +53,10 @@
     "react-i18next": "^15.0.0"
   },
   "devDependencies": {
+    "@storybook/react-vite": "^10.3.3",
     "@testing-library/jest-dom": "^6.6.0",
     "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitest/coverage-v8": "^2.0.0",

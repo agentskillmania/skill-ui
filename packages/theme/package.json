@@ -18,7 +18,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "dev": "tsc --watch",
     "demo": "vite serve demo -c demo/vite.config.ts",
     "test": "vitest run",
@@ -39,9 +39,6 @@
     "type": "git",
     "url": "https://github.com/agentskillmania/skill-ui.git",
     "directory": "packages/theme"
-  },
-  "dependencies": {
-    "@emotion/css": "^11.13.5"
   },
   "peerDependencies": {
     "react": "^19.0.0",

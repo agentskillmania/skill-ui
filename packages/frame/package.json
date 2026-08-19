@@ -18,13 +18,13 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "dev": "tsc --watch",
     "test": "vitest run",
     "test:unit": "vitest run test/unit",
     "test:coverage": "vitest run test/unit --coverage",
     "test:watch": "vitest watch test/unit",
-    "storybook": "storybook dev -p 6006",
+    "storybook": "storybook dev -p 6009",
     "build-storybook": "storybook build",
     "prepublishOnly": "pnpm test:unit && pnpm build"
   },
@@ -44,11 +44,9 @@
   "dependencies": {
     "@agentskillmania/skill-ui-shared": "workspace:*",
     "@agentskillmania/skill-ui-theme": "workspace:*",
-    "lucide-react": "^0.460.0",
-    "@ant-design/icons": "^6.1.1"
+    "lucide-react": "^0.460.0"
   },
   "peerDependencies": {
-    "antd": "^6.0.0",
     "i18next": "^24.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -78,6 +76,6 @@
     "vitest": "^2.0.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.19.0"
   }
 }

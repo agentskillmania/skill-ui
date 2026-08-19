@@ -35,6 +35,12 @@
     },
     {
       "path": "./packages/settings"
+    },
+    {
+      "path": "./packages/state"
+    },
+    {
+      "path": "./packages/portal"
     }
   ],
   "files": []

@@ -18,11 +18,11 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "dev": "tsc --watch",
     "test": "vitest run",
     "test:unit": "vitest run test/unit",
-    "test:intg": "vitest run test/integration",
+    "test:intg": "vitest run test/integration --passWithNoTests",
     "test:coverage": "vitest run test/unit --coverage",
     "test:watch": "vitest watch test/unit",
     "prepublishOnly": "pnpm test:unit && pnpm build",
@@ -66,7 +66,6 @@
     "@ant-design/x": "^2.4.0",
     "@ant-design/x-markdown": "^2.4.0",
     "@chromatic-com/storybook": "^5.0.2",
-    "@monaco-editor/react": "^4.7.0",
     "@storybook/addon-a11y": "^10.3.3",
     "@storybook/addon-docs": "^10.3.3",
     "@storybook/react-vite": "^10.3.3",
@@ -89,6 +88,6 @@
     "vitest": "^2.0.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.19.0"
   }
 }

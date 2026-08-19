@@ -1,16 +1,16 @@
 echo "Running pre-commit checks..."
 
-# 1. 运行单元测试
-echo "▶ Running unit tests..."
-if ! pnpm test:unit; then
-    echo "❌ Unit tests failed. Commit aborted."
-    exit 1
-fi
-
-# 2. 运行 build
+# 1. 运行 build（先产出最新 dist，chat 等包的测试经 node_modules 链接解析到 dist）
 echo "▶ Running build..."
 if ! pnpm run build; then
     echo "❌ Build failed. Commit aborted."
+    exit 1
+fi
+
+# 2. 运行单元测试
+echo "▶ Running unit tests..."
+if ! pnpm test:unit; then
+    echo "❌ Unit tests failed. Commit aborted."
     exit 1
 fi
 

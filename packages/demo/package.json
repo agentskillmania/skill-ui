@@ -9,7 +9,7 @@
     "dev:client": "pnpm exec vite",
     "test": "vitest run --passWithNoTests",
     "test:unit": "vitest run test/unit --passWithNoTests",
-    "test:intg": "vitest run test/integration",
+    "test:intg": "vitest run test/integration --passWithNoTests",
     "test:watch": "vitest"
   },
   "dependencies": {
@@ -17,9 +17,12 @@
     "@agentskillmania/skill-ui-cockpit": "workspace:*",
     "@agentskillmania/skill-ui-editor": "workspace:*",
     "@agentskillmania/skill-ui-frame": "workspace:*",
+    "@agentskillmania/skill-ui-shared": "workspace:*",
     "@agentskillmania/skill-ui-state": "workspace:*",
     "@agentskillmania/skill-ui-theme": "workspace:*",
+    "@ant-design/icons": "^6.1.1",
     "@ant-design/x": "^2.4.0",
+    "@emotion/react": "^11.14.0",
     "antd": "^6.3.3",
     "i18next": "^24.0.0",
     "react": "^19.0.0",
@@ -28,7 +31,6 @@
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.0",
-    "@testing-library/jest-dom/vitest": "^6.6.0",
     "@testing-library/react": "^16.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",

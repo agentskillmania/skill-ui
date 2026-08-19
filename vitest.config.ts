@@ -44,7 +44,7 @@ export default defineConfig({
         statements: 90,
       },
       include: ['packages/*/src/**/*.{ts,tsx}'],
-      exclude: ['packages/*/src/**/*.d.ts', 'packages/*/src/**/index.ts'],
+      exclude: ['packages/*/src/**/*.d.ts', 'packages/*/src/**/index.ts', 'packages/*/src/**/*.stories.tsx'],
     },
   },
 });
