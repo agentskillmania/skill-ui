@@ -213,12 +213,13 @@ describe('reducer — human-input defaults', () => {
     expect(block!.metadata?.message).toBe('');
   });
 
-  it('human-input with no requestId generates block id but leaves metadata.requestId undefined', () => {
+  it('human-input with no requestId generates one and stores it in metadata', () => {
     const state = run([s('human-input', { questions: [{ question: 'q', type: 'text' }] })]);
     const block = lastMsg(state).blocks?.find((b) => b.type === 'human_input');
     expect(block).toBeDefined();
     expect(block!.id).toBeTruthy();
-    expect(block!.metadata?.requestId).toBeUndefined();
+    // Generated requestId must be stored so a later resolved event can match
+    expect(block!.metadata?.requestId).toBe(block!.id);
   });
 
   it('human-input-resolved with no requestId does not crash', () => {
@@ -322,7 +323,7 @@ describe('reducer — sub-agent defaults', () => {
     expect(msg.content).toBe('');
   });
 
-  it('subagent-thinking with no content creates empty thinking block', () => {
+  it('subagent-thinking with no content does not create a thinking block', () => {
     const state = run([
       s('subagent-start', { subtaskId: 's1', name: 'sub', task: 'do' }),
       s('subagent-thinking', { subtaskId: 's1' }),
@@ -330,7 +331,8 @@ describe('reducer — sub-agent defaults', () => {
     const sub = state.subAgents.get('s1')!;
     const msg = sub.messages[sub.messages.length - 1];
     const block = msg.blocks?.find((b) => b.type === 'thinking');
-    expect(block!.content).toBe('');
+    // Mirror the main-agent guard: an empty first chunk means no reasoning
+    expect(block).toBeUndefined();
   });
 
   it('subagent-tool-start with no action does not crash', () => {

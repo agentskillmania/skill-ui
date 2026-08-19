@@ -96,8 +96,13 @@ function labelFor(eventName: string, data: Record<string, unknown>): string {
       return 'LLM request';
     case 'llm-response':
       return 'LLM response';
-    case 'phase-change':
-      return `Phase: → ${(data.to as { type?: string })?.type ?? ''}`;
+    case 'phase-change': {
+      // `to` arrives as an object ({ type }) from one daemon and as a plain
+      // string from the other — handle both.
+      const to = data.to;
+      const toType = typeof to === 'string' ? to : ((to as { type?: string })?.type ?? '');
+      return `Phase: → ${toType}`;
+    }
     case 'compressing':
       return 'Compressing context';
     case 'compressed':
@@ -125,6 +130,24 @@ function toEventLog(eventName: string, data: Record<string, unknown>): AgentEven
     label: labelFor(eventName, data),
     payload: { ...data },
   };
+}
+
+// ─── Event log ────────────────────────────────────────────────────
+
+/**
+ * Cap the event log. Every reducer call used to copy the full array
+ * (`[...events, entry]`), so a long session paid O(n) per token — O(n²)
+ * total — and retained every full tool result payload forever. The cockpit
+ * event log folds token streams anyway; keeping the newest entries is
+ * enough.
+ */
+const MAX_EVENT_LOG = 5000;
+
+function appendEvent(events: AgentEvent[], entry: AgentEvent): AgentEvent[] {
+  if (events.length >= MAX_EVENT_LOG) {
+    return [...events.slice(events.length - MAX_EVENT_LOG + 1), entry];
+  }
+  return [...events, entry];
 }
 
 // ─── Token helpers ────────────────────────────────────────────────
@@ -191,6 +214,19 @@ function closeThinkingBlocks(blocks: AgentBlock[]): AgentBlock[] {
 /** Close every still-streaming block (terminal events: done, sub-agent end). */
 function closeAllBlocks(blocks: AgentBlock[]): AgentBlock[] {
   return blocks.map((b) => (b.status === 'streaming' ? { ...b, status: 'completed' as const } : b));
+}
+
+/**
+ * Close blocks on terminal events (done/error). Streaming blocks flip to the
+ * terminal status; pending human_input blocks flip too — once the run is over,
+ * a still-interactive input would accept answers nobody reads.
+ */
+function closeTerminalBlocks(blocks: AgentBlock[], status: 'completed' | 'error'): AgentBlock[] {
+  return blocks.map((b) =>
+    b.status === 'streaming' || (b.type === 'human_input' && b.status === 'pending')
+      ? { ...b, status }
+      : b
+  );
 }
 
 // ─── Main agent event handlers ────────────────────────────────────
@@ -451,13 +487,18 @@ function reduceMainEvent(
           options = firstQ.options?.map((o) => ({ label: o, value: o }));
         }
       }
+      // Always assign a requestId: without one, a later human-input-resolved
+      // could never match (block stays pending forever), and two resolved
+      // events both missing requestId would mass-complete every block
+      // (undefined === undefined).
+      const requestId = (data.requestId as string) ?? genBlockId();
       const block: AgentBlock = {
-        id: (data.requestId as string) ?? genBlockId(),
+        id: requestId,
         type: 'human_input',
         status: 'pending',
         content: '',
         metadata: {
-          requestId: data.requestId,
+          requestId,
           inputType,
           title: data.context ?? 'AI needs your input',
           message: questions.map((q) => q.question).join('\n'),
@@ -476,7 +517,10 @@ function reduceMainEvent(
     }
 
     case 'human-input-resolved': {
-      const reqId = data.requestId as string;
+      const reqId = data.requestId as string | undefined;
+      // No requestId means we cannot identify which block to resolve —
+      // matching everything would complete unrelated pending blocks.
+      if (!reqId) return state;
       return {
         ...state,
         messages: state.messages.map((m) => {
@@ -517,8 +561,10 @@ function reduceMainEvent(
         ...state,
         tokens: tokens ? addTokens(state.tokens, tokens) : state.tokens,
         // lastInputTokens = the input size of the most recent LLM call =
-        // the context window currently in use (NOT cumulative).
-        ...(tokens?.input !== undefined ? { lastInputTokens: tokens.input } : {}),
+        // the context window currently in use (NOT cumulative). Daemon may
+        // send `tokens: {}` — that would zero the gauge, so only trust a
+        // positive reading.
+        ...(tokens && tokens.input > 0 ? { lastInputTokens: tokens.input } : {}),
       };
     }
 
@@ -532,7 +578,9 @@ function reduceMainEvent(
               !!i &&
               typeof i === 'object' &&
               (typeof (i as Record<string, unknown>).id === 'number' ||
-                typeof (i as Record<string, unknown>).id === 'string')
+                typeof (i as Record<string, unknown>).id === 'string') &&
+              // Number('abc') → NaN would poison downstream id comparisons
+              !Number.isNaN(Number((i as Record<string, unknown>).id))
           )
           .map((i) => ({
             id: typeof i.id === 'number' ? i.id : Number(i.id),
@@ -587,10 +635,19 @@ function reduceMainEvent(
       // from the local view (the backend state is already empty). The command
       // echo ("Session cleared.") arrives as a subsequent `token` event, which
       // creates a fresh streaming assistant message via `ensureStreamingMessage`.
+      // Also drop conversation-scoped residue: stale sub-agent cards, todo
+      // snapshot and token gauges would otherwise outlive the clear. The event
+      // log is kept — it is an append-only audit, and the `session-cleared`
+      // entry itself lives there. (subAgents is reset by the top-level
+      // reducer, which owns that slice.)
       return {
         ...state,
         messages: [],
         compression: undefined,
+        activeSkill: null,
+        todoList: undefined,
+        tokens: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+        lastInputTokens: undefined,
       };
     }
 
@@ -602,6 +659,7 @@ function reduceMainEvent(
       return {
         ...state,
         status: 'idle',
+        activeSkill: null,
         tokens: tokens ? addTokens(state.tokens, tokens) : state.tokens,
         totalSteps: totalSteps ?? state.totalSteps,
         duration: duration ?? state.duration,
@@ -610,7 +668,7 @@ function reduceMainEvent(
             ? {
                 ...m,
                 status: 'completed' as const,
-                blocks: m.blocks ? closeAllBlocks(m.blocks) : m.blocks,
+                blocks: m.blocks ? closeTerminalBlocks(m.blocks, 'completed') : m.blocks,
               }
             : m
         ),
@@ -621,12 +679,16 @@ function reduceMainEvent(
       return {
         ...state,
         status: 'error',
+        activeSkill: null,
         messages: state.messages.map((m) =>
           m.status === 'streaming'
             ? {
                 ...m,
                 status: 'error' as const,
                 content: m.content || `Error: ${data.message ?? 'Unknown error'}`,
+                // Close open blocks too — otherwise thinking/tool blocks keep
+                // their streaming pulse/spinner forever after a failed run.
+                blocks: m.blocks ? closeTerminalBlocks(m.blocks, 'error') : m.blocks,
               }
             : m
         ),
@@ -672,7 +734,14 @@ function reduceSubAgentEvent(
         ...run,
         messages: run.messages.map((m) =>
           m.status === 'streaming' && m.role === 'assistant'
-            ? { ...m, content: m.content + delta }
+            ? {
+                ...m,
+                content: m.content + delta,
+                // Mirror the main token handler: real content closes open
+                // thinking blocks; empty deltas between reasoning segments
+                // must not.
+                blocks: delta && m.blocks ? closeThinkingBlocks(m.blocks) : m.blocks,
+              }
             : m
         ),
       });
@@ -700,6 +769,9 @@ function reduceSubAgentEvent(
               ),
             };
           }
+          // Mirror the main-agent guard: an empty first chunk means the model
+          // produced no reasoning — never create an empty thinking block.
+          if (!content) return m;
           const block: AgentBlock = {
             id: genBlockId(),
             type: 'thinking',
@@ -823,12 +895,16 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
   const eventName = sse.event;
   const data = sse.data;
 
-  // Append to event log (lossless — one entry per event)
+  // Append to event log (capped at MAX_EVENT_LOG entries)
   const logEntry = toEventLog(eventName, data);
 
   // Route to sub-agent or main
   if (eventName === 'subagent-start') {
     // Create sub-agent + add block to parent main message
+    // Generate a subtaskId when the daemon omits it: using '' as the Map key
+    // makes two such sub-agents overwrite each other, and the parent block
+    // could never be matched by subagent-end.
+    const subtaskId = (data.subtaskId as string) ?? genBlockId();
     const blockId = genBlockId();
     const { run: mainWithBlock } = (() => {
       const { run, messageId } = ensureStreamingMessage(state.main);
@@ -838,7 +914,7 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
         status: 'streaming',
         content: '',
         metadata: {
-          subtaskId: data.subtaskId ?? '',
+          subtaskId,
           name: data.name ?? '',
           task: data.task ?? '',
         },
@@ -855,13 +931,13 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
       };
     })();
 
-    const subData = { ...data, parentBlockId: blockId };
+    const subData = { ...data, subtaskId, parentBlockId: blockId };
     const subAgents = reduceSubAgentEvent(state.subAgents, 'subagent-start', subData);
 
     return {
       main: mainWithBlock,
       subAgents,
-      events: [...state.events, logEntry],
+      events: appendEvent(state.events, logEntry),
     };
   }
 
@@ -912,7 +988,7 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
     return {
       main,
       subAgents,
-      events: [...state.events, logEntry],
+      events: appendEvent(state.events, logEntry),
     };
   }
 
@@ -920,7 +996,8 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
   const main = reduceMainEvent(state.main, eventName, data);
   return {
     main,
-    subAgents: state.subAgents,
-    events: [...state.events, logEntry],
+    // `/clear` wipes the conversation — sub-agent runs belong to it
+    subAgents: eventName === 'session-cleared' ? new Map() : state.subAgents,
+    events: appendEvent(state.events, logEntry),
   };
 }

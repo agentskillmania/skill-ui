@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest';
 import { reducer } from '../../../src/core/conversation/reducer.js';
 import { createEmptySessionState } from '../../../src/core/conversation/types.js';
-import type { SSEEvent, SessionRunState } from '../../../src/core/conversation/types.js';
+import type { SessionRunState } from '../../../src/core/conversation/types.js';
+import type { SSEEvent } from '../../../src/core/types.js';
 
 function pushEvents(events: SSEEvent[]): SessionRunState {
   return events.reduce(reducer, createEmptySessionState());
@@ -122,7 +123,7 @@ describe('reducer — labelFor coverage', () => {
     ['subagent-thinking', { content: 'x' }, 'Sub-agent thinking: '],
     ['llm-request', {}, 'LLM request'],
     ['llm-response', {}, 'LLM response'],
-    ['phase-change', { from: 'a', to: 'b' }, 'Phase: → '],
+    ['phase-change', { from: 'a', to: 'b' }, 'Phase: → b'],
     ['compressing', {}, 'Compressing context'],
     ['compressed', { summary: 's' }, 'Compressed: -0 messages'],
     ['human-input', { questions: [] }, 'Human input needed'],
