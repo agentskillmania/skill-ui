@@ -321,16 +321,29 @@ function reduceMainEvent(
       const { run, messageId } = ensureStreamingMessage(state);
       const toolName = (data.name as string) ?? 'unknown';
       const callId = (data.id as string) ?? genBlockId();
-      const block: AgentBlock = {
-        id: callId,
-        type: 'tool_call',
-        status: 'streaming',
-        content: '',
-        metadata: {
-          toolName,
-          toolArgs: JSON.stringify(data.args ?? {}),
-        },
-      };
+      // load_skill 与 fromHistory 的 SKILL_TOOL 特判保持同构：实时也展示为 skill 块
+      const isSkillTool = toolName === 'load_skill';
+      const block: AgentBlock = isSkillTool
+        ? {
+            id: callId,
+            type: 'skill',
+            status: 'streaming',
+            content: '',
+            metadata: {
+              skillName: (data.args as { name?: string } | undefined)?.name ?? '',
+              phase: 'loading',
+            },
+          }
+        : {
+            id: callId,
+            type: 'tool_call',
+            status: 'streaming',
+            content: '',
+            metadata: {
+              toolName,
+              toolArgs: JSON.stringify(data.args ?? {}),
+            },
+          };
       return {
         ...run,
         messages: run.messages.map((m) =>
@@ -373,15 +386,25 @@ function reduceMainEvent(
           }
           return {
             ...m,
-            blocks: m.blocks.map((b) =>
-              b.id === callId
-                ? {
-                    ...b,
-                    status: 'completed' as const,
-                    metadata: { ...b.metadata, toolResult: data.result ?? '' },
-                  }
-                : b
-            ),
+            blocks: m.blocks.map((b) => {
+              if (b.id !== callId) return b;
+              // load_skill 块按 skill 语义收尾，终态与 fromHistory 一致
+              if (b.type === 'skill') {
+                const resultStr =
+                  typeof data.result === 'string' ? data.result : JSON.stringify(data.result);
+                return {
+                  ...b,
+                  status: 'completed' as const,
+                  content: resultStr ? `Result: ${resultStr.slice(0, 200)}` : '',
+                  metadata: { ...b.metadata, phase: 'completed', result: resultStr },
+                };
+              }
+              return {
+                ...b,
+                status: 'completed' as const,
+                metadata: { ...b.metadata, toolResult: data.result ?? '' },
+              };
+            }),
           };
         }),
       };

@@ -74,6 +74,23 @@ describe('reducer — main agent events', () => {
     expect(state.main.activeSkill).toBeNull();
   });
 
+  it('renders live load_skill tool call as skill block (parity with history)', () => {
+    // daemon 实时以 tool-start/tool-end 携带 load_skill，不另发 skill-* 事件；
+    // 展示必须与 fromHistory 的 SKILL_TOOL 特判一致，否则只有历史会话能看到 skill 块
+    const state = pushEvents([
+      { event: 'tool-start', data: { id: 'call-s1', name: 'load_skill', args: { name: 'poet' } } },
+      { event: 'tool-end', data: { callId: 'call-s1', result: 'loaded 3 instructions' } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    const skillBlock = msg.blocks?.find((b) => b.type === 'skill');
+    expect(skillBlock).toBeDefined();
+    expect(skillBlock!.status).toBe('completed');
+    expect(skillBlock!.metadata?.skillName).toBe('poet');
+    expect(skillBlock!.metadata?.phase).toBe('completed');
+    expect(skillBlock!.metadata?.result).toBe('loaded 3 instructions');
+    expect(msg.blocks?.some((b) => b.type === 'tool_call')).toBe(false);
+  });
+
   it('completes ALL parallel tool_call blocks with their own results', () => {
     // Parallel tool invocations arrive as a burst of tool-start events (the
     // daemon splits ToolsStart into per-call tool-start frames), followed by
