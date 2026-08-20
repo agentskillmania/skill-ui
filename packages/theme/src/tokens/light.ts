@@ -90,6 +90,7 @@ export const lightBlockColor: Theme['blockColor'] = {
   skill: { text: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.10)' },
   a2ui: { text: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.10)' },
   subagent: { text: '#0891b2', bg: 'rgba(8, 145, 178, 0.10)' },
+  todo: { text: '#e11d48', bg: 'rgba(225, 29, 72, 0.10)' },
 };
 
 export const lightEventStatusColor: Theme['eventStatusColor'] = {

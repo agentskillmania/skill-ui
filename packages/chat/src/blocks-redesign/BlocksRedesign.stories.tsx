@@ -1,7 +1,10 @@
 /** @jsxImportSource @emotion/react */
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { ThemeProvider as SkillThemeProvider } from '@agentskillmania/skill-ui-theme';
 import { useEffect, useState } from 'react';
 import { ThinkingBlock } from './ThinkingBlock.js';
+import { TodoBlock } from './TodoBlock.js';
+import { ShellBlock } from './ShellBlock.js';
 import { ToolCallBlock } from './ToolCallBlock.js';
 import { PlanBlock } from './PlanBlock.js';
 import { ErrorBlock } from './ErrorBlock.js';
@@ -323,7 +326,186 @@ export const PlanWithError: Story = {
   },
 };
 
+// ---- TodoBlock ----
+
+export const TodoActive: Story = {
+  name: 'Todo Active',
+  render: () => {
+    const block: Block = {
+      id: 'todo-1',
+      type: 'todo',
+      status: 'streaming',
+      content: '',
+      metadata: {
+        items: [
+          { content: '梳理现有 blocks 的展示结构', status: 'completed' },
+          { content: '设计 TodoBlock 的 UI 方案', status: 'completed' },
+          { content: '实现组件并接入 BlocksRenderer', status: 'in_progress' },
+          { content: '补充 stories 与截图走查', status: 'pending' },
+          { content: 'state 层接入 todo 事件', status: 'pending' },
+        ],
+      },
+    };
+    return (
+      <Wrapper>
+        <TodoBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+export const TodoAllCompleted: Story = {
+  name: 'Todo All Completed (collapsed)',
+  render: () => {
+    const block: Block = {
+      id: 'todo-2',
+      type: 'todo',
+      status: 'completed',
+      content: '',
+      metadata: {
+        items: [
+          { content: '梳理现有 blocks 的展示结构', status: 'completed' },
+          { content: '设计 TodoBlock 的 UI 方案', status: 'completed' },
+          { content: '实现组件并接入 BlocksRenderer', status: 'completed' },
+          { content: '补充 stories 与截图走查', status: 'completed' },
+          { content: 'state 层接入 todo 事件', status: 'completed' },
+        ],
+      },
+    };
+    return (
+      <Wrapper>
+        <TodoBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+export const TodoCustomTitle: Story = {
+  name: 'Todo With Custom Title',
+  render: () => {
+    const block: Block = {
+      id: 'todo-3',
+      type: 'todo',
+      status: 'streaming',
+      content: '',
+      metadata: {
+        title: '发布会筹备',
+        items: [
+          { content: '确定主题与议程', status: 'completed' },
+          { content: '准备演示 Demo', status: 'in_progress' },
+          { content: '彩排', status: 'pending' },
+        ],
+      },
+    };
+    return (
+      <Wrapper>
+        <TodoBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+// ---- ShellBlock ----
+
+export const ShellRunning: Story = {
+  name: 'Shell Running',
+  render: () => {
+    const block: Block = {
+      id: 'shell-1',
+      type: 'shell',
+      status: 'streaming',
+      content: '',
+      metadata: {
+        command: 'pnpm test:unit',
+        // 含 ANSI 颜色码与进度条 \r 的真实输出样本
+        output:
+          '\x1b[96m\x1b[1m RUN \x1b[22m\x1b[39m v2.1.9 \x1b[90m/Users/yusangeng/workspace/skill-ui\x1b[39m\n\n \x1b[90m✓\x1b[39m src/blocks-redesign/ThinkingBlock.tsx \x1b[32m(3 tests)\x1b[39m \x1b[2m4ms\x1b[22m\n \x1b[90m✓\x1b[39m src/blocks-redesign/TodoBlock.tsx \x1b[32m(2 tests)\x1b[39m \x1b[2m3ms\x1b[22m\n\r \x1b[90m⎯⎯\x1b[39m Running \x1b[1m11\x1b[22m tests \x1b[2m[\x1b[22m\x1b[2m#\x1b[22m\x1b[2m]\x1b[22m',
+      },
+    };
+    return (
+      <Wrapper>
+        <ShellBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+export const ShellCompleted: Story = {
+  name: 'Shell Completed',
+  render: () => {
+    const block: Block = {
+      id: 'shell-2',
+      type: 'shell',
+      status: 'completed',
+      content: '',
+      metadata: {
+        command: 'pnpm build',
+        output:
+          '> @agentskillmania/skill-ui-chat@1.1.2 build\n> tsc\n\nsrc/blocks-redesign/ShellBlock.tsx: Compiled successfully.\n\n ✓ Built in 8.42s',
+        exitCode: 0,
+      },
+    };
+    return (
+      <Wrapper>
+        <ShellBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+export const ShellFailed: Story = {
+  name: 'Shell Failed',
+  render: () => {
+    const block: Block = {
+      id: 'shell-3',
+      type: 'shell',
+      status: 'completed',
+      content: '',
+      metadata: {
+        command: 'cargo build --release',
+        output:
+          'error[E0308]: mismatched types\n  --> src/session/mod.rs:42:26\n   |\n42 |     let blocks: Vec<Block> = events.map(to_block).collect();\n   |            -------        ^^^^^^^^^^^^^^^^^^^^^ expected `Block`, found `Option<Block>`\n   |\nerror: aborting due to 1 previous error',
+        exitCode: 101,
+      },
+    };
+    return (
+      <Wrapper>
+        <ShellBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
 // ---- ErrorBlock ----
+
+export const ShellDarkTheme: Story = {
+  name: 'Shell Dark Theme',
+  render: () => {
+    const block: Block = {
+      id: 'shell-dark',
+      type: 'shell',
+      status: 'completed',
+      content: '',
+      metadata: {
+        command: 'cargo build --release',
+        output:
+          'error[E0308]: mismatched types\n  --> src/session/mod.rs:42:26\n   |\n42 |     let blocks: Vec<Block> = events.map(to_block).collect();\n   |            -------        ^^^^^^^^^^^^^^^^^^^^^ expected `Block`, found `Option<Block>`\n   |\nerror: aborting due to 1 previous error',
+        exitCode: 101,
+      },
+    };
+    return (
+      <div style={{ background: '#0f172a', padding: 16 }}>
+        <SkillThemeProvider defaultMode="dark">
+          <Wrapper>
+            <ShellBlock block={block} />
+          </Wrapper>
+        </SkillThemeProvider>
+      </div>
+    );
+  },
+};
+
+// ---- ErrorBlock (continued) ----
 
 export const ErrorWithHint: Story = {
   render: () => {

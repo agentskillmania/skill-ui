@@ -8,3 +8,5 @@ export { ErrorBlock } from './ErrorBlock.js';
 export { A2UIBlock } from './A2UIBlock.js';
 export { SubAgentBlock } from './SubAgentBlock.js';
 export { SubAgentModal } from './SubAgentModal.js';
+export { TodoBlock } from './TodoBlock.js';
+export { ShellBlock } from './ShellBlock.js';

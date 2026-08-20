@@ -52,6 +52,15 @@
   "plan": {
     "title": "Execution plan"
   },
+  "todo": {
+    "title": "Task list",
+    "count": "{{done}}/{{total}}",
+    "allDone": "All done {{done}}/{{total}}"
+  },
+  "shell": {
+    "title": "Shell",
+    "running": "Running"
+  },
   "commands": {
     "noMatch": "No matching commands",
     "defaultGroup": "Common"

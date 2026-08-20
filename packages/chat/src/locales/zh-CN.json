@@ -52,6 +52,15 @@
   "plan": {
     "title": "执行计划"
   },
+  "todo": {
+    "title": "任务清单",
+    "count": "{{done}}/{{total}}",
+    "allDone": "全部完成 {{done}}/{{total}}"
+  },
+  "shell": {
+    "title": "终端",
+    "running": "运行中"
+  },
   "commands": {
     "noMatch": "无匹配指令",
     "defaultGroup": "常用"

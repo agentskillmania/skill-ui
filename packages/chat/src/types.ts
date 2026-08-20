@@ -70,6 +70,28 @@ export interface PlanMetadata {
   steps?: PlanStep[];
 }
 
+/** Todo item */
+export interface TodoItem {
+  content: string;
+  status: 'pending' | 'in_progress' | 'completed';
+}
+
+/** Todo metadata */
+export interface TodoMetadata {
+  title?: string;
+  items?: TodoItem[];
+}
+
+/** Shell tool metadata */
+export interface ShellMetadata {
+  /** Command line being executed */
+  command?: string;
+  /** Combined stdout/stderr text (may contain ANSI escape codes) */
+  output?: string;
+  /** Process exit code; undefined while running */
+  exitCode?: number;
+}
+
 /** Human interaction metadata */
 /** A single question in a multi-question human-input request (mirrors the
  * daemon's HumanQuestion). */

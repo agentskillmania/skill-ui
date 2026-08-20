@@ -9,9 +9,11 @@ import { A2UIBlock } from './A2UIBlock.js';
 import { ErrorBlock } from './ErrorBlock.js';
 import { HumanInputBlock } from './HumanInputBlock.js';
 import { PlanBlock } from './PlanBlock.js';
+import { ShellBlock } from './ShellBlock.js';
 import { SkillBlock } from './SkillBlock.js';
 import { SubAgentBlock } from './SubAgentBlock.js';
 import { ThinkingBlock } from './ThinkingBlock.js';
+import { TodoBlock } from './TodoBlock.js';
 import { ToolCallBlock } from './ToolCallBlock.js';
 
 const fadeInUp = keyframes`
@@ -39,6 +41,8 @@ const builtinBlockRenderers: Record<string, React.ComponentType<BlockProps>> = {
   skill: SkillBlock,
   a2ui: A2UIBlock,
   subagent: SubAgentBlock,
+  todo: TodoBlock,
+  shell: ShellBlock,
 };
 
 export function BlocksRenderer({
