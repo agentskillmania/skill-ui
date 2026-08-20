@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import { ChatWrapper } from './testUtils.js';
+import { ChatWrapper, expandAllCollapsed } from './testUtils.js';
 import { MessageItem } from '../../src/messages/MessageItem.js';
 import { UserMessage } from '../../src/messages/UserMessage.js';
 import { AssistantMessage } from '../../src/messages/AssistantMessage.js';
@@ -29,6 +29,7 @@ describe('UserMessage', () => {
         <UserMessage message={userMsg} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('Hello')).toBeInTheDocument();
   });
 
@@ -52,6 +53,7 @@ describe('AssistantMessage', () => {
         <AssistantMessage message={assistantMsg} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('Hi there')).toBeInTheDocument();
   });
 
@@ -65,6 +67,7 @@ describe('AssistantMessage', () => {
         <AssistantMessage message={msg} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('思考中...')).toBeInTheDocument();
   });
 
@@ -75,6 +78,7 @@ describe('AssistantMessage', () => {
         <AssistantMessage message={msg} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     // Content still renders, but BlocksRenderer not invoked
     expect(screen.getByText('Hi there')).toBeInTheDocument();
   });
@@ -98,6 +102,7 @@ describe('AssistantMessage', () => {
         <AssistantMessage message={msg} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByRole('status')).toBeInTheDocument();
     expect(screen.getByLabelText('AI is typing')).toBeInTheDocument();
   });
@@ -114,6 +119,7 @@ describe('AssistantMessage', () => {
         <AssistantMessage message={msg} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
     expect(screen.getByText('partial response')).toBeInTheDocument();
   });
@@ -131,6 +137,7 @@ describe('AssistantMessage', () => {
         <AssistantMessage message={msg} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     // Blocks render, typing indicator should NOT appear
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
@@ -142,6 +149,7 @@ describe('AssistantMessage', () => {
         <AssistantMessage message={msg} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
@@ -157,6 +165,7 @@ describe('AssistantMessage', () => {
         <AssistantMessage message={msg} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     // Content renders with streaming enabled
     expect(screen.getByText('加载中...')).toBeInTheDocument();
   });
@@ -171,6 +180,7 @@ describe('AssistantMessage', () => {
         <AssistantMessage message={msg} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('思考中...')).toBeInTheDocument();
     expect(screen.getByText('Hi there')).toBeInTheDocument();
   });
@@ -183,6 +193,7 @@ describe('SystemMessage', () => {
         <SystemMessage message={systemMsg} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('System notice')).toBeInTheDocument();
   });
 
@@ -207,6 +218,7 @@ describe('MessageWrapper', () => {
         </MessageWrapper>
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('子内容')).toBeInTheDocument();
   });
 });
@@ -218,6 +230,7 @@ describe('MessageItem', () => {
         <MessageItem message={userMsg} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('Hello')).toBeInTheDocument();
   });
 
@@ -227,6 +240,7 @@ describe('MessageItem', () => {
         <MessageItem message={assistantMsg} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('Hi there')).toBeInTheDocument();
   });
 
@@ -236,6 +250,7 @@ describe('MessageItem', () => {
         <MessageItem message={systemMsg} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('System notice')).toBeInTheDocument();
   });
 
@@ -246,6 +261,7 @@ describe('MessageItem', () => {
         <MessageItem message={userMsg} renderers={{ messages: { user: CustomMsg } }} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('Custom: Hello')).toBeInTheDocument();
   });
 
@@ -258,6 +274,7 @@ describe('MessageItem', () => {
         />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByTestId('decorated')).toBeInTheDocument();
   });
 
@@ -269,6 +286,7 @@ describe('MessageItem', () => {
         <MessageItem message={unknownMsg} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     // should render content in SystemMessage style
     expect(screen.getByText('工具输出')).toBeInTheDocument();
   });

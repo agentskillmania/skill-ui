@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { lightTheme, ThemeProvider } from '@agentskillmania/skill-ui-theme';
 import type { Theme } from '@agentskillmania/skill-ui-theme';
-import { ChatWrapper } from './testUtils.js';
+import { ChatWrapper, expandAllCollapsed } from './testUtils.js';
 import { BlocksRenderer } from '../../src/blocks-redesign/BlocksRenderer.js';
 import { ThinkingBlock } from '../../src/blocks-redesign/ThinkingBlock.js';
 import { ToolCallBlock } from '../../src/blocks-redesign/ToolCallBlock.js';
@@ -64,6 +64,7 @@ describe('ThinkingBlock', () => {
         <ThinkingBlock block={thinkingBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('让我想想...')).toBeInTheDocument();
   });
 
@@ -74,6 +75,7 @@ describe('ThinkingBlock', () => {
         <ThinkingBlock block={streaming} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('思考中')).toBeInTheDocument();
   });
 });
@@ -85,6 +87,7 @@ describe('ToolCallBlock', () => {
         <ToolCallBlock block={toolBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('search')).toBeInTheDocument();
     expect(screen.getByText('{"q":"test"}')).toBeInTheDocument();
   });
@@ -95,6 +98,7 @@ describe('ToolCallBlock', () => {
         <ToolCallBlock block={toolBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('ok')).toBeInTheDocument();
   });
 
@@ -105,6 +109,7 @@ describe('ToolCallBlock', () => {
         <ToolCallBlock block={noMeta} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('未知工具')).toBeInTheDocument();
   });
 
@@ -126,6 +131,7 @@ describe('ToolCallBlock', () => {
         <ToolCallBlock block={scriptBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('run-script')).toBeInTheDocument();
     expect(screen.getByText('script')).toBeInTheDocument();
     expect(screen.getByText('echo hello')).toBeInTheDocument();
@@ -145,6 +151,7 @@ describe('ToolCallBlock', () => {
         <ToolCallBlock block={builtinBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('list-files')).toBeInTheDocument();
     expect(screen.getByText('builtin')).toBeInTheDocument();
     expect(screen.getByText('file1.ts')).toBeInTheDocument();
@@ -163,6 +170,7 @@ describe('ToolCallBlock', () => {
         <ToolCallBlock block={defaultBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('custom-tool')).toBeInTheDocument();
     expect(screen.getByText('unknown_type')).toBeInTheDocument();
   });
@@ -180,6 +188,7 @@ describe('ToolCallBlock', () => {
         <ToolCallBlock block={errorToolBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('fail-tool')).toBeInTheDocument();
     expect(screen.getByText('执行失败')).toBeInTheDocument();
   });
@@ -197,6 +206,7 @@ describe('ToolCallBlock', () => {
         <ToolCallBlock block={argsOnlyBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('search')).toBeInTheDocument();
     expect(screen.getByText('{"q":"test"}')).toBeInTheDocument();
   });
@@ -216,6 +226,7 @@ describe('ToolCallBlock', () => {
         <ToolCallBlock block={noColorBlock} />
       </ThemeProvider>
     );
+    expandAllCollapsed();
     expect(screen.getByText('test-tool')).toBeInTheDocument();
   });
 
@@ -225,6 +236,7 @@ describe('ToolCallBlock', () => {
         <ToolCallBlock block={toolBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     // Modal should not be open initially
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     // Find and click the input row (contains the args text)
@@ -241,6 +253,7 @@ describe('ToolCallBlock', () => {
         <ToolCallBlock block={toolBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     fireEvent.click(screen.getByText('ok'));
     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -252,6 +265,7 @@ describe('ToolCallBlock', () => {
         <ToolCallBlock block={toolBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     fireEvent.click(screen.getByText('{"q":"test"}'));
     const dialog = screen.getByRole('dialog');
     expect(dialog.textContent).toContain('search');
@@ -266,6 +280,7 @@ describe('PlanBlock', () => {
         <PlanBlock block={planBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('步骤一')).toBeInTheDocument();
     expect(screen.getByText('步骤二')).toBeInTheDocument();
     expect(screen.getByText('步骤三')).toBeInTheDocument();
@@ -277,6 +292,7 @@ describe('PlanBlock', () => {
         <PlanBlock block={planBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('1/3')).toBeInTheDocument();
   });
 
@@ -287,6 +303,7 @@ describe('PlanBlock', () => {
         <PlanBlock block={empty} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('执行计划')).toBeInTheDocument();
   });
 
@@ -308,6 +325,7 @@ describe('PlanBlock', () => {
         <PlanBlock block={errorPlanBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('成功的步骤')).toBeInTheDocument();
     expect(screen.getByText('失败的步骤')).toBeInTheDocument();
     // error step uses XCircle icon (SVG), no ✗ text
@@ -332,6 +350,7 @@ describe('PlanBlock', () => {
         <PlanBlock block={skippedPlanBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('执行步骤')).toBeInTheDocument();
     expect(screen.getByText('跳过步骤')).toBeInTheDocument();
     // skipped step uses Minus icon (SVG), no — text
@@ -356,6 +375,7 @@ describe('PlanBlock', () => {
         <PlanBlock block={pendingPlanBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     // pending steps use Circle icon (SVG), no numeric text
     expect(screen.getByText('1/3')).toBeInTheDocument();
   });
@@ -368,6 +388,7 @@ describe('ErrorBlock', () => {
         <ErrorBlock block={errorBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('出错了')).toBeInTheDocument();
     expect(screen.getByText('ERR_001')).toBeInTheDocument();
   });
@@ -379,6 +400,7 @@ describe('ErrorBlock', () => {
         <ErrorBlock block={noCode} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('错误')).toBeInTheDocument();
   });
 
@@ -395,6 +417,7 @@ describe('ErrorBlock', () => {
         <ErrorBlock block={hintBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('连接失败')).toBeInTheDocument();
     expect(screen.getByText('NET_ERR')).toBeInTheDocument();
     expect(screen.getByText('请检查网络连接后重试')).toBeInTheDocument();
@@ -413,6 +436,7 @@ describe('ErrorBlock', () => {
         <ErrorBlock block={noHint} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('崩溃')).toBeInTheDocument();
     expect(screen.getByText('FATAL')).toBeInTheDocument();
     // No hint section should exist — the container should have exactly 2 children (header + body)
@@ -428,6 +452,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={humanBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('是否继续？')).toBeInTheDocument();
     const buttons = screen.getAllByRole('button');
     expect(buttons.length).toBeGreaterThanOrEqual(2);
@@ -441,6 +466,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={humanBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     fireEvent.click(screen.getByText('确认'));
     expect(onConfirm).toHaveBeenCalledWith('req1', true);
   });
@@ -452,6 +478,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={done} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('已回复')).toBeInTheDocument();
   });
 
@@ -465,6 +492,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={inputBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByPlaceholderText('请输入...')).toBeInTheDocument();
   });
 
@@ -485,6 +513,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={selectBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('选项A')).toBeInTheDocument();
     expect(screen.getByText('选项B')).toBeInTheDocument();
   });
@@ -506,6 +535,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={multiBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('选项A')).toBeInTheDocument();
     expect(screen.getByText('选项B')).toBeInTheDocument();
   });
@@ -521,6 +551,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={inputBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     // input type should have input box and submit button
     const input = screen.getByPlaceholderText('请输入...');
     expect(input).toBeInTheDocument();
@@ -546,6 +577,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={selectBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     // Submit button is disabled when no option selected
     const submitBtn = screen.getByText('提交');
     expect(submitBtn).toBeDisabled();
@@ -570,6 +602,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={multiBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     // has defaultValue='a', so selectedValues is initially ['a'], submit button enabled
     const submitBtn = screen.getByText('提交');
     expect(submitBtn).not.toBeDisabled();
@@ -584,6 +617,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={humanBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     fireEvent.click(screen.getByText('取消'));
     expect(onConfirm).toHaveBeenCalledWith('req1', false);
   });
@@ -599,6 +633,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={noReqId} onConfirm={onConfirm} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     // title is "请确认操作", button is "确认" — no ambiguity
     fireEvent.click(screen.getByText('确认'));
     // requestId should fallback to block.id
@@ -617,6 +652,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={noMetaBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     // inputType defaults to 'confirmation', title defaults to '需要确认'
     expect(screen.getByText('需要确认')).toBeInTheDocument();
     expect(screen.getByText('等待中')).toBeInTheDocument();
@@ -633,6 +669,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={inputBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     // input box exists
     const input = screen.getByPlaceholderText('请输入...');
     // modify input value
@@ -660,6 +697,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={selectBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     // select an option
     fireEvent.click(screen.getByText('选项A'));
     // now submit button should be enabled
@@ -687,6 +725,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={multiBlock} onConfirm={onConfirm} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     // select an option
     fireEvent.click(screen.getByText('选项A'));
     // now submit button should be enabled
@@ -706,6 +745,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={streamingBlock} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('等待中')).toBeInTheDocument();
   });
 
@@ -720,6 +760,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={completedWithObj} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     // plain objects (not tagged enums / answers) are JSON.stringified
     expect(screen.getByText('{"text":"hello"}')).toBeInTheDocument();
   });
@@ -735,6 +776,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={completedWithNum} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('42')).toBeInTheDocument();
   });
 
@@ -749,6 +791,7 @@ describe('HumanInputBlock', () => {
         <HumanInputBlock block={completedWithArr} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('a, b')).toBeInTheDocument();
   });
 });
@@ -761,6 +804,7 @@ describe('BlocksRenderer', () => {
         <BlocksRenderer blocks={blocks} />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('让我想想...')).toBeInTheDocument();
     expect(screen.getByText('search')).toBeInTheDocument();
     expect(screen.getByText('步骤一')).toBeInTheDocument();
@@ -777,6 +821,7 @@ describe('BlocksRenderer', () => {
         />
       </ChatWrapper>
     );
+    expandAllCollapsed();
     expect(screen.getByText('Custom: thinking')).toBeInTheDocument();
   });
 

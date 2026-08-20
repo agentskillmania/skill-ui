@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, SkillBlockMetadata } from '../types.js';
+import { CollapseChevron, useBlockCollapse } from './collapse.js';
 
 type TFunction = (key: string, params?: Record<string, unknown>) => string;
 
@@ -100,6 +101,10 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
   const { t } = useTranslation(NAMESPACE);
   const meta = block.metadata as SkillBlockMetadata | undefined;
   const { title, tag, icon, accentColor } = getPhaseDisplay(meta, block.status, theme, t);
+  // 技能执行结束后收起；错误保持展开
+  const { expanded, toggle } = useBlockCollapse(
+    block.status === 'completed' && meta?.phase === 'completed'
+  );
   const isSpinning = meta?.phase === 'loading' || meta?.phase === 'executing';
   const phases = getPhases(t);
 
@@ -121,12 +126,16 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
     >
       {/* Header */}
       <div
+        onClick={toggle}
+        aria-expanded={expanded}
         css={css`
           display: flex;
           align-items: center;
           gap: ${theme.spacing[2]};
           padding: ${theme.spacing[2]} ${theme.spacing[4]};
           border-bottom: 1px solid ${theme.color.borderSecondary};
+          ${expanded ? '' : 'border-bottom: none;'}
+          cursor: pointer;
         `}
       >
         <div
@@ -207,10 +216,18 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
             {tag}
           </span>
         )}
+        <span
+          css={css`
+            color: ${theme.color.textTertiary};
+            flex-shrink: 0;
+          `}
+        >
+          <CollapseChevron expanded={expanded} />
+        </span>
       </div>
 
       {/* Content */}
-      {block.content && (
+      {expanded && block.content && (
         <div
           css={css`
             padding: ${theme.spacing[2]} ${theme.spacing[4]};
@@ -224,7 +241,7 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
       )}
 
       {/* Phase Timeline — only render when a phase is known */}
-      {meta?.phase && (
+      {expanded && meta?.phase && (
         <div
           css={css`
             display: flex;

@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, PlanMetadata, PlanStep } from '../types.js';
+import { CollapseChevron, useBlockCollapse } from './collapse.js';
 
 /** Get icon component for step status */
 function getStepIcon(step: PlanStep): React.ReactNode {
@@ -66,6 +67,9 @@ export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
   const completedCount = steps.filter((s) => s.status === 'completed').length;
   const progress = steps.length > 0 ? (completedCount / steps.length) * 100 : 0;
 
+  // 计划完成后收起，进度条保留在标题栏作摘要
+  const { expanded, toggle } = useBlockCollapse(block.status === 'completed');
+
   return (
     <div
       css={css`
@@ -84,6 +88,8 @@ export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
     >
       {/* Header */}
       <div
+        onClick={toggle}
+        aria-expanded={expanded}
         css={css`
           display: flex;
           align-items: center;
@@ -91,6 +97,8 @@ export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
           padding: ${theme.spacing[2]} ${theme.spacing[4]};
           background: ${theme.color.fill};
           border-bottom: 1px solid ${theme.color.borderSecondary};
+          ${expanded ? '' : 'border-bottom: none;'}
+          cursor: pointer;
         `}
       >
         <div
@@ -159,94 +167,103 @@ export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
           >
             {completedCount}/{steps.length}
           </span>
+          <span
+            css={css`
+              color: ${theme.color.textTertiary};
+            `}
+          >
+            <CollapseChevron expanded={expanded} />
+          </span>
         </div>
       </div>
 
       {/* Steps */}
-      <div
-        css={css`
-          padding: ${theme.spacing[2]} ${theme.spacing[4]};
-        `}
-      >
-        {steps.map((step, index) => {
-          const color = getStepColor(step, theme);
-          const iconBg = getStepIconBg(step, theme);
-          const isLast = index === steps.length - 1;
-          return (
-            <div
-              key={index}
-              css={css`
-                display: flex;
-                align-items: flex-start;
-                gap: ${theme.spacing[2]};
-                padding: ${theme.spacing[1]} 0;
-                position: relative;
-              `}
-            >
-              {/* Connector line */}
-              {!isLast && (
-                <div
-                  css={css`
-                    position: absolute;
-                    top: 24px;
-                    left: 9px;
-                    width: 2px;
-                    height: calc(100% - 8px);
-                    background: ${theme.color.borderSecondary};
-                  `}
-                />
-              )}
-
-              {/* Icon */}
+      {expanded && (
+        <div
+          css={css`
+            padding: ${theme.spacing[2]} ${theme.spacing[4]};
+          `}
+        >
+          {steps.map((step, index) => {
+            const color = getStepColor(step, theme);
+            const iconBg = getStepIconBg(step, theme);
+            const isLast = index === steps.length - 1;
+            return (
               <div
+                key={index}
                 css={css`
                   display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  width: 20px;
-                  height: 20px;
-                  border-radius: ${theme.radius.full};
-                  background: ${iconBg};
-                  color: ${color};
-                  flex-shrink: 0;
-                  margin-top: 1px;
-                  z-index: 1;
-                  transition: all ${theme.motion.duration.normal} ${theme.motion.easing.out};
-                  ${step.status === 'pending'
-                    ? css`
-                        border: 1px solid ${theme.color.border};
-                      `
-                    : ''}
+                  align-items: flex-start;
+                  gap: ${theme.spacing[2]};
+                  padding: ${theme.spacing[1]} 0;
+                  position: relative;
                 `}
               >
-                {getStepIcon(step)}
-              </div>
+                {/* Connector line */}
+                {!isLast && (
+                  <div
+                    css={css`
+                      position: absolute;
+                      top: 24px;
+                      left: 9px;
+                      width: 2px;
+                      height: calc(100% - 8px);
+                      background: ${theme.color.borderSecondary};
+                    `}
+                  />
+                )}
 
-              {/* Content */}
-              <div
-                css={css`
-                  flex: 1;
-                  min-width: 0;
-                `}
-              >
+                {/* Icon */}
                 <div
                   css={css`
-                    font-size: ${theme.font.size.sm};
-                    font-weight: ${theme.font.weight.medium};
-                    color: ${step.status === 'skipped'
-                      ? theme.color.textTertiary
-                      : theme.color.text};
-                    line-height: ${theme.font.lineHeight};
-                    ${step.status === 'skipped' ? 'text-decoration: line-through;' : ''}
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 20px;
+                    height: 20px;
+                    border-radius: ${theme.radius.full};
+                    background: ${iconBg};
+                    color: ${color};
+                    flex-shrink: 0;
+                    margin-top: 1px;
+                    z-index: 1;
+                    transition: all ${theme.motion.duration.normal} ${theme.motion.easing.out};
+                    ${step.status === 'pending'
+                      ? css`
+                          border: 1px solid ${theme.color.border};
+                        `
+                      : ''}
                   `}
                 >
-                  {step.content}
+                  {getStepIcon(step)}
+                </div>
+
+                {/* Content */}
+                <div
+                  css={css`
+                    flex: 1;
+                    min-width: 0;
+                  `}
+                >
+                  <div
+                    css={css`
+                      font-size: ${theme.font.size.sm};
+                      font-weight: ${theme.font.weight.medium};
+                      color: ${step.status === 'skipped'
+                        ? theme.color.textTertiary
+                        : theme.color.text};
+                      line-height: ${theme.font.lineHeight};
+                      ${step.status === 'skipped' ? 'text-decoration: line-through;' : ''}
+                    `}
+                  >
+                    {step.content}
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 });

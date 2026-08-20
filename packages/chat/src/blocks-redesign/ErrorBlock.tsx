@@ -9,11 +9,14 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, ErrorMetadata } from '../types.js';
+import { CollapseChevron, useBlockCollapse } from './collapse.js';
 
 export const ErrorBlock = memo(function ErrorBlock({ block }: BlockProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const meta = block.metadata as ErrorMetadata | undefined;
+  // 错误默认展开（需要人看），仅手动收起
+  const { expanded, toggle } = useBlockCollapse(false);
 
   return (
     <div
@@ -29,7 +32,10 @@ export const ErrorBlock = memo(function ErrorBlock({ block }: BlockProps) {
       `}
     >
       {/* Header */}
+      {/* Header — collapsible, but errors default expanded (need attention) */}
       <div
+        onClick={toggle}
+        aria-expanded={expanded}
         css={css`
           display: flex;
           align-items: center;
@@ -37,6 +43,8 @@ export const ErrorBlock = memo(function ErrorBlock({ block }: BlockProps) {
           padding: ${theme.spacing[2]} ${theme.spacing[4]};
           background: ${theme.color.errorBg};
           border-bottom: 1px solid ${theme.color.error};
+          ${expanded ? '' : 'border-bottom: none;'}
+          cursor: pointer;
         `}
       >
         <div
@@ -81,27 +89,39 @@ export const ErrorBlock = memo(function ErrorBlock({ block }: BlockProps) {
             {meta.errorCode}
           </span>
         )}
+        <span
+          css={css`
+            color: ${theme.color.error};
+            opacity: 0.7;
+            flex-shrink: 0;
+            display: inline-flex;
+          `}
+        >
+          <CollapseChevron expanded={expanded} />
+        </span>
       </div>
 
       {/* Body */}
-      <pre
-        css={css`
-          padding: ${theme.spacing[3]};
-          font-family: ${theme.font.familyMono};
-          font-size: ${theme.font.size.xs};
-          line-height: ${theme.font.lineHeightRelaxed};
-          color: ${theme.color.textSecondary};
-          white-space: pre-wrap;
-          word-break: break-all;
-          margin: 0;
-          overflow-x: auto;
-        `}
-      >
-        {block.content}
-      </pre>
+      {expanded && (
+        <pre
+          css={css`
+            padding: ${theme.spacing[3]};
+            font-family: ${theme.font.familyMono};
+            font-size: ${theme.font.size.xs};
+            line-height: ${theme.font.lineHeightRelaxed};
+            color: ${theme.color.textSecondary};
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin: 0;
+            overflow-x: auto;
+          `}
+        >
+          {block.content}
+        </pre>
+      )}
 
       {/* Hint — only shown when backend provides it */}
-      {meta?.hint && (
+      {expanded && meta?.hint && (
         <div
           css={css`
             display: flex;

@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, HumanInputMetadata, HumanInputQuestion } from '../types.js';
+import { CollapseChevron, useBlockCollapse } from './collapse.js';
 
 /**
  * Shared button base — layout, typography, transition, and active-state
@@ -328,6 +329,8 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
   const inputType = meta?.inputType ?? 'confirmation';
   const requestId = meta?.requestId ?? block.id;
   const isPending = block.status === 'pending' || block.status === 'streaming';
+  // 已回复后自动收起；待回复时不可收起
+  const { expanded, toggle } = useBlockCollapse(!isPending);
   const accentColor = theme.blockColor.humanInput.text;
   const accentBg = theme.blockColor.humanInput.bg;
 
@@ -352,8 +355,10 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
         }
       `}
     >
-      {/* Header */}
+      {/* Header — pending 状态不可收起（答案表单不能被藏起来），已回复可收起 */}
       <div
+        onClick={!isPending ? toggle : undefined}
+        aria-expanded={isPending ? true : expanded}
         css={css`
           display: flex;
           align-items: center;
@@ -361,6 +366,8 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
           padding: ${theme.spacing[2]} ${theme.spacing[4]};
           background: ${accentBg};
           border-bottom: 1px solid ${accentColor};
+          ${!isPending && !expanded ? 'border-bottom: none;' : ''}
+          ${!isPending ? 'cursor: pointer;' : ''}
         `}
       >
         <div
@@ -408,25 +415,38 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
         >
           {isPending ? t('humanInput.pending') : t('humanInput.replied')}
         </span>
+        {!isPending && (
+          <span
+            css={css`
+              color: ${theme.color.textTertiary};
+              flex-shrink: 0;
+              display: inline-flex;
+            `}
+          >
+            <CollapseChevron expanded={expanded} />
+          </span>
+        )}
       </div>
 
       {/* Body */}
       {!isPending ? (
         /* Completed state — green text on the card's own background, no green band */
-        <div
-          css={css`
-            display: flex;
-            align-items: center;
-            gap: ${theme.spacing[2]};
-            padding: ${theme.spacing[2]} ${theme.spacing[4]};
-            font-size: ${theme.font.size.base};
-            color: ${theme.color.success};
-            font-weight: ${theme.font.weight.medium};
-          `}
-        >
-          <Check size={12} style={{ opacity: 0.6 }} />
-          {formatResponse(meta?.response, t) || t('humanInput.completed')}
-        </div>
+        expanded && (
+          <div
+            css={css`
+              display: flex;
+              align-items: center;
+              gap: ${theme.spacing[2]};
+              padding: ${theme.spacing[2]} ${theme.spacing[4]};
+              font-size: ${theme.font.size.base};
+              color: ${theme.color.success};
+              font-weight: ${theme.font.weight.medium};
+            `}
+          >
+            <Check size={12} style={{ opacity: 0.6 }} />
+            {formatResponse(meta?.response, t) || t('humanInput.completed')}
+          </div>
+        )
       ) : (
         /* Pending state */
         <div

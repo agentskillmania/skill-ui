@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, SubAgentBlockMetadata, BlockStatus } from '../types.js';
+import { CollapseChevron, useBlockCollapse } from './collapse.js';
 
 /**
  * SubAgentModal is lazy-loaded to break a circular dependency:
@@ -103,6 +104,8 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
   const accent = theme.blockColor.subagent ?? { text: theme.color.primary, bg: 'transparent' };
   const isStreaming = block.status === 'streaming';
   const isError = block.status === 'error' || meta?.resultStatus === 'error';
+  // 子代理完成后收起；错误保持展开
+  const { expanded, toggle } = useBlockCollapse(block.status === 'completed' && !isError);
 
   // Tag background/color — mirrors the pill style used by SkillBlock/ErrorBlock
   const tagColors =
@@ -135,6 +138,8 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
       >
         {/* Header — fill background + bottom border, matches ToolCallBlock/SkillBlock */}
         <div
+          onClick={toggle}
+          aria-expanded={expanded}
           css={css`
             display: flex;
             align-items: center;
@@ -142,6 +147,8 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
             padding: ${theme.spacing[2]} ${theme.spacing[4]};
             background: ${isError ? theme.color.errorBg : theme.color.fill};
             border-bottom: 1px solid ${isError ? theme.color.error : theme.color.borderSecondary};
+            ${expanded ? '' : 'border-bottom: none;'}
+            cursor: pointer;
           `}
         >
           <div
@@ -211,61 +218,73 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
             />
             {statusConfig.label}
           </span>
+          <span
+            css={css`
+              color: ${theme.color.textTertiary};
+              flex-shrink: 0;
+              display: inline-flex;
+            `}
+          >
+            <CollapseChevron expanded={expanded} />
+          </span>
         </div>
 
         {/* Body: task line + metrics */}
-        {(meta?.task ||
-          meta?.steps != null ||
-          (meta?.inputTokens != null && meta?.outputTokens != null) ||
-          meta?.duration != null) && (
-          <div
-            css={css`
-              padding: ${theme.spacing[2]} ${theme.spacing[4]};
-            `}
-          >
-            {meta?.task && (
-              <div
-                css={css`
-                  font-size: ${theme.font.size.sm};
-                  color: ${theme.color.textSecondary};
-                  white-space: nowrap;
-                  overflow: hidden;
-                  text-overflow: ellipsis;
-                  margin-bottom: ${theme.spacing[1]};
-                `}
-              >
-                {meta.task}
-              </div>
-            )}
-            {/* Metrics row */}
-            {(meta?.steps != null ||
-              (meta?.inputTokens != null && meta?.outputTokens != null) ||
-              meta?.duration != null) && (
-              <div
-                css={css`
-                  display: flex;
-                  align-items: center;
-                  gap: ${theme.spacing[2]};
-                  font-size: ${theme.font.size.xs};
-                  color: ${theme.color.textTertiary};
-                `}
-              >
-                {meta?.steps != null && <span>{t('subagent.steps', { count: meta.steps })}</span>}
-                {meta?.inputTokens != null && meta?.outputTokens != null && (
-                  <span>
-                    {t('subagent.tokens', {
-                      input: formatTokens(meta.inputTokens),
-                      output: formatTokens(meta.outputTokens),
-                    })}
-                  </span>
-                )}
-                {meta?.duration != null && (
-                  <span>{t('subagent.duration', { duration: formatDuration(meta.duration) })}</span>
-                )}
-              </div>
-            )}
-          </div>
-        )}
+        {expanded &&
+          (meta?.task ||
+            meta?.steps != null ||
+            (meta?.inputTokens != null && meta?.outputTokens != null) ||
+            meta?.duration != null) && (
+            <div
+              css={css`
+                padding: ${theme.spacing[2]} ${theme.spacing[4]};
+              `}
+            >
+              {meta?.task && (
+                <div
+                  css={css`
+                    font-size: ${theme.font.size.sm};
+                    color: ${theme.color.textSecondary};
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    margin-bottom: ${theme.spacing[1]};
+                  `}
+                >
+                  {meta.task}
+                </div>
+              )}
+              {/* Metrics row */}
+              {(meta?.steps != null ||
+                (meta?.inputTokens != null && meta?.outputTokens != null) ||
+                meta?.duration != null) && (
+                <div
+                  css={css`
+                    display: flex;
+                    align-items: center;
+                    gap: ${theme.spacing[2]};
+                    font-size: ${theme.font.size.xs};
+                    color: ${theme.color.textTertiary};
+                  `}
+                >
+                  {meta?.steps != null && <span>{t('subagent.steps', { count: meta.steps })}</span>}
+                  {meta?.inputTokens != null && meta?.outputTokens != null && (
+                    <span>
+                      {t('subagent.tokens', {
+                        input: formatTokens(meta.inputTokens),
+                        output: formatTokens(meta.outputTokens),
+                      })}
+                    </span>
+                  )}
+                  {meta?.duration != null && (
+                    <span>
+                      {t('subagent.duration', { duration: formatDuration(meta.duration) })}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
       </div>
 
       <Suspense fallback={null}>

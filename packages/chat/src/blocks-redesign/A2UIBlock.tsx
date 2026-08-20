@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, A2UIBlockMetadata, BlockAction } from '../types.js';
+import { CollapseChevron, useBlockCollapse } from './collapse.js';
 
 /** Dynamically loaded genui module */
 type GenuiModule = typeof import('@agentskillmania/genui');
@@ -144,6 +145,9 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
   const accentColor = theme.blockColor.a2ui?.text ?? theme.color.primary;
   const accentBg = theme.blockColor.a2ui?.bg ?? theme.color.primaryBg;
 
+  // 内容块默认展开，仅手动收起
+  const { expanded, toggle } = useBlockCollapse(false);
+
   return (
     <div
       css={css`
@@ -162,6 +166,8 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
     >
       {/* Header */}
       <div
+        onClick={toggle}
+        aria-expanded={expanded}
         css={css`
           display: flex;
           align-items: center;
@@ -169,6 +175,8 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
           padding: ${theme.spacing[2]} ${theme.spacing[4]};
           background: ${theme.color.fill};
           border-bottom: 1px solid ${theme.color.borderSecondary};
+          ${expanded ? '' : 'border-bottom: none;'}
+          cursor: pointer;
         `}
       >
         <div
@@ -244,7 +252,10 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
             </span>
           )}
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsModalOpen(true);
+            }}
             css={css`
               display: flex;
               align-items: center;
@@ -269,106 +280,117 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
           >
             <Maximize2 size={12} />
           </button>
+          <span
+            css={css`
+              color: ${theme.color.textTertiary};
+              flex-shrink: 0;
+              display: inline-flex;
+            `}
+          >
+            <CollapseChevron expanded={expanded} />
+          </span>
         </div>
       </div>
 
       {/* Content area */}
-      <div
-        ref={contentRef}
-        css={css`
-          max-height: ${maxHeight};
-          overflow: auto;
-          position: relative;
-        `}
-      >
-        {!engineReady ? (
-          <div
-            css={css`
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              gap: ${theme.spacing[2]};
-              padding: ${theme.spacing[8]} ${theme.spacing[4]};
-              color: ${theme.color.textTertiary};
-              font-size: ${theme.font.size.sm};
-            `}
-          >
-            <Loader2
-              size={16}
-              css={css`
-                animation: ${spinKeyframes} 1s linear infinite;
-              `}
-            />
-            <span>{t('a2ui.initializing')}</span>
-          </div>
-        ) : genui && smRef.current ? (
-          <div
-            css={css`
-              min-height: 100px;
-              padding: ${theme.spacing[2]} ${theme.spacing[4]};
-            `}
-          >
-            <genui.GenUISurface
-              surfaceManager={smRef.current}
-              width="100%"
-              height="100%"
-              onAction={handleSurfaceAction}
-            />
-          </div>
-        ) : null}
-
-        {/* Gradient fade + expand button when overflow */}
-        {isOverflow && engineReady && (
-          <div
-            css={css`
-              position: sticky;
-              bottom: 0;
-              left: 0;
-              right: 0;
-              width: 100%;
-              pointer-events: none;
-            `}
-          >
+      {expanded && (
+        <div
+          ref={contentRef}
+          css={css`
+            max-height: ${maxHeight};
+            overflow: auto;
+            position: relative;
+          `}
+        >
+          {!engineReady ? (
             <div
               css={css`
                 display: flex;
-                align-items: flex-end;
+                align-items: center;
                 justify-content: center;
-                width: 100%;
-                height: 80px;
-                background: linear-gradient(
-                  to bottom,
-                  transparent 0%,
-                  ${theme.color.bgContainer} 55%
-                );
-                padding-bottom: ${theme.spacing[3]};
+                gap: ${theme.spacing[2]};
+                padding: ${theme.spacing[8]} ${theme.spacing[4]};
+                color: ${theme.color.textTertiary};
+                font-size: ${theme.font.size.sm};
               `}
             >
-              <button
-                onClick={() => setIsModalOpen(true)}
+              <Loader2
+                size={16}
                 css={css`
-                  pointer-events: auto;
-                  padding: ${theme.spacing[1]} ${theme.spacing[3]};
-                  border: none;
-                  border-radius: ${theme.radius.md};
-                  background: ${theme.color.fill};
-                  color: ${theme.color.primary};
-                  font-size: ${theme.font.size.sm};
-                  font-weight: ${theme.font.weight.medium};
-                  cursor: pointer;
-                  transition: background ${theme.motion.duration.fast};
-                  &:hover {
-                    background: ${theme.color.fillSecondary};
-                  }
+                  animation: ${spinKeyframes} 1s linear infinite;
                 `}
-                type="button"
-              >
-                {t('a2ui.expand')}
-              </button>
+              />
+              <span>{t('a2ui.initializing')}</span>
             </div>
-          </div>
-        )}
-      </div>
+          ) : genui && smRef.current ? (
+            <div
+              css={css`
+                min-height: 100px;
+                padding: ${theme.spacing[2]} ${theme.spacing[4]};
+              `}
+            >
+              <genui.GenUISurface
+                surfaceManager={smRef.current}
+                width="100%"
+                height="100%"
+                onAction={handleSurfaceAction}
+              />
+            </div>
+          ) : null}
+
+          {/* Gradient fade + expand button when overflow */}
+          {isOverflow && engineReady && (
+            <div
+              css={css`
+                position: sticky;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                pointer-events: none;
+              `}
+            >
+              <div
+                css={css`
+                  display: flex;
+                  align-items: flex-end;
+                  justify-content: center;
+                  width: 100%;
+                  height: 80px;
+                  background: linear-gradient(
+                    to bottom,
+                    transparent 0%,
+                    ${theme.color.bgContainer} 55%
+                  );
+                  padding-bottom: ${theme.spacing[3]};
+                `}
+              >
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  css={css`
+                    pointer-events: auto;
+                    padding: ${theme.spacing[1]} ${theme.spacing[3]};
+                    border: none;
+                    border-radius: ${theme.radius.md};
+                    background: ${theme.color.fill};
+                    color: ${theme.color.primary};
+                    font-size: ${theme.font.size.sm};
+                    font-weight: ${theme.font.weight.medium};
+                    cursor: pointer;
+                    transition: background ${theme.motion.duration.fast};
+                    &:hover {
+                      background: ${theme.color.fillSecondary};
+                    }
+                  `}
+                  type="button"
+                >
+                  {t('a2ui.expand')}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Full-view modal */}
       <Modal

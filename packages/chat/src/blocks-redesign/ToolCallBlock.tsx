@@ -8,6 +8,7 @@ import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { BlockProps, ToolCallMetadata } from '../types.js';
+import { CollapseChevron, useBlockCollapse } from './collapse.js';
 import { ToolCallDetailModal } from './ToolCallDetailModal.js';
 import { getToolColorKey } from './toolColorUtils.js';
 import { NAMESPACE } from '../locales/index.js';
@@ -112,6 +113,9 @@ export const ToolCallBlock = memo(function ToolCallBlock({ block }: BlockProps) 
   const args = meta?.toolArgs;
   const result = meta?.toolResult;
 
+  // 工具调用结束后收起；错误保持展开
+  const { expanded, toggle } = useBlockCollapse(block.status === 'completed');
+
   const [detailOpen, setDetailOpen] = useState(false);
 
   return (
@@ -133,6 +137,8 @@ export const ToolCallBlock = memo(function ToolCallBlock({ block }: BlockProps) 
       >
         {/* Header */}
         <div
+          onClick={toggle}
+          aria-expanded={expanded}
           css={css`
             display: flex;
             align-items: center;
@@ -140,6 +146,8 @@ export const ToolCallBlock = memo(function ToolCallBlock({ block }: BlockProps) 
             padding: ${theme.spacing[2]} ${theme.spacing[4]};
             background: ${theme.color.fill};
             border-bottom: 1px solid ${theme.color.borderSecondary};
+            ${expanded ? '' : 'border-bottom: none;'}
+            cursor: pointer;
           `}
         >
           <div
@@ -173,40 +181,53 @@ export const ToolCallBlock = memo(function ToolCallBlock({ block }: BlockProps) 
               {toolName}
             </span>
           </div>
-          {toolType && (
-            <span
-              css={css`
-                font-size: ${theme.font.size.xs};
-                font-weight: ${theme.font.weight.bold};
-                text-transform: uppercase;
-                letter-spacing: 0.06em;
-                padding: 2px 8px;
-                border-radius: ${theme.radius.sm};
-                background: ${accentBg};
-                color: ${accentColor};
-              `}
-            >
-              {toolType}
-            </span>
-          )}
+          <div
+            css={css`
+              display: flex;
+              align-items: center;
+              gap: ${theme.spacing[2]};
+              flex-shrink: 0;
+              color: ${theme.color.textTertiary};
+            `}
+          >
+            {toolType && (
+              <span
+                css={css`
+                  font-size: ${theme.font.size.xs};
+                  font-weight: ${theme.font.weight.bold};
+                  text-transform: uppercase;
+                  letter-spacing: 0.06em;
+                  padding: 2px 8px;
+                  border-radius: ${theme.radius.sm};
+                  background: ${accentBg};
+                  color: ${accentColor};
+                `}
+              >
+                {toolType}
+              </span>
+            )}
+            <CollapseChevron expanded={expanded} />
+          </div>
         </div>
 
         {/* Input row */}
-        <div
-          css={css`
-            border-bottom: 1px solid ${theme.color.borderSecondary};
-          `}
-        >
-          <CodeRow
-            label={t('toolCall.input')}
-            dotColor={theme.color.info}
-            content={args}
-            onClick={() => setDetailOpen(true)}
-          />
-        </div>
+        {expanded && (
+          <div
+            css={css`
+              border-bottom: 1px solid ${theme.color.borderSecondary};
+            `}
+          >
+            <CodeRow
+              label={t('toolCall.input')}
+              dotColor={theme.color.info}
+              content={args}
+              onClick={() => setDetailOpen(true)}
+            />
+          </div>
+        )}
 
         {/* Output row */}
-        {result && (
+        {expanded && result && (
           <CodeRow
             label={t('toolCall.output')}
             dotColor={block.status === 'error' ? theme.color.error : theme.color.success}
