@@ -4,7 +4,7 @@
 import { theme } from 'antd';
 import type { ThemeConfig } from 'antd';
 
-import { lightTheme, darkTheme } from '../tokens/index.js';
+import { lightTheme, darkTheme, getTheme, type ThemeId } from '../tokens/index.js';
 import type { Theme } from '../types.js';
 
 /**
@@ -31,6 +31,11 @@ export function createAntdConfig(t: Theme): ThemeConfig {
       colorTextSecondary: t.color.textSecondary,
       colorTextTertiary: t.color.textTertiary,
       colorTextQuaternary: t.color.textQuaternary,
+      // Text on solid color fills (primary buttons, selected states…).
+      // textInverse doubles as this token: white in light themes, dark in
+      // dark themes whose primaries are brightened — required by Ink dark,
+      // where the primary surface is paper-white.
+      colorTextLightSolid: t.color.textInverse,
       colorBorder: t.color.border,
       colorBorderSecondary: t.color.borderSecondary,
       colorFill: t.color.fill,
@@ -69,6 +74,14 @@ export function createAntdConfig(t: Theme): ThemeConfig {
 
 export const lightAntdConfig = createAntdConfig(lightTheme);
 export const darkAntdConfig = createAntdConfig(darkTheme);
+
+/**
+ * Convenience: Ant Design ThemeConfig by mode + theme id.
+ * Pre-generated lightAntdConfig/darkAntdConfig above are the "slate" theme.
+ */
+export function getAntdConfig(mode: 'light' | 'dark', themeId?: ThemeId): ThemeConfig {
+  return createAntdConfig(getTheme(mode, themeId));
+}
 
 /**
  * Ant Design X dedicated tokens

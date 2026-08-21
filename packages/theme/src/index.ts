@@ -24,6 +24,12 @@ export {
   darkEventStatusColor,
   darkAgentStatusColor,
   darkSkillStatusColor,
+  themeRegistry,
+  themeMetas,
+  resolveThemeId,
+  defaultThemeId,
+  type ThemeId,
+  type ThemeMeta,
 } from './tokens/index.js';
 
 // Provider
@@ -32,6 +38,7 @@ export { ThemeProvider, useTheme, createEmotionTheme, GlobalStyles } from './pro
 // Ant Design adapter
 export {
   createAntdConfig,
+  getAntdConfig,
   lightAntdConfig,
   darkAntdConfig,
   getAntdXTokens,

@@ -127,12 +127,12 @@ export function GlobalStyles() {
         /* ========== Ant Design X Sender send button ========== */
         .ant-sender-actions-list button:not(:disabled) {
           background: ${theme.color.primary} !important;
-          color: white !important;
+          color: ${theme.color.textInverse} !important;
         }
 
         .ant-sender-actions-list button:not(:disabled):hover {
           background: ${theme.color.primaryHover} !important;
-          color: white !important;
+          color: ${theme.color.textInverse} !important;
         }
       `}
     />

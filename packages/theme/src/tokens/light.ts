@@ -25,24 +25,28 @@ export const lightColor: Theme['color'] = {
   infoBg: 'rgba(67, 97, 238, 0.1)',
   infoBorder: 'rgba(67, 97, 238, 0.3)',
 
-  // Extended colors
+  // Extended colors (600-level hues — 500-level looked fluorescent on light surfaces
+  // and drifted from the blockColor palette, which already used 600-level)
   green: '#16a34a',
   greenBg: 'rgba(22, 163, 74, 0.1)',
   blue: '#4361ee',
   blueBg: 'rgba(67, 97, 238, 0.1)',
-  purple: '#8b5cf6',
-  purpleBg: 'rgba(139, 92, 246, 0.1)',
-  orange: '#f97316',
-  orangeBg: 'rgba(249, 115, 22, 0.1)',
-  cyan: '#06b6d4',
-  cyanBg: 'rgba(6, 182, 212, 0.1)',
+  purple: '#7c3aed',
+  purpleBg: 'rgba(124, 58, 237, 0.1)',
+  orange: '#ea580c',
+  orangeBg: 'rgba(234, 88, 12, 0.1)',
+  cyan: '#0891b2',
+  cyanBg: 'rgba(8, 145, 178, 0.1)',
 
   // Background
-  bgBase: '#f8fafc',
-  bgLayout: '#f8fafc',
+  // bgBase one step deeper (slate-100) so white containers separate by surface,
+  // not only by 1px borders; bgElevated returns to white (elevation = lighter),
+  // popovers/dropdowns are distinguished by shadow instead of a darker fill.
+  bgBase: '#f1f5f9',
+  bgLayout: '#f1f5f9',
   bgContainer: '#ffffff',
-  bgElevated: '#fafafa',
-  bgSpotlight: '#f1f5f9',
+  bgElevated: '#ffffff',
+  bgSpotlight: '#e2e8f0',
   bgMask: 'rgba(0, 0, 0, 0.4)',
 
   // Text

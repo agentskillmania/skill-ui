@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { css } from '@emotion/react';
-import { useTheme, getTheme, type Theme } from '../src/index';
+import { useTheme, getTheme, themeMetas, type Theme, type ThemeId } from '../src/index';
 import { ColorTokens } from './sections/ColorTokens';
 import { BlockColors } from './sections/BlockColors';
 import { Typography } from './sections/Typography';
@@ -12,8 +12,9 @@ import { AntdXShowcase } from './sections/AntdXShowcase';
 export function App() {
   const theme = useTheme();
   const [mode, setMode] = useState<'light' | 'dark'>('light');
+  const [themeId, setThemeId] = useState<ThemeId>('slate');
 
-  const currentTheme = getTheme(mode);
+  const currentTheme = getTheme(mode, themeId);
 
   return (
     <ThemeProviderOverride theme={currentTheme} mode={mode}>
@@ -48,26 +49,85 @@ export function App() {
           >
             @agentskillmania/skill-ui-theme
           </h1>
-          <button
-            onClick={() => setMode(mode === 'light' ? 'dark' : 'light')}
+          <div
             css={css`
-              padding: ${currentTheme.spacing[2]} ${currentTheme.spacing[4]};
-              border-radius: ${currentTheme.radius.md};
-              border: 1px solid ${currentTheme.color.border};
-              background: ${currentTheme.color.bgContainer};
-              color: ${currentTheme.color.text};
-              cursor: pointer;
-              font-size: ${currentTheme.font.size.base};
-              font-weight: ${currentTheme.font.weight.medium};
-              transition: all 0.2s;
-              &:hover {
-                border-color: ${currentTheme.color.primary};
-                background: ${currentTheme.color.primaryBg};
-              }
+              display: flex;
+              align-items: center;
+              gap: ${currentTheme.spacing[3]};
             `}
           >
-            {mode === 'light' ? '☀️ 浅色' : '🌙 深色'}
-          </button>
+            {/* 主题切换 */}
+            <div
+              css={css`
+                display: flex;
+                gap: ${currentTheme.spacing[1]};
+                padding: ${currentTheme.spacing['0.5']};
+                border: 1px solid ${currentTheme.color.border};
+                border-radius: ${currentTheme.radius.md};
+                background: ${currentTheme.color.bgContainer};
+              `}
+            >
+              {themeMetas.map((meta) => {
+                const active = meta.id === themeId;
+                return (
+                  <button
+                    key={meta.id}
+                    onClick={() => setThemeId(meta.id)}
+                    title={meta.descriptionZh}
+                    css={css`
+                      display: flex;
+                      align-items: center;
+                      gap: ${currentTheme.spacing[2]};
+                      padding: ${currentTheme.spacing[1]} ${currentTheme.spacing[3]};
+                      border-radius: ${currentTheme.radius.base};
+                      border: 1px solid ${active ? currentTheme.color.primary : 'transparent'};
+                      background: ${active ? currentTheme.color.primaryBg : 'transparent'};
+                      color: ${currentTheme.color.text};
+                      cursor: pointer;
+                      font-size: ${currentTheme.font.size.sm};
+                      font-weight: ${currentTheme.font.weight.medium};
+                      transition: all 0.15s;
+                      &:hover {
+                        background: ${currentTheme.color.primaryBg};
+                      }
+                    `}
+                  >
+                    <span
+                      css={css`
+                        width: 12px;
+                        height: 12px;
+                        border-radius: ${currentTheme.radius.full};
+                        background: ${meta.swatch.primary};
+                        border: 1px solid ${currentTheme.color.border};
+                      `}
+                    />
+                    {meta.nameZh} {meta.name}
+                  </button>
+                );
+              })}
+            </div>
+            {/* 深浅切换 */}
+            <button
+              onClick={() => setMode(mode === 'light' ? 'dark' : 'light')}
+              css={css`
+                padding: ${currentTheme.spacing[2]} ${currentTheme.spacing[4]};
+                border-radius: ${currentTheme.radius.md};
+                border: 1px solid ${currentTheme.color.border};
+                background: ${currentTheme.color.bgContainer};
+                color: ${currentTheme.color.text};
+                cursor: pointer;
+                font-size: ${currentTheme.font.size.base};
+                font-weight: ${currentTheme.font.weight.medium};
+                transition: all 0.2s;
+                &:hover {
+                  border-color: ${currentTheme.color.primary};
+                  background: ${currentTheme.color.primaryBg};
+                }
+              `}
+            >
+              {mode === 'light' ? '☀️ 浅色' : '🌙 深色'}
+            </button>
+          </div>
         </div>
 
         {/* 内容区 */}

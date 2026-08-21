@@ -32,12 +32,17 @@ export const radius: Theme['radius'] = {
   full: '9999px',
 };
 
+/**
+ * Light-mode shadows: slate-tinted (rgb 15,23,42 = slate-900) with visible
+ * separation — the previous scale topped out at 0.12 alpha and was nearly
+ * invisible on light surfaces, forcing all layering onto 1px borders.
+ */
 export const shadow: Theme['shadow'] = {
-  sm: '0 1px 2px rgba(0, 0, 0, 0.05)',
-  base: '0 2px 4px rgba(0, 0, 0, 0.05)',
-  md: '0 4px 8px rgba(0, 0, 0, 0.08)',
-  lg: '0 8px 16px rgba(0, 0, 0, 0.1)',
-  xl: '0 8px 32px rgba(0, 0, 0, 0.12)',
+  sm: '0 1px 2px rgba(15, 23, 42, 0.06)',
+  base: '0 1px 3px rgba(15, 23, 42, 0.08)',
+  md: '0 2px 4px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.08)',
+  lg: '0 4px 8px rgba(15, 23, 42, 0.08), 0 8px 24px rgba(15, 23, 42, 0.1)',
+  xl: '0 8px 16px rgba(15, 23, 42, 0.08), 0 16px 40px rgba(15, 23, 42, 0.12)',
 };
 
 export const darkShadow: Theme['shadow'] = {
