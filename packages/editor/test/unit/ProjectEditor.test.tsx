@@ -1,10 +1,16 @@
 /** @jsxImportSource @emotion/react */
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { screen, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithProviders } from './testUtils.js';
 import { ProjectEditor } from '../../src/project-editor/ProjectEditor.js';
 import type { ProjectFile, FileTab, EditorPanel } from '../../src/types.js';
 import { Modal } from 'antd';
+
+beforeEach(() => {
+  // 模块级 handler 每测重置:否则拿到上一个测试 render 注册的旧闭包,
+  // 102 行的保存测试就依赖了前序测试的执行顺序
+  registeredSaveHandler = null;
+});
 
 // Track save handler registered by CodeEditor handleMount
 let registeredSaveHandler: (() => void) | null = null;
@@ -118,14 +124,6 @@ describe('ProjectEditor', () => {
     );
     // No monaco editor should render — no change button
     expect(screen.queryByTestId('monaco-change')).not.toBeInTheDocument();
-  });
-
-  it('calls onEditorSave with file path and content when saved', () => {
-    const onEditorSave = vi.fn();
-    renderWithProviders(<ProjectEditor {...baseProps} onEditorSave={onEditorSave} />);
-    // StatusBar renders a save button when isDirty is true
-    // isDirty comes from editorDirtyFilePaths including activeFilePath
-    // We can test via the monaco editor integration
   });
 
   it('does not throw when onEditorSave is undefined', () => {

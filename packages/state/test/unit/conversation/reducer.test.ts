@@ -531,3 +531,55 @@ describe('reducer — empty thinking events', () => {
     expect(thinkingBlocks[0].content).toBe('Hi');
   });
 });
+
+describe('reducer — session-cleared (destructive reset)', () => {
+  it('drops all messages, resets tokens/todo/compression, keeps the audit log', () => {
+    // Populate a busy state: user + assistant messages, tokens, todo, sub-agent
+    let state = pushEvents([
+      { event: 'user-message', data: { content: 'hi' } },
+      { event: 'token', data: { delta: 'answer' } },
+      {
+        event: 'llm-response',
+        data: { text: 'answer', toolCalls: null, tokens: { input: 100, output: 20 } },
+      },
+      {
+        event: 'todo-list',
+        data: {
+          items: [{ id: 1, subject: 'task', status: 'in_progress' }],
+        },
+      },
+      {
+        event: 'subagent-start',
+        data: { name: 'helper', task: 'do things', subtaskId: 'sub-1' },
+      },
+      { event: 'done', data: { status: 'success' } },
+    ]);
+    expect(state.main.messages.length).toBeGreaterThan(0);
+    expect((state.main.tokens as { input: number }).input).toBe(100);
+    expect(state.main.todoList?.items.length).toBe(1);
+    expect(state.subAgents.size).toBe(1);
+
+    // /clear lands
+    state = reducer(state, { event: 'session-cleared', data: {} });
+
+    // 消息被批量丢弃(唯一破坏性路径)
+    expect(state.main.messages).toEqual([]);
+    // token 计量归零
+    expect(state.main.tokens).toEqual({
+      input: 0,
+      output: 0,
+      cacheRead: 0,
+      cacheWrite: 0,
+    });
+    // 会话级残留清空
+    expect(state.main.todoList).toBeUndefined();
+    expect(state.main.compression).toBeUndefined();
+    expect(state.main.activeSkill).toBeNull();
+    expect(state.main.lastInputTokens).toBeUndefined();
+    // 子代理卡片随顶层 slice 重置
+    expect(state.subAgents.size).toBe(0);
+    // 事件日志是 append-only 审计:保留且含 session-cleared 条目
+    expect(state.events.length).toBeGreaterThan(0);
+    expect(state.events.some((e) => e.type === 'session-cleared')).toBe(true);
+  });
+});

@@ -35,40 +35,33 @@ describe('Chat', () => {
     expect(screen.getByPlaceholderText('请输入...')).toBeInTheDocument();
   });
 
-  it('streaming status passes loading to ChatInput', () => {
-    render(<Chat messages={mockMessages} status="streaming" />, { wrapper: Wrapper });
-    // antdx Sender in loading state renders a cancel action button with "Cancel" aria-label
-    const textarea = screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)');
-    expect(textarea).toBeInTheDocument();
-    // Verify a button with cancel semantics exists (Sender's loading action)
-    const buttons = screen.getAllByRole('button');
-    expect(buttons.length).toBeGreaterThanOrEqual(1);
-    // The button should have cancel/stop semantics — at minimum it must be an action button
-    // that is NOT the textarea submit trigger
-    const hasCancelButton = buttons.some(
-      (btn) =>
-        btn.getAttribute('aria-label')?.toLowerCase().includes('cancel') ||
-        btn.getAttribute('aria-label')?.toLowerCase().includes('stop')
-    );
-    // If antdx doesn't set aria-label in jsdom, fall back to verifying button count > 0
-    // which is already asserted above — this test verifies the integration point exists
-    expect(hasCancelButton || buttons.length >= 1).toBe(true);
+  it('streaming status renders stop button and clicking it calls onStop', () => {
+    const onStop = vi.fn();
+    render(<Chat messages={mockMessages} status="streaming" onStop={onStop} />, {
+      wrapper: Wrapper,
+    });
+    // antdx Sender 在 loading 态把提交按钮换成 "Stop loading" 取消动作。
+    // 行为断言:按钮在场且点击真的触发 onStop(此前版本是永真式,按钮
+    // 语义从未被验证)
+    const stopBtn = screen.getByRole('button', { name: /stop/i });
+    expect(stopBtn).toBeInTheDocument();
+    fireEvent.click(stopBtn);
+    expect(onStop).toHaveBeenCalled();
   });
 
   it('error status does not show stop button', () => {
     render(<Chat messages={mockMessages} status="error" />, { wrapper: Wrapper });
-    // in non-streaming state Sender does not render loading button
-    expect(screen.queryByPlaceholderText('输入消息... (Shift+Enter 换行)')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /stop/i })).not.toBeInTheDocument();
   });
 
   it('completed status does not show stop button', () => {
     render(<Chat messages={mockMessages} status="completed" />, { wrapper: Wrapper });
-    expect(screen.queryByPlaceholderText('输入消息... (Shift+Enter 换行)')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /stop/i })).not.toBeInTheDocument();
   });
 
   it('idle status does not show stop button', () => {
     render(<Chat messages={mockMessages} status="idle" />, { wrapper: Wrapper });
-    expect(screen.queryByPlaceholderText('输入消息... (Shift+Enter 换行)')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /stop/i })).not.toBeInTheDocument();
   });
 
   it('Enter triggers onSendMessage after typing', () => {

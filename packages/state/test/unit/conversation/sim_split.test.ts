@@ -1,3 +1,8 @@
+/**
+ * Live-split race simulation: history load lands mid-run. Guards the
+ * user-visible outcome (no duplicated user bubble, one assistant message
+ * with completed tool block), not internal transitions.
+ */
 import { describe, it, expect } from 'vitest';
 import { reducer } from '../../../src/core/conversation/reducer.js';
 import { createEmptySessionState } from '../../../src/core/conversation/types.js';
@@ -9,7 +14,7 @@ function feed(events: SSEEvent[]) {
 }
 
 describe('live split simulation', () => {
-  it('race: loadHistory lands mid-run', () => {
+  it('race: loadHistory lands mid-run — one user bubble, one assistant with completed tool block', () => {
     // 1. user sends message
     let s = feed([{ event: 'user-message', data: { content: 'hi' } }]);
     // 2. GET /messages raced while run in flight: daemon persisted [user] at run start
@@ -35,19 +40,19 @@ describe('live split simulation', () => {
       { event: 'step-end', data: { step: 0, status: 'done', tokens: {} } },
       { event: 'done', data: { status: 'success', totalSteps: 2 } },
     ].reduce(reducer, s);
+
+    // 消息面:恰好两条,用户消息未被竞态复制
     const msgs = s.main.messages;
-    console.log(
-      'MESSAGES:',
-      JSON.stringify(
-        msgs.map((m) => ({
-          role: m.role,
-          content: m.content,
-          blocks: m.blocks?.map((b) => b.type),
-        })),
-        null,
-        1
-      )
-    );
-    expect(msgs.length).toBe(2); // user + ONE assistant bubble
+    expect(msgs).toHaveLength(2);
+    expect(msgs[0].role).toBe('user');
+    expect(msgs[0].content).toBe('hi');
+    expect(msgs[1].role).toBe('assistant');
+    expect(msgs[1].content).toBe('final answer');
+    // 块面:工具调用块存在且已随 done 收尾
+    const toolBlock = msgs[1].blocks?.find((b) => b.type === 'tool_call');
+    expect(toolBlock).toBeDefined();
+    expect(toolBlock!.status).toBe('completed');
+    // 终态:run 回到 idle
+    expect(s.main.status).toBe('idle');
   });
 });

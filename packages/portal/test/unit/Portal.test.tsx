@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { describe, it, expect, vi, beforeAll } from 'vitest';
+import { describe, it, expect, vi, beforeAll, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider } from '@emotion/react';
 import { ConfigProvider } from 'antd';
@@ -31,6 +31,13 @@ vi.mock('../../src/components/PortalHeader/PortalHeader.js', () => ({
     );
   },
 }));
+
+beforeEach(() => {
+  // 模块级捕获每测重置:render 的 useEffect 会重新捕获;残留旧闭包
+  // 会让断言打到上一个测试的 vi.fn 上,产生顺序依赖
+  capturedOnSelect = null;
+  capturedOnEdit = null;
+});
 
 beforeAll(() => {
   class ResizeObserverMock {

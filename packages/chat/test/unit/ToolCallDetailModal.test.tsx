@@ -75,12 +75,12 @@ describe('ToolCallDetailModal', () => {
 
   it('calls onClose when modal close button clicked', () => {
     const { onClose } = renderModal();
-    // antd Modal close icon renders as a button with aria-label
+    // antd Modal close icon renders as .ant-modal-close。无条件断言:
+    // if 守卫会让选择器失效时整组断言静默通过
     const closeBtn = document.querySelector('.ant-modal-close');
-    if (closeBtn) {
-      closeBtn.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-      expect(onClose).toHaveBeenCalled();
-    }
+    expect(closeBtn).not.toBeNull();
+    closeBtn!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(onClose).toHaveBeenCalled();
   });
 
   it('uses vs-dark theme in dark mode', () => {

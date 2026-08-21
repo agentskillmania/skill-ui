@@ -210,19 +210,6 @@ describe('VisualEditor (Crepe implementation)', () => {
     expect(call[0].defaultValue).toBe('');
   });
 
-  it('returns early when rootRef.current is null (does not create Crepe)', async () => {
-    // Modify mock to make rootRef.current null
-    const originalCreate = mockCrepeInstance.create;
-    mockCrepeInstance.create = vi.fn().mockResolvedValue(null);
-
-    renderWithProviders(<VisualEditor {...defaultProps} />);
-
-    // Since rootRef is obtained via ref, we need to test the null branch
-    // This branch is hard to trigger in actual rendering because ref is always set
-    // But we can verify by not waiting for create
-    mockCrepeInstance.create = originalCreate;
-  });
-
   it('does not execute replaceAll when editor.status is not Created', async () => {
     // Simulate editor.status as undefined or other non-Created value
     const originalEditor = mockCrepeInstance.editor;

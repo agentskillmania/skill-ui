@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider } from '@emotion/react';
 import { ConfigProvider } from 'antd';
@@ -7,6 +7,11 @@ import { lightTheme, lightAntdConfig } from '@agentskillmania/skill-ui-theme';
 
 // Track filterOption calls to exercise antd Select's filterOption inline callback
 let capturedFilterOption: ((input: string, option: any) => boolean) | null = null;
+
+beforeEach(() => {
+  // 模块级捕获必须每测重置:否则捕获失败时拿到的是上一个测试的旧闭包
+  capturedFilterOption = null;
+});
 
 vi.mock('antd', async () => {
   const actual = await vi.importActual('antd');
@@ -237,12 +242,14 @@ describe('SessionSection', () => {
   });
 
   it('filterOption matches label against input', () => {
-    expect(capturedFilterOption).toBeTruthy();
-    if (capturedFilterOption) {
-      expect(capturedFilterOption('test', { label: 'Test Label' })).toBe(true);
-      expect(capturedFilterOption('xyz', { label: 'Test Label' })).toBe(false);
-      expect(capturedFilterOption('test', null)).toBe(false);
-      expect(capturedFilterOption('test', { label: 'TEST LABEL' })).toBe(true);
-    }
+    // 自渲染:捕获不依赖前序测试的执行顺序
+    render(<SessionSection sessions={mockSessions} {...baseProps} />, { wrapper });
+    // 无条件断言——if 守卫会让捕获失败时整组断言静默通过
+    expect(capturedFilterOption).toBeInstanceOf(Function);
+    const matches = capturedFilterOption as (input: string, option: unknown) => boolean;
+    expect(matches('test', { label: 'Test Label' })).toBe(true);
+    expect(matches('xyz', { label: 'Test Label' })).toBe(false);
+    expect(matches('test', null)).toBe(false);
+    expect(matches('test', { label: 'TEST LABEL' })).toBe(true);
   });
 });
