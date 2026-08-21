@@ -242,6 +242,85 @@ describe('conversation selectors', () => {
     it('returns empty when there are no activity blocks', () => {
       expect(selectActivityTimeline(makeState())).toEqual([]);
     });
+
+    it('skips text/other blocks and messages without blocks', () => {
+      const state = makeState();
+      state.main.messages = [
+        { id: 'm0', role: 'assistant', content: 'x', status: 'completed' }, // no blocks field
+        {
+          id: 'm1',
+          role: 'assistant',
+          content: 'prose',
+          status: 'completed',
+          blocks: [
+            { id: 't1', type: 'text', status: 'completed', content: 'prose' },
+            { id: 'h1', type: 'human_input', status: 'pending', content: '' },
+          ],
+        },
+      ];
+      expect(selectActivityTimeline(state)).toEqual([]);
+    });
+
+    it('maps statuses, fallbacks, and detail extraction edge cases', () => {
+      const state = makeState();
+      state.main.messages = [
+        {
+          id: 'm1',
+          role: 'assistant',
+          content: '',
+          status: 'completed',
+          blocks: [
+            // thinking still streaming → running
+            { id: 'b1', type: 'thinking', status: 'streaming', content: '' },
+            // tool without metadata → label fallback 'tool', no detail key
+            { id: 'b2', type: 'tool_call', status: 'error', content: '' },
+            // tool with non-string toolArgs → no detail
+            {
+              id: 'b3',
+              type: 'tool_call',
+              status: 'completed',
+              content: '',
+              metadata: { toolName: 'x', toolArgs: 42 },
+            },
+            // tool with unparseable toolArgs → raw-string detail
+            {
+              id: 'b4',
+              type: 'tool_call',
+              status: 'completed',
+              content: '',
+              metadata: { toolName: 'y', toolArgs: '{not json' },
+            },
+            // tool with >80-char first value → truncated detail
+            {
+              id: 'b5',
+              type: 'tool_call',
+              status: 'completed',
+              content: '',
+              metadata: { toolName: 'z', toolArgs: JSON.stringify({ q: 'x'.repeat(100) }) },
+            },
+            // sub-agent without name, error status
+            { id: 'b6', type: 'subagent', status: 'error', content: '', metadata: {} },
+            // sub-agent streaming → running
+            {
+              id: 'b7',
+              type: 'subagent',
+              status: 'streaming',
+              content: '',
+              metadata: { name: 'w' },
+            },
+          ],
+        },
+      ];
+      const tl = selectActivityTimeline(state);
+      expect(tl[0]).toEqual({ id: 'b1', type: 'thinking', label: '', status: 'running' });
+      expect(tl[1]).toEqual({ id: 'b2', type: 'tool', label: 'tool', status: 'error' });
+      expect(tl[2]).toEqual({ id: 'b3', type: 'tool', label: 'x', status: 'done' });
+      expect(tl[3]).toMatchObject({ id: 'b4', detail: '{not json' });
+      expect(tl[4].detail).toHaveLength(81); // 80 chars + ellipsis
+      expect(tl[4].detail!.endsWith('…')).toBe(true);
+      expect(tl[5]).toEqual({ id: 'b6', type: 'subagent', label: 'sub-agent', status: 'error' });
+      expect(tl[6]).toEqual({ id: 'b7', type: 'subagent', label: 'w', status: 'running' });
+    });
   });
 
   describe('selectTodoList', () => {

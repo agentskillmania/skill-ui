@@ -260,23 +260,40 @@ function reduceMainEvent(
 
     // ── Streaming tokens ──
     case 'token': {
-      const { run, messageId } = ensureStreamingMessage(state);
       const delta = (data.delta as string) ?? '';
+      // LLM streams emit empty `token` frames between reasoning segments.
+      // They must neither close an open thinking block nor spawn an empty
+      // text block (an empty block would suppress the typing indicator and
+      // render as a stray gap).
+      if (!delta) return state;
+      const { run, messageId } = ensureStreamingMessage(state);
       return {
         ...run,
-        messages: run.messages.map((m) =>
-          m.id === messageId
-            ? {
-                ...m,
-                content: m.content + delta,
-                // Only close open blocks when REAL content arrives. LLM
-                // streams emit empty `token` events between reasoning
-                // segments; closing on those would flip a streaming thinking
-                // block to completed mid-reasoning (visually "disappearing").
-                blocks: delta ? (m.blocks ? closeThinkingBlocks(m.blocks) : m.blocks) : m.blocks,
-              }
-            : m
-        ),
+        messages: run.messages.map((m) => {
+          if (m.id !== messageId) return m;
+          // Real content closes open thinking blocks — a text segment begins.
+          const blocks = closeThinkingBlocks(m.blocks ?? []);
+          const last = blocks[blocks.length - 1];
+          // Text is a block like any other: append into the trailing open
+          // text segment, or open a new one right after whatever came last
+          // (thinking, tool call, …). Block array order IS the render order.
+          if (last?.type === 'text' && last.status === 'streaming') {
+            return {
+              ...m,
+              content: m.content + delta,
+              blocks: blocks.map((b) =>
+                b.id === last.id ? { ...b, content: b.content + delta } : b
+              ),
+            };
+          }
+          const textBlock: AgentBlock = {
+            id: genBlockId(),
+            type: 'text',
+            status: 'streaming',
+            content: delta,
+          };
+          return { ...m, content: m.content + delta, blocks: [...blocks, textBlock] };
+        }),
       };
     }
 
@@ -699,22 +716,27 @@ function reduceMainEvent(
     }
 
     case 'error': {
+      const message = (data.message as string) ?? 'Unknown error';
       return {
         ...state,
         status: 'error',
         activeSkill: null,
-        messages: state.messages.map((m) =>
-          m.status === 'streaming'
-            ? {
-                ...m,
-                status: 'error' as const,
-                content: m.content || `Error: ${data.message ?? 'Unknown error'}`,
-                // Close open blocks too — otherwise thinking/tool blocks keep
-                // their streaming pulse/spinner forever after a failed run.
-                blocks: m.blocks ? closeTerminalBlocks(m.blocks, 'error') : m.blocks,
-              }
-            : m
-        ),
+        messages: state.messages.map((m) => {
+          if (m.status !== 'streaming') return m;
+          // Close open blocks — otherwise thinking/tool blocks keep their
+          // streaming pulse forever after a failed run.
+          const closed = closeTerminalBlocks(m.blocks ?? [], 'error');
+          // The error becomes an in-order block. The old fallback wrote it
+          // into `content` only when empty, silently dropping the message
+          // whenever the run had already produced text.
+          const errorBlock: AgentBlock = {
+            id: genBlockId(),
+            type: 'error',
+            status: 'error',
+            content: message,
+          };
+          return { ...m, status: 'error' as const, blocks: [...closed, errorBlock] };
+        }),
       };
     }
 
@@ -751,22 +773,36 @@ function reduceSubAgentEvent(
       const sub = subAgents.get(subtaskId);
       if (!sub) return subAgents;
       const delta = (data.delta as string) ?? '';
-      const { run } = ensureStreamingMessage(sub);
+      // Mirror the main token handler: empty frames neither close thinking
+      // blocks nor create empty text blocks.
+      if (!delta) return subAgents;
+      const { run, messageId } = ensureStreamingMessage(sub);
       return new Map(subAgents).set(subtaskId, {
         ...sub,
         ...run,
-        messages: run.messages.map((m) =>
-          m.status === 'streaming' && m.role === 'assistant'
-            ? {
-                ...m,
-                content: m.content + delta,
-                // Mirror the main token handler: real content closes open
-                // thinking blocks; empty deltas between reasoning segments
-                // must not.
-                blocks: delta && m.blocks ? closeThinkingBlocks(m.blocks) : m.blocks,
-              }
-            : m
-        ),
+        messages: run.messages.map((m) => {
+          if (m.id !== messageId) return m;
+          const blocks = closeThinkingBlocks(m.blocks ?? []);
+          const last = blocks[blocks.length - 1];
+          // Text segments interleave with thinking/tool blocks in arrival
+          // order, exactly like the main agent's token handler.
+          if (last?.type === 'text' && last.status === 'streaming') {
+            return {
+              ...m,
+              content: m.content + delta,
+              blocks: blocks.map((b) =>
+                b.id === last.id ? { ...b, content: b.content + delta } : b
+              ),
+            };
+          }
+          const textBlock: AgentBlock = {
+            id: genBlockId(),
+            type: 'text',
+            status: 'streaming',
+            content: delta,
+          };
+          return { ...m, content: m.content + delta, blocks: [...blocks, textBlock] };
+        }),
       });
     }
 

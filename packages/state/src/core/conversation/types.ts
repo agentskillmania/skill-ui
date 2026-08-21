@@ -30,7 +30,15 @@ export type MessageRole = 'user' | 'assistant' | 'system' | 'tool';
 
 /**
  * A structured block within an assistant message.
- * Blocks are the primary UI render unit (thinking, tool_call, skill, etc.).
+ * Blocks are the primary UI render unit AND the single chronological
+ * source: thinking, text, tool_call, skill, subagent, human_input, error.
+ * A message's render order is its blocks array order — producers (the
+ * reducer, fromHistory) append only, never prepend.
+ *
+ * 'text' is a plain assistant prose segment (markdown in `content`). One
+ * message typically holds several: each tool call / thinking segment that
+ * interrupts the prose starts a new text block, so interleaved ordering
+ * survives.
  */
 export interface AgentBlock {
   id: string;
@@ -46,6 +54,12 @@ export interface AgentBlock {
 export interface AgentMessage {
   id: string;
   role: MessageRole;
+  /**
+   * Derived field: concatenation of the message's text blocks, kept in sync
+   * by the reducer and fromHistory. Exists for backward compatibility
+   * (legacy renderers, copy handlers) — the chat UI renders text blocks
+   * inline and only falls back to `content` when no text blocks exist.
+   */
   content: string;
   blocks?: AgentBlock[];
   status: MessageStatus;

@@ -383,10 +383,9 @@ describe('reducer — negative paths', () => {
       { event: 'token', data: {} },
       { event: 'done', data: {} },
     ]);
-    // Empty token delta → empty content but no crash
+    // Empty token delta is a no-op — no message, no block, no crash
     expect(state.main.status).toBe('idle');
-    const lastMsg = state.main.messages[state.main.messages.length - 1];
-    expect(lastMsg.content).toBe('');
+    expect(state.main.messages).toHaveLength(0);
   });
 
   it('handles llm-response with undefined tokens', () => {
@@ -506,6 +505,82 @@ describe('reducer — empty token events', () => {
   });
 });
 
+describe('reducer — text blocks & interleaved ordering', () => {
+  it('keeps the full chronological order: thinking → text → tool → thinking → text', () => {
+    // The core invariant of text-as-block: every segment lands in the blocks
+    // array exactly where it happened, so live rendering matches resume.
+    const state = pushEvents([
+      { event: 'user-message', data: { content: 'hi' } },
+      { event: 'thinking', data: { content: '思考A' } },
+      { event: 'token', data: { delta: '我先查一下' } },
+      { event: 'tool-start', data: { id: 'c1', name: 'search', args: { q: 'x' } } },
+      { event: 'tool-end', data: { callId: 'c1', result: 'found' } },
+      { event: 'thinking', data: { content: '思考B' } },
+      { event: 'token', data: { delta: '结论如下' } },
+      { event: 'done', data: { status: 'success' } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    expect(msg.blocks?.map((b) => b.type)).toEqual([
+      'thinking',
+      'text',
+      'tool_call',
+      'thinking',
+      'text',
+    ]);
+    expect(msg.blocks?.map((b) => b.content)).toEqual([
+      '思考A',
+      '我先查一下',
+      '',
+      '思考B',
+      '结论如下',
+    ]);
+    // Everything terminal after done; derived content is the text concat.
+    expect(msg.blocks?.every((b) => b.status === 'completed')).toBe(true);
+    expect(msg.content).toBe('我先查一下结论如下');
+  });
+
+  it('consecutive tokens merge into one trailing text block', () => {
+    const state = pushEvents([
+      { event: 'token', data: { delta: 'Hello' } },
+      { event: 'token', data: { delta: ' world' } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    const textBlocks = msg.blocks?.filter((b) => b.type === 'text') ?? [];
+    expect(textBlocks).toHaveLength(1);
+    expect(textBlocks[0].content).toBe('Hello world');
+    expect(textBlocks[0].status).toBe('streaming');
+  });
+
+  it('a tool call splits prose into two separate text blocks', () => {
+    const state = pushEvents([
+      { event: 'token', data: { delta: 'before tool' } },
+      { event: 'tool-start', data: { id: 'c1', name: 'shell', args: {} } },
+      { event: 'tool-end', data: { callId: 'c1', result: 'ok' } },
+      { event: 'token', data: { delta: 'after tool' } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    expect(msg.blocks?.map((b) => b.type)).toEqual(['text', 'tool_call', 'text']);
+  });
+
+  it('sub-agent tokens interleave text/thinking/tool blocks in arrival order', () => {
+    const state = pushEvents([
+      { event: 'subagent-start', data: { subtaskId: 's1', name: 'sub', task: 'do' } },
+      { event: 'subagent-thinking', data: { subtaskId: 's1', content: 'sub thought' } },
+      { event: 'subagent-token', data: { subtaskId: 's1', delta: 'sub prose' } },
+      {
+        event: 'subagent-tool-start',
+        data: { subtaskId: 's1', action: { id: 'sc1', tool: 'shell', arguments: {} } },
+      },
+      { event: 'subagent-tool-end', data: { subtaskId: 's1', callId: 'sc1', result: 'ok' } },
+      { event: 'subagent-token', data: { subtaskId: 's1', delta: 'sub final' } },
+    ]);
+    const sub = state.subAgents.get('s1')!;
+    const msg = sub.messages[sub.messages.length - 1];
+    expect(msg.blocks?.map((b) => b.type)).toEqual(['thinking', 'text', 'tool_call', 'text']);
+    expect(msg.content).toBe('sub prosesub final');
+  });
+});
+
 describe('reducer — empty thinking events', () => {
   it('empty thinking must not create a block (LLM streams an empty reasoning_content first)', () => {
     const state = pushEvents([
@@ -514,7 +589,10 @@ describe('reducer — empty thinking events', () => {
       { event: 'done', data: { status: 'success' } },
     ]);
     const msg = state.main.messages[state.main.messages.length - 1];
-    expect(msg.blocks ?? []).toHaveLength(0);
+    // No thinking block — but the real token DID open a text block.
+    expect(msg.blocks?.filter((b) => b.type === 'thinking') ?? []).toHaveLength(0);
+    expect(msg.blocks?.map((b) => b.type)).toEqual(['text']);
+    expect(msg.blocks![0]).toMatchObject({ type: 'text', content: '你好', status: 'completed' });
     expect(msg.content).toBe('你好');
   });
 

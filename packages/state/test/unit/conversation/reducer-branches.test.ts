@@ -71,15 +71,15 @@ describe('reducer — token accumulation with partial data', () => {
 });
 
 describe('reducer — streaming with null/missing fields', () => {
-  it('token with null delta produces empty string content', () => {
+  it('token with null delta is a no-op', () => {
     const state = run([s('token', { delta: null })]);
-    expect(lastMsg(state).content).toBe('');
-    expect(lastMsg(state).status).toBe('streaming');
+    // Empty frames between reasoning segments create neither message nor block
+    expect(state.main.messages).toHaveLength(0);
   });
 
-  it('token with missing delta field produces empty string content', () => {
+  it('token with missing delta field is a no-op', () => {
     const state = run([s('token', {})]);
-    expect(lastMsg(state).content).toBe('');
+    expect(state.main.messages).toHaveLength(0);
   });
 
   it('thinking with null content does not create an empty block', () => {
@@ -313,14 +313,14 @@ describe('reducer — sub-agent defaults', () => {
     expect(state.subAgents.size).toBe(1);
   });
 
-  it('subagent-token with no token produces empty assistant content', () => {
+  it('subagent-token with no token is a no-op', () => {
     const state = run([
       s('subagent-start', { subtaskId: 's1', name: 'sub', task: 'do' }),
       s('subagent-token', { subtaskId: 's1' }),
     ]);
     const sub = state.subAgents.get('s1')!;
-    const msg = sub.messages[sub.messages.length - 1];
-    expect(msg.content).toBe('');
+    // Empty delta creates no message (mirrors the main token handler)
+    expect(sub.messages).toHaveLength(0);
   });
 
   it('subagent-thinking with no content does not create a thinking block', () => {
@@ -672,18 +672,35 @@ describe('reducer — done/error on messages with no blocks', () => {
     expect(lastMsg(state).status).toBe('completed');
   });
 
-  it('error fills empty content with error message', () => {
+  it('error appends an error block with the default message', () => {
     const state = run([s('user-message', { content: 'hi' }), s('error', {})]);
     expect(lastMsg(state).status).toBe('error');
-    expect(lastMsg(state).content).toMatch(/^Error:/);
+    const errorBlock = lastMsg(state).blocks?.find((b) => b.type === 'error');
+    expect(errorBlock).toMatchObject({ status: 'error', content: 'Unknown error' });
   });
 
-  it('error with custom message puts it in content', () => {
+  it('error with custom message puts it in the error block', () => {
     const state = run([
       s('user-message', { content: 'hi' }),
       s('error', { message: 'custom error' }),
     ]);
-    expect(lastMsg(state).content).toBe('Error: custom error');
+    const errorBlock = lastMsg(state).blocks?.find((b) => b.type === 'error');
+    expect(errorBlock?.content).toBe('custom error');
+  });
+
+  it('error keeps existing text and appends the error block after it', () => {
+    // Regression: the old fallback wrote the error into `content` only when
+    // empty — with prose already streamed, the error vanished silently.
+    const state = run([
+      s('user-message', { content: 'hi' }),
+      s('token', { delta: 'partial answer' }),
+      s('error', { message: 'boom' }),
+    ]);
+    const msg = lastMsg(state);
+    expect(msg.content).toBe('partial answer');
+    expect(msg.blocks?.map((b) => b.type)).toEqual(['text', 'error']);
+    expect(msg.blocks![0].status).toBe('error'); // streaming text closed as error
+    expect(msg.blocks![1]).toMatchObject({ type: 'error', content: 'boom' });
   });
 
   it('token on message with no blocks appends to content', () => {

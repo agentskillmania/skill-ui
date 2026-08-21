@@ -432,11 +432,14 @@ describe('fromHistory — turn-level bubble merging', () => {
     const assistant = msgs[1];
     expect(assistant.role).toBe('assistant');
     expect(assistant.content).toBe('final answer');
-    expect(assistant.blocks).toHaveLength(1);
+    // Tool block first (from the action row), then the closing text block —
+    // blocks carry the chronological order; content is their concatenation.
+    expect(assistant.blocks?.map((b) => b.type)).toEqual(['tool_call', 'text']);
     expect(assistant.blocks![0]).toMatchObject({
       type: 'tool_call',
       metadata: { toolName: 'shell', toolResult: 'file list' },
     });
+    expect(assistant.blocks![1]).toMatchObject({ type: 'text', content: 'final answer' });
   });
 
   it('merges thought + action + text into one bubble with thinking + tool blocks', () => {
@@ -459,7 +462,7 @@ describe('fromHistory — turn-level bubble merging', () => {
     const assistant = msgs[1];
     expect(assistant.content).toBe('done');
     const blockTypes = assistant.blocks?.map((b) => b.type) ?? [];
-    expect(blockTypes).toEqual(['thinking', 'tool_call']);
+    expect(blockTypes).toEqual(['thinking', 'tool_call', 'text']);
   });
 
   it('keeps separate turns in separate bubbles', () => {
@@ -506,7 +509,72 @@ describe('fromHistory — turn-level bubble merging', () => {
     const msgs = selectMainMessages(state);
     expect(msgs).toHaveLength(2);
     const assistant = msgs[1];
-    expect(assistant.blocks).toHaveLength(1);
+    // Each trailing text row becomes its own text block, in order.
+    expect(assistant.blocks?.map((b) => b.type)).toEqual(['tool_call', 'text', 'text']);
+    expect(assistant.blocks![1].content).toBe('The value is 42');
+    expect(assistant.blocks![2].content).toBe(' Does that help?');
     expect(assistant.content).toBe('The value is 42 Does that help?');
+  });
+
+  /**
+   * Regression: thinking blocks used to be PREPENDED to the bubble, so a
+   * resumed conversation rendered every thought at the top in reverse
+   * order — never matching the live view. Blocks must append in storage
+   * order, making resume block-for-block identical to the live reducer.
+   */
+  it('preserves interleaved order: thought → text+tool → thought → text', () => {
+    const messages: ColtsMessageInput[] = [
+      { role: 'user', content: 'hi', timestamp: 1000 },
+      { role: 'assistant', content: '思考A', type: 'thought', timestamp: 2000 },
+      {
+        role: 'assistant',
+        content: '我先查一下',
+        type: 'action',
+        toolCalls: [{ id: 'c1', name: 'search', arguments: { q: 'x' } }],
+        timestamp: 3000,
+      },
+      { role: 'tool', content: 'result', toolCallId: 'c1', toolName: 'search', timestamp: 4000 },
+      { role: 'assistant', content: '思考B', type: 'thought', timestamp: 5000 },
+      { role: 'assistant', content: '结论如下', type: 'text', timestamp: 6000 },
+    ];
+    const state = fromHistory(messages);
+    const assistant = selectMainMessages(state)[1];
+    expect(assistant.blocks?.map((b) => b.type)).toEqual([
+      'thinking',
+      'text',
+      'tool_call',
+      'thinking',
+      'text',
+    ]);
+    expect(assistant.blocks?.map((b) => b.content)).toEqual([
+      '思考A',
+      '我先查一下',
+      '',
+      '思考B',
+      '结论如下',
+    ]);
+    // Derived content stays the concatenation of the text blocks.
+    expect(assistant.content).toBe('我先查一下结论如下');
+  });
+
+  it('keeps prose ahead of tool calls within a single action row', () => {
+    // One completion emitted both text and toolCalls: the persisted action
+    // row holds both. Live SSE streams the tokens before tool-start, so the
+    // reconstructed text block must precede the tool block too.
+    const messages: ColtsMessageInput[] = [
+      { role: 'user', content: 'hi', timestamp: 1000 },
+      {
+        role: 'assistant',
+        content: 'let me look',
+        type: 'action',
+        toolCalls: [{ id: 'c1', name: 'file_read', arguments: { path: 'a' } }],
+        timestamp: 2000,
+      },
+      { role: 'tool', content: 'data', toolCallId: 'c1', toolName: 'file_read', timestamp: 3000 },
+    ];
+    const state = fromHistory(messages);
+    const assistant = selectMainMessages(state)[1];
+    expect(assistant.blocks?.map((b) => b.type)).toEqual(['text', 'tool_call']);
+    expect(assistant.blocks![0].content).toBe('let me look');
   });
 });

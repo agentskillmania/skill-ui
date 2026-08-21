@@ -1,11 +1,19 @@
 /**
  * @fileoverview fromHistory — reconstruct SessionRunState from colts Message[]
  *
- * Colts persists flat messages (role/content/toolCalls/toolName).
- * This module rebuilds structured AgentMessage[] with blocks by:
+ * Colts persists flat messages (role/content/toolCalls/toolName) in strict
+ * chronological order: per LLM call the thought row comes first, then the
+ * action/text row (prose + toolCalls of the same completion), then the
+ * tool result rows. This module rebuilds structured AgentMessage[] by
+ * APPENDING blocks in that exact order:
  * - type:'thought' → thinking block
+ * - row content → text block (before the row's tool blocks — live SSE also
+ *   delivers the tokens of a completion before its tool-start events, so
+ *   both paths agree)
  * - toolCalls + role:'tool' result → tool_call / skill / human_input / subagent block
- * - assistant without toolCalls → plain content
+ *
+ * The result is block-for-block identical to what the live reducer produces
+ * for the same conversation — resume must never reshuffle the layout.
  *
  * Limitations: sub-agent internal conversations, a2ui, and streaming
  * animations are runtime-only and cannot be reconstructed.
@@ -73,10 +81,10 @@ export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
           status: 'completed',
           content: msg.content,
         };
-        // Attach to the current turn's bubble (thinking blocks come first),
-        // or create a wrapper message for it.
+        // Append in storage order — the thought row sits exactly where the
+        // reasoning happened (usually right before its action row).
         if (current) {
-          current.blocks = [thinkingBlock, ...(current.blocks ?? [])];
+          current.blocks = [...(current.blocks ?? []), thinkingBlock];
         } else {
           current = {
             id: `hist-msg-${agentMessages.length}`,
@@ -91,8 +99,18 @@ export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
         continue;
       }
 
-      // Assistant with tool calls
+      // Assistant row (action or text). Prose comes FIRST: the row's
+      // content and its tool calls belong to the same completion, and the
+      // live path streams the tokens before the tool-start events.
       const blocks: AgentBlock[] = [];
+      if (msg.content) {
+        blocks.push({
+          id: genHistBlockId(),
+          type: 'text',
+          status: 'completed',
+          content: msg.content,
+        });
+      }
       if (msg.toolCalls && msg.toolCalls.length > 0) {
         for (const tc of msg.toolCalls) {
           const result = toolResults.get(tc.id);
