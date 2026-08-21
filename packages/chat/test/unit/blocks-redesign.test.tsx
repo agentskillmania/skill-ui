@@ -134,6 +134,37 @@ describe('ShellBlock', () => {
     renderBlock({ id: 'b5', type: 'shell', status: 'completed', content: '' });
     expect(screen.getByText('终端')).toBeInTheDocument();
   });
+
+  it('routes tool_call(shell) through the terminal block (adapter)', () => {
+    // state reducer 只产通用 tool_call;渲染层按 toolName=shell 适配到
+    // 专用终端块——命令取 args.command,输出取 toolResult,exitCode 解析。
+    renderBlock({
+      id: 'b6',
+      type: 'tool_call',
+      status: 'completed',
+      content: '',
+      metadata: {
+        toolName: 'shell',
+        toolArgs: JSON.stringify({ command: 'pwd' }),
+        toolResult: 'Exit code: 1\nSTDERR:\nnope',
+      },
+    });
+    expect(screen.getByText('pwd')).toBeInTheDocument();
+    // 非零退出码:块保持展开,输出直接可见
+    expect(screen.getByText(/Exit code: 1/)).toBeInTheDocument();
+    expect(screen.getByText(/nope/)).toBeInTheDocument();
+  });
+
+  it('keeps generic tool_call rendering for other tools', () => {
+    renderBlock({
+      id: 'b7',
+      type: 'tool_call',
+      status: 'completed',
+      content: '',
+      metadata: { toolName: 'file_read', toolArgs: '{"path":"a.md"}' },
+    });
+    expect(screen.queryByText('终端')).not.toBeInTheDocument();
+  });
 });
 
 // ── SubAgentBlock ───────────────────────────────────────────────────────────
