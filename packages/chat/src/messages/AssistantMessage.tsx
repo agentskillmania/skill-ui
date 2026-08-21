@@ -20,6 +20,12 @@ export const AssistantMessage = memo(function AssistantMessage({
 
   const hasBlocks = message.blocks && message.blocks.length > 0;
   const hasContent = Boolean(message.content);
+  // Text blocks ARE the prose, rendered in chronological position. The
+  // message-level `content` only renders as a legacy fallback for messages
+  // built without text blocks (hand-built, or older producers) — rendering
+  // both would duplicate the prose.
+  const hasInlineText = Boolean(message.blocks?.some((b) => b.type === 'text'));
+  const showContentFallback = hasContent && !hasInlineText;
   // Empty streaming bubble — show typing dots before the first token arrives
   const showTyping = message.status === 'streaming' && !hasBlocks && !hasContent;
 
@@ -34,9 +40,13 @@ export const AssistantMessage = memo(function AssistantMessage({
     >
       {hasBlocks && (
         <div
-          css={css`
-            margin-bottom: ${theme.spacing[3]};
-          `}
+          css={
+            showContentFallback
+              ? css`
+                  margin-bottom: ${theme.spacing[3]};
+                `
+              : undefined
+          }
         >
           <BlocksRenderer
             blocks={message.blocks!}
@@ -46,7 +56,7 @@ export const AssistantMessage = memo(function AssistantMessage({
           />
         </div>
       )}
-      {hasContent && (
+      {showContentFallback && (
         <MarkdownRenderer streaming={message.status === 'streaming'}>
           {message.content}
         </MarkdownRenderer>

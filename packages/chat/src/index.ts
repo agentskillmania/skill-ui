@@ -12,6 +12,7 @@ export { UserMessage } from './messages/UserMessage.js';
 export { AssistantMessage } from './messages/AssistantMessage.js';
 export { SystemMessage } from './messages/SystemMessage.js';
 export { BlocksRenderer } from './blocks-redesign/BlocksRenderer.js';
+export { TextBlock } from './blocks-redesign/TextBlock.js';
 export { ThinkingBlock } from './blocks-redesign/ThinkingBlock.js';
 export { ToolCallBlock } from './blocks-redesign/ToolCallBlock.js';
 export { PlanBlock } from './blocks-redesign/PlanBlock.js';

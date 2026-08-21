@@ -4,6 +4,7 @@ import { lightTheme, ThemeProvider } from '@agentskillmania/skill-ui-theme';
 import type { Theme } from '@agentskillmania/skill-ui-theme';
 import { ChatWrapper, expandAllCollapsed } from './testUtils.js';
 import { BlocksRenderer } from '../../src/blocks-redesign/BlocksRenderer.js';
+import { TextBlock } from '../../src/blocks-redesign/TextBlock.js';
 import { ThinkingBlock } from '../../src/blocks-redesign/ThinkingBlock.js';
 import { ToolCallBlock } from '../../src/blocks-redesign/ToolCallBlock.js';
 import { PlanBlock } from '../../src/blocks-redesign/PlanBlock.js';
@@ -834,5 +835,141 @@ describe('BlocksRenderer', () => {
     );
     // should only have container div, no block content
     expect(container.textContent).toBe('');
+  });
+
+  it('renders text blocks inline in array order (interleaved with other blocks)', () => {
+    // The chronological invariant: a text segment between two blocks renders
+    // BETWEEN them, not after all blocks.
+    const blocks: Block[] = [
+      { id: 't1', type: 'text', status: 'completed', content: '第一段文字' },
+      toolBlock,
+      { id: 't2', type: 'text', status: 'completed', content: '第二段文字' },
+    ];
+    const { container } = render(
+      <ChatWrapper>
+        <BlocksRenderer blocks={blocks} />
+      </ChatWrapper>
+    );
+    expandAllCollapsed();
+    const text = container.textContent ?? '';
+    expect(text).toContain('第一段文字');
+    expect(text).toContain('第二段文字');
+    const i1 = text.indexOf('第一段文字');
+    const iTool = text.indexOf('search');
+    const i2 = text.indexOf('第二段文字');
+    expect(i1).toBeGreaterThanOrEqual(0);
+    expect(iTool).toBeGreaterThan(i1);
+    expect(i2).toBeGreaterThan(iTool);
+  });
+
+  it('adapts shell tool_calls to ShellBlock (command from args, exit code from output)', () => {
+    const shellCall: Block = {
+      id: 'sh1',
+      type: 'tool_call',
+      status: 'completed',
+      content: '',
+      metadata: {
+        toolName: 'shell',
+        toolArgs: '{"command":"ls -la"}',
+        toolResult: 'Exit code: 3\nboom',
+      },
+    };
+    const { container } = render(
+      <ChatWrapper>
+        <BlocksRenderer blocks={[shellCall]} />
+      </ChatWrapper>
+    );
+    expandAllCollapsed();
+    const text = container.textContent ?? '';
+    expect(text).toContain('ls -la');
+    expect(text).toContain('exit 3');
+  });
+
+  it('falls back to raw toolArgs as the command when args are not JSON', () => {
+    const shellCall: Block = {
+      id: 'sh2',
+      type: 'tool_call',
+      status: 'completed',
+      content: '',
+      metadata: { toolName: 'shell', toolArgs: '{not-json', toolResult: 'ok' },
+    };
+    const { container } = render(
+      <ChatWrapper>
+        <BlocksRenderer blocks={[shellCall]} />
+      </ChatWrapper>
+    );
+    expandAllCollapsed();
+    expect(container.textContent).toContain('{not-json');
+  });
+
+  it('lets a custom renderer override the shell adaptation', () => {
+    const shellCall: Block = {
+      id: 'sh3',
+      type: 'tool_call',
+      status: 'completed',
+      content: '',
+      metadata: { toolName: 'shell', toolArgs: '{"command":"pwd"}', toolResult: '/' },
+    };
+    const CustomShell = ({ block }: { block: Block }) => (
+      <div>custom shell: {(block.metadata as { command?: string }).command}</div>
+    );
+    render(
+      <ChatWrapper>
+        <BlocksRenderer blocks={[shellCall]} renderers={{ blocks: { shell: CustomShell } }} />
+      </ChatWrapper>
+    );
+    expect(screen.getByText('custom shell: pwd')).toBeInTheDocument();
+  });
+
+  it('shell adaptation: metadata.command wins, output falls back to block content', () => {
+    // command provided directly (no toolArgs parse) + no toolResult →
+    // ShellBlock output comes from block.content; running status keeps the
+    // exit code unset (no "exit N" badge).
+    const running: Block = {
+      id: 'sh4',
+      type: 'tool_call',
+      status: 'streaming',
+      content: 'partial output',
+      metadata: { toolName: 'shell', command: 'npm test' },
+    };
+    const { container } = render(
+      <ChatWrapper>
+        <BlocksRenderer blocks={[running]} />
+      </ChatWrapper>
+    );
+    expandAllCollapsed();
+    const text = container.textContent ?? '';
+    expect(text).toContain('npm test');
+    expect(text).toContain('partial output');
+    expect(text).not.toContain('exit 0');
+  });
+});
+
+describe('TextBlock', () => {
+  it('renders block content as markdown', () => {
+    render(
+      <ChatWrapper>
+        <TextBlock block={{ id: 't1', type: 'text', status: 'completed', content: '**加粗**' }} />
+      </ChatWrapper>
+    );
+    expect(screen.getByText('加粗')).toBeInTheDocument();
+  });
+
+  it('renders nothing for empty content', () => {
+    const { container } = render(
+      <ChatWrapper>
+        <TextBlock block={{ id: 't1', type: 'text', status: 'completed', content: '' }} />
+      </ChatWrapper>
+    );
+    expect(container.textContent).toBe('');
+  });
+
+  it('renders normally while streaming (streaming flag forwarded to markdown)', () => {
+    const { container } = render(
+      <ChatWrapper>
+        <TextBlock block={{ id: 't1', type: 'text', status: 'streaming', content: '进行中' }} />
+      </ChatWrapper>
+    );
+    expect(container.textContent).toContain('进行中');
   });
 });

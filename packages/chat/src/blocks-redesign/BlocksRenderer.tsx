@@ -13,6 +13,7 @@ import { PlanBlock } from './PlanBlock.js';
 import { ShellBlock } from './ShellBlock.js';
 import { SkillBlock } from './SkillBlock.js';
 import { SubAgentBlock } from './SubAgentBlock.js';
+import { TextBlock } from './TextBlock.js';
 import { ThinkingBlock } from './ThinkingBlock.js';
 import { TodoBlock } from './TodoBlock.js';
 import { ToolCallBlock } from './ToolCallBlock.js';
@@ -34,6 +35,7 @@ export interface BlocksRendererProps {
 
 /** Built-in block renderers (redesigned) */
 const builtinBlockRenderers: Record<string, React.ComponentType<BlockProps>> = {
+  text: TextBlock,
   thinking: ThinkingBlock,
   tool_call: ToolCallBlock,
   plan: PlanBlock,

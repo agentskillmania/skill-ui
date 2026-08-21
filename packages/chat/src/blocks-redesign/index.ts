@@ -1,4 +1,5 @@
 export { BlocksRenderer } from './BlocksRenderer.js';
+export { TextBlock } from './TextBlock.js';
 export { ThinkingBlock } from './ThinkingBlock.js';
 export { ToolCallBlock } from './ToolCallBlock.js';
 export { HumanInputBlock } from './HumanInputBlock.js';

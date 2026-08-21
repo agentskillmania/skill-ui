@@ -184,6 +184,46 @@ describe('AssistantMessage', () => {
     expect(screen.getByText('思考中...')).toBeInTheDocument();
     expect(screen.getByText('Hi there')).toBeInTheDocument();
   });
+
+  it('renders text blocks inline in chronological position, without duplicating content', () => {
+    // Text-as-block: prose segments live in the blocks array; the derived
+    // `content` (their concatenation) must NOT render again at the bottom.
+    const msg: Message = {
+      id: 'tb1',
+      role: 'assistant',
+      content: '我先查一下结论如下',
+      status: 'completed',
+      blocks: [
+        { id: 'k1', type: 'thinking', status: 'completed', content: '思考A' },
+        { id: 'k2', type: 'text', status: 'completed', content: '我先查一下' },
+        {
+          id: 'k3',
+          type: 'tool_call',
+          status: 'completed',
+          content: '',
+          metadata: { toolName: 'search', toolArgs: '{}', toolResult: 'ok' },
+        },
+        { id: 'k4', type: 'thinking', status: 'completed', content: '思考B' },
+        { id: 'k5', type: 'text', status: 'completed', content: '结论如下' },
+      ],
+    };
+    const { container } = render(
+      <ChatWrapper>
+        <AssistantMessage message={msg} />
+      </ChatWrapper>
+    );
+    expandAllCollapsed();
+    const text = container.textContent ?? '';
+    // Each prose segment exactly once (no content fallback duplication)
+    expect(text.match(/我先查一下/g)).toHaveLength(1);
+    expect(text.match(/结论如下/g)).toHaveLength(1);
+    // Chronological order: 思考A < 我先查一下 < search < 思考B < 结论如下
+    const order = ['思考A', '我先查一下', 'search', '思考B', '结论如下'].map((s) =>
+      text.indexOf(s)
+    );
+    expect(order.every((i) => i >= 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+  });
 });
 
 describe('SystemMessage', () => {
