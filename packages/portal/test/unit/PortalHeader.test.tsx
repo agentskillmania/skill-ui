@@ -147,42 +147,33 @@ describe('PortalHeader', () => {
     expect(onQueryChange).toHaveBeenCalledWith('new term');
   });
 
-  it('opens dropdown and triggers onSelect when option clicked', async () => {
-    const onSelect = vi.fn();
-    const onEdit = vi.fn();
+  it('forwards typed query via onQueryChange', () => {
+    // jsdom 中 antd AutoComplete 的下拉不开,无法驱动 onSelect/onEdit 的
+    // 选项点击(此前两个同名测试的 mock 从未被触发——虚假覆盖,已删)。
+    // 可真实驱动的是受控输入:onQueryChange 必须带上输入值。
+    const onQueryChange = vi.fn();
     render(
       <PortalHeader
         {...defaultProps}
         query=""
         results={mockResults}
-        onSelect={onSelect}
-        onEdit={onEdit}
+        onQueryChange={onQueryChange}
       />,
       { wrapper }
     );
-
-    // Try to open the AutoComplete dropdown by focusing the input
     const input = screen.getByPlaceholderText('搜索技能、智能体或会话记录…');
-    fireEvent.focus(input);
-
-    // In jsdom, antd's AutoComplete may not render the dropdown,
-    // so we just verify the component renders without crashing
-    expect(input).toBeInTheDocument();
-    expect(document.querySelector('.ant-select')).toBeTruthy();
+    fireEvent.change(input, { target: { value: '搜索词' } });
+    expect(onQueryChange).toHaveBeenCalledWith('搜索词');
   });
 
-  it('triggers onEdit from search result items', () => {
-    const onEdit = vi.fn();
+  it('submits query via Enter key', () => {
+    const onSearch = vi.fn();
     render(
-      <PortalHeader
-        {...defaultProps}
-        query="test"
-        results={mockResults}
-        onEdit={onEdit}
-        onSelect={vi.fn()}
-      />,
+      <PortalHeader {...defaultProps} query="关键词" results={mockResults} onSearch={onSearch} />,
       { wrapper }
     );
-    expect(screen.getByPlaceholderText('搜索技能、智能体或会话记录…')).toBeInTheDocument();
+    const input = screen.getByPlaceholderText('搜索技能、智能体或会话记录…');
+    fireEvent.keyDown(input, { key: 'Enter' });
+    expect(onSearch).toHaveBeenCalledWith('关键词');
   });
 });
