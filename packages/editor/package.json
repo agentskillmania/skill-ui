@@ -1,6 +1,6 @@
 {
   "name": "@agentskillmania/skill-ui-editor",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Skill editor UI components for @agentskillmania — file tree, code editor, visual editor, toolbars.",
   "type": "module",
   "main": "dist/index.js",
