@@ -86,9 +86,7 @@ describe('AgentSection', () => {
       { wrapper }
     );
     // Click the <a> element inside the pagination item (native click needed for antd)
-    const pageLink = document.querySelector('.ant-pagination-item-2 a') as HTMLElement;
-    expect(pageLink).toBeTruthy();
-    pageLink.click();
+    fireEvent.click(screen.getByTitle('2'));
     expect(onPageChange).toHaveBeenCalledWith(2, 12);
   });
 
@@ -117,9 +115,7 @@ describe('AgentSection', () => {
     });
 
     // Use native click to trigger Popconfirm
-    const deleteBtn = document.querySelector('.ant-btn-dangerous') as HTMLElement;
-    expect(deleteBtn).toBeTruthy();
-    deleteBtn.click();
+    fireEvent.click(screen.getAllByRole('button', { name: '删除' })[0]);
 
     // Confirm the popconfirm with fuzzy text match
     const confirmBtn = await screen.findByText((content) => content.replace(/\s+/g, '') === '删除');
@@ -146,8 +142,10 @@ describe('AgentSection', () => {
     fireEvent.change(input, { target: { value: 'My New Agent' } });
 
     // Click the primary button in modal footer to submit
+    // antd v6 Modal footer 按钮在 jsdom 中无可访问名,退回语义类定位
+    // (ant-btn-primary 在 modal footer 语境=确认钮,单按钮无歧义)
     const createBtn = document.querySelector('.ant-modal-wrap .ant-btn-primary') as HTMLElement;
-    expect(createBtn).toBeTruthy();
+    expect(createBtn).not.toBeNull();
     createBtn.click();
 
     // Wait for async form validation
@@ -163,13 +161,8 @@ describe('AgentSection', () => {
     fireEvent.click(screen.getByText('新建智能体'));
     await screen.findByPlaceholderText('请输入名称');
 
-    // Click cancel button inside modal footer
-    const cancelBtn = document.querySelector(
-      '.ant-modal-wrap .ant-btn:not(.ant-btn-primary)'
-    ) as HTMLElement;
-    if (cancelBtn) {
-      cancelBtn.click();
-    }
+    // Click cancel button inside modal footer(此前 if 守卫可静默通过)
+    fireEvent.click(screen.getByRole('button', { name: '取 消' }));
 
     await new Promise((r) => setTimeout(r, 50));
     expect(onCreate).not.toHaveBeenCalled();

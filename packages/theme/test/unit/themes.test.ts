@@ -37,7 +37,9 @@ describe('themeRegistry', () => {
         expect(Object.keys(variant.agentStatusColor).sort()).toEqual([...AGENT_KEYS].sort());
         expect(Object.keys(variant.skillStatusColor).sort()).toEqual([...SKILL_KEYS].sort());
         for (const value of Object.values(variant.color)) {
-          expect(value).toBeTruthy();
+          // 每个颜色 token 必须是合法的 hex 或 rgba() 字符串——
+          // toBeTruthy 会被任意垃圾值骗过
+          expect(String(value)).toMatch(/^(#[0-9a-fA-F]{3,8}|rgba?\(.+\))$/);
         }
       }
     }
@@ -60,8 +62,8 @@ describe('themeMetas', () => {
   it('lists all themes with picker-ready metadata', () => {
     expect(themeMetas.map((m) => m.id)).toEqual(['slate', 'paper', 'ink']);
     for (const meta of themeMetas) {
-      expect(meta.name).toBeTruthy();
-      expect(meta.nameZh).toBeTruthy();
+      expect(meta.name).toMatch(/^\S.+\S$/);
+      expect(meta.nameZh).toMatch(/^\S(.*\S)?$/);
       expect(meta.swatch.primary).toMatch(/^#/);
       expect(meta.swatch.bgBase).toMatch(/^#/);
     }

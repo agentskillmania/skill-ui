@@ -80,9 +80,7 @@ describe('SkillSection', () => {
       { wrapper }
     );
     // Click the <a> element inside the pagination item (native click needed for antd)
-    const pageLink = document.querySelector('.ant-pagination-item-2 a') as HTMLElement;
-    expect(pageLink).toBeTruthy();
-    pageLink.click();
+    fireEvent.click(screen.getByTitle('2'));
     expect(onPageChange).toHaveBeenCalledWith(2, 12);
   });
 

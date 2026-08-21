@@ -233,9 +233,9 @@ describe('ProjectEditor', () => {
     );
     // Find the collapse toggle button (ChevronLeft icon when expanded)
     const collapseIcon = container.querySelector('svg.lucide-chevron-left');
-    expect(collapseIcon).toBeTruthy();
+    expect(collapseIcon).toBeInTheDocument();
     const collapseBtn = collapseIcon?.closest('button');
-    expect(collapseBtn).toBeTruthy();
+    expect(collapseBtn).toBeInTheDocument();
     fireEvent.click(collapseBtn!);
     // onEditorPanelChange should be called (callback fires on toggle)
     expect(onEditorPanelChange).toHaveBeenCalled();
@@ -248,9 +248,9 @@ describe('ProjectEditor', () => {
     );
     // Find the Copilot panel button (Bot icon)
     const botIcon = container.querySelector('svg.lucide-bot');
-    expect(botIcon).toBeTruthy();
+    expect(botIcon).toBeInTheDocument();
     const panelBtn = botIcon?.closest('button');
-    expect(panelBtn).toBeTruthy();
+    expect(panelBtn).toBeInTheDocument();
     fireEvent.click(panelBtn!);
     // Should call onEditorPanelChange with 'copilot'
     expect(onEditorPanelChange).toHaveBeenCalledWith('copilot');

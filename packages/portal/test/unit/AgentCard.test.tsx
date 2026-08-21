@@ -56,9 +56,7 @@ describe('AgentCard', () => {
     });
 
     // Use native click to trigger Popconfirm (fireEvent.click doesn't work for antd Popconfirm)
-    const deleteBtn = document.querySelector('.ant-btn-dangerous') as HTMLElement;
-    expect(deleteBtn).toBeTruthy();
-    deleteBtn.click();
+    fireEvent.click(screen.getByRole('button', { name: '删除' }));
 
     // Confirm the popconfirm with fuzzy text match (antd may render with character spacing)
     const confirmBtn = await screen.findByText((content) => content.replace(/\s+/g, '') === '删除');

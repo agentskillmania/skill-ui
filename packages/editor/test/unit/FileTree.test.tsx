@@ -22,16 +22,16 @@ const sampleFiles: ProjectFile[] = [
 describe('FileTree', () => {
   it('renders all root-level files', () => {
     renderWithProviders(<FileTree files={sampleFiles} activeFilePath={null} onSelect={vi.fn()} />);
-    expect(screen.getByText('SKILL.md')).toBeTruthy();
-    expect(screen.getByText('src')).toBeTruthy();
-    expect(screen.getByText('package.json')).toBeTruthy();
+    expect(screen.getByText('SKILL.md')).toBeInTheDocument();
+    expect(screen.getByText('src')).toBeInTheDocument();
+    expect(screen.getByText('package.json')).toBeInTheDocument();
   });
 
   it('expanding directory shows child files', () => {
     renderWithProviders(<FileTree files={sampleFiles} activeFilePath={null} onSelect={vi.fn()} />);
     // Directory expanded by default, child files should be visible
-    expect(screen.getByText('index.ts')).toBeTruthy();
-    expect(screen.getByText('util.ts')).toBeTruthy();
+    expect(screen.getByText('index.ts')).toBeInTheDocument();
+    expect(screen.getByText('util.ts')).toBeInTheDocument();
   });
 
   it('clicking file triggers selection', () => {
@@ -48,28 +48,27 @@ describe('FileTree', () => {
     expect(screen.queryByText('index.ts')).toBeNull();
     // Click again to expand
     fireEvent.click(screen.getByText('src'));
-    expect(screen.getByText('index.ts')).toBeTruthy();
+    expect(screen.getByText('index.ts')).toBeInTheDocument();
   });
 
   it('shows empty state when file list is empty', () => {
     renderWithProviders(<FileTree files={[]} activeFilePath={null} onSelect={vi.fn()} />);
-    expect(screen.getByText('暂无文件')).toBeTruthy();
+    expect(screen.getByText('暂无文件')).toBeInTheDocument();
   });
 
-  it('highlights currently selected file', () => {
+  it('highlights currently selected file and only that one', () => {
     renderWithProviders(
       <FileTree files={sampleFiles} activeFilePath="SKILL.md" onSelect={vi.fn()} />
     );
-    const fileEl = screen.getByText('SKILL.md').closest('[class]');
-    expect(fileEl).toBeTruthy();
-    // Verify highlight style (background should not be transparent)
-    const styles = window.getComputedStyle(fileEl!);
-    expect(styles.backgroundColor).not.toBe('');
+    // data-active 是激活行的显式标记(此前版本查 computed style,
+    // jsdom 不应用 emotion 样式,断言近乎恒真)
+    expect(screen.getByText('SKILL.md').closest('[data-active="true"]')).not.toBeNull();
+    expect(screen.getByText('package.json').closest('[data-active="true"]')).toBeNull();
   });
 
   it('uses default icon for files without extension', () => {
     const files: ProjectFile[] = [{ path: 'Makefile', content: 'all:' }];
     renderWithProviders(<FileTree files={files} activeFilePath={null} onSelect={vi.fn()} />);
-    expect(screen.getByText('Makefile')).toBeTruthy();
+    expect(screen.getByText('Makefile')).toBeInTheDocument();
   });
 });

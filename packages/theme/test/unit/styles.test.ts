@@ -71,6 +71,8 @@ describe('visual effects', () => {
   it('glassEffect returns valid styles', () => {
     const s = glassEffect(lightTheme);
     expect(s.styles).toContain('backdrop-filter');
+    // 模糊值来自主题 token,而非任意 backdrop-filter 字符串
+    expect(s.styles).toContain(lightTheme.blur.lg);
   });
 
   it('glassEffect does not crash in dark mode', () => {
@@ -82,12 +84,13 @@ describe('visual effects', () => {
   it('glassEffect supports strong strength', () => {
     const s = glassEffect(lightTheme, 'strong');
     expect(s.styles).toContain('backdrop-filter');
+    expect(s.styles).toContain(lightTheme.blur.lg);
   });
 
   it('card returns valid styles', () => {
     const s = card(lightTheme);
-    expect(s.styles).toContain('border-radius');
-    expect(s.styles).toContain('box-shadow');
+    expect(s.styles).toContain(`border-radius: ${lightTheme.radius.lg}`);
+    expect(s.styles).toContain(lightTheme.shadow.md);
   });
 
   it('card supports custom options', () => {
@@ -135,13 +138,18 @@ describe('interaction states', () => {
   it('focusVisible returns valid styles', () => {
     const s = focusVisible(lightTheme);
     expect(s.styles).toContain('focus-visible');
+    // 轮廓绑定主题主色,而非任意 focus 样式
+    expect(s.styles).toContain(`outline: 2px solid ${lightTheme.color.primary}`);
+    expect(s.styles).toContain('outline-offset: 2px');
   });
 });
 
 describe('animations', () => {
   it('transition returns valid styles', () => {
     const s = transition(lightTheme);
-    expect(s.styles).toContain('transition');
+    // 默认参数落到真实值:常规时长(150ms) + 默认缓动 out
+    expect(s.styles).toContain(lightTheme.motion.duration.normal);
+    expect(s.styles).toContain(lightTheme.motion.easing.out);
   });
 
   it('transition supports custom duration and timing strings', () => {
@@ -163,7 +171,8 @@ describe('animations', () => {
 
   it('scaleActive returns valid styles', () => {
     const s = scaleActive(lightTheme);
-    expect(s.styles).toContain('scale');
+    expect(s.styles).toContain('transform: scale(0.95)');
+    expect(s.styles).toContain('200ms');
   });
 });
 
@@ -240,8 +249,8 @@ describe('containers', () => {
 
 describe('media queries', () => {
   it('media contains compact and standard', () => {
-    expect(media.compact).toContain('max-width');
-    expect(media.standard).toContain('min-width');
+    expect(media.compact).toBe('@media (max-width: 768px)');
+    expect(media.standard).toBe('@media (min-width: 768px)');
   });
 
   it('container contains compact and standard', () => {

@@ -45,7 +45,6 @@ vi.mock('@milkdown/utils', () => ({
 const mockAddCommand = vi.fn();
 
 // Mock Monaco Editor to avoid full rendering
-const mockOnMount = vi.fn();
 vi.mock('@monaco-editor/react', () => ({
   __esModule: true,
   default: ({ value, defaultValue, onChange, onMount }: any) => {
@@ -57,7 +56,6 @@ vi.mock('@monaco-editor/react', () => ({
           addCommand: mockAddCommand,
         };
         onMount(mockEditor, { monaco: true });
-        mockOnMount(mockEditor);
       }
     }, [onMount]);
     return (
@@ -79,12 +77,7 @@ describe('EditorArea', () => {
 
   it('renders Monaco in code mode', () => {
     renderWithProviders(<EditorArea {...defaultProps} />);
-    expect(screen.getByTestId('monaco-editor')).toBeTruthy();
-  });
-
-  it('renders Monaco in code mode', () => {
-    renderWithProviders(<EditorArea {...defaultProps} />);
-    expect(screen.getByTestId('monaco-editor')).toBeTruthy();
+    expect(screen.getByTestId('monaco-editor')).toBeInTheDocument();
   });
 
   it('renders VisualEditor (Crepe container) in wysiwyg mode', () => {
@@ -92,7 +85,7 @@ describe('EditorArea', () => {
       <EditorArea {...defaultProps} mode="wysiwyg" content="# 标题\n\n段落" />
     );
     expect(screen.queryByTestId('monaco-editor')).toBeNull();
-    expect(container.querySelector('[data-crepe-root]')).toBeTruthy();
+    expect(container.querySelector('[data-crepe-root]')).toBeInTheDocument();
   });
 
   it('passes content to child editor', () => {
@@ -100,10 +93,11 @@ describe('EditorArea', () => {
     expect(screen.getByTestId('monaco-value').textContent).toBe('console.log("hello")');
   });
 
-  it('Monaco onMount callback is triggered correctly', () => {
+  it('CodeEditor handleMount wires the save shortcut onto the editor instance', () => {
     renderWithProviders(<EditorArea {...defaultProps} />);
-    // Wait for onMount to be called
-    expect(mockOnMount).toHaveBeenCalledWith(expect.any(Object));
+    // 真实集成点:handleMount 把保存快捷键注册到编辑器实例(此前版本断言
+    // 的是 mock 自己记录自己的调用,与被测组件零关系)
+    expect(mockAddCommand).toHaveBeenCalledWith(expect.any(Number), expect.any(Function));
   });
 
   it('Monaco onChange handles undefined values', () => {

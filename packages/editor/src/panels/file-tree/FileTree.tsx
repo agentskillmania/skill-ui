@@ -46,6 +46,7 @@ function TreeNode({
     <div>
       <div
         onClick={handleClick}
+        data-active={isActive ? 'true' : undefined}
         css={css`
           display: flex;
           align-items: center;

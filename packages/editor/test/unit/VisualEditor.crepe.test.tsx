@@ -73,7 +73,7 @@ describe('VisualEditor (Crepe implementation)', () => {
 
     const { Crepe } = vi.mocked(await import('@milkdown/crepe'));
     const call = Crepe.mock.calls[0] as [Record<string, unknown>];
-    expect(call[0].root).toBeTruthy();
+    expect(call[0].root).toBeInTheDocument();
     expect(call[0].defaultValue).toBe('# 初始标题\n\n初始段落');
   });
 
@@ -94,7 +94,7 @@ describe('VisualEditor (Crepe implementation)', () => {
 
     await waitFor(() => expect(mockCrepeInstance.create).toHaveBeenCalled());
 
-    expect(container.querySelector('[data-crepe-root]')).toBeTruthy();
+    expect(container.querySelector('[data-crepe-root]')).toBeInTheDocument();
   });
 
   it('user editing triggers onChange callback', async () => {
@@ -105,8 +105,8 @@ describe('VisualEditor (Crepe implementation)', () => {
 
     await waitFor(() => expect(mockCrepeInstance.on).toHaveBeenCalled());
 
-    // Simulate user editing
-    expect(markdownUpdatedCallback).toBeTruthy();
+    // Simulate user editing(捕获到的必须是函数:VisualEditor 已订阅更新事件)
+    expect(markdownUpdatedCallback).toBeInstanceOf(Function);
     markdownUpdatedCallback!({}, '# 新内容', '# 初始标题\n\n初始段落');
 
     expect(defaultProps.onChange).toHaveBeenCalledWith('# 新内容');

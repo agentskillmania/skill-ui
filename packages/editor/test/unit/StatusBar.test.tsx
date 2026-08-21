@@ -14,7 +14,7 @@ describe('StatusBar', () => {
         onEditModeChange={vi.fn()}
       />
     );
-    expect(screen.getByText('src/index.ts')).toBeTruthy();
+    expect(screen.getByText('src/index.ts')).toBeInTheDocument();
   });
 
   it('does not display when no file path', () => {
@@ -34,7 +34,7 @@ describe('StatusBar', () => {
         onEditModeChange={vi.fn()}
       />
     );
-    expect(screen.getByText('未保存')).toBeTruthy();
+    expect(screen.getByText('未保存')).toBeInTheDocument();
   });
 
   it('displays cursor position', () => {
@@ -46,8 +46,8 @@ describe('StatusBar', () => {
         onEditModeChange={vi.fn()}
       />
     );
-    expect(screen.getByText(/行 5/)).toBeTruthy();
-    expect(screen.getByText(/列 12/)).toBeTruthy();
+    expect(screen.getByText(/行 5/)).toBeInTheDocument();
+    expect(screen.getByText(/列 12/)).toBeInTheDocument();
   });
 
   it('shows "预览" button for markdown files in code mode', () => {
@@ -59,7 +59,7 @@ describe('StatusBar', () => {
         onEditModeChange={vi.fn()}
       />
     );
-    expect(screen.getByText('预览')).toBeTruthy();
+    expect(screen.getByText('预览')).toBeInTheDocument();
   });
 
   it('does not show "预览" button for non-markdown files', () => {
@@ -83,7 +83,7 @@ describe('StatusBar', () => {
         onEditModeChange={vi.fn()}
       />
     );
-    expect(screen.getByText('代码')).toBeTruthy();
+    expect(screen.getByText('代码')).toBeInTheDocument();
   });
 
   it('does not show mode button for non-markdown files in wysiwyg mode', () => {

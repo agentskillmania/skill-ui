@@ -65,7 +65,13 @@ export const SkillCard = memo(
             cancelText={t('cancel')}
             okButtonProps={{ danger: true }}
           >
-            <Button type="text" danger icon={<Trash2 size={14} />} size="small" />
+            <Button
+              type="text"
+              danger
+              aria-label={t('delete')}
+              icon={<Trash2 size={14} />}
+              size="small"
+            />
           </Popconfirm>
         </div>
 

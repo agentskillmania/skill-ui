@@ -140,12 +140,8 @@ describe('SessionSection', () => {
       { wrapper }
     );
 
-    // Find the resume button (first button in the Space)
-    const space = document.querySelector('.ant-space');
-    const buttons = space?.querySelectorAll('button');
-    expect(buttons).toBeTruthy();
-    expect(buttons!.length).toBeGreaterThanOrEqual(1);
-    fireEvent.click(buttons![0]);
+    // 语义定位:aria-label(按钮索引会随组件增删按钮而错位)
+    fireEvent.click(screen.getByRole('button', { name: '继续对话' }));
     expect(onResume).toHaveBeenCalledWith('sess-1');
   });
 
@@ -156,10 +152,8 @@ describe('SessionSection', () => {
       { wrapper }
     );
 
-    // Use native click to trigger Popconfirm
-    const deleteBtn = document.querySelector('.ant-btn-dangerous') as HTMLElement;
-    expect(deleteBtn).toBeTruthy();
-    deleteBtn.click();
+    // 语义定位删除按钮(此前依赖 .ant-btn-dangerous 内部类名)
+    fireEvent.click(screen.getByRole('button', { name: '删除' }));
 
     // Confirm the popconfirm with fuzzy text match
     const confirmBtn = await screen.findByText((content) => content.replace(/\s+/g, '') === '删除');
@@ -175,12 +169,7 @@ describe('SessionSection', () => {
       { wrapper }
     );
 
-    // Find the fork button (second button in the Space)
-    const space = document.querySelector('.ant-space');
-    const buttons = space?.querySelectorAll('button');
-    expect(buttons).toBeTruthy();
-    expect(buttons!.length).toBeGreaterThanOrEqual(2);
-    fireEvent.click(buttons![1]);
+    fireEvent.click(screen.getByRole('button', { name: '复制会话' }));
     expect(onFork).toHaveBeenCalledWith('sess-1');
   });
 

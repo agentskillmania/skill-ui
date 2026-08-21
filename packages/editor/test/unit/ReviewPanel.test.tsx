@@ -46,28 +46,28 @@ describe('ReviewPanel', () => {
 
   it('shows empty state when items is undefined', () => {
     renderWithProviders(<ReviewPanel />);
-    expect(screen.getByText('审核项将在此显示')).toBeTruthy();
+    expect(screen.getByText('审核项将在此显示')).toBeInTheDocument();
   });
 
   it('shows empty state when items is empty array', () => {
     renderWithProviders(<ReviewPanel items={[]} />);
-    expect(screen.getByText('审核项将在此显示')).toBeTruthy();
+    expect(screen.getByText('审核项将在此显示')).toBeInTheDocument();
   });
 
   // ─── Rendering ───
 
   it('displays all review item messages', () => {
     renderWithProviders(<ReviewPanel items={sampleItems} />);
-    expect(screen.getByText('Invalid JSON: trailing comma')).toBeTruthy();
-    expect(screen.getByText('Missing optional description field')).toBeTruthy();
-    expect(screen.getByText('Instructions are clear')).toBeTruthy();
-    expect(screen.getByText('No detail on this one')).toBeTruthy();
+    expect(screen.getByText('Invalid JSON: trailing comma')).toBeInTheDocument();
+    expect(screen.getByText('Missing optional description field')).toBeInTheDocument();
+    expect(screen.getByText('Instructions are clear')).toBeInTheDocument();
+    expect(screen.getByText('No detail on this one')).toBeInTheDocument();
   });
 
   it('displays file paths for items that have one', () => {
     renderWithProviders(<ReviewPanel items={sampleItems} />);
-    expect(screen.getByText('mcp.json')).toBeTruthy();
-    expect(screen.getByText('AGENT.md')).toBeTruthy();
+    expect(screen.getByText('mcp.json')).toBeInTheDocument();
+    expect(screen.getByText('AGENT.md')).toBeInTheDocument();
   });
 
   // ─── Expand/collapse (core behavior) ───
@@ -75,7 +75,7 @@ describe('ReviewPanel', () => {
   it('shows detail for error items by default (auto-expanded)', () => {
     renderWithProviders(<ReviewPanel items={sampleItems} />);
     // r1 is error with detail — should be visible immediately
-    expect(screen.getByText('Remove trailing comma on line 12')).toBeTruthy();
+    expect(screen.getByText('Remove trailing comma on line 12')).toBeInTheDocument();
   });
 
   it('hides detail for warning items by default (collapsed)', () => {
@@ -89,13 +89,13 @@ describe('ReviewPanel', () => {
     // Click the warning item row (the message text is inside the clickable row)
     fireEvent.click(screen.getByText('Missing optional description field'));
     // Now detail should be visible
-    expect(screen.getByText('Consider adding a description for clarity')).toBeTruthy();
+    expect(screen.getByText('Consider adding a description for clarity')).toBeInTheDocument();
   });
 
   it('collapses error detail on click', () => {
     renderWithProviders(<ReviewPanel items={sampleItems} />);
     // r1 detail starts expanded
-    expect(screen.getByText('Remove trailing comma on line 12')).toBeTruthy();
+    expect(screen.getByText('Remove trailing comma on line 12')).toBeInTheDocument();
     // Click to collapse
     fireEvent.click(screen.getByText('Invalid JSON: trailing comma'));
     // Detail should disappear
@@ -109,7 +109,7 @@ describe('ReviewPanel', () => {
     expect(screen.queryByText('Remove trailing comma on line 12')).toBeNull();
     // Re-expand
     fireEvent.click(screen.getByText('Invalid JSON: trailing comma'));
-    expect(screen.getByText('Remove trailing comma on line 12')).toBeTruthy();
+    expect(screen.getByText('Remove trailing comma on line 12')).toBeInTheDocument();
   });
 
   it('items without detail are not clickable (no expand/collapse)', () => {
@@ -117,7 +117,7 @@ describe('ReviewPanel', () => {
     // r3 is info with no detail — clicking should not break anything
     fireEvent.click(screen.getByText('Instructions are clear'));
     // No crash, no detail appears — just verify it still renders
-    expect(screen.getByText('Instructions are clear')).toBeTruthy();
+    expect(screen.getByText('Instructions are clear')).toBeInTheDocument();
   });
 
   // ─── Auto-scroll ───
@@ -142,8 +142,8 @@ describe('ReviewPanel', () => {
 
   it('renders file path inside InfoRow with copy support', () => {
     renderWithProviders(<ReviewPanel items={sampleItems} />);
-    expect(screen.getByText('mcp.json')).toBeTruthy();
-    expect(screen.getByText('AGENT.md')).toBeTruthy();
+    expect(screen.getByText('mcp.json')).toBeInTheDocument();
+    expect(screen.getByText('AGENT.md')).toBeInTheDocument();
   });
 
   // ─── No score display ───

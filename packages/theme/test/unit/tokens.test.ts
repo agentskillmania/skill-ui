@@ -43,25 +43,25 @@ describe('lightTheme', () => {
 
   it('contains required color tokens', () => {
     expect(lightTheme.color.primary).toBe('#4361ee');
-    expect(lightTheme.color.text).toBeTruthy();
-    expect(lightTheme.color.bgBase).toBeTruthy();
-    expect(lightTheme.color.border).toBeTruthy();
+    expect(lightTheme.color.text).toBe('#0f172a');
+    expect(lightTheme.color.bgBase).toBe('#f1f5f9');
+    expect(lightTheme.color.border).toBe('#e2e8f0');
   });
 
   it('contains new color tokens', () => {
     expect(lightTheme.color.textInverse).toBe('#ffffff');
-    expect(lightTheme.color.borderHover).toBeTruthy();
-    expect(lightTheme.color.borderActive).toBeTruthy();
+    expect(lightTheme.color.borderHover).toBe('#cbd5e1');
+    expect(lightTheme.color.borderActive).toBe('#94a3b8');
   });
 
   it('contains blockColor (nested structure)', () => {
-    expect(lightTheme.blockColor.thinking.text).toBeTruthy();
-    expect(lightTheme.blockColor.thinking.bg).toBeTruthy();
-    expect(lightTheme.blockColor.humanInput.text).toBeTruthy();
-    expect(lightTheme.blockColor.humanInput.bg).toBeTruthy();
-    expect(lightTheme.blockColor.toolMcp.text).toBeTruthy();
-    expect(lightTheme.blockColor.toolBuiltin.text).toBeTruthy();
-    expect(lightTheme.blockColor.plan.text).toBeTruthy();
+    expect(lightTheme.blockColor.thinking.text).toBe('#7c3aed');
+    expect(lightTheme.blockColor.thinking.bg).toBe('rgba(124, 58, 237, 0.10)');
+    expect(lightTheme.blockColor.humanInput.text).toBe('#ca8a04');
+    expect(lightTheme.blockColor.humanInput.bg).toBe('rgba(202, 138, 4, 0.10)');
+    expect(lightTheme.blockColor.toolMcp.text).toBe('#0891b2');
+    expect(lightTheme.blockColor.toolBuiltin.text).toBe('#059669');
+    expect(lightTheme.blockColor.plan.text).toBe('#2563eb');
   });
 
   it('reuses shared non-color tokens', () => {
@@ -86,20 +86,28 @@ describe('darkTheme', () => {
   });
 
   it('contains required color tokens', () => {
-    expect(darkTheme.color.primary).toBeTruthy();
-    expect(darkTheme.color.text).toBeTruthy();
-    expect(darkTheme.color.bgBase).toBeTruthy();
+    expect(darkTheme.color.primary).toBe('#6b83f2');
+    expect(darkTheme.color.text).toBe('#f1f5f9');
+    expect(darkTheme.color.bgBase).toBe('#0f172a');
   });
 
   it('dark background is darker than light', () => {
+    // 真比较明暗(WCAG 相对亮度),而非只验 hex 格式
+    const luminance = (hex: string) => {
+      const n = [1, 3, 5]
+        .map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+        .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4));
+      return 0.2126 * n[0] + 0.7152 * n[1] + 0.0722 * n[2];
+    };
     expect(darkTheme.color.bgBase).toMatch(/^#[0-9a-f]{6}$/);
-    expect(darkTheme.color.bgContainer).toMatch(/^#[0-9a-f]{6}$/);
+    expect(lightTheme.color.bgBase).toMatch(/^#[0-9a-f]{6}$/);
+    expect(luminance(darkTheme.color.bgBase)).toBeLessThan(luminance(lightTheme.color.bgBase));
   });
 
   it('contains new color tokens', () => {
     expect(darkTheme.color.textInverse).toBe('#0f172a');
-    expect(darkTheme.color.borderHover).toBeTruthy();
-    expect(darkTheme.color.borderActive).toBeTruthy();
+    expect(darkTheme.color.borderHover).toBe('#475569');
+    expect(darkTheme.color.borderActive).toBe('#64748b');
   });
 
   it('reuses shared non-color tokens', () => {
@@ -131,9 +139,9 @@ describe('shared tokens', () => {
   });
 
   it('shadow contains common shadows', () => {
-    expect(shadow.sm).toBeTruthy();
-    expect(shadow.base).toBeTruthy();
-    expect(shadow.md).toBeTruthy();
+    expect(shadow.sm).toBe('0 1px 2px rgba(15, 23, 42, 0.06)');
+    expect(shadow.base).toBe('0 1px 3px rgba(15, 23, 42, 0.08)');
+    expect(shadow.md).toBe('0 2px 4px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.08)');
   });
 
   it('font contains font configuration', () => {

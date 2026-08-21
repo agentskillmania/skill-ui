@@ -1,0 +1,237 @@
+/**
+ * Blocks-redesign coverage: TodoBlock / ShellBlock / SubAgentBlock /
+ * SubAgentModal — previously 978 lines with zero tests (routed from
+ * BlocksRenderer). Asserts user-visible contracts: text, status labels,
+ * collapse behavior, ANSI cleaning, modal open/close.
+ */
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { ChatWrapper, expandAllCollapsed } from './testUtils.js';
+import { BlocksRenderer } from '../../src/blocks-redesign/BlocksRenderer.js';
+import { SubAgentModal } from '../../src/blocks-redesign/SubAgentModal.js';
+import type { Block, Message } from '../../src/types.js';
+
+/// 经 BlocksRenderer 渲染单块(走真实路由,顺带覆盖路由正确性)
+function renderBlock(block: Block) {
+  return render(
+    <ChatWrapper>
+      <BlocksRenderer blocks={[block]} />
+    </ChatWrapper>
+  );
+}
+
+// ── TodoBlock ───────────────────────────────────────────────────────────────
+
+describe('TodoBlock', () => {
+  const todoBlock = (items: Block['metadata'], status: Block['status'] = 'completed'): Block => ({
+    id: 'b1',
+    type: 'todo',
+    status,
+    content: '',
+    metadata: { title: '会话任务', items: items as never },
+  });
+
+  it('renders title, item texts and done-count', () => {
+    renderBlock(
+      todoBlock([
+        { content: '搜索资料', status: 'completed' },
+        { content: '写报告', status: 'in_progress' },
+        { content: '复查', status: 'pending' },
+      ])
+    );
+    expect(screen.getByText('会话任务')).toBeInTheDocument();
+    expect(screen.getByText('搜索资料')).toBeInTheDocument();
+    expect(screen.getByText('写报告')).toBeInTheDocument();
+    expect(screen.getByText('复查')).toBeInTheDocument();
+    // 计数 1/3(精确文本,而非存在性)
+    expect(screen.getByText('1/3')).toBeInTheDocument();
+  });
+
+  it('collapses to summary line when all items are completed, expands on click', () => {
+    renderBlock(todoBlock([{ content: '唯一任务', status: 'completed' }]));
+    // 全完成:折叠成摘要行,列表项不可见
+    expect(screen.getByText('全部完成 1/1')).toBeInTheDocument();
+    expect(screen.queryByText('唯一任务')).not.toBeInTheDocument();
+    // 点标题栏展开
+    fireEvent.click(screen.getByText('全部完成 1/1'));
+    expect(screen.getByText('唯一任务')).toBeInTheDocument();
+  });
+
+  it('stays expanded while items are in progress', () => {
+    renderBlock(
+      todoBlock([
+        { content: '进行中任务', status: 'in_progress' },
+        { content: '待办', status: 'pending' },
+      ])
+    );
+    expect(screen.getByText('进行中任务')).toBeInTheDocument();
+    expect(screen.getByText('待办')).toBeInTheDocument();
+    expect(screen.getByText('0/2')).toBeInTheDocument();
+  });
+
+  it('renders gracefully without metadata (negative path)', () => {
+    renderBlock({ id: 'b1', type: 'todo', status: 'completed', content: '' });
+    // 标题回退默认文案,不崩溃,计数 0/0
+    expect(screen.getByText('任务清单')).toBeInTheDocument();
+    expect(screen.getByText('0/0')).toBeInTheDocument();
+  });
+});
+
+// ── ShellBlock ──────────────────────────────────────────────────────────────
+
+describe('ShellBlock', () => {
+  it('renders command and output text (collapsed when done, expands on header click)', () => {
+    renderBlock({
+      id: 'b2',
+      type: 'shell',
+      status: 'completed',
+      content: '',
+      metadata: { command: 'ls -la', output: 'file1.txt\nfile2.txt', exitCode: 0 },
+    });
+    expect(screen.getByText('ls -la')).toBeInTheDocument();
+    // 完成态默认折叠:输出不可见
+    expect(screen.queryByText(/file1\.txt/)).not.toBeInTheDocument();
+    // 点标题栏(aria-expanded 头)展开
+    fireEvent.click(document.querySelector('[aria-expanded="false"]') as HTMLElement);
+    expect(screen.getByText(/file1\.txt/)).toBeInTheDocument();
+    expect(screen.getByText(/file2\.txt/)).toBeInTheDocument();
+  });
+
+  it('strips ANSI escape sequences from output', () => {
+    renderBlock({
+      id: 'b3',
+      type: 'shell',
+      status: 'completed',
+      content: '',
+      metadata: {
+        command: 'echo',
+        // 模拟彩色终端输出:ESC[31m…ESC[0m + 裸 \r 回车
+        output: '\u001b[31m红色文本\u001b[0m\r第二行',
+        exitCode: 0,
+      },
+    });
+    fireEvent.click(document.querySelector('[aria-expanded="false"]') as HTMLElement);
+    expect(screen.getByText(/红色文本/)).toBeInTheDocument();
+    expect(screen.getByText(/第二行/)).toBeInTheDocument();
+    // 转义序列不应出现在可见文本里
+    expect(document.body.textContent).not.toContain('\u001b');
+    expect(document.body.textContent).not.toContain('[31m');
+  });
+
+  it('shows running state without exit code', () => {
+    renderBlock({
+      id: 'b4',
+      type: 'shell',
+      status: 'streaming',
+      content: '',
+      metadata: { command: 'sleep 10', output: '' },
+    });
+    expect(screen.getByText('sleep 10')).toBeInTheDocument();
+    expect(screen.getByText('运行中')).toBeInTheDocument();
+  });
+
+  it('renders gracefully without metadata (negative path)', () => {
+    renderBlock({ id: 'b5', type: 'shell', status: 'completed', content: '' });
+    expect(screen.getByText('终端')).toBeInTheDocument();
+  });
+});
+
+// ── SubAgentBlock ───────────────────────────────────────────────────────────
+
+describe('SubAgentBlock', () => {
+  const subBlock = (status: Block['status'], metadata: Block['metadata']): Block => ({
+    id: 'b6',
+    type: 'subagent',
+    status,
+    content: '子智能体的流式输出内容',
+    metadata,
+  });
+
+  it('renders name, task and streaming label while running', () => {
+    renderBlock(subBlock('streaming', { name: 'searcher', task: '查找资料' }));
+    expect(screen.getByText('searcher')).toBeInTheDocument();
+    expect(screen.getByText('查找资料')).toBeInTheDocument();
+    expect(screen.getByText('运行中')).toBeInTheDocument();
+  });
+
+  it('completed block defaults collapsed, expands to stats on header click', () => {
+    renderBlock(
+      subBlock('completed', {
+        name: 'writer',
+        task: '写摘要',
+        resultStatus: 'completed',
+        steps: 3,
+        inputTokens: 100,
+        outputTokens: 20,
+      })
+    );
+    expect(screen.getByText('writer')).toBeInTheDocument();
+    expect(screen.getByText('已完成')).toBeInTheDocument();
+    // 完成态默认折叠:统计行不可见
+    expect(screen.queryByText('3 步')).not.toBeInTheDocument();
+    // 点标题栏(aria-expanded 头,非名字——名字点击打开详情模态)展开
+    fireEvent.click(document.querySelector('[aria-expanded="false"]') as HTMLElement);
+    // 判别性由上一行的折叠前不可见保证;展开后摘要行与统计行各出现一份
+    expect(screen.getAllByText('3 步').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('↑100 ↓20 tok').length).toBeGreaterThan(0);
+  });
+
+  it.each([
+    ['error', undefined, '错误'],
+    ['completed', { resultStatus: 'timeout' }, '超时'],
+    ['completed', { resultStatus: 'max_steps' }, '达到上限'],
+    ['completed', { resultStatus: 'abort' }, '已中止'],
+  ] as const)('status %s + resultStatus %s shows label %s', (status, meta, label) => {
+    renderBlock(subBlock(status, { name: 'a', task: 't', ...meta }));
+    expect(screen.getByText(label)).toBeInTheDocument();
+  });
+
+  it('opens the detail modal when the row is clicked', async () => {
+    const messages: Message[] = [
+      { id: 'm1', role: 'user', content: '子任务指令', status: 'completed' },
+    ];
+    renderBlock(subBlock('streaming', { name: 'searcher', task: '查找资料', messages }));
+    // 行点击打开懒加载的 SubAgentModal
+    fireEvent.click(screen.getByText('searcher'));
+    await waitFor(() => {
+      expect(screen.getByText('子任务指令')).toBeInTheDocument();
+    });
+  });
+});
+
+// ── SubAgentModal ───────────────────────────────────────────────────────────
+
+describe('SubAgentModal', () => {
+  const messages: Message[] = [
+    { id: 'm1', role: 'user', content: '问题内容', status: 'completed' },
+    { id: 'm2', role: 'assistant', content: '回答内容', status: 'completed' },
+  ];
+
+  it('renders message list content when open', () => {
+    render(
+      <ChatWrapper>
+        <SubAgentModal open={true} onClose={() => {}} messages={messages} />
+      </ChatWrapper>
+    );
+    expect(screen.getByText('问题内容')).toBeInTheDocument();
+    expect(screen.getByText('回答内容')).toBeInTheDocument();
+  });
+
+  it('shows the empty hint when there are no messages (negative path)', () => {
+    render(
+      <ChatWrapper>
+        <SubAgentModal open={true} onClose={() => {}} messages={[]} />
+      </ChatWrapper>
+    );
+    expect(screen.getByText('无对话记录')).toBeInTheDocument();
+  });
+
+  it('does not render content when closed', () => {
+    render(
+      <ChatWrapper>
+        <SubAgentModal open={false} onClose={() => {}} messages={messages} />
+      </ChatWrapper>
+    );
+    expect(screen.queryByText('问题内容')).not.toBeInTheDocument();
+  });
+});

@@ -21,9 +21,9 @@ describe('FileTabs', () => {
         onTabClose={vi.fn()}
       />
     );
-    expect(screen.getByText('SKILL.md')).toBeTruthy();
-    expect(screen.getByText('index.ts')).toBeTruthy();
-    expect(screen.getByText('package.json')).toBeTruthy();
+    expect(screen.getByText('SKILL.md')).toBeInTheDocument();
+    expect(screen.getByText('index.ts')).toBeInTheDocument();
+    expect(screen.getByText('package.json')).toBeInTheDocument();
   });
 
   it('shows unsaved indicator', () => {
@@ -37,7 +37,7 @@ describe('FileTabs', () => {
     );
     // Modified tab should show dot indicator
     const dot = screen.getByText('•');
-    expect(dot).toBeTruthy();
+    expect(dot).toBeInTheDocument();
   });
 
   it('clicking tab triggers switch', () => {

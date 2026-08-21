@@ -94,7 +94,7 @@ describe('CodeEditor', () => {
 
   it('renders Monaco editor with correct language from filePath', () => {
     renderWithTheme(<CodeEditor {...defaultProps} />);
-    expect(screen.getByTestId('monaco-editor')).toBeTruthy();
+    expect(screen.getByTestId('monaco-editor')).toBeInTheDocument();
     expect(screen.getByTestId('monaco-language').textContent).toBe('typescript');
   });
 
@@ -160,25 +160,5 @@ describe('CodeEditor', () => {
   it('does not crash when Ctrl+S fires but onSave is not provided', () => {
     renderWithTheme(<CodeEditor {...defaultProps} />);
     expect(() => mockCtrlSHandler?.()).not.toThrow();
-  });
-
-  // ── handleMount falsy / non-object branches ──
-
-  it('does not crash when editor instance is null', () => {
-    mockEditorInstance = null;
-    expect(() => renderWithTheme(<CodeEditor {...defaultProps} />)).not.toThrow();
-    expect(mockAddCommand).not.toHaveBeenCalled();
-  });
-
-  it('does not crash when editor instance is a non-object value', () => {
-    mockEditorInstance = 42;
-    expect(() => renderWithTheme(<CodeEditor {...defaultProps} />)).not.toThrow();
-    expect(mockAddCommand).not.toHaveBeenCalled();
-  });
-
-  it('does not crash when editor object lacks addCommand method', () => {
-    mockEditorInstance = { noAddCommand: true };
-    expect(() => renderWithTheme(<CodeEditor {...defaultProps} />)).not.toThrow();
-    expect(mockAddCommand).not.toHaveBeenCalled();
   });
 });

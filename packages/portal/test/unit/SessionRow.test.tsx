@@ -51,12 +51,9 @@ describe('SessionRow', () => {
       wrapper,
     });
 
-    // Find the resume button (first within the actions area)
-    const space = document.querySelector('.ant-space');
-    const buttons = space?.querySelectorAll('button');
-    expect(buttons).toBeTruthy();
-    expect(buttons!.length).toBeGreaterThanOrEqual(1);
-    fireEvent.click(buttons![0]);
+    // 语义定位:按 aria-label 找按钮(此前按 buttons[0] 索引,组件
+    // 增删按钮时语义错位且测试仍可能通过)
+    fireEvent.click(screen.getByRole('button', { name: '继续对话' }));
     expect(onResume).toHaveBeenCalledTimes(1);
   });
 
@@ -67,12 +64,7 @@ describe('SessionRow', () => {
       { wrapper }
     );
 
-    // Find the fork button (second within the actions area)
-    const space = document.querySelector('.ant-space');
-    const buttons = space?.querySelectorAll('button');
-    expect(buttons).toBeTruthy();
-    expect(buttons!.length).toBeGreaterThanOrEqual(2);
-    fireEvent.click(buttons![1]);
+    fireEvent.click(screen.getByRole('button', { name: '复制会话' }));
     expect(onFork).toHaveBeenCalledTimes(1);
   });
 

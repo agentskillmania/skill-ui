@@ -35,9 +35,9 @@ const sampleCommands: ChatCommand[] = [
 describe('CopilotPanel', () => {
   it('displays quick command hint when no messages', () => {
     renderWithProviders(<CopilotPanel commands={sampleCommands} />);
-    expect(screen.getByText('向 Copilot 提问，或使用快捷命令')).toBeTruthy();
-    expect(screen.getByText('生成技能')).toBeTruthy();
-    expect(screen.getByText('查找类似')).toBeTruthy();
+    expect(screen.getByText('向 Copilot 提问，或使用快捷命令')).toBeInTheDocument();
+    expect(screen.getByText('生成技能')).toBeInTheDocument();
+    expect(screen.getByText('查找类似')).toBeInTheDocument();
   });
 
   it('clicking quick command triggers onSend', () => {
@@ -51,12 +51,12 @@ describe('CopilotPanel', () => {
     renderWithProviders(
       <CopilotPanel messages={[{ id: '1', role: 'user', content: '你好' } as any]} />
     );
-    expect(screen.getByTestId('message-list')).toBeTruthy();
+    expect(screen.getByTestId('message-list')).toBeInTheDocument();
   });
 
   it('renders input box', () => {
     renderWithProviders(<CopilotPanel />);
-    expect(screen.getByText('向 Copilot 提问...')).toBeTruthy();
+    expect(screen.getByText('向 Copilot 提问...')).toBeInTheDocument();
   });
 
   it('clicking send button triggers onSend', () => {

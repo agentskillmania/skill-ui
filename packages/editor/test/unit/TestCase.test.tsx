@@ -21,32 +21,32 @@ const sampleCases: TestCaseType[] = [
 describe('TestCase', () => {
   it('shows empty state when cases is undefined', () => {
     renderWithProviders(<TestCase />);
-    expect(screen.getByText('暂无测试用例')).toBeTruthy();
+    expect(screen.getByText('暂无测试用例')).toBeInTheDocument();
   });
 
   it('shows empty state with empty array', () => {
     renderWithProviders(<TestCase cases={[]} />);
-    expect(screen.getByText('暂无测试用例')).toBeTruthy();
+    expect(screen.getByText('暂无测试用例')).toBeInTheDocument();
   });
 
   it('displays all test case names', () => {
     renderWithProviders(<TestCase cases={sampleCases} />);
-    expect(screen.getByText('basic-chat')).toBeTruthy();
-    expect(screen.getByText('tool-calling')).toBeTruthy();
-    expect(screen.getByText('multi-turn')).toBeTruthy();
-    expect(screen.getByText('skill-loading')).toBeTruthy();
+    expect(screen.getByText('basic-chat')).toBeInTheDocument();
+    expect(screen.getByText('tool-calling')).toBeInTheDocument();
+    expect(screen.getByText('multi-turn')).toBeInTheDocument();
+    expect(screen.getByText('skill-loading')).toBeInTheDocument();
   });
 
   it('displays run all button', () => {
     const onRunAll = vi.fn();
     renderWithProviders(<TestCase cases={sampleCases} onRunAll={onRunAll} />);
-    expect(screen.getByText('全部运行')).toBeTruthy();
+    expect(screen.getByText('全部运行')).toBeInTheDocument();
   });
 
   it('formats duration >= 1000ms as seconds', () => {
     renderWithProviders(<TestCase cases={sampleCases} />);
-    expect(screen.getByText('1.2s')).toBeTruthy();
-    expect(screen.getByText('3.5s')).toBeTruthy();
+    expect(screen.getByText('1.2s')).toBeInTheDocument();
+    expect(screen.getByText('3.5s')).toBeInTheDocument();
   });
 
   it('formats duration < 1000ms as milliseconds', () => {
@@ -54,7 +54,7 @@ describe('TestCase', () => {
       { id: 'fast', name: 'fast-test', status: 'passed', duration: 500 },
     ];
     renderWithProviders(<TestCase cases={cases} />);
-    expect(screen.getByText('500ms')).toBeTruthy();
+    expect(screen.getByText('500ms')).toBeInTheDocument();
   });
 
   it('does not show duration for cases without duration', () => {
@@ -95,7 +95,7 @@ describe('TestCase', () => {
 
   it('shows error detail for failed case by default (auto-expanded)', () => {
     renderWithProviders(<TestCase cases={sampleCases} />);
-    expect(screen.getByText('Agent did not call web_search')).toBeTruthy();
+    expect(screen.getByText('Agent did not call web_search')).toBeInTheDocument();
   });
 
   it('collapses error detail when clicking the row', () => {
@@ -111,7 +111,7 @@ describe('TestCase', () => {
     fireEvent.click(screen.getByText('multi-turn'));
     expect(screen.queryByText('Agent did not call web_search')).toBeNull();
     fireEvent.click(screen.getByText('multi-turn'));
-    expect(screen.getByText('Agent did not call web_search')).toBeTruthy();
+    expect(screen.getByText('Agent did not call web_search')).toBeInTheDocument();
   });
 
   it('does not show expand for cases without error', () => {
@@ -121,6 +121,6 @@ describe('TestCase', () => {
     renderWithProviders(<TestCase cases={noErrorCases} />);
     // Passed case has no error, clicking should not crash
     fireEvent.click(screen.getByText('passing-test'));
-    expect(screen.getByText('passing-test')).toBeTruthy();
+    expect(screen.getByText('passing-test')).toBeInTheDocument();
   });
 });

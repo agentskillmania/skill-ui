@@ -54,9 +54,7 @@ describe('SkillCard', () => {
     });
 
     // Use native click to trigger Popconfirm
-    const deleteBtn = document.querySelector('.ant-btn-dangerous') as HTMLElement;
-    expect(deleteBtn).toBeTruthy();
-    deleteBtn.click();
+    fireEvent.click(screen.getByRole('button', { name: '删除' }));
 
     // Confirm the popconfirm with fuzzy text match
     const confirmBtn = await screen.findByText((content) => content.replace(/\s+/g, '') === '删除');

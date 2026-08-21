@@ -31,6 +31,8 @@
     "noSkills": "No skills yet",
     "noSessions": "No recent sessions",
     "createFirstAgent": "Click the button above to create your first agent",
-    "createFirstSkill": "Click the button above to create your first skill"
+    "createFirstSkill": "Click the button above to create your first skill",
+    "resumeSession": "Resume session",
+    "forkSession": "Fork session"
   }
 }

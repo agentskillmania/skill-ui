@@ -79,6 +79,7 @@ export const SessionRow = memo(
             <Button
               type="text"
               size="small"
+              aria-label={t('resumeSession')}
               icon={<MessageCircle size={14} />}
               onClick={(e) => {
                 e.stopPropagation();
@@ -88,6 +89,7 @@ export const SessionRow = memo(
             <Button
               type="text"
               size="small"
+              aria-label={t('forkSession')}
               icon={<GitBranch size={14} />}
               onClick={(e) => {
                 e.stopPropagation();
@@ -101,7 +103,13 @@ export const SessionRow = memo(
               cancelText={t('cancel')}
               okButtonProps={{ danger: true }}
             >
-              <Button type="text" danger icon={<Trash2 size={14} />} size="small" />
+              <Button
+                type="text"
+                danger
+                aria-label={t('delete')}
+                icon={<Trash2 size={14} />}
+                size="small"
+              />
             </Popconfirm>
           </Space>
         </div>

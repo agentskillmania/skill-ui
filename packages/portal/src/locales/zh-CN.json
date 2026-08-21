@@ -31,6 +31,8 @@
     "noSkills": "暂无技能",
     "noSessions": "暂无会话",
     "createFirstAgent": "点击上方按钮创建第一个智能体",
-    "createFirstSkill": "点击上方按钮创建第一个技能"
+    "createFirstSkill": "点击上方按钮创建第一个技能",
+    "resumeSession": "继续对话",
+    "forkSession": "复制会话"
   }
 }
