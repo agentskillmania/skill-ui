@@ -57,7 +57,10 @@ export const ContextUsage = memo(function ContextUsage({ usage }: ContextUsagePr
         size={20}
         strokeWidth={6}
         strokeColor={color}
-        trailColor={theme.color.fill}
+        // Track is a 6px graphic line sitting directly on bgBase (the toolbar has
+        // no surface of its own), where `fill` is literally bgBase in light themes.
+        // Use the border family's visible rung instead.
+        railColor={theme.color.borderHover}
         format={() => `${percent}%`}
       />
       <span

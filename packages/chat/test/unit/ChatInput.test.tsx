@@ -357,7 +357,7 @@ describe('ChatInput', () => {
   });
 
   it('context usage renders used / total', () => {
-    render(
+    const { container } = render(
       <ChatWrapper>
         <ChatInput value="" onChange={() => {}} contextUsage={{ used: 12000, total: 200000 }} />
       </ChatWrapper>
@@ -365,5 +365,11 @@ describe('ChatInput', () => {
     const usage = screen.getByTestId('context-usage');
     expect(usage.textContent).toContain('12k');
     expect(usage.textContent).toContain('200k');
+
+    // The ring sits directly on bgBase, where light themes' `fill` equals bgBase
+    // exactly — the rail must use a visible border-family color instead.
+    const rail = container.querySelector('.ant-progress-circle-rail');
+    expect(rail).not.toBeNull();
+    expect(rail!.getAttribute('stroke')).toBe('#cbd5e1'); // lightTheme.borderHover
   });
 });
