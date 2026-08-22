@@ -64,6 +64,22 @@ describe('reducer — uncovered event branches', () => {
     expect(state.main.compression).toEqual({ summary: 'summarized history', removedCount: 5 });
   });
 
+  it('compressed with estimatedContextSize refreshes lastInputTokens', () => {
+    // 压缩完成后上下文占用应立即回落到压缩后的估算,而不是停在压缩前
+    // 的旧值直到下一次 llm-response。
+    const state = pushEvents([
+      {
+        event: 'llm-response',
+        data: { text: 'hi', tokens: { input: 90_000, output: 10 } },
+      },
+      {
+        event: 'compressed',
+        data: { summary: 's', removedCount: 3, estimatedContextSize: 12_000 },
+      },
+    ]);
+    expect(state.main.lastInputTokens).toBe(12_000);
+  });
+
   it('handles compressing event (no-op but logged)', () => {
     const state = stateWithOneEvent({ event: 'compressing', data: {} });
     expect(state.events).toHaveLength(1);
@@ -207,17 +223,26 @@ describe('reducer — sub-agent edge cases', () => {
 });
 
 describe('reducer — token accumulation edge cases', () => {
-  it('accumulates tokens from llm-response', () => {
+  it('llm-response sets lastInputTokens but leaves cumulative totals to step-end', () => {
     const state = stateWithOneEvent({
       event: 'llm-response',
       data: {
         tokens: { input: 100, output: 50, cacheRead: 10, cacheWrite: 5 },
       },
     });
-    expect(state.main.tokens.input).toBe(100);
-    expect(state.main.tokens.output).toBe(50);
-    expect(state.main.tokens.cacheRead).toBe(10);
-    expect(state.main.tokens.cacheWrite).toBe(5);
+    expect(state.main.lastInputTokens).toBe(100);
+    expect(state.main.tokens.input).toBe(0);
+  });
+
+  it('parses snake_case cache fields (wrangler.rs wire format)', () => {
+    const state = stateWithOneEvent({
+      event: 'step-end',
+      data: {
+        step: 0,
+        tokens: { input: 100, output: 50, cache_read: 10, cache_write: 5 },
+      },
+    });
+    expect(state.main.tokens).toEqual({ input: 100, output: 50, cacheRead: 10, cacheWrite: 5 });
   });
 
   it('handles llm-response without tokens', () => {
@@ -237,15 +262,15 @@ describe('reducer — token accumulation edge cases', () => {
     expect(state.main.tokens.output).toBe(100);
   });
 
-  it('accumulates tokens from done', () => {
+  it('done does not re-add tokens (step-end owns accumulation)', () => {
     const state = stateWithOneEvent({
       event: 'done',
       data: {
         tokens: { input: 300, output: 150 },
       },
     });
-    expect(state.main.tokens.input).toBe(300);
-    expect(state.main.tokens.output).toBe(150);
+    expect(state.main.tokens.input).toBe(0);
+    expect(state.main.tokens.output).toBe(0);
   });
 });
 

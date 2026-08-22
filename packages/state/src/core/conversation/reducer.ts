@@ -163,13 +163,17 @@ function addTokens(a: TokenStats, b?: Partial<TokenStats>): TokenStats {
 }
 
 function extractTokens(data: Record<string, unknown>): TokenStats | undefined {
-  const t = data.tokens as Partial<TokenStats> | undefined;
+  // 线上格式有两种:wanderer TS(colts)发 camelCase,wrangler.rs(Rust)的
+  // TokenStats 无 serde rename,发 snake_case。两者都接。
+  const t = data.tokens as
+    | (Partial<TokenStats> & { cache_read?: number; cache_write?: number })
+    | undefined;
   if (!t) return undefined;
   return {
     input: t.input ?? 0,
     output: t.output ?? 0,
-    cacheRead: t.cacheRead ?? 0,
-    cacheWrite: t.cacheWrite ?? 0,
+    cacheRead: t.cacheRead ?? t.cache_read ?? 0,
+    cacheWrite: t.cacheWrite ?? t.cache_write ?? 0,
   };
 }
 
@@ -359,6 +363,9 @@ function reduceMainEvent(
             metadata: {
               toolName,
               toolArgs: JSON.stringify(data.args ?? {}),
+              // 可选工具来源('mcp'|'builtin'|'script')——由宿主或 daemon
+              // 在帧上补充,这里只负责透传给 ToolCallBlock 的徽章。
+              ...(typeof data.toolType === 'string' ? { toolType: data.toolType } : {}),
             },
           };
       return {
@@ -599,11 +606,11 @@ function reduceMainEvent(
       const tokens = extractTokens(data);
       return {
         ...state,
-        tokens: tokens ? addTokens(state.tokens, tokens) : state.tokens,
-        // lastInputTokens = the input size of the most recent LLM call =
-        // the context window currently in use (NOT cumulative). Daemon may
-        // send `tokens: {}` — that would zero the gauge, so only trust a
-        // positive reading.
+        // 累计账只在 step-end 累加(每次 LLM 调用恰有一次 step-end;这里
+        // 再加一次会双计)。本事件只维护 lastInputTokens —— 最近一次调用
+        // 的输入大小,即当前上下文窗口占用(NON-cumulative)。
+        // Daemon may send `tokens: {}` — that would zero the gauge, so only
+        // trust a positive reading.
         ...(tokens && tokens.input > 0 ? { lastInputTokens: tokens.input } : {}),
       };
     }
@@ -661,12 +668,17 @@ function reduceMainEvent(
     }
 
     case 'compressed': {
+      // daemon(wrangler.rs)自 0.x 起在压缩完成时附带 `estimatedContextSize`
+      // —— 压缩后的下一次请求输入估算。用它立即刷新上下文占用表,而不是
+      // 停在压缩前的旧值直到下一次 llm-response。
+      const estimated = data.estimatedContextSize as number | undefined;
       return {
         ...state,
         compression: {
           summary: (data.summary as string) ?? '',
           removedCount: (data.removedCount as number) ?? 0,
         },
+        ...(typeof estimated === 'number' && estimated > 0 ? { lastInputTokens: estimated } : {}),
       };
     }
 
@@ -693,14 +705,15 @@ function reduceMainEvent(
 
     // ── Terminal ──
     case 'done': {
-      const tokens = extractTokens(data);
       const totalSteps = data.totalSteps as number | undefined;
       const duration = data.duration as number | undefined;
+      // done 的 tokens 是整轮累计量(wrangler.rs;colts run() 同理),而每个
+      // step 的用量已在 step-end 里累加过 —— 这里再加一次会重复计数。
+      // duration/totalSteps 则是权威整轮值,覆盖逐步累加的近似。
       return {
         ...state,
         status: 'idle',
         activeSkill: null,
-        tokens: tokens ? addTokens(state.tokens, tokens) : state.tokens,
         totalSteps: totalSteps ?? state.totalSteps,
         duration: duration ?? state.duration,
         messages: state.messages.map((m) =>
@@ -846,7 +859,13 @@ function reduceSubAgentEvent(
       const sub = subAgents.get(subtaskId);
       if (!sub) return subAgents;
       const action =
-        (data.action as { id?: string; tool?: string; name?: string; arguments?: unknown }) ?? {};
+        (data.action as {
+          id?: string;
+          tool?: string;
+          name?: string;
+          arguments?: unknown;
+          toolType?: string;
+        }) ?? {};
       const toolName = action.tool ?? action.name ?? 'unknown';
       const callId = action.id ?? genBlockId();
       const { run, messageId } = ensureStreamingMessage(sub);
@@ -855,7 +874,12 @@ function reduceSubAgentEvent(
         type: 'tool_call',
         status: 'streaming',
         content: '',
-        metadata: { toolName, toolArgs: JSON.stringify(action.arguments ?? {}) },
+        metadata: {
+          toolName,
+          toolArgs: JSON.stringify(action.arguments ?? {}),
+          // 与主 agent 的 tool-start 同约定:可选来源字段,仅透传。
+          ...(typeof action.toolType === 'string' ? { toolType: action.toolType } : {}),
+        },
       };
       return new Map(subAgents).set(subtaskId, {
         ...sub,

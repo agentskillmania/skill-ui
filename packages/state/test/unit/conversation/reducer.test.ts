@@ -59,6 +59,21 @@ describe('reducer — main agent events', () => {
     expect(toolBlock!.metadata?.toolResult).toBe('file content');
   });
 
+  it('forwards optional toolType from tool-start into block metadata', () => {
+    const state = pushEvents([
+      {
+        event: 'tool-start',
+        data: { id: 'call-1', name: 'fs__read', args: {}, toolType: 'mcp' },
+      },
+      { event: 'tool-start', data: { id: 'call-2', name: 'web_fetch', args: {} } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    const blocks = msg.blocks?.filter((b) => b.type === 'tool_call');
+    expect(blocks?.[0].metadata?.toolType).toBe('mcp');
+    // 未携带时不写入(undefined 不落进 metadata,保持旧形状)
+    expect(blocks?.[1].metadata).not.toHaveProperty('toolType');
+  });
+
   it('manages skill lifecycle: loading → loaded → start → end', () => {
     const state = pushEvents([
       { event: 'skill-loading', data: { name: 'poet' } },
@@ -176,7 +191,9 @@ describe('reducer — main agent events', () => {
     expect(humanBlock!.metadata?.response).toBe('yes');
   });
 
-  it('accumulates tokens from llm-response events', () => {
+  it('llm-response updates lastInputTokens without touching cumulative totals', () => {
+    // 累计账由 step-end 统一负责(每次 LLM 调用恰有一次 step-end);
+    // llm-response 携带的是同一次调用的 tokens,在这里累加会双计。
     const state = pushEvents([
       {
         event: 'llm-response',
@@ -187,7 +204,8 @@ describe('reducer — main agent events', () => {
         data: { text: 'bye', tokens: { input: 200, output: 30, cacheRead: 0, cacheWrite: 0 } },
       },
     ]);
-    expect(state.main.tokens).toEqual({ input: 300, output: 80, cacheRead: 10, cacheWrite: 5 });
+    expect(state.main.tokens).toEqual({ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
+    expect(state.main.lastInputTokens).toBe(200);
   });
 
   it('records step count and duration from step events', () => {
@@ -419,12 +437,13 @@ describe('reducer — extractTokens boundary', () => {
     expect(state.main.tokens).toEqual({ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
   });
 
-  it('llm-response with partial tokens fills missing fields with zero', () => {
+  it('llm-response with partial tokens updates lastInputTokens only', () => {
     const state = pushEvents([
       { event: 'llm-response', data: { text: 'hi', tokens: { input: 50 } } },
     ]);
-    // output, cacheRead, cacheWrite should default to 0
-    expect(state.main.tokens).toEqual({ input: 50, output: 0, cacheRead: 0, cacheWrite: 0 });
+    // 累计账不动(归 step-end 管);lastInputTokens 取正读数。
+    expect(state.main.tokens).toEqual({ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
+    expect(state.main.lastInputTokens).toBe(50);
   });
 
   it('step-end without tokens field leaves tokens unchanged', () => {
@@ -456,9 +475,19 @@ describe('reducer — extractTokens boundary', () => {
     expect(state.main.duration).toBe(500);
   });
 
-  it('done with tokens sets final totals', () => {
+  it('done overrides duration/totalSteps but does not re-add tokens', () => {
+    // tokens 的累计在 step-end 完成;done 携带的是整轮累计值(信息性),
+    // 再累加会重复计数。
     const state = pushEvents([
       { event: 'token', data: { delta: 'answer' } },
+      {
+        event: 'step-end',
+        data: {
+          step: 0,
+          tokens: { input: 200, output: 80, cacheRead: 10, cacheWrite: 5 },
+          duration: 4800,
+        },
+      },
       {
         event: 'done',
         data: {
@@ -579,6 +608,28 @@ describe('reducer — text blocks & interleaved ordering', () => {
     expect(msg.blocks?.map((b) => b.type)).toEqual(['thinking', 'text', 'tool_call', 'text']);
     expect(msg.content).toBe('sub prosesub final');
   });
+
+  it('forwards optional toolType from subagent-tool-start action into metadata', () => {
+    const state = pushEvents([
+      { event: 'subagent-start', data: { subtaskId: 's1', name: 'sub', task: 'do' } },
+      {
+        event: 'subagent-tool-start',
+        data: {
+          subtaskId: 's1',
+          action: { id: 'sc1', tool: 'fs__read', arguments: {}, toolType: 'mcp' },
+        },
+      },
+      {
+        event: 'subagent-tool-start',
+        data: { subtaskId: 's1', action: { id: 'sc2', tool: 'web_fetch', arguments: {} } },
+      },
+    ]);
+    const sub = state.subAgents.get('s1')!;
+    const msg = sub.messages[sub.messages.length - 1];
+    const blocks = msg.blocks?.filter((b) => b.type === 'tool_call');
+    expect(blocks?.[0].metadata?.toolType).toBe('mcp');
+    expect(blocks?.[1].metadata).not.toHaveProperty('toolType');
+  });
 });
 
 describe('reducer — empty thinking events', () => {
@@ -619,6 +670,11 @@ describe('reducer — session-cleared (destructive reset)', () => {
       {
         event: 'llm-response',
         data: { text: 'answer', toolCalls: null, tokens: { input: 100, output: 20 } },
+      },
+      // 累计账由 step-end 负责(llm-response 只更 lastInputTokens)。
+      {
+        event: 'step-end',
+        data: { step: 0, tokens: { input: 100, output: 20 }, duration: 800 },
       },
       {
         event: 'todo-list',

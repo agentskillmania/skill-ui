@@ -22,12 +22,14 @@ function lastMsg(state: ReturnType<typeof run>) {
 }
 
 describe('reducer — token accumulation with partial data', () => {
-  it('accumulates partial token stats (missing fields default to 0)', () => {
+  it('llm-response tokens never accumulate (cumulative lives at step-end)', () => {
     const state = run([
       s('llm-response', { tokens: { input: 10 } }),
       s('llm-response', { tokens: { output: 5 } }),
     ]);
-    expect(state.main.tokens).toEqual({ input: 10, output: 5, cacheRead: 0, cacheWrite: 0 });
+    expect(state.main.tokens).toEqual({ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
+    // 第二次响应 input 缺失(视为 0)不覆盖已有的正读数。
+    expect(state.main.lastInputTokens).toBe(10);
   });
 
   it('treats null token fields as 0', () => {
@@ -50,9 +52,9 @@ describe('reducer — token accumulation with partial data', () => {
     expect(state.main.tokens.output).toBe(0);
   });
 
-  it('accumulates partial tokens from done', () => {
+  it('done does not accumulate partial tokens (informational run totals)', () => {
     const state = run([s('done', { tokens: { output: 50 } })]);
-    expect(state.main.tokens.output).toBe(50);
+    expect(state.main.tokens.output).toBe(0);
     expect(state.main.tokens.input).toBe(0);
   });
 
