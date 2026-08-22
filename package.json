@@ -26,7 +26,8 @@
     "lint:fix": "eslint packages/*/src --fix",
     "format": "prettier --write \"packages/**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"packages/**/*.{ts,tsx}\"",
-    "prepare": "husky"
+    "prepare": "husky",
+    "release": "node scripts/release.mjs"
   },
   "devDependencies": {
     "@emotion/css": "^11.13.5",
