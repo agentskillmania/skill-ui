@@ -49,6 +49,9 @@ export interface ColtsMessageInput {
     id: string;
     name: string;
     arguments: Record<string, unknown>;
+    /** 可选工具来源('mcp'|'builtin'|'script')——宿主或 daemon 补充,
+     * 透传到 tool_call 块的 metadata 供徽章渲染。 */
+    toolType?: string;
   }>;
   toolCallId?: string;
   toolName?: string;

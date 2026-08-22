@@ -1,6 +1,6 @@
 {
   "name": "@agentskillmania/skill-ui-state",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Event reducer state machine for agent runtime state — consumes SSE events, produces structured AgentRunState for chat and cockpit UIs.",
   "type": "module",
   "main": "dist/index.js",

@@ -62,6 +62,28 @@ describe('fromHistory', () => {
     expect(toolBlock!.status).toBe('completed');
   });
 
+  it('forwards optional toolType from history toolCalls into metadata', () => {
+    const messages: ColtsMessageInput[] = [
+      {
+        role: 'assistant',
+        content: '',
+        toolCalls: [
+          { id: 'call-1', name: 'fs__read', arguments: {}, toolType: 'mcp' },
+          { id: 'call-2', name: 'web_fetch', arguments: { url: 'https://x' } },
+        ],
+        timestamp: 1000,
+      },
+      { role: 'tool', content: 'a', toolCallId: 'call-1', toolName: 'fs__read', timestamp: 2000 },
+      { role: 'tool', content: 'b', toolCallId: 'call-2', toolName: 'web_fetch', timestamp: 3000 },
+    ];
+    const state = fromHistory(messages);
+    const msgs = selectMainMessages(state);
+    const blocks = msgs[0].blocks?.filter((b) => b.type === 'tool_call');
+    expect(blocks?.[0].metadata?.toolType).toBe('mcp');
+    // 未携带时不写入,保持旧形状
+    expect(blocks?.[1].metadata).not.toHaveProperty('toolType');
+  });
+
   it('reconstructs skill blocks from load_skill tool calls', () => {
     const messages: ColtsMessageInput[] = [
       {

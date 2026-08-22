@@ -225,6 +225,8 @@ export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
                 toolName: tc.name,
                 toolArgs: JSON.stringify(tc.arguments),
                 toolResult: resultContent,
+                // 可选来源字段('mcp'|'builtin'|'script'),与实时路径同约定。
+                ...(tc.toolType ? { toolType: tc.toolType } : {}),
               },
             });
           }
