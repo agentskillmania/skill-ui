@@ -107,6 +107,10 @@ function labelFor(eventName: string, data: Record<string, unknown>): string {
       return 'Compressing context';
     case 'compressed':
       return `Compressed: -${data.removedCount ?? 0} messages`;
+    case 'system-message':
+      // Marker rows synthesized by the host (compaction / model switch / …).
+      // The host owns the copy — `label` carries a short one for the event log.
+      return (data.label as string) ?? 'System';
     case 'session-cleared':
       return 'Session cleared';
     case 'human-input':
@@ -260,6 +264,23 @@ function reduceMainEvent(
         createdAt: Date.now(),
       };
       return { ...state, messages: [...state.messages, userMsg, pendingAssistant] };
+    }
+
+    // ── System marker (host-synthesized: compaction, model switch, …) ──
+    // Unlike user-message this does NOT pre-create a streaming assistant
+    // message: a marker is a completed one-liner (rendered centered by the
+    // chat UI), not a turn opener. Chronological append-only, like everything
+    // else — if a marker lands mid-run (auto-compaction between steps), the
+    // next token starts a fresh assistant bubble after it.
+    case 'system-message': {
+      const sysMsg: AgentMessage = {
+        id: `sys-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        role: 'system',
+        content: (data.content as string) ?? '',
+        status: 'completed',
+        createdAt: (data.timestamp as number) ?? Date.now(),
+      };
+      return { ...state, messages: [...state.messages, sysMsg] };
     }
 
     // ── Streaming tokens ──
