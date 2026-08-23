@@ -634,4 +634,68 @@ describe('fromHistory — turn-level bubble merging', () => {
     expect(assistant.blocks?.map((b) => b.type)).toEqual(['text', 'tool_call']);
     expect(assistant.blocks![0].content).toBe('let me look');
   });
+
+  it('splits multimodal user messages into text content + attachments', () => {
+    const messages: ColtsMessageInput[] = [
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: '看这两张图' },
+          { type: 'image_url', image_url: { url: 'file:img-1-screenshot.png' } },
+          { type: 'image_url', image_url: { url: 'data:image/jpeg;base64,QUJD' } },
+        ],
+        timestamp: 1000,
+      },
+      { role: 'assistant', content: '看到了。', type: 'action', timestamp: 2000 },
+    ];
+    const state = fromHistory(messages);
+    const user = selectMainMessages(state)[0];
+    expect(user.role).toBe('user');
+    expect(user.content).toBe('看这两张图');
+    expect(user.attachments).toHaveLength(2);
+    // file: 引用取 basename 作附件名,mime 按扩展名;url 原样保留(宿主
+    // 渲染前自行解析)。
+    expect(user.attachments![0]).toMatchObject({
+      name: 'img-1-screenshot.png',
+      mimeType: 'image/png',
+      url: 'file:img-1-screenshot.png',
+    });
+    // data URL 从 scheme 猜 mime。
+    expect(user.attachments![1]).toMatchObject({
+      name: 'image',
+      mimeType: 'image/jpeg',
+      url: 'data:image/jpeg;base64,QUJD',
+    });
+    // 纯图消息(无 text part)content 为空串,attachments 仍在。
+    const imageOnly: ColtsMessageInput[] = [
+      { role: 'user', content: [{ type: 'image_url', image_url: { url: 'file:x.png' } }] },
+    ];
+    const onlyUser = selectMainMessages(fromHistory(imageOnly))[0];
+    expect(onlyUser.content).toBe('');
+    expect(onlyUser.attachments).toHaveLength(1);
+  });
+
+  it('keeps plain-text user messages attachment-free (backward compatible)', () => {
+    const messages: ColtsMessageInput[] = [{ role: 'user', content: 'hi', timestamp: 1000 }];
+    const user = selectMainMessages(fromHistory(messages))[0];
+    expect(user.content).toBe('hi');
+    expect(user.attachments).toBeUndefined();
+  });
+
+  it('degrades assistant parts content to [image] placeholder text', () => {
+    // assistant 侧正常不含图,但 parts 形态必须安全降级而不是塞进数组。
+    const messages: ColtsMessageInput[] = [
+      {
+        role: 'assistant',
+        content: [
+          { type: 'text', text: '图在这里' },
+          { type: 'image_url', image_url: { url: 'https://x/y.png' } },
+        ],
+        type: 'action',
+        timestamp: 1000,
+      },
+    ];
+    const assistant = selectMainMessages(fromHistory(messages))[0];
+    expect(assistant.content).toBe('图在这里\n[image]');
+  });
 });

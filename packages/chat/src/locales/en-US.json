@@ -67,6 +67,9 @@
   },
   "chatInput": {
     "model": "Model",
+    "attachImage": "Add image",
+    "attachDisabled": "Adding images is unavailable",
+    "removeAttachment": "Remove attachment",
     "thinking": {
       "auto": "Auto",
       "on": "Thinking",

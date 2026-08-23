@@ -44,6 +44,45 @@ describe('UserMessage', () => {
     expect(container.querySelector('div')).toBeInTheDocument();
     expect(container.textContent).toBe('');
   });
+
+  it('renders attachments above the text; image-only message renders without text', () => {
+    const withImages: Message = {
+      id: 'mm1',
+      role: 'user',
+      content: '看这两张',
+      status: 'completed',
+      attachments: [
+        { id: 'a1', name: 'one.png', mimeType: 'image/png', url: 'data:image/png;base64,AAAA' },
+        { id: 'a2', name: 'two.png', mimeType: 'image/png', url: 'data:image/png;base64,BBBB' },
+      ],
+    };
+    render(
+      <ChatWrapper>
+        <UserMessage message={withImages} />
+      </ChatWrapper>
+    );
+    expect(screen.getByText('看这两张')).toBeInTheDocument();
+    expect(screen.getByAltText('one.png')).toBeInTheDocument();
+    expect(screen.getByAltText('two.png')).toBeInTheDocument();
+
+    const imageOnly: Message = {
+      id: 'mm2',
+      role: 'user',
+      content: '',
+      status: 'completed',
+      attachments: [
+        { id: 'a3', name: 'solo.png', mimeType: 'image/png', url: 'data:image/png;base64,CCCC' },
+      ],
+    };
+    const { container } = render(
+      <ChatWrapper>
+        <UserMessage message={imageOnly} />
+      </ChatWrapper>
+    );
+    expect(screen.getByAltText('solo.png')).toBeInTheDocument();
+    // 纯图消息:气泡里只有图片,没有空文本行。
+    expect(container.textContent).toBe('');
+  });
 });
 
 describe('AssistantMessage', () => {

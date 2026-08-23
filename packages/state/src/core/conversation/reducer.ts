@@ -281,10 +281,14 @@ function reduceMainEvent(
   switch (eventName) {
     // ── User message (not from colts — injected by the consumer hook) ──
     case 'user-message': {
+      const attachments = (data.attachments as AgentMessage['attachments']) ?? undefined;
       const userMsg: AgentMessage = {
         id: `user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         role: 'user',
         content: (data.content as string) ?? '',
+        // 多模态附件(图片)随消息级透传——不进 blocks(blocks 是 assistant
+        // 的时序渲染单元)。
+        ...(attachments && attachments.length > 0 ? { attachments } : {}),
         status: 'completed',
         createdAt: Date.now(),
       };

@@ -36,6 +36,7 @@ export { ContextUsage, formatTokens } from './ChatInput/ContextUsage.js';
 export type {
   Message,
   Block,
+  ChatAttachment,
   MessageStatus,
   MessageRole,
   BlockStatus,

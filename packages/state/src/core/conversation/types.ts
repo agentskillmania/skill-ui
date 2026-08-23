@@ -49,6 +49,20 @@ export interface AgentBlock {
 }
 
 /**
+ * A binary attachment on a user message (multimodal input — currently images).
+ * `url` is renderable as-is: a data URL for local files, http(s) for remote.
+ * Attachments live at message level (orthogonal to blocks, which are the
+ * assistant's chronological render units).
+ */
+export interface MessageAttachment {
+  id: string;
+  name: string;
+  mimeType: string;
+  url: string;
+  size?: number;
+}
+
+/**
  * A conversation message. Assistant messages carry blocks.
  */
 export interface AgentMessage {
@@ -62,6 +76,8 @@ export interface AgentMessage {
    */
   content: string;
   blocks?: AgentBlock[];
+  /** Multimodal attachments (user messages; currently images). */
+  attachments?: MessageAttachment[];
   status: MessageStatus;
   createdAt?: number;
 }

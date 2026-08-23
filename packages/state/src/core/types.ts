@@ -37,13 +37,25 @@ export interface EventFeed {
 // ─── History Loading Input ────────────────────────────────────────
 
 /**
+ * One element of a colts multimodal `content[]` (OpenAI content-parts shape).
+ * `image_url.url` may be a data URL, http(s) URL, or a `file:` reference
+ * (relative to the session dir — the host resolves it before rendering).
+ */
+export type ColtsContentPart =
+  | { type: 'text'; text: string }
+  | { type: 'image_url'; image_url: { url: string; detail?: string | null } };
+
+/**
  * Minimal representation of a colts Message, used for history loading.
  * The state package does not depend on colts — this is a structural type
  * that accepts colts Message[] without importing it.
+ *
+ * `content` is a bare string for plain-text messages (the untagged wire
+ * shape) or a content-parts array for multimodal messages.
  */
 export interface ColtsMessageInput {
   role: string;
-  content: string;
+  content: string | ColtsContentPart[];
   type?: string;
   toolCalls?: Array<{
     id: string;

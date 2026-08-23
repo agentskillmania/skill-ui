@@ -3,10 +3,12 @@
  */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { Sender } from '@ant-design/x';
+import { Tooltip } from 'antd';
 import { css } from '@emotion/react';
 import { memo, useRef } from 'react';
-import type { KeyboardEvent, ReactNode } from 'react';
+import type { ChangeEvent, DragEvent, KeyboardEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Image as ImageIcon, X } from 'lucide-react';
 
 import { ContextUsage } from './ContextUsage.js';
 import { ModelSelector } from './ModelSelector.js';
@@ -15,6 +17,7 @@ import type { CommandAutocompleteRef } from '../commands/CommandAutocomplete.js'
 import { CommandAutocomplete } from '../commands/CommandAutocomplete.js';
 import { NAMESPACE } from '../locales/index.js';
 import type {
+  ChatAttachment,
   ChatCommand,
   ChatContextUsage as ChatContextUsageData,
   ChatModelGroup,
@@ -26,13 +29,31 @@ export interface ChatInputProps {
   value: string;
   /** Callback when input value changes */
   onChange: (value: string) => void;
-  onSubmit?: (message: string) => void;
+  onSubmit?: (message: string, attachments?: ChatAttachment[]) => void;
   onCancel?: () => void;
   loading?: boolean;
   disabled?: boolean;
   placeholder?: string;
   prefix?: ReactNode;
   suffix?: ReactNode;
+
+  /** Pending attachments (controlled — enables attach button/paste/drop/chips) */
+  attachments?: ChatAttachment[];
+  /** Pending-attachments change callback */
+  onAttachmentsChange?: (attachments: ChatAttachment[]) => void;
+  /** Disable attaching (e.g. current model lacks image input) */
+  attachmentsDisabled?: boolean;
+  /** Why attaching is disabled (attach-button tooltip) */
+  attachmentsDisabledReason?: string;
+  /** Max pending attachments (default 5) */
+  maxAttachments?: number;
+  /** Max size per attachment in MB (default 10) */
+  maxAttachmentMB?: number;
+  /** Rejected attach attempts (host surfaces its own toast/i18n) */
+  onAttachmentsRejected?: (
+    reason: 'disabled' | 'too-many' | 'too-large' | 'unsupported-type',
+    files: File[]
+  ) => void;
 
   /** Command list (enables slash autocomplete + toolbar capsules) */
   commands?: ChatCommand[];
@@ -68,6 +89,13 @@ export const ChatInput = memo(function ChatInput({
   placeholder,
   prefix,
   suffix,
+  attachments,
+  onAttachmentsChange,
+  attachmentsDisabled = false,
+  attachmentsDisabledReason,
+  maxAttachments = 5,
+  maxAttachmentMB = 10,
+  onAttachmentsRejected,
   commands,
   onCommand,
   commandTrigger = '/',
@@ -95,6 +123,74 @@ export const ChatInput = memo(function ChatInput({
   // exposes a keydown handler for navigation; we delegate to it here so
   // ArrowUp/Down/Enter/Escape drive the panel while the user keeps typing.
   const cmdRef = useRef<CommandAutocompleteRef>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // ── Attachments ──
+  const attachEnabled = Boolean(onAttachmentsChange);
+
+  const readAsAttachment = (file: File): Promise<ChatAttachment> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () =>
+        resolve({
+          id: `att-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+          name: file.name || 'image',
+          mimeType: file.type || 'image/png',
+          url: reader.result as string,
+          size: file.size,
+        });
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(file);
+    });
+
+  const handleFiles = (incoming: File[]) => {
+    if (!onAttachmentsChange || incoming.length === 0) return;
+    if (attachmentsDisabled) {
+      onAttachmentsRejected?.('disabled', incoming);
+      return;
+    }
+    const images = incoming.filter((f) => f.type.startsWith('image/'));
+    const rejected = incoming.filter((f) => !f.type.startsWith('image/'));
+    if (rejected.length > 0) onAttachmentsRejected?.('unsupported-type', rejected);
+    if (images.length === 0) return;
+    const room = maxAttachments - (attachments?.length ?? 0);
+    if (images.length > room) {
+      onAttachmentsRejected?.('too-many', images);
+      return;
+    }
+    const tooLarge = images.filter((f) => f.size > maxAttachmentMB * 1024 * 1024);
+    if (tooLarge.length > 0) {
+      onAttachmentsRejected?.('too-large', tooLarge);
+      return;
+    }
+    void Promise.all(images.map(readAsAttachment)).then((converted) => {
+      onAttachmentsChange([...(attachments ?? []), ...converted]);
+    });
+  };
+
+  const handlePasteFile = (files: FileList) => handleFiles(Array.from(files));
+
+  const handleDrop = (e: DragEvent) => {
+    if (!attachEnabled) return;
+    e.preventDefault();
+    handleFiles(Array.from(e.dataTransfer.files));
+  };
+
+  const handlePick = (e: ChangeEvent<HTMLInputElement>) => {
+    handleFiles(Array.from(e.target.files ?? []));
+    // 允许连续选同一文件:清空 input 的选中态。
+    e.target.value = '';
+  };
+
+  const removeAttachment = (id: string) => {
+    onAttachmentsChange?.((attachments ?? []).filter((a) => a.id !== id));
+  };
+
+  const formatSize = (bytes?: number): string => {
+    if (bytes == null) return '';
+    if (bytes >= 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+    return `${Math.max(1, Math.round(bytes / 1024))} KB`;
+  };
 
   const handleKeyDown = (e: KeyboardEvent) => {
     if (e.key === 'Enter' && Date.now() - lastCompositionEndRef.current < 80) {
@@ -109,7 +205,8 @@ export const ChatInput = memo(function ChatInput({
 
   const handleSubmit = (val: string) => {
     const trimmed = val.trim();
-    if (!trimmed) {
+    // 空文本 + 有附件 = 合法的纯图消息;两者都空才忽略。
+    if (!trimmed && !(attachments && attachments.length > 0)) {
       return;
     }
     // A leading trigger (e.g. "/") means a command message: resolve it to a
@@ -125,7 +222,10 @@ export const ChatInput = memo(function ChatInput({
         return;
       }
     }
-    onSubmit?.(trimmed);
+    const pendingAttachments = attachments && attachments.length > 0 ? attachments : undefined;
+    // 无附件时保持单参调用形态(向后兼容:宿主的 mock 断言不受影响)。
+    if (pendingAttachments) onSubmit?.(trimmed, pendingAttachments);
+    else onSubmit?.(trimmed);
   };
 
   const handleCommandSelect = (command: ChatCommand) => {
@@ -140,7 +240,7 @@ export const ChatInput = memo(function ChatInput({
   const showModel = Boolean(models && models.length > 0 && onModelChange);
   const showThinking = Boolean(onThinkingChange);
   const showUsage = Boolean(contextUsage);
-  const showToolbar = showCommands || showModel || showThinking || showUsage;
+  const showToolbar = showCommands || showModel || showThinking || showUsage || attachEnabled;
 
   const toolbarElement = showToolbar ? (
     <div
@@ -203,7 +303,7 @@ export const ChatInput = memo(function ChatInput({
         </div>
       )}
 
-      {/* Right: model / thinking / context */}
+      {/* Right: attach / model / thinking / context */}
       <div
         css={css`
           display: flex;
@@ -212,6 +312,62 @@ export const ChatInput = memo(function ChatInput({
           flex-shrink: 0;
         `}
       >
+        {attachEnabled && (
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={handlePick}
+            />
+            <Tooltip
+              title={
+                attachmentsDisabled
+                  ? (attachmentsDisabledReason ?? t('chatInput.attachDisabled'))
+                  : t('chatInput.attachImage')
+              }
+            >
+              <span
+                css={css`
+                  display: inline-flex;
+                `}
+              >
+                <button
+                  type="button"
+                  data-testid="attach-button"
+                  aria-label={t('chatInput.attachImage')}
+                  disabled={disabled || attachmentsDisabled}
+                  onClick={() => fileInputRef.current?.click()}
+                  css={css`
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 26px;
+                    height: 26px;
+                    border: none;
+                    border-radius: ${theme.radius.md};
+                    background: transparent;
+                    color: ${theme.color.textSecondary};
+                    cursor: pointer;
+                    transition: all ${theme.motion.duration.fast} ${theme.motion.easing.out};
+
+                    &:hover:not(:disabled) {
+                      background: ${theme.color.hoverOverlay};
+                    }
+                    &:disabled {
+                      color: ${theme.color.textDisabled};
+                      cursor: not-allowed;
+                    }
+                  `}
+                >
+                  <ImageIcon size={15} />
+                </button>
+              </span>
+            </Tooltip>
+          </>
+        )}
         {showModel && (
           <ModelSelector
             groups={models!}
@@ -227,6 +383,99 @@ export const ChatInput = memo(function ChatInput({
       </div>
     </div>
   ) : null;
+
+  // ---- Attachment chips (Sender header slot — inside the input box top) ----
+  const chipsElement =
+    attachEnabled && attachments && attachments.length > 0 ? (
+      <div
+        data-testid="attachment-chips"
+        css={css`
+          display: flex;
+          flex-wrap: wrap;
+          gap: ${theme.spacing[2]};
+          padding: ${theme.spacing[2]} ${theme.spacing[3]} 0;
+        `}
+      >
+        {attachments.map((a) => (
+          <div
+            key={a.id}
+            css={css`
+              display: flex;
+              align-items: center;
+              gap: ${theme.spacing[2]};
+              background: ${theme.color.fillSubtle};
+              border: 1px solid ${theme.color.borderSecondary};
+              border-radius: ${theme.radius.md};
+              padding: 5px 8px 5px 5px;
+              position: relative;
+            `}
+          >
+            <img
+              src={a.url}
+              alt={a.name}
+              css={css`
+                width: 34px;
+                height: 34px;
+                border-radius: ${theme.radius.sm};
+                object-fit: cover;
+                border: 1px solid ${theme.color.borderSecondary};
+                flex-shrink: 0;
+              `}
+            />
+            <span>
+              <div
+                css={css`
+                  font-size: ${theme.font.size.sm};
+                  color: ${theme.color.text};
+                  line-height: 1.3;
+                  max-width: 140px;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  white-space: nowrap;
+                `}
+              >
+                {a.name}
+              </div>
+              <div
+                css={css`
+                  font-size: ${theme.font.size.xs};
+                  color: ${theme.color.textTertiary};
+                  line-height: 1.3;
+                `}
+              >
+                {formatSize(a.size)}
+              </div>
+            </span>
+            <button
+              type="button"
+              aria-label={t('chatInput.removeAttachment')}
+              onClick={() => removeAttachment(a.id)}
+              css={css`
+                position: absolute;
+                top: -6px;
+                right: -6px;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: ${theme.color.bgContainer};
+                border: 1px solid ${theme.color.border};
+                color: ${theme.color.textTertiary};
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                cursor: pointer;
+                &:hover {
+                  color: ${theme.color.error};
+                }
+              `}
+            >
+              <X size={10} />
+            </button>
+          </div>
+        ))}
+      </div>
+    ) : null;
 
   const senderElement = (
     <div
@@ -251,6 +500,11 @@ export const ChatInput = memo(function ChatInput({
         >
           {prefix}
           <div
+            data-testid="chat-input-dropzone"
+            onDragOver={(e) => {
+              if (attachEnabled) e.preventDefault();
+            }}
+            onDrop={handleDrop}
             css={css`
               flex: 1;
               min-width: 0;
@@ -274,6 +528,8 @@ export const ChatInput = memo(function ChatInput({
               disabled={disabled}
               loading={loading}
               onKeyDown={handleKeyDown}
+              onPasteFile={attachEnabled ? handlePasteFile : undefined}
+              header={chipsElement ?? undefined}
               autoSize={{ minRows: 1, maxRows: 4 }}
               style={{
                 border: 'none',

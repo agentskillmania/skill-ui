@@ -11,7 +11,7 @@
  */
 
 // ─── Shared types (cross-slice) ───────────────────────────────────
-export type { SSEEvent, EventFeed, ColtsMessageInput } from './core/types.js';
+export type { SSEEvent, EventFeed, ColtsMessageInput, ColtsContentPart } from './core/types.js';
 
 // ─── Conversation slice: types ────────────────────────────────────
 export type {
@@ -21,6 +21,7 @@ export type {
   MessageRole,
   AgentBlock,
   AgentMessage,
+  MessageAttachment,
   EventCategory,
   AgentEvent,
   AgentRunState,

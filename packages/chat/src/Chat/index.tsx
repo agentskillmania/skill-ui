@@ -43,6 +43,13 @@ export function Chat({
   thinking,
   onThinkingChange,
   contextUsage,
+  attachments,
+  onAttachmentsChange,
+  attachmentsDisabled,
+  attachmentsDisabledReason,
+  maxAttachments,
+  maxAttachmentMB,
+  onAttachmentsRejected,
 }: ChatProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
@@ -126,6 +133,13 @@ export function Chat({
             thinking={thinking}
             onThinkingChange={onThinkingChange}
             contextUsage={contextUsage}
+            attachments={attachments}
+            onAttachmentsChange={onAttachmentsChange}
+            attachmentsDisabled={attachmentsDisabled}
+            attachmentsDisabledReason={attachmentsDisabledReason}
+            maxAttachments={maxAttachments}
+            maxAttachmentMB={maxAttachmentMB}
+            onAttachmentsRejected={onAttachmentsRejected}
           />
         </div>
       </div>

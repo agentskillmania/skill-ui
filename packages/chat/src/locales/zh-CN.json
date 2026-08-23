@@ -67,6 +67,9 @@
   },
   "chatInput": {
     "model": "模型",
+    "attachImage": "添加图片",
+    "attachDisabled": "当前不可添加图片",
+    "removeAttachment": "移除附件",
     "thinking": {
       "auto": "自动",
       "on": "思考",

@@ -808,3 +808,23 @@ describe('reducer — session-cleared (destructive reset)', () => {
     expect(state.events.some((e) => e.type === 'session-cleared')).toBe(true);
   });
 });
+
+describe('reducer — user-message attachments', () => {
+  it('passes attachments through onto the user message (message level, not blocks)', () => {
+    const attachments = [
+      {
+        id: 'a1',
+        name: 'shot.png',
+        mimeType: 'image/png',
+        url: 'data:image/png;base64,QUJD',
+        size: 3,
+      },
+    ];
+    const state = pushEvents([{ event: 'user-message', data: { content: '看图', attachments } }]);
+    const user = state.main.messages.find((m) => m.role === 'user');
+    expect(user?.attachments).toEqual(attachments);
+    // 无附件的旧事件形态保持 undefined(渲染层不出现空网格)。
+    const legacy = pushEvents([{ event: 'user-message', data: { content: 'hi' } }]);
+    expect(legacy.main.messages.find((m) => m.role === 'user')?.attachments).toBeUndefined();
+  });
+});

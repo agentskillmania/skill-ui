@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ChatWrapper } from './testUtils.js';
 import { ChatInput } from '../../src/ChatInput/index.js';
 import type { ChatCommand } from '../../src/types.js';
@@ -371,5 +371,149 @@ describe('ChatInput', () => {
     const rail = container.querySelector('.ant-progress-circle-rail');
     expect(rail).not.toBeNull();
     expect(rail!.getAttribute('stroke')).toBe('#cbd5e1'); // lightTheme.borderHover
+  });
+});
+
+describe('ChatInput — attachments', () => {
+  const pngFile = (name = 'shot.png', size = 1024) =>
+    new File([new Uint8Array(size)], name, { type: 'image/png' });
+  const attachment = (id: string) => ({
+    id,
+    name: `${id}.png`,
+    mimeType: 'image/png',
+    url: `data:image/png;base64,${id}`,
+    size: 1024,
+  });
+
+  it('renders pending attachments as chips; × removes that one', () => {
+    const onAttachmentsChange = vi.fn();
+    render(
+      <ChatWrapper>
+        <ChatInput
+          attachments={[attachment('a1'), attachment('a2')]}
+          onAttachmentsChange={onAttachmentsChange}
+        />
+      </ChatWrapper>
+    );
+    expect(screen.getByTestId('attachment-chips')).toBeInTheDocument();
+    expect(screen.getByText('a1.png')).toBeInTheDocument();
+    const removeButtons = screen.getAllByLabelText('移除附件');
+    fireEvent.click(removeButtons[0]);
+    expect(onAttachmentsChange).toHaveBeenCalledWith([attachment('a2')]);
+  });
+
+  it('attach button requires onAttachmentsChange; disabled by attachmentsDisabled', () => {
+    const { rerender } = render(
+      <ChatWrapper>
+        <ChatInput />
+      </ChatWrapper>
+    );
+    expect(screen.queryByTestId('attach-button')).toBeNull();
+
+    rerender(
+      <ChatWrapper>
+        <ChatInput onAttachmentsChange={() => {}} attachmentsDisabled />
+      </ChatWrapper>
+    );
+    expect(screen.getByTestId('attach-button')).toBeDisabled();
+  });
+
+  it('drop an image converts it to an attachment (data URL)', async () => {
+    const onAttachmentsChange = vi.fn();
+    render(
+      <ChatWrapper>
+        <ChatInput attachments={[]} onAttachmentsChange={onAttachmentsChange} />
+      </ChatWrapper>
+    );
+    fireEvent.drop(screen.getByTestId('chat-input-dropzone'), {
+      dataTransfer: { files: [pngFile()] },
+    });
+    await waitFor(() => expect(onAttachmentsChange).toHaveBeenCalled());
+    const next = onAttachmentsChange.mock.calls[0][0];
+    expect(next).toHaveLength(1);
+    expect(next[0].name).toBe('shot.png');
+    expect(next[0].mimeType).toBe('image/png');
+    expect(next[0].url).toMatch(/^data:image\/png;base64,/);
+    expect(next[0].size).toBe(1024);
+  });
+
+  it('drop is rejected with reason when disabled / wrong type / too many / too large', () => {
+    const onAttachmentsRejected = vi.fn();
+    const change = vi.fn();
+    const { rerender } = render(
+      <ChatWrapper>
+        <ChatInput
+          attachments={[]}
+          onAttachmentsChange={change}
+          attachmentsDisabled
+          onAttachmentsRejected={onAttachmentsRejected}
+        />
+      </ChatWrapper>
+    );
+    const drop = (files: File[]) =>
+      fireEvent.drop(screen.getByTestId('chat-input-dropzone'), {
+        dataTransfer: { files },
+      });
+
+    drop([pngFile()]);
+    expect(onAttachmentsRejected).toHaveBeenLastCalledWith('disabled', [expect.any(File)]);
+
+    rerender(
+      <ChatWrapper>
+        <ChatInput
+          attachments={[]}
+          onAttachmentsChange={change}
+          onAttachmentsRejected={onAttachmentsRejected}
+        />
+      </ChatWrapper>
+    );
+    drop([new File(['x'], 'doc.txt', { type: 'text/plain' })]);
+    expect(onAttachmentsRejected).toHaveBeenLastCalledWith('unsupported-type', [expect.any(File)]);
+
+    drop([pngFile('1'), pngFile('2'), pngFile('3'), pngFile('4'), pngFile('5'), pngFile('6')]);
+    expect(onAttachmentsRejected).toHaveBeenLastCalledWith('too-many', expect.any(Array));
+
+    drop([pngFile('big.png', 11 * 1024 * 1024)]);
+    expect(onAttachmentsRejected).toHaveBeenLastCalledWith('too-large', [expect.any(File)]);
+    expect(change).not.toHaveBeenCalled();
+  });
+
+  it('submit passes attachments as the second argument', () => {
+    const onSubmit = vi.fn();
+    render(
+      <ChatWrapper>
+        <ChatInput value="看图说话" attachments={[attachment('a1')]} onSubmit={onSubmit} />
+      </ChatWrapper>
+    );
+    const textarea = screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)');
+    fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
+    expect(onSubmit).toHaveBeenCalledWith('看图说话', [attachment('a1')]);
+  });
+
+  it('image-only submit (empty text + attachments) is allowed', () => {
+    const onSubmit = vi.fn();
+    render(
+      <ChatWrapper>
+        <ChatInput value="" attachments={[attachment('a1')]} onSubmit={onSubmit} />
+      </ChatWrapper>
+    );
+    const textarea = screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)');
+    fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
+    expect(onSubmit).toHaveBeenCalledWith('', [attachment('a1')]);
+  });
+
+  it('plain submit without attachments keeps single-argument semantics', () => {
+    const onSubmit = vi.fn();
+    render(
+      <ChatWrapper>
+        <ChatInput value="纯文本" onSubmit={onSubmit} />
+      </ChatWrapper>
+    );
+    const textarea = screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)');
+    fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
+    expect(onSubmit).toHaveBeenCalledWith('纯文本');
+    // 单参形态:第二参不存在(而不是显式 undefined)——宿主旧的
+    // toHaveBeenCalledWith('...') 断言不受影响。
+    expect(onSubmit.mock.calls[0]).toHaveLength(1);
   });
 });

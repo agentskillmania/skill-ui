@@ -23,11 +23,12 @@ import type {
   SessionRunState,
   AgentMessage,
   AgentBlock,
+  MessageAttachment,
   SubAgentRunState,
   TodoListSnapshot,
 } from './types.js';
 import { createEmptySessionState, createEmptyRunState } from './types.js';
-import type { ColtsMessageInput } from '../types.js';
+import type { ColtsContentPart, ColtsMessageInput } from '../types.js';
 
 /** fromHistory 的可选附加输入(daemon 持久化在 context.todoList 的快照)。 */
 export interface FromHistoryExtras {
@@ -38,6 +39,63 @@ export interface FromHistoryExtras {
 let histBlockIdCounter = 0;
 function genHistBlockId(): string {
   return `hist-blk-${++histBlockIdCounter}`;
+}
+
+let histAttachmentIdCounter = 0;
+
+/** colts content 的文本投影:字符串原样;parts 按 plain_text 规则拼接
+ * (text 段 + 图片 [image] 占位),与 daemon 的事件/token 估算口径一致。 */
+function textOf(content: string | ColtsContentPart[] | undefined): string {
+  if (content == null) return '';
+  if (typeof content === 'string') return content;
+  return content
+    .map((p) => (p.type === 'text' ? p.text : '[image]'))
+    .filter((s) => s.length > 0)
+    .join('\n');
+}
+
+/** `file:` 引用的 basename 作为附件名(如 file:img-1.png → img-1.png)。 */
+function attachmentNameOf(url: string): string {
+  if (url.startsWith('file:')) {
+    const base = url.slice('file:'.length).split('/').pop();
+    if (base) return base;
+  }
+  return 'image';
+}
+
+/** 从 data URL 或文件扩展名猜 mime,兜底 image/png。 */
+function attachmentMimeOf(url: string): string {
+  const dataMatch = /^data:([^;,]+)[;,]/.exec(url);
+  if (dataMatch) return dataMatch[1];
+  const ext = url.split('.').pop()?.toLowerCase();
+  if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';
+  if (ext === 'gif') return 'image/gif';
+  if (ext === 'webp') return 'image/webp';
+  if (ext === 'svg') return 'image/svg+xml';
+  return 'image/png';
+}
+
+/** user 消息的 content 拆分:文本进 content,图片成 attachments。
+ * `file:` 引用的 url 原样保留——宿主(gmemo)在渲染前自行解析成可展示 URL。 */
+function normalizeUserContent(content: string | ColtsContentPart[]): {
+  text: string;
+  attachments?: MessageAttachment[];
+} {
+  if (typeof content === 'string') return { text: content };
+  const text = content
+    .filter((p): p is Extract<ColtsContentPart, { type: 'text' }> => p.type === 'text')
+    .map((p) => p.text)
+    .filter((s) => s.length > 0)
+    .join('\n');
+  const attachments = content
+    .filter((p): p is Extract<ColtsContentPart, { type: 'image_url' }> => p.type === 'image_url')
+    .map((p) => ({
+      id: `hist-att-${++histAttachmentIdCounter}`,
+      name: attachmentNameOf(p.image_url.url),
+      mimeType: attachmentMimeOf(p.image_url.url),
+      url: p.image_url.url,
+    }));
+  return { text, attachments: attachments.length > 0 ? attachments : undefined };
 }
 
 /** Tool names that map to special block types */
@@ -74,10 +132,12 @@ export function fromHistory(
 
   for (const msg of messages) {
     if (msg.role === 'user') {
+      const { text, attachments } = normalizeUserContent(msg.content);
       agentMessages.push({
         id: `hist-msg-${agentMessages.length}`,
         role: 'user',
-        content: msg.content,
+        content: text,
+        ...(attachments ? { attachments } : {}),
         status: 'completed',
         createdAt: msg.timestamp,
       });
@@ -88,13 +148,14 @@ export function fromHistory(
     }
 
     if (msg.role === 'assistant') {
+      const msgText = textOf(msg.content);
       // Check for thinking (type='thought')
       if (msg.type === 'thought') {
         const thinkingBlock: AgentBlock = {
           id: genHistBlockId(),
           type: 'thinking',
           status: 'completed',
-          content: msg.content,
+          content: msgText,
         };
         // Append in storage order — the thought row sits exactly where the
         // reasoning happened (usually right before its action row).
@@ -118,18 +179,18 @@ export function fromHistory(
       // content and its tool calls belong to the same completion, and the
       // live path streams the tokens before the tool-start events.
       const blocks: AgentBlock[] = [];
-      if (msg.content) {
+      if (msgText) {
         blocks.push({
           id: genHistBlockId(),
           type: 'text',
           status: 'completed',
-          content: msg.content,
+          content: msgText,
         });
       }
       if (msg.toolCalls && msg.toolCalls.length > 0) {
         for (const tc of msg.toolCalls) {
           const result = toolResults.get(tc.id);
-          const resultContent = result?.content ?? '';
+          const resultContent = result ? textOf(result.content) : '';
 
           if (tc.name === SKILL_TOOL) {
             blocks.push({
@@ -250,19 +311,19 @@ export function fromHistory(
 
       // If there are blocks, attach to an assistant message
       // If there's also text content, it's the assistant's reasoning/answer
-      if (blocks.length > 0 || msg.content) {
+      if (blocks.length > 0 || msgText) {
         // Merge into the current turn's bubble when one exists (the storage
         // layer splits one turn into one row per LLM call — action/text/
         // thought — so the reconstructed view must rejoin them into a single
         // bubble to match the live reducer, which merges a whole run).
         if (current) {
           current.blocks = [...(current.blocks ?? []), ...blocks];
-          current.content = current.content + (msg.content ?? '');
+          current.content = current.content + msgText;
         } else {
           current = {
             id: `hist-msg-${agentMessages.length}`,
             role: 'assistant',
-            content: msg.content ?? '',
+            content: msgText,
             status: 'completed',
             createdAt: msg.timestamp,
             blocks: blocks.length > 0 ? blocks : undefined,
@@ -281,7 +342,7 @@ export function fromHistory(
       agentMessages.push({
         id: `hist-msg-${agentMessages.length}`,
         role: 'system',
-        content: msg.content,
+        content: textOf(msg.content),
         status: 'completed',
         createdAt: msg.timestamp,
       });

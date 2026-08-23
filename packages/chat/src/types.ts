@@ -19,6 +19,24 @@ export type HumanInputType = 'confirmation' | 'input' | 'single-select' | 'multi
 
 // ---- Core Data Models ----
 
+/**
+ * A binary attachment (multimodal input — currently images), either pending
+ * in the composer or already sent on a user message. `url` is renderable
+ * as-is: a data URL for local files, http(s) for remote.
+ */
+export interface ChatAttachment {
+  /** Unique identifier */
+  id: string;
+  /** File name */
+  name: string;
+  /** MIME type (image/*) */
+  mimeType: string;
+  /** Renderable URL (data URL / http(s)) */
+  url: string;
+  /** Byte size */
+  size?: number;
+}
+
 /** Message */
 export interface Message {
   /** Unique identifier */
@@ -29,6 +47,8 @@ export interface Message {
   content: string;
   /** Block list (assistant messages) */
   blocks?: Block[];
+  /** Attachments (user messages; rendered above the text) */
+  attachments?: ChatAttachment[];
   /** Message status */
   status: MessageStatus;
   /** Creation timestamp */
@@ -293,8 +313,8 @@ export interface ChatProps {
   messages: Message[];
 
   // Message interactions
-  /** Send message callback */
-  onSendMessage?: (content: string) => void;
+  /** Send message callback (attachments present when the composer holds any) */
+  onSendMessage?: (content: string, attachments?: ChatAttachment[]) => void;
   /** Stop generation callback */
   onStop?: () => void;
   /** Human interaction confirmation callback */
@@ -317,6 +337,28 @@ export interface ChatProps {
   inputValue: string;
   /** Input value change callback */
   onInputChange: (value: string) => void;
+
+  // Attachments (composer, controlled — mirrors inputValue/onInputChange)
+  /** Pending attachments in the composer. Pair with onAttachmentsChange to
+   * enable the attach button / paste / drop flows and the chip strip. */
+  attachments?: ChatAttachment[];
+  /** Pending-attachments change callback */
+  onAttachmentsChange?: (attachments: ChatAttachment[]) => void;
+  /** Disable attaching (e.g. current model lacks image input). Paste/drop
+   * are rejected via onAttachmentsRejected; the attach button shows
+   * attachmentsDisabledReason in its tooltip. */
+  attachmentsDisabled?: boolean;
+  /** Why attaching is disabled (attach-button tooltip) */
+  attachmentsDisabledReason?: string;
+  /** Max pending attachments (default 5) */
+  maxAttachments?: number;
+  /** Max size per attachment in MB (default 10) */
+  maxAttachmentMB?: number;
+  /** Rejected attach attempts (host surfaces its own toast/i18n) */
+  onAttachmentsRejected?: (
+    reason: 'disabled' | 'too-many' | 'too-large' | 'unsupported-type',
+    files: File[]
+  ) => void;
 
   // Status
   /** Chat overall status */
