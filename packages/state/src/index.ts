@@ -58,6 +58,7 @@ export {
 
 // ─── Conversation slice: history loading ──────────────────────────
 export { fromHistory } from './core/conversation/fromHistory.js';
+export type { FromHistoryExtras } from './core/conversation/fromHistory.js';
 
 // ─── Diagnostics slice: types ─────────────────────────────────────
 export type {

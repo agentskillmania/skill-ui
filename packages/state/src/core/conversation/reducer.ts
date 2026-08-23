@@ -224,6 +224,16 @@ function closeAllBlocks(blocks: AgentBlock[]): AgentBlock[] {
   return blocks.map((b) => (b.status === 'streaming' ? { ...b, status: 'completed' as const } : b));
 }
 
+/** Locate the singleton todo block maintained by the todo-list handler
+ * (latest match wins — there should only ever be one per run). */
+function findTodoBlock(messages: AgentMessage[]): { messageId: string; blockId: string } | null {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const b = messages[i].blocks?.find((x) => x.type === 'todo');
+    if (b) return { messageId: messages[i].id, blockId: b.id };
+  }
+  return null;
+}
+
 /**
  * Close blocks on terminal events (done/error). Streaming blocks flip to the
  * terminal status; pending human_input blocks flip too — once the run is over,
@@ -665,7 +675,46 @@ function reduceMainEvent(
               : {}),
           })),
       };
-      return { ...state, todoList };
+      // 单例内联块:首个非空清单在当前 streaming 消息末尾建 todo 块,后续
+      // 事件原地更新 metadata.items(不新建/不挪位/不累积)。终态由
+      // done/error 的 closeTerminalBlocks 类型无关收尾,无需特判。
+      const existing = findTodoBlock(state.messages);
+      if (existing) {
+        return {
+          ...state,
+          todoList,
+          messages: state.messages.map((m) =>
+            m.id === existing.messageId
+              ? {
+                  ...m,
+                  blocks: (m.blocks ?? []).map((b) =>
+                    b.id === existing.blockId
+                      ? { ...b, metadata: { ...b.metadata, items: todoList.items } }
+                      : b
+                  ),
+                }
+              : m
+          ),
+        };
+      }
+      if (todoList.items.length === 0) {
+        return { ...state, todoList };
+      }
+      const { run, messageId } = ensureStreamingMessage(state);
+      const todoBlock: AgentBlock = {
+        id: genBlockId(),
+        type: 'todo',
+        status: 'streaming',
+        content: '',
+        metadata: { items: todoList.items },
+      };
+      return {
+        ...run,
+        todoList,
+        messages: run.messages.map((m) =>
+          m.id === messageId ? { ...m, blocks: [...(m.blocks ?? []), todoBlock] } : m
+        ),
+      };
     }
 
     // ── Step lifecycle ──

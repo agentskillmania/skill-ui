@@ -84,6 +84,41 @@ describe('fromHistory', () => {
     expect(blocks?.[1].metadata).not.toHaveProperty('toolType');
   });
 
+  it('restores todoList snapshot and synthesizes one completed todo block', () => {
+    const messages: ColtsMessageInput[] = [
+      { role: 'user', content: 'plan please', timestamp: 1000 },
+      { role: 'assistant', content: 'on it', type: 'action', timestamp: 2000 },
+    ];
+    const todoList = {
+      items: [
+        { id: 1, subject: 'draft', status: 'completed' as const },
+        { id: 2, subject: 'review', status: 'pending' as const },
+      ],
+    };
+    const state = fromHistory(messages, { todoList });
+    // 快照恢复(侧栏数据源)
+    expect(state.main.todoList?.items).toHaveLength(2);
+    // 合成单个 completed 块,挂到最后一条 assistant 消息
+    const msgs = selectMainMessages(state);
+    const lastAssistant = [...msgs].reverse().find((m) => m.role === 'assistant')!;
+    const todoBlocks = lastAssistant.blocks?.filter((b) => b.type === 'todo');
+    expect(todoBlocks).toHaveLength(1);
+    expect(todoBlocks![0].status).toBe('completed');
+    const items = todoBlocks![0].metadata?.items as Array<{ subject: string }>;
+    expect(items[1].subject).toBe('review');
+  });
+
+  it('without extras no todo block is synthesized (legacy archives)', () => {
+    const messages: ColtsMessageInput[] = [
+      { role: 'user', content: 'hi', timestamp: 1000 },
+      { role: 'assistant', content: 'hello', type: 'action', timestamp: 2000 },
+    ];
+    const state = fromHistory(messages);
+    expect(state.main.todoList).toBeUndefined();
+    const msgs = selectMainMessages(state);
+    expect(msgs.flatMap((m) => m.blocks?.filter((b) => b.type === 'todo') ?? [])).toHaveLength(0);
+  });
+
   it('reconstructs skill blocks from load_skill tool calls', () => {
     const messages: ColtsMessageInput[] = [
       {

@@ -630,6 +630,45 @@ describe('reducer — text blocks & interleaved ordering', () => {
     expect(blocks?.[0].metadata?.toolType).toBe('mcp');
     expect(blocks?.[1].metadata).not.toHaveProperty('toolType');
   });
+
+  it('todo-list creates a singleton inline block and updates it in place', () => {
+    const items1 = [{ id: 1, subject: 'task A', status: 'in_progress' }];
+    const items2 = [
+      { id: 1, subject: 'task A', status: 'completed' },
+      { id: 2, subject: 'task B', status: 'pending' },
+    ];
+    const state = pushEvents([
+      { event: 'token', data: { delta: 'working' } },
+      { event: 'todo-list', data: { items: items1 } },
+      { event: 'todo-list', data: { items: items2 } },
+    ]);
+    // 快照取最新
+    expect(state.main.todoList?.items).toHaveLength(2);
+    // 只有一个 todo 块,原地更新:同消息、同 block id
+    const allTodo = state.main.messages.flatMap(
+      (m) => m.blocks?.filter((b) => b.type === 'todo') ?? []
+    );
+    expect(allTodo).toHaveLength(1);
+    expect(allTodo[0].status).toBe('streaming');
+    const items = allTodo[0].metadata?.items as Array<{ subject: string }>;
+    expect(items).toHaveLength(2);
+    expect(items[1].subject).toBe('task B');
+  });
+
+  it('todo-list with empty items does not create a block; done closes it', () => {
+    const empty = pushEvents([{ event: 'todo-list', data: { items: [] } }]);
+    expect(empty.main.todoList?.items).toHaveLength(0);
+    expect(
+      empty.main.messages.flatMap((m) => m.blocks?.filter((b) => b.type === 'todo') ?? [])
+    ).toHaveLength(0);
+
+    const done = pushEvents([
+      { event: 'todo-list', data: { items: [{ id: 1, subject: 't', status: 'completed' }] } },
+      { event: 'done', data: { status: 'success' } },
+    ]);
+    const todo = done.main.messages.flatMap((m) => m.blocks ?? []).find((b) => b.type === 'todo');
+    expect(todo?.status).toBe('completed');
+  });
 });
 
 describe('reducer — empty thinking events', () => {

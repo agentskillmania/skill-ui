@@ -19,9 +19,21 @@
  * animations are runtime-only and cannot be reconstructed.
  */
 
-import type { SessionRunState, AgentMessage, AgentBlock, SubAgentRunState } from './types.js';
+import type {
+  SessionRunState,
+  AgentMessage,
+  AgentBlock,
+  SubAgentRunState,
+  TodoListSnapshot,
+} from './types.js';
 import { createEmptySessionState, createEmptyRunState } from './types.js';
 import type { ColtsMessageInput } from '../types.js';
+
+/** fromHistory 的可选附加输入(daemon 持久化在 context.todoList 的快照)。 */
+export interface FromHistoryExtras {
+  /** 给了就恢复 state.todoList(侧栏据此渲染),并合成一个内联 todo 块。 */
+  todoList?: TodoListSnapshot;
+}
 
 let histBlockIdCounter = 0;
 function genHistBlockId(): string {
@@ -40,7 +52,10 @@ const DELEGATE_TOOL = 'delegate';
  * are paired with their subsequent role:'tool' result messages to build
  * blocks. Sub-agent (delegate) results are parsed for summary metrics.
  */
-export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
+export function fromHistory(
+  messages: ColtsMessageInput[],
+  extras?: FromHistoryExtras
+): SessionRunState {
   const state = createEmptySessionState();
   const agentMessages: AgentMessage[] = [];
   const subAgents = new Map<string, SubAgentRunState>();
@@ -281,6 +296,27 @@ export function fromHistory(messages: ColtsMessageInput[]): SessionRunState {
     messages: agentMessages,
   };
   state.subAgents = subAgents;
+
+  // todo 快照恢复:state.todoList 供侧栏渲染;内联块只合成一个(快照语义
+  // —— 表现最终清单,不为历史里的每次写入补块),挂到最后一条 assistant
+  // 消息末尾。
+  const snapshot = extras?.todoList;
+  if (snapshot && snapshot.items.length > 0) {
+    state.main.todoList = snapshot;
+    for (let i = agentMessages.length - 1; i >= 0; i--) {
+      const m = agentMessages[i];
+      if (m.role !== 'assistant') continue;
+      const todoBlock: AgentBlock = {
+        id: genHistBlockId(),
+        type: 'todo',
+        status: 'completed',
+        content: '',
+        metadata: { items: snapshot.items },
+      };
+      m.blocks = [...(m.blocks ?? []), todoBlock];
+      break;
+    }
+  }
 
   return state;
 }
