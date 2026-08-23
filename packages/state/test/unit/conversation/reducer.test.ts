@@ -609,6 +609,58 @@ describe('reducer — text blocks & interleaved ordering', () => {
     expect(msg.content).toBe('sub prosesub final');
   });
 
+  // ── Mid-run closure: only the ACTIVE trailing segment may blink ──
+  // A text block's streaming flag drives the markdown cursor; when the next
+  // segment starts, the previous one must close immediately (not at `done`).
+
+  it('tool-start closes the open text block mid-run', () => {
+    const state = pushEvents([
+      { event: 'token', data: { delta: 'prose' } },
+      { event: 'tool-start', data: { id: 'c1', name: 'shell', args: {} } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    expect(msg.blocks![0]).toMatchObject({ type: 'text', status: 'completed' });
+    expect(msg.blocks![1]).toMatchObject({ type: 'tool_call', status: 'streaming' });
+  });
+
+  it('thinking closes the open text block mid-run (and vice versa)', () => {
+    const state = pushEvents([
+      { event: 'token', data: { delta: 'prose' } },
+      { event: 'thinking', data: { content: 'hmm' } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    expect(msg.blocks![0]).toMatchObject({ type: 'text', status: 'completed' });
+    expect(msg.blocks![1]).toMatchObject({ type: 'thinking', status: 'streaming' });
+  });
+
+  it('at most one streaming prose block at any time (single cursor invariant)', () => {
+    const state = pushEvents([
+      { event: 'thinking', data: { content: 'A' } },
+      { event: 'token', data: { delta: 'one' } },
+      { event: 'thinking', data: { content: 'B' } },
+      { event: 'token', data: { delta: 'two' } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    const open = msg.blocks?.filter((b) => b.status === 'streaming') ?? [];
+    expect(open).toHaveLength(1);
+    expect(open[0]).toMatchObject({ type: 'text', content: 'two' });
+  });
+
+  it('sub-agent tool-start closes the open text block mid-run', () => {
+    const state = pushEvents([
+      { event: 'subagent-start', data: { subtaskId: 's1', name: 'sub', task: 'do' } },
+      { event: 'subagent-token', data: { subtaskId: 's1', delta: 'prose' } },
+      {
+        event: 'subagent-tool-start',
+        data: { subtaskId: 's1', action: { id: 'sc1', tool: 'shell', arguments: {} } },
+      },
+    ]);
+    const sub = state.subAgents.get('s1')!;
+    const msg = sub.messages[sub.messages.length - 1];
+    expect(msg.blocks![0]).toMatchObject({ type: 'text', status: 'completed' });
+    expect(msg.blocks![1]).toMatchObject({ type: 'tool_call', status: 'streaming' });
+  });
+
   it('forwards optional toolType from subagent-tool-start action into metadata', () => {
     const state = pushEvents([
       { event: 'subagent-start', data: { subtaskId: 's1', name: 'sub', task: 'do' } },

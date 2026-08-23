@@ -219,6 +219,30 @@ function closeThinkingBlocks(blocks: AgentBlock[]): AgentBlock[] {
   );
 }
 
+/**
+ * Close open TEXT blocks on a message.
+ *
+ * A text segment ends the moment the next segment begins (thinking, tool
+ * call, skill, …). closeThinkingBlocks is thinking-only, so without this
+ * nothing closed a text block mid-run: every text segment of a run kept
+ * its streaming flag until `done`, and the chat UI rendered a blinking
+ * cursor on ALL of them at once (the cursor is status-driven).
+ */
+function closeTextBlocks(blocks: AgentBlock[]): AgentBlock[] {
+  return blocks.map((b) =>
+    b.type === 'text' && b.status === 'streaming' ? { ...b, status: 'completed' as const } : b
+  );
+}
+
+/**
+ * Close both prose segment kinds (thinking + text). Used when a non-prose
+ * block starts (tool call, skill, human input, sub-agent): the prose that
+ * preceded it is finished by definition.
+ */
+function closeProseBlocks(blocks: AgentBlock[]): AgentBlock[] {
+  return closeTextBlocks(closeThinkingBlocks(blocks));
+}
+
 /** Close every still-streaming block (terminal events: done, sub-agent end). */
 function closeAllBlocks(blocks: AgentBlock[]): AgentBlock[] {
   return blocks.map((b) => (b.status === 'streaming' ? { ...b, status: 'completed' as const } : b));
@@ -339,7 +363,8 @@ function reduceMainEvent(
         ...run,
         messages: run.messages.map((m) => {
           if (m.id !== messageId) return m;
-          const blocks = m.blocks ?? [];
+          // Reasoning (re)starts — any open text segment is finished.
+          const blocks = closeTextBlocks(m.blocks ?? []);
           // Find an open thinking block
           const openThinking = blocks.find(
             (b) => b.type === 'thinking' && b.status === 'streaming'
@@ -402,7 +427,7 @@ function reduceMainEvent(
       return {
         ...run,
         messages: run.messages.map((m) =>
-          m.id === messageId ? { ...m, blocks: [...closeThinkingBlocks(m.blocks ?? []), block] } : m
+          m.id === messageId ? { ...m, blocks: [...closeProseBlocks(m.blocks ?? []), block] } : m
         ),
       };
     }
@@ -480,7 +505,7 @@ function reduceMainEvent(
         ...run,
         activeSkill: (data.name as string) ?? run.activeSkill,
         messages: run.messages.map((m) =>
-          m.id === messageId ? { ...m, blocks: [...closeThinkingBlocks(m.blocks ?? []), block] } : m
+          m.id === messageId ? { ...m, blocks: [...closeProseBlocks(m.blocks ?? []), block] } : m
         ),
       };
     }
@@ -589,7 +614,7 @@ function reduceMainEvent(
       return {
         ...run,
         messages: run.messages.map((m) =>
-          m.id === messageId ? { ...m, blocks: [...closeThinkingBlocks(m.blocks ?? []), block] } : m
+          m.id === messageId ? { ...m, blocks: [...closeProseBlocks(m.blocks ?? []), block] } : m
         ),
       };
     }
@@ -899,7 +924,8 @@ function reduceSubAgentEvent(
         ...run,
         messages: run.messages.map((m) => {
           if (m.id !== messageId) return m;
-          const blocks = m.blocks ?? [];
+          // Mirror the main thinking handler: an open text segment closes.
+          const blocks = closeTextBlocks(m.blocks ?? []);
           const openThinking = blocks.find(
             (b) => b.type === 'thinking' && b.status === 'streaming'
           );
@@ -955,7 +981,7 @@ function reduceSubAgentEvent(
         ...sub,
         ...run,
         messages: run.messages.map((m) =>
-          m.id === messageId ? { ...m, blocks: [...closeThinkingBlocks(m.blocks ?? []), block] } : m
+          m.id === messageId ? { ...m, blocks: [...closeProseBlocks(m.blocks ?? []), block] } : m
         ),
       });
     }
@@ -1076,9 +1102,7 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
         run: {
           ...run,
           messages: run.messages.map((m) =>
-            m.id === messageId
-              ? { ...m, blocks: [...closeThinkingBlocks(m.blocks ?? []), block] }
-              : m
+            m.id === messageId ? { ...m, blocks: [...closeProseBlocks(m.blocks ?? []), block] } : m
           ),
         },
       };
