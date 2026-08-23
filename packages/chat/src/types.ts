@@ -70,9 +70,13 @@ export interface PlanMetadata {
   steps?: PlanStep[];
 }
 
-/** Todo item */
+/** Todo item。`subject` 是 wire/daemon 的真实字段(state 包 TodoItem);
+ * `content` 是旧形状,保留兼容(stories 在用)。渲染时 subject 优先。 */
 export interface TodoItem {
-  content: string;
+  id?: number;
+  subject?: string;
+  content?: string;
+  description?: string;
   status: 'pending' | 'in_progress' | 'completed';
 }
 

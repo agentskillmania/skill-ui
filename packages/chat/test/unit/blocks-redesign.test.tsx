@@ -47,6 +47,18 @@ describe('TodoBlock', () => {
     expect(screen.getByText('1/3')).toBeInTheDocument();
   });
 
+  it('renders wire-shaped items (subject) — daemon 真实数据形状', () => {
+    renderBlock(
+      todoBlock([
+        { id: 1, subject: '搜索资料', status: 'completed' },
+        { id: 2, subject: '写报告', status: 'in_progress' },
+      ])
+    );
+    expect(screen.getByText('搜索资料')).toBeInTheDocument();
+    expect(screen.getByText('写报告')).toBeInTheDocument();
+    expect(screen.getByText('1/2')).toBeInTheDocument();
+  });
+
   it('collapses to summary line when all items are completed, expands on click', () => {
     renderBlock(todoBlock([{ content: '唯一任务', status: 'completed' }]));
     // 全完成:折叠成摘要行,列表项不可见

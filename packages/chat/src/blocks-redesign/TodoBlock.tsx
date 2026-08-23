@@ -257,7 +257,8 @@ export const TodoBlock = memo(function TodoBlock({ block }: BlockProps) {
                         : theme.color.textSecondary};
                   `}
                 >
-                  {item.content}
+                  {/* wire/daemon 的真字段是 subject;content 是旧形状(stories) */}
+                  {item.subject ?? item.content ?? ''}
                 </div>
               </div>
             );
