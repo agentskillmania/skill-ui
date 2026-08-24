@@ -3,6 +3,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { css, useTheme } from '@emotion/react';
 import { useState } from 'react';
 import { Activity, Terminal, Wrench, FileText } from 'lucide-react';
+import { Segmented } from 'antd';
 import { Sidebar } from './Sidebar.js';
 import { SidebarPanel } from './SidebarPanel.js';
 import type { SidebarProps } from './Sidebar.js';
@@ -134,6 +135,48 @@ export const Collapsed: Story = {
       </SidebarPanel>
     </Sidebar>
   ),
+};
+
+/** Panel header hosting an extra control (e.g. a source switcher) via headerExtra. */
+export const PanelHeaderExtra: Story = {
+  render: () => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [activePanel, setActivePanel] = useState('files');
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [source, setSource] = useState('artifacts');
+
+    return (
+      <Sidebar
+        width={360}
+        isCollapsed={false}
+        activePanel={activePanel}
+        items={[
+          { id: 'files', icon: FileText, label: 'Files' },
+          { id: 'event-log', icon: Activity, label: 'Event Log' },
+        ]}
+        onToggleCollapse={() => {}}
+        onSwitchPanel={(id) => setActivePanel(id)}
+      >
+        <SidebarPanel
+          title="Files"
+          icon={FileText}
+          headerExtra={
+            <Segmented
+              size="small"
+              value={source}
+              onChange={(v) => setSource(v as string)}
+              options={[
+                { label: 'Artifacts', value: 'artifacts' },
+                { label: 'Workspace', value: 'workspace' },
+              ]}
+            />
+          }
+        >
+          <div>Current source: {source}</div>
+        </SidebarPanel>
+      </Sidebar>
+    );
+  },
 };
 
 /** Fully interactive sidebar with collapse toggle, panel switching, and a split layout. */

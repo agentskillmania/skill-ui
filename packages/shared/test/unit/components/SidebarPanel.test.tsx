@@ -61,4 +61,30 @@ describe('SidebarPanel', () => {
     const outer = container.firstChild as HTMLElement;
     expect(outer).toHaveStyle({ height: '100%' });
   });
+
+  it('renders headerExtra content when provided', () => {
+    render(
+      <SidebarPanel
+        title="Files"
+        icon={ClipboardList}
+        headerExtra={<button type="button">switch</button>}
+      >
+        <span>Panel Content</span>
+      </SidebarPanel>,
+      { wrapper }
+    );
+    expect(screen.getByRole('button', { name: 'switch' })).toBeInTheDocument();
+  });
+
+  it('renders no extra wrapper when headerExtra is omitted', () => {
+    const { container } = render(
+      <SidebarPanel title="Files" icon={ClipboardList}>
+        <div />
+      </SidebarPanel>,
+      { wrapper }
+    );
+    const header = container.firstChild?.firstChild as HTMLElement;
+    // header 只含 icon 与 title 两个元素
+    expect(header.children).toHaveLength(2);
+  });
 });

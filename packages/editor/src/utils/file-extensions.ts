@@ -38,9 +38,17 @@ export const CODE_EXTENSIONS = [
 /** File extensions supported by the visual (wysiwyg) editor. */
 export const VISUAL_EDITOR_EXTENSIONS = ['md', 'mdx'] as const;
 
+/** Image file extensions (previewed inline by the file browser). */
+export const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'ico'] as const;
+
 /** Lowercased extension (without dot) for a file name or path, or '' if none. */
 export function getExtension(name: string): string {
   return name.split('.').pop()?.toLowerCase() ?? '';
+}
+
+/** Whether the path points at an inline-previewable image. */
+export function isImageName(name: string): boolean {
+  return (IMAGE_EXTENSIONS as readonly string[]).includes(getExtension(name));
 }
 
 /** File kind derived from its extension. */

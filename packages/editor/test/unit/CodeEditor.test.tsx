@@ -27,6 +27,9 @@ const mockAddCommand = vi.fn((_keybinding: number, handler: () => void) => {
   mockCtrlSHandler = handler;
 });
 
+/** loader.config 指向本地引擎的调用记录(CodeEditor 懒加载时触发) */
+const mockLoaderConfig = vi.fn();
+
 vi.mock('@monaco-editor/react', () => ({
   __esModule: true,
   default: (props: any) => {
@@ -51,7 +54,11 @@ vi.mock('@monaco-editor/react', () => ({
       </div>
     );
   },
+  loader: { config: mockLoaderConfig },
 }));
+
+// 引擎本体 mock 成空对象:loader.config 只需要拿到一个引用
+vi.mock('monaco-editor', () => ({}));
 
 // ── Test wrappers ──
 
@@ -90,75 +97,92 @@ describe('CodeEditor', () => {
     mockEditorInstance = { addCommand: mockAddCommand };
   });
 
-  // ── Basic rendering ──
+  // ── Lazy loading ──
 
-  it('renders Monaco editor with correct language from filePath', () => {
+  it('shows a loading placeholder before the engine import resolves', () => {
     renderWithTheme(<CodeEditor {...defaultProps} />);
-    expect(screen.getByTestId('monaco-editor')).toBeInTheDocument();
-    expect(screen.getByTestId('monaco-language').textContent).toBe('typescript');
+    // 同步渲染阶段 import 的 .then 尚未执行,loading 占位可见
+    // (editor 测试环境合入真实 zh-CN 文案,断言翻译后的文本)
+    expect(screen.getByText('加载编辑器…')).toBeInTheDocument();
   });
 
-  it('falls back to plaintext for unknown file extension', () => {
+  it('loads the engine lazily and points the loader at the local monaco (no CDN)', async () => {
+    renderWithTheme(<CodeEditor {...defaultProps} />);
+    expect(await screen.findByTestId('monaco-editor')).toBeInTheDocument();
+    expect(mockLoaderConfig).toHaveBeenCalledWith({ monaco: {} });
+  });
+
+  // ── Basic rendering ──
+
+  it('renders Monaco editor with correct language from filePath', async () => {
+    renderWithTheme(<CodeEditor {...defaultProps} />);
+    expect((await screen.findByTestId('monaco-language')).textContent).toBe('typescript');
+  });
+
+  it('falls back to plaintext for unknown file extension', async () => {
     renderWithTheme(<CodeEditor {...defaultProps} filePath="unknown.xyz" />);
-    expect(screen.getByTestId('monaco-language').textContent).toBe('plaintext');
+    expect((await screen.findByTestId('monaco-language')).textContent).toBe('plaintext');
   });
 
   // ── Theme branch (theme.mode === 'dark') ──
 
-  it('uses vs theme when theme mode is light', () => {
+  it('uses vs theme when theme mode is light', async () => {
     renderWithTheme(<CodeEditor {...defaultProps} />);
-    expect(screen.getByTestId('monaco-theme').textContent).toBe('vs');
+    expect((await screen.findByTestId('monaco-theme')).textContent).toBe('vs');
   });
 
-  it('uses vs-dark theme when theme mode is dark', () => {
+  it('uses vs-dark theme when theme mode is dark', async () => {
     renderWithTheme(<CodeEditor {...defaultProps} />, true);
-    expect(screen.getByTestId('monaco-theme').textContent).toBe('vs-dark');
+    expect((await screen.findByTestId('monaco-theme')).textContent).toBe('vs-dark');
   });
 
   // ── readOnly ?? false branch ──
 
-  it('passes readOnly true to Monaco when readOnly prop is true', () => {
+  it('passes readOnly true to Monaco when readOnly prop is true', async () => {
     renderWithTheme(<CodeEditor {...defaultProps} readOnly={true} />);
-    expect(screen.getByTestId('monaco-readonly').textContent).toBe('true');
+    expect((await screen.findByTestId('monaco-readonly')).textContent).toBe('true');
   });
 
-  it('defaults readOnly to false when readOnly prop is not provided', () => {
+  it('defaults readOnly to false when readOnly prop is not provided', async () => {
     renderWithTheme(<CodeEditor {...defaultProps} />);
-    expect(screen.getByTestId('monaco-readonly').textContent).toBe('false');
+    expect((await screen.findByTestId('monaco-readonly')).textContent).toBe('false');
   });
 
   // ── value ?? '' branch (onChange undefined handling) ──
 
-  it('calls onChange with the editor value when value is defined', () => {
+  it('calls onChange with the editor value when value is defined', async () => {
     const onChange = vi.fn();
     renderWithTheme(<CodeEditor {...defaultProps} onChange={onChange} />);
-    fireEvent.click(screen.getByTestId('mock-edit'));
+    fireEvent.click(await screen.findByTestId('mock-edit'));
     expect(onChange).toHaveBeenCalledWith('edited');
   });
 
-  it('calls onChange with empty string when Monaco passes undefined', () => {
+  it('calls onChange with empty string when Monaco passes undefined', async () => {
     const onChange = vi.fn();
     renderWithTheme(<CodeEditor {...defaultProps} onChange={onChange} />);
-    fireEvent.click(screen.getByTestId('mock-edit-undefined'));
+    fireEvent.click(await screen.findByTestId('mock-edit-undefined'));
     expect(onChange).toHaveBeenCalledWith('');
   });
 
   // ── Ctrl+S command ──
 
-  it('registers Ctrl+S save command on mount', () => {
+  it('registers Ctrl+S save command on mount', async () => {
     renderWithTheme(<CodeEditor {...defaultProps} />);
+    await screen.findByTestId('monaco-editor');
     expect(mockAddCommand).toHaveBeenCalledWith(2097, expect.any(Function));
   });
 
-  it('calls onSave with current content when Ctrl+S fires and onSave is provided', () => {
+  it('calls onSave with current content when Ctrl+S fires and onSave is provided', async () => {
     const onSave = vi.fn();
     renderWithTheme(<CodeEditor {...defaultProps} content="content to save" onSave={onSave} />);
+    await screen.findByTestId('monaco-editor');
     mockCtrlSHandler?.();
     expect(onSave).toHaveBeenCalledWith('content to save');
   });
 
-  it('does not crash when Ctrl+S fires but onSave is not provided', () => {
+  it('does not crash when Ctrl+S fires but onSave is not provided', async () => {
     renderWithTheme(<CodeEditor {...defaultProps} />);
+    await screen.findByTestId('monaco-editor');
     expect(() => mockCtrlSHandler?.()).not.toThrow();
   });
 });

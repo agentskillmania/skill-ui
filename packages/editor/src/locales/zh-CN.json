@@ -5,6 +5,10 @@
     "review": "审核",
     "test": "测试"
   },
+  "codeEditor": {
+    "loading": "加载编辑器…",
+    "loadError": "编辑器加载失败"
+  },
   "copilot": {
     "emptyHint": "向 Copilot 提问，或使用快捷命令",
     "placeholder": "向 Copilot 提问..."
@@ -42,5 +46,20 @@
     "passed": "通过",
     "failed": "失败",
     "running": "运行中..."
+  },
+  "fileBrowser": {
+    "sourceArtifacts": "产物",
+    "sourceWorkspace": "Workspace",
+    "collapseList": "折叠列表",
+    "showList": "显示列表",
+    "emptyArtifacts": "本会话还没有新建或修改过的文件",
+    "emptySelection": "选择左侧文件查看详情",
+    "openInFolder": "打开所在目录",
+    "copyPath": "复制路径",
+    "openExternal": "新窗口打开",
+    "unsupported": "该文件不支持预览",
+    "imageNoChannel": "图片预览通道未接入，可打开所在目录查看",
+    "created": "新建",
+    "modified": "修改"
   }
 }

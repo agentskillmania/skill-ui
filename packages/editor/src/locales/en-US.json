@@ -5,6 +5,10 @@
     "review": "Review",
     "test": "Tests"
   },
+  "codeEditor": {
+    "loading": "Loading editor…",
+    "loadError": "Failed to load editor"
+  },
   "copilot": {
     "emptyHint": "Ask Copilot, or use quick commands",
     "placeholder": "Ask Copilot..."
@@ -42,5 +46,20 @@
     "passed": "Passed",
     "failed": "Failed",
     "running": "Running..."
+  },
+  "fileBrowser": {
+    "sourceArtifacts": "Artifacts",
+    "sourceWorkspace": "Workspace",
+    "collapseList": "Collapse list",
+    "showList": "Show list",
+    "emptyArtifacts": "No files created or modified in this session yet",
+    "emptySelection": "Select a file to preview",
+    "openInFolder": "Reveal in folder",
+    "copyPath": "Copy path",
+    "openExternal": "Open in new window",
+    "unsupported": "This file cannot be previewed",
+    "imageNoChannel": "Image preview is not wired up yet; reveal the file to view it",
+    "created": "New",
+    "modified": "Modified"
   }
 }

@@ -65,7 +65,11 @@ vi.mock('@monaco-editor/react', () => ({
       </div>
     );
   },
+  loader: { config: vi.fn() },
 }));
+
+// 引擎本体 mock 成空对象(CodeEditor 懒加载会 import 它)
+vi.mock('monaco-editor', () => ({}));
 
 describe('EditorArea', () => {
   const defaultProps = {
@@ -75,9 +79,9 @@ describe('EditorArea', () => {
     onChange: vi.fn(),
   };
 
-  it('renders Monaco in code mode', () => {
+  it('renders Monaco in code mode', async () => {
     renderWithProviders(<EditorArea {...defaultProps} />);
-    expect(screen.getByTestId('monaco-editor')).toBeInTheDocument();
+    expect(await screen.findByTestId('monaco-editor')).toBeInTheDocument();
   });
 
   it('renders VisualEditor (Crepe container) in wysiwyg mode', () => {
@@ -88,30 +92,31 @@ describe('EditorArea', () => {
     expect(container.querySelector('[data-crepe-root]')).toBeInTheDocument();
   });
 
-  it('passes content to child editor', () => {
+  it('passes content to child editor', async () => {
     renderWithProviders(<EditorArea {...defaultProps} />);
-    expect(screen.getByTestId('monaco-value').textContent).toBe('console.log("hello")');
+    expect((await screen.findByTestId('monaco-value')).textContent).toBe('console.log("hello")');
   });
 
-  it('CodeEditor handleMount wires the save shortcut onto the editor instance', () => {
+  it('CodeEditor handleMount wires the save shortcut onto the editor instance', async () => {
     renderWithProviders(<EditorArea {...defaultProps} />);
     // 真实集成点:handleMount 把保存快捷键注册到编辑器实例(此前版本断言
     // 的是 mock 自己记录自己的调用,与被测组件零关系)
+    await screen.findByTestId('monaco-editor');
     expect(mockAddCommand).toHaveBeenCalledWith(expect.any(Number), expect.any(Function));
   });
 
-  it('Monaco onChange handles undefined values', () => {
+  it('Monaco onChange handles undefined values', async () => {
     const onChange = vi.fn();
     renderWithProviders(<EditorArea {...defaultProps} onChange={onChange} />);
 
-    const editButton = screen.getByText('mock-edit');
+    const editButton = await screen.findByText('mock-edit');
     fireEvent.click(editButton);
 
     // onChange should be called even if Monaco passes undefined
     expect(onChange).toHaveBeenCalled();
   });
 
-  it('CodeEditor registers Ctrl+S save command on onMount', () => {
+  it('CodeEditor registers Ctrl+S save command on onMount', async () => {
     const onSave = vi.fn();
 
     // Clear previous call records
@@ -128,6 +133,7 @@ describe('EditorArea', () => {
     );
 
     // Verify addCommand is called with Ctrl+S keycode (2097 = CtrlCmd | KeyS)
+    await screen.findByTestId('monaco-editor');
     expect(mockAddCommand).toHaveBeenCalledWith(2097, expect.any(Function));
   });
 });

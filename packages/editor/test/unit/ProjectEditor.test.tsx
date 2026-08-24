@@ -40,7 +40,11 @@ vi.mock('@monaco-editor/react', () => ({
       </div>
     );
   },
+  loader: { config: vi.fn() },
 }));
+
+// 引擎本体 mock 成空对象(CodeEditor 懒加载会 import 它)
+vi.mock('monaco-editor', () => ({}));
 
 const sampleFiles: ProjectFile[] = [
   { path: 'SKILL.md', content: 'skill content' },
@@ -98,17 +102,18 @@ describe('ProjectEditor', () => {
     expect(screen.getByText('此文件为目录')).toBeInTheDocument();
   });
 
-  it('calls onEditorFileChange when content is edited', () => {
+  it('calls onEditorFileChange when content is edited', async () => {
     const onEditorFileChange = vi.fn();
     renderWithProviders(<ProjectEditor {...baseProps} onEditorFileChange={onEditorFileChange} />);
-    fireEvent.click(screen.getByTestId('monaco-change'));
+    fireEvent.click(await screen.findByTestId('monaco-change'));
     expect(onEditorFileChange).toHaveBeenCalledWith('SKILL.md', 'new content');
   });
 
-  it('calls onEditorSave when save shortcut triggered', () => {
+  it('calls onEditorSave when save shortcut triggered', async () => {
     const onEditorSave = vi.fn();
     renderWithProviders(<ProjectEditor {...baseProps} onEditorSave={onEditorSave} />);
     // Trigger the save handler registered by CodeEditor handleMount
+    await screen.findByTestId('monaco-editor');
     registeredSaveHandler?.();
     expect(onEditorSave).toHaveBeenCalledWith('SKILL.md', 'skill content');
   });
@@ -187,7 +192,7 @@ describe('ProjectEditor', () => {
     expect(screen.getByText('Copilot')).toBeInTheDocument();
   });
 
-  it('renders with nested file path (findFile recursion)', () => {
+  it('renders with nested file path (findFile recursion)', async () => {
     renderWithProviders(
       <ProjectEditor
         {...baseProps}
@@ -196,10 +201,10 @@ describe('ProjectEditor', () => {
       />
     );
     // Should find the nested file and render its content in the editor
-    expect(screen.getByTestId('monaco-content')).toHaveTextContent('export {};');
+    expect(await screen.findByTestId('monaco-content')).toHaveTextContent('export {};');
   });
 
-  it('handles non-existent file path (findFile returns null)', () => {
+  it('handles non-existent file path (findFile returns null)', async () => {
     renderWithProviders(
       <ProjectEditor
         {...baseProps}
@@ -209,10 +214,10 @@ describe('ProjectEditor', () => {
     );
     // When findFile returns null, activeFileNode?.isDirectory is false,
     // so it renders the EditorArea. The editor should still render.
-    expect(screen.getByTestId('monaco-editor')).toBeInTheDocument();
+    expect(await screen.findByTestId('monaco-editor')).toBeInTheDocument();
   });
 
-  it('matches file path in directory children via findFile', () => {
+  it('matches file path in directory children via findFile', async () => {
     renderWithProviders(
       <ProjectEditor
         {...baseProps}
@@ -221,7 +226,7 @@ describe('ProjectEditor', () => {
       />
     );
     // Should find the nested file in children
-    expect(screen.getByTestId('monaco-content')).toHaveTextContent(
+    expect(await screen.findByTestId('monaco-content')).toHaveTextContent(
       'export async function search()'
     );
   });

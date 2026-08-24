@@ -2,6 +2,7 @@
  * @agentskillmania/skill-ui-editor type definitions
  */
 import type { Message, ChatCommand } from '@agentskillmania/skill-ui-chat';
+import type { CSSProperties } from 'react';
 
 /** Project file */
 export interface ProjectFile {
@@ -136,7 +137,7 @@ export interface ProjectEditorProps {
 
   // ─── Style ───
   className?: string;
-  style?: React.CSSProperties;
+  style?: CSSProperties;
 }
 
 export interface FileTreeProps {
@@ -195,4 +196,96 @@ export interface EditorContextValue {
   setEditMode: (mode: EditMode) => void;
   setCursorPosition: (pos: CursorPosition | null) => void;
   setDirty: (dirty: boolean) => void;
+}
+
+// ─── File Browser (side window) ───
+
+/** List source of the side-window file browser. */
+export type FileBrowserSource = 'artifacts' | 'workspace';
+
+/** Tool call as persisted in the session message history (camelCase wire shape). */
+export interface FileBrowserToolCall {
+  /** Tool name, e.g. "file_write" | "file_edit" */
+  name: string;
+  /** Tool arguments as a live JSON object (paths live under `filePath`). */
+  arguments?: Record<string, unknown>;
+}
+
+/**
+ * Minimal message shape consumed by [`deriveArtifacts`] — a subset of what
+ * `GET /api/chat/:sessionId/messages` returns, so callers can feed the raw
+ * response without mapping.
+ */
+export interface FileBrowserMessage {
+  /** Message role; only assistant messages carry `toolCalls`. */
+  role?: string;
+  /** Tool calls issued by this (assistant) message. */
+  toolCalls?: FileBrowserToolCall[];
+}
+
+/** A file touched by `file_write` / `file_edit` during the session. */
+export interface ArtifactEntry {
+  /** Workspace-relative path. */
+  path: string;
+  /** `created` on first touch, `modified` once touched again. */
+  status: 'created' | 'modified';
+  /** Index of the message that last touched the file (higher = newer). */
+  lastTouch: number;
+  /** Tools that touched the path, in first-seen order. */
+  ops: string[];
+}
+
+export interface FileBrowserProps {
+  /** Workspace tree (map the daemon tree response via `daemonTreeToProjectFiles`). */
+  workspaceFiles: ProjectFile[];
+  /** Artifact list (output of `deriveArtifacts`). */
+  artifacts: ArtifactEntry[];
+  /** Active list source. Controlled; when omitted the browser renders its own switcher. */
+  source?: FileBrowserSource;
+  /**
+   * Fired on source switch. Pair with `source` to lift the switcher into the
+   * host panel header (SidebarPanel `headerExtra`).
+   */
+  onSourceChange?: (source: FileBrowserSource) => void;
+  /** Selected workspace-relative path, null = nothing selected. */
+  activePath: string | null;
+  /** Content of the active file; undefined while loading. */
+  activeContent?: string;
+  /** True when the content endpoint failed (e.g. binary file). */
+  activeUnsupported?: boolean;
+  onActivePathChange: (path: string | null) => void;
+  /** Editor mode for the text preview (toggleable via StatusBar). Defaults to 'code'. */
+  editMode?: EditMode;
+  onEditModeChange?: (mode: EditMode) => void;
+  /** Resolves an image path to a previewable URL; absence degrades to a placeholder. */
+  imageSrcResolver?: (path: string) => string | undefined;
+  /** Host "reveal in folder" action; the button is hidden when omitted. */
+  onOpenInFolder?: (path: string) => void;
+  className?: string;
+  style?: CSSProperties;
+}
+
+export interface ArtifactListProps {
+  /** Derived artifact entries, newest touch first. */
+  artifacts: ArtifactEntry[];
+  /** Currently selected workspace-relative path. */
+  activePath: string | null;
+  /** Fired when an entry is clicked. */
+  onSelect: (path: string) => void;
+}
+
+export interface FileDetailProps {
+  /** Selected workspace-relative path. */
+  path: string;
+  /** File text content; undefined while loading. */
+  content?: string;
+  /** True when the content endpoint failed (e.g. binary file). */
+  unsupported?: boolean;
+  /** Editor mode for text preview (StatusBar toggles it). */
+  editMode?: EditMode;
+  onEditModeChange?: (mode: EditMode) => void;
+  /** Resolves an image path to a previewable URL; absence degrades to placeholder. */
+  imageSrcResolver?: (path: string) => string | undefined;
+  /** Host "reveal in folder" action; button hidden when omitted. */
+  onOpenInFolder?: (path: string) => void;
 }

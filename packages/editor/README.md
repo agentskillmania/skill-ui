@@ -17,7 +17,25 @@ pnpm add @agentskillmania/skill-ui-editor
 ## Usage
 
 ```tsx
-import { ... } from '@agentskillmania/skill-ui-editor';
+import {
+  // Side-window file browser: derive artifacts from session messages, map the
+  // daemon workspace tree, and render the browser (breakpoint layout — the
+  // container width is the only control variable, no inner drag handle).
+  FileBrowser,
+  deriveArtifacts,
+  daemonTreeToProjectFiles,
+} from '@agentskillmania/skill-ui-editor';
+
+const artifacts = deriveArtifacts(messages); // scan file_write / file_edit toolCalls
+const files = daemonTreeToProjectFiles(treeResponse); // GET /api/files/:id/tree → FileTree shape
+
+<FileBrowser
+  workspaceFiles={files}
+  artifacts={artifacts}
+  activePath={path}
+  activeContent={content}
+  onActivePathChange={setPath}
+/>;
 ```
 
 ## License

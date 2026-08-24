@@ -2,23 +2,28 @@
 /**
  * Code editor (based on Monaco)
  *
- * Uses controlled mode (value + onChange), correctly updates content when switching files.
- * Forces Monaco to rebuild instance on file switch via key={filePath}.
+ * The engine is loaded LAZILY from the local `monaco-editor` package — never
+ * the CDN: `@monaco-editor/react` defaults to jsdelivr, which hangs forever in
+ * offline/restricted webviews (e.g. the Tauri host). Deferring the import also
+ * keeps jsdom tests and app startup away from monaco's multi-MB engine.
+ *
+ * Uses controlled mode (value + onChange), correctly updates content when
+ * switching files. Forces Monaco to rebuild instance on file switch via
+ * key={filePath}.
  */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import _MonacoEditor from '@monaco-editor/react';
-import React, { useRef } from 'react';
+import { css } from '@emotion/react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
+import { NAMESPACE } from '../locales/index.js';
 import type { EditorAreaProps } from '../types.js';
 import { getFileInfo } from '../utils/file-utils.js';
 
 // React 19 type compatibility
-const MonacoEditor = _MonacoEditor as unknown as React.ComponentType<{
+type MonacoEditorComponent = React.ComponentType<{
   defaultLanguage?: string;
   defaultValue?: string;
-  language?: string;
-  value?: string;
-  path?: string;
   theme?: string;
   height?: string | number;
   options?: Record<string, unknown>;
@@ -28,15 +33,36 @@ const MonacoEditor = _MonacoEditor as unknown as React.ComponentType<{
 
 export function CodeEditor({ content, filePath, readOnly, onChange, onSave }: EditorAreaProps) {
   const theme = useTheme();
+  const { t } = useTranslation(NAMESPACE);
   const { language } = getFileInfo(filePath);
   const monacoTheme = theme.mode === 'dark' ? 'vs-dark' : 'vs';
   const editorRef = useRef<unknown>(null);
+  const [Editor, setEditor] = useState<MonacoEditorComponent | null>(null);
+  const [failed, setFailed] = useState<string | null>(null);
 
   // Use ref to keep onSave and content up-to-date, avoiding closure trap
   const onSaveRef = useRef(onSave);
   onSaveRef.current = onSave;
   const contentRef = useRef(content);
   contentRef.current = content;
+
+  useEffect(() => {
+    if (Editor) return;
+    let cancelled = false;
+    Promise.all([import('@monaco-editor/react'), import('monaco-editor')])
+      .then(([mod, monaco]) => {
+        // Point @monaco-editor/react's loader at the local engine (no CDN).
+        mod.loader.config({ monaco });
+        const ctor = (mod as unknown as { default: MonacoEditorComponent }).default;
+        if (!cancelled) setEditor(() => ctor);
+      })
+      .catch((e) => {
+        if (!cancelled) setFailed(String(e));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [Editor]);
 
   const handleMount = (editor: unknown) => {
     editorRef.current = editor;
@@ -50,8 +76,35 @@ export function CodeEditor({ content, filePath, readOnly, onChange, onSave }: Ed
     }
   };
 
+  if (failed) {
+    return (
+      <div
+        css={css`
+          padding: ${theme.spacing[3]};
+          font-size: ${theme.font.size.sm};
+          color: ${theme.color.error};
+        `}
+      >
+        {t('codeEditor.loadError')}: {failed}
+      </div>
+    );
+  }
+  if (!Editor) {
+    return (
+      <div
+        css={css`
+          padding: ${theme.spacing[3]};
+          font-size: ${theme.font.size.sm};
+          color: ${theme.color.textTertiary};
+        `}
+      >
+        {t('codeEditor.loading')}
+      </div>
+    );
+  }
+
   return (
-    <MonacoEditor
+    <Editor
       key={filePath}
       defaultLanguage={language}
       defaultValue={content}

@@ -9,6 +9,8 @@ export interface SidebarPanelProps {
   title: string;
   /** Panel icon. */
   icon: LucideIcon;
+  /** Optional controls at the right end of the header (e.g. a Segmented switcher). */
+  headerExtra?: ReactNode;
   /** Scrollable panel content. */
   children: ReactNode;
 }
@@ -17,6 +19,7 @@ export interface SidebarPanelProps {
 export const SidebarPanel = memo(function SidebarPanel({
   title,
   icon: Icon,
+  headerExtra,
   children,
 }: SidebarPanelProps) {
   const theme = useTheme();
@@ -49,6 +52,22 @@ export const SidebarPanel = memo(function SidebarPanel({
       >
         <Icon size={16} />
         <span>{title}</span>
+        {headerExtra ? (
+          <div
+            css={css`
+              margin-left: auto;
+              /* 抵消 header 的 uppercase/字距样式,控件内容按原样渲染 */
+              text-transform: none;
+              letter-spacing: normal;
+              font-weight: ${theme.font.weight.normal};
+              display: flex;
+              align-items: center;
+              min-width: 0;
+            `}
+          >
+            {headerExtra}
+          </div>
+        ) : null}
       </div>
 
       {/* Content */}
