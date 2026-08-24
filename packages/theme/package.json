@@ -1,6 +1,6 @@
 {
   "name": "@agentskillmania/skill-ui-theme",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Theme and style utilities for @agentskillmania UI components.",
   "type": "module",
   "main": "dist/index.js",
