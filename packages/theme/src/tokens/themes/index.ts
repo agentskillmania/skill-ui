@@ -9,11 +9,11 @@ import { lightTheme } from '../light.js';
 import { darkTheme } from '../dark.js';
 import { paperLightTheme, paperDarkTheme } from './paper.js';
 import { inkLightTheme, inkDarkTheme } from './ink.js';
-import { neonLightTheme, neonDarkTheme } from './neon.js';
+import { tideLightTheme, tideDarkTheme } from './tide.js';
 import { emberLightTheme, emberDarkTheme } from './ember.js';
 import { blossomLightTheme, blossomDarkTheme } from './blossom.js';
 
-export type ThemeId = 'slate' | 'paper' | 'ink' | 'neon' | 'ember' | 'blossom';
+export type ThemeId = 'slate' | 'paper' | 'ink' | 'tide' | 'ember' | 'blossom';
 
 export interface ThemeMeta {
   id: ThemeId;
@@ -91,22 +91,22 @@ export const themeRegistry: Record<ThemeId, ThemeEntry> = {
     light: inkLightTheme,
     dark: inkDarkTheme,
   },
-  neon: {
+  tide: {
     meta: {
-      id: 'neon',
-      name: 'Neon',
-      nameZh: '霓',
-      description: 'Synthwave: violet night, hot-pink primary, cyan accents.',
-      descriptionZh: '合成波：紫黑夜色 + 霓虹粉主色 + 青色点缀，高饱和、张扬。',
+      id: 'tide',
+      name: 'Tide',
+      nameZh: '汐',
+      description: 'Open sea: deep ocean blue with luminous sky-blue and moonlit teal.',
+      descriptionZh: '深海蓝:海雾白/夜海黑底 + 亮青蓝主色 + 月光青点缀,冷静开阔。',
       swatch: {
-        primary: neonLightTheme.color.primary,
-        bgBase: neonLightTheme.color.bgBase,
-        bgContainer: neonLightTheme.color.bgContainer,
-        text: neonLightTheme.color.text,
+        primary: tideLightTheme.color.primary,
+        bgBase: tideLightTheme.color.bgBase,
+        bgContainer: tideLightTheme.color.bgContainer,
+        text: tideLightTheme.color.text,
       },
     },
-    light: neonLightTheme,
-    dark: neonDarkTheme,
+    light: tideLightTheme,
+    dark: tideDarkTheme,
   },
   ember: {
     meta: {
@@ -149,7 +149,7 @@ export const themeMetas: ThemeMeta[] = [
   themeRegistry.slate.meta,
   themeRegistry.paper.meta,
   themeRegistry.ink.meta,
-  themeRegistry.neon.meta,
+  themeRegistry.tide.meta,
   themeRegistry.ember.meta,
   themeRegistry.blossom.meta,
 ];

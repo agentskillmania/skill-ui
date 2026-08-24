@@ -22,7 +22,7 @@ describe('themeRegistry', () => {
       'slate',
       'paper',
       'ink',
-      'neon',
+      'tide',
       'ember',
       'blossom',
     ]);
@@ -71,7 +71,7 @@ describe('themeMetas', () => {
       'slate',
       'paper',
       'ink',
-      'neon',
+      'tide',
       'ember',
       'blossom',
     ]);

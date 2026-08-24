@@ -36,7 +36,7 @@ export {
   paperDarkColor,
 } from './themes/paper.js';
 export { inkLightTheme, inkDarkTheme, inkLightColor, inkDarkColor } from './themes/ink.js';
-export { neonLightTheme, neonDarkTheme, neonLightColor, neonDarkColor } from './themes/neon.js';
+export { tideLightTheme, tideDarkTheme, tideLightColor, tideDarkColor } from './themes/tide.js';
 export {
   emberLightTheme,
   emberDarkTheme,
