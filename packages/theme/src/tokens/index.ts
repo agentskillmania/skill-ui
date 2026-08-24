@@ -36,6 +36,19 @@ export {
   paperDarkColor,
 } from './themes/paper.js';
 export { inkLightTheme, inkDarkTheme, inkLightColor, inkDarkColor } from './themes/ink.js';
+export { neonLightTheme, neonDarkTheme, neonLightColor, neonDarkColor } from './themes/neon.js';
+export {
+  emberLightTheme,
+  emberDarkTheme,
+  emberLightColor,
+  emberDarkColor,
+} from './themes/ember.js';
+export {
+  blossomLightTheme,
+  blossomDarkTheme,
+  blossomLightColor,
+  blossomDarkColor,
+} from './themes/blossom.js';
 
 /**
  * Get the theme object by mode and theme id.

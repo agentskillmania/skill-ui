@@ -9,8 +9,11 @@ import { lightTheme } from '../light.js';
 import { darkTheme } from '../dark.js';
 import { paperLightTheme, paperDarkTheme } from './paper.js';
 import { inkLightTheme, inkDarkTheme } from './ink.js';
+import { neonLightTheme, neonDarkTheme } from './neon.js';
+import { emberLightTheme, emberDarkTheme } from './ember.js';
+import { blossomLightTheme, blossomDarkTheme } from './blossom.js';
 
-export type ThemeId = 'slate' | 'paper' | 'ink';
+export type ThemeId = 'slate' | 'paper' | 'ink' | 'neon' | 'ember' | 'blossom';
 
 export interface ThemeMeta {
   id: ThemeId;
@@ -88,6 +91,57 @@ export const themeRegistry: Record<ThemeId, ThemeEntry> = {
     light: inkLightTheme,
     dark: inkDarkTheme,
   },
+  neon: {
+    meta: {
+      id: 'neon',
+      name: 'Neon',
+      nameZh: '霓',
+      description: 'Synthwave: violet night, hot-pink primary, cyan accents.',
+      descriptionZh: '合成波：紫黑夜色 + 霓虹粉主色 + 青色点缀，高饱和、张扬。',
+      swatch: {
+        primary: neonLightTheme.color.primary,
+        bgBase: neonLightTheme.color.bgBase,
+        bgContainer: neonLightTheme.color.bgContainer,
+        text: neonLightTheme.color.text,
+      },
+    },
+    light: neonLightTheme,
+    dark: neonDarkTheme,
+  },
+  ember: {
+    meta: {
+      id: 'ember',
+      name: 'Ember',
+      nameZh: '烬',
+      description: 'Firelight: warm whites and charred browns around a fire-orange primary.',
+      descriptionZh: '炭火余温：暖白与炭棕围绕焦橙主色，浓暖不寡淡。',
+      swatch: {
+        primary: emberLightTheme.color.primary,
+        bgBase: emberLightTheme.color.bgBase,
+        bgContainer: emberLightTheme.color.bgContainer,
+        text: emberLightTheme.color.text,
+      },
+    },
+    light: emberLightTheme,
+    dark: emberDarkTheme,
+  },
+  blossom: {
+    meta: {
+      id: 'blossom',
+      name: 'Blossom',
+      nameZh: '樱',
+      description: 'Cherry-blossom pastel: cream-pink surfaces, rose primary, soft violet links.',
+      descriptionZh: '樱花粉彩：奶油粉白 + 樱色主色 + 紫罗兰链接，柔软亲和。',
+      swatch: {
+        primary: blossomLightTheme.color.primary,
+        bgBase: blossomLightTheme.color.bgBase,
+        bgContainer: blossomLightTheme.color.bgContainer,
+        text: blossomLightTheme.color.text,
+      },
+    },
+    light: blossomLightTheme,
+    dark: blossomDarkTheme,
+  },
 };
 
 /** All themes in display order — use this to build theme pickers. */
@@ -95,6 +149,9 @@ export const themeMetas: ThemeMeta[] = [
   themeRegistry.slate.meta,
   themeRegistry.paper.meta,
   themeRegistry.ink.meta,
+  themeRegistry.neon.meta,
+  themeRegistry.ember.meta,
+  themeRegistry.blossom.meta,
 ];
 
 export const defaultThemeId: ThemeId = 'slate';

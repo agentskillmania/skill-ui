@@ -17,8 +17,15 @@ const AGENT_KEYS = Object.keys(lightTheme.agentStatusColor);
 const SKILL_KEYS = Object.keys(lightTheme.skillStatusColor);
 
 describe('themeRegistry', () => {
-  it('contains slate, paper and ink', () => {
-    expect(Object.keys(themeRegistry)).toEqual(['slate', 'paper', 'ink']);
+  it('contains all six themes in display order', () => {
+    expect(Object.keys(themeRegistry)).toEqual([
+      'slate',
+      'paper',
+      'ink',
+      'neon',
+      'ember',
+      'blossom',
+    ]);
   });
 
   it('every theme has light and dark variants with correct modes', () => {
@@ -53,14 +60,21 @@ describe('themeRegistry', () => {
   it('themes are visually distinct (different base backgrounds and primaries)', () => {
     const bases = Object.values(themeRegistry).map((e) => e.light.color.bgBase);
     const primaries = Object.values(themeRegistry).map((e) => e.light.color.primary);
-    expect(new Set(bases).size).toBe(3);
-    expect(new Set(primaries).size).toBe(3);
+    expect(new Set(bases).size).toBe(6);
+    expect(new Set(primaries).size).toBe(6);
   });
 });
 
 describe('themeMetas', () => {
   it('lists all themes with picker-ready metadata', () => {
-    expect(themeMetas.map((m) => m.id)).toEqual(['slate', 'paper', 'ink']);
+    expect(themeMetas.map((m) => m.id)).toEqual([
+      'slate',
+      'paper',
+      'ink',
+      'neon',
+      'ember',
+      'blossom',
+    ]);
     for (const meta of themeMetas) {
       expect(meta.name).toMatch(/^\S.+\S$/);
       expect(meta.nameZh).toMatch(/^\S(.*\S)?$/);
