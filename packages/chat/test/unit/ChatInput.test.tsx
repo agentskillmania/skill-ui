@@ -37,6 +37,19 @@ describe('ChatInput', () => {
     expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).toHaveFocus();
   });
 
+  it('disables textarea transitions (autoSize mount correction must not animate)', () => {
+    // autoSize 初次校正在挂载后落地,antd .ant-input 的 transition:all 会把
+    // 高度校正播成渐变 —— 按会话重挂载输入框的宿主(gmemo)每次切换都会
+    // 看到输入栏缩一下。inline transition:none 钉死这个契约。
+    render(
+      <ChatWrapper>
+        <ChatInput value="" onChange={() => {}} />
+      </ChatWrapper>
+    );
+    const textarea = screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)');
+    expect(textarea.style.transition).toBe('none');
+  });
+
   it('does not steal focus without autoFocus', () => {
     render(
       <ChatWrapper>

@@ -562,6 +562,13 @@ export const ChatInput = memo(function ChatInput({
                 border: 'none',
                 background: 'transparent',
               }}
+              // autoSize 的初次高度校正在挂载后落地(首帧按浏览器默认 2 行
+              // 渲染,再修正到 minRows),而 antd `.ant-input` 自带
+              // `transition: all` —— 校正被播成一段高度渐变动画:宿主若按
+              // 会话维度重挂载输入框(gmemo 每条笔记一个实例),每次切换都会
+              // 看到输入栏缩一下。这里把 textarea 的过渡全关掉:本组件已剥掉
+              // 边框/背景,没有依赖过渡的视觉态。
+              styles={{ input: { transition: 'none' } }}
               footer={null}
             />
           </div>
