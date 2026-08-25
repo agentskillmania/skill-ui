@@ -5,8 +5,8 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { Sender } from '@ant-design/x';
 import { Tooltip } from 'antd';
 import { css } from '@emotion/react';
-import { memo, useRef } from 'react';
-import type { ChangeEvent, DragEvent, KeyboardEvent, ReactNode } from 'react';
+import { memo, useEffect, useRef } from 'react';
+import type { ChangeEvent, ComponentRef, DragEvent, KeyboardEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image as ImageIcon, X } from 'lucide-react';
 
@@ -34,6 +34,9 @@ export interface ChatInputProps {
   loading?: boolean;
   disabled?: boolean;
   placeholder?: string;
+  /** Focus the textarea while true (e.g. the centered empty-state composer).
+   * Applies on mount and whenever it flips back to true. */
+  autoFocus?: boolean;
   prefix?: ReactNode;
   suffix?: ReactNode;
   /** Full-width content on its own row above the input (mode banners, e.g.
@@ -91,6 +94,7 @@ export const ChatInput = memo(function ChatInput({
   loading = false,
   disabled = false,
   placeholder,
+  autoFocus = false,
   prefix,
   suffix,
   banner,
@@ -129,6 +133,14 @@ export const ChatInput = memo(function ChatInput({
   // ArrowUp/Down/Enter/Escape drive the panel while the user keeps typing.
   const cmdRef = useRef<CommandAutocompleteRef>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sender does not accept an autoFocus prop (it picks only a few textarea
+  // props), so focus programmatically via its ref — on mount and whenever
+  // autoFocus flips back to true (e.g. the conversation becomes empty again).
+  const senderRef = useRef<ComponentRef<typeof Sender>>(null);
+  useEffect(() => {
+    if (autoFocus) senderRef.current?.focus();
+  }, [autoFocus]);
 
   // ── Attachments ──
   const attachEnabled = Boolean(onAttachmentsChange);
@@ -526,6 +538,7 @@ export const ChatInput = memo(function ChatInput({
             `}
           >
             <Sender
+              ref={senderRef}
               value={value}
               onChange={onChange}
               onSubmit={handleSubmit}

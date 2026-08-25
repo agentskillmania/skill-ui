@@ -397,6 +397,11 @@ export interface ChatProps {
   // Extensibility
   /** Custom renderer registry */
   renderers?: ChatRenderers;
+  /** Content shown above the composer while the conversation is empty — the
+   * composer centers itself on screen until the first message exists, then
+   * slides to the bottom. undefined = default localized greeting; null = off;
+   * a node = fully custom content (interactive nodes stay clickable). */
+  welcome?: ReactNode;
   /** Input prefix content */
   inputPrefix?: ReactNode;
   /** Input suffix content */

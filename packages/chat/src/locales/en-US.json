@@ -5,7 +5,10 @@
     "submit": "Submit"
   },
   "chat": {
-    "placeholder": "Type a message... (Shift+Enter for new line)"
+    "placeholder": "Type a message... (Shift+Enter for new line)",
+    "welcome": {
+      "title": "What can I help you with?"
+    }
   },
   "thinking": {
     "thinking": "Thinking",

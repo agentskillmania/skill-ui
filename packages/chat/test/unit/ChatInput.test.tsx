@@ -28,6 +28,24 @@ describe('ChatInput', () => {
     expect(screen.getByPlaceholderText('说点什么...')).toBeInTheDocument();
   });
 
+  it('autoFocus focuses the textarea', () => {
+    render(
+      <ChatWrapper>
+        <ChatInput autoFocus value="" onChange={() => {}} />
+      </ChatWrapper>
+    );
+    expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).toHaveFocus();
+  });
+
+  it('does not steal focus without autoFocus', () => {
+    render(
+      <ChatWrapper>
+        <ChatInput value="" onChange={() => {}} />
+      </ChatWrapper>
+    );
+    expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).not.toHaveFocus();
+  });
+
   it('renders prefix and suffix', () => {
     render(
       <ChatWrapper>

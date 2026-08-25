@@ -102,4 +102,36 @@ describe('Chat', () => {
     render(<Chat messages={[]} commands={mockCommands} />, { wrapper: Wrapper });
     expect(screen.queryByText('搜索')).not.toBeInTheDocument();
   });
+
+  // 空对话欢迎态:输入框垂直居中 + 欢迎语;首条消息后回归常规布局
+  describe('welcome state', () => {
+    it('renders default greeting when the conversation is empty', () => {
+      render(<Chat messages={[]} />, { wrapper: Wrapper });
+      const welcome = screen.getByTestId('chat-welcome');
+      expect(welcome).toHaveTextContent('有什么可以帮你的？');
+      expect(welcome).toBeVisible();
+    });
+
+    it('renders custom welcome content when provided', () => {
+      render(<Chat messages={[]} welcome={<div>自定义欢迎</div>} />, { wrapper: Wrapper });
+      expect(screen.getByTestId('chat-welcome')).toHaveTextContent('自定义欢迎');
+    });
+
+    it('renders no welcome layer when welcome is null', () => {
+      render(<Chat messages={[]} welcome={null} />, { wrapper: Wrapper });
+      expect(screen.queryByTestId('chat-welcome')).not.toBeInTheDocument();
+    });
+
+    it('hides the welcome layer once messages exist', () => {
+      render(<Chat messages={mockMessages} />, { wrapper: Wrapper });
+      // 常驻挂载、opacity 过渡淡出(与输入框滑落动画同步),因此断言不可见
+      // 而非不在文档中
+      expect(screen.getByTestId('chat-welcome')).not.toBeVisible();
+    });
+
+    it('auto-focuses the composer when empty', () => {
+      render(<Chat messages={[]} />, { wrapper: Wrapper });
+      expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).toHaveFocus();
+    });
+  });
 });

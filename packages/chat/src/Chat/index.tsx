@@ -26,6 +26,7 @@ export function Chat({
   status = 'idle',
   disabled = false,
   renderers = {},
+  welcome,
   inputPrefix,
   inputSuffix,
   inputBanner,
@@ -57,6 +58,13 @@ export function Chat({
   const { t } = useTranslation(NAMESPACE);
   const resolvedPlaceholder = placeholder ?? t('chat.placeholder');
 
+  // Empty-conversation welcome state: the composer centers itself on screen
+  // until the first message exists, then slides to the bottom (ChatGPT-style).
+  // welcome: undefined = default localized greeting, null = off, node = custom.
+  const isEmpty = messages.length === 0;
+  const welcomeContent =
+    welcome === null ? null : welcome !== undefined ? welcome : t('chat.welcome.title');
+
   return (
     <div
       className={className}
@@ -75,8 +83,42 @@ export function Chat({
           overflow: hidden;
           display: flex;
           justify-content: center;
+          position: relative;
         `}
       >
+        {welcomeContent !== null && (
+          <div
+            data-testid="chat-welcome"
+            css={css`
+              position: absolute;
+              left: 0;
+              right: 0;
+              bottom: ${theme.spacing[8]};
+              display: flex;
+              justify-content: center;
+              padding: 0 ${theme.spacing[4]};
+              opacity: ${isEmpty ? 1 : 0};
+              pointer-events: ${isEmpty ? 'auto' : 'none'};
+              transition: opacity ${theme.motion.duration.slower} ${theme.motion.easing.out};
+            `}
+          >
+            {typeof welcomeContent === 'string' ? (
+              <div
+                css={css`
+                  text-align: center;
+                  font-size: ${theme.font.size['2xl']};
+                  font-weight: ${theme.font.weight.medium};
+                  line-height: ${theme.font.lineHeightHeading};
+                  color: ${theme.color.text};
+                `}
+              >
+                {welcomeContent}
+              </div>
+            ) : (
+              welcomeContent
+            )}
+          </div>
+        )}
         <div
           css={css`
             width: 100%;
@@ -124,6 +166,7 @@ export function Chat({
             onCancel={onStop}
             loading={status === 'streaming'}
             disabled={disabled}
+            autoFocus={isEmpty}
             placeholder={resolvedPlaceholder}
             prefix={inputPrefix}
             suffix={inputSuffix}
@@ -148,6 +191,21 @@ export function Chat({
           />
         </div>
       </div>
+
+      {/* Empty-state spacer: shares the leftover space with the message area
+          50/50 while empty (centering the composer mid-screen), then animates
+          flex-grow to 0 so the composer slides to the bottom on first message.
+          flex-grow is animatable, unlike justify-content. */}
+      <div
+        aria-hidden
+        css={css`
+          flex-grow: ${isEmpty ? 1 : 0};
+          flex-shrink: 1;
+          flex-basis: 0;
+          pointer-events: none;
+          transition: flex-grow ${theme.motion.duration.slower} ${theme.motion.easing.out};
+        `}
+      />
     </div>
   );
 }

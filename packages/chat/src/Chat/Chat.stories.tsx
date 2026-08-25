@@ -47,8 +47,13 @@ const meta: Meta<typeof Chat> = {
 export default meta;
 type Story = StoryObj<typeof Chat>;
 
-/** Empty message list */
+/** 空消息列表——输入框垂直居中的欢迎态（发送首条消息后滑落到底部） */
 export const Empty: Story = {
+  render: (args) => (
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Chat {...args} />
+    </div>
+  ),
   args: {
     messages: [],
     status: 'idle',
@@ -271,4 +276,91 @@ const WithCommandsComponent = () => {
 
 export const WithCommands: Story = {
   render: () => <WithCommandsComponent />,
+};
+
+/** 从居中欢迎态开始的完整交互——发送首条消息，输入框滑落到底部变为常规对话 */
+const WelcomeToChatComponent = () => {
+  const [messages, setMessages] = React.useState<Message[]>([]);
+  const [inputValue, setInputValue] = React.useState('');
+  const [status, setStatus] = React.useState<'idle' | 'streaming' | 'error'>('idle');
+
+  const handleSendMessage = (content: string) => {
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content,
+        status: 'completed',
+        createdAt: Date.now(),
+      },
+    ]);
+    setInputValue('');
+    setStatus('streaming');
+
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `ai-${Date.now()}`,
+          role: 'assistant',
+          content: `收到: "${content}"`,
+          status: 'completed',
+          createdAt: Date.now(),
+        },
+      ]);
+      setStatus('idle');
+    }, 1000);
+  };
+
+  return (
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Chat
+        messages={messages}
+        status={status}
+        inputValue={inputValue}
+        onInputChange={setInputValue}
+        onSendMessage={handleSendMessage}
+        onStop={() => setStatus('idle')}
+      />
+    </div>
+  );
+};
+
+export const WelcomeToChat: Story = {
+  render: () => <WelcomeToChatComponent />,
+};
+
+/** 自定义欢迎内容（welcome 插槽；传 null 可完全关闭欢迎层） */
+export const CustomWelcome: Story = {
+  render: (args) => (
+    <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Chat {...args} />
+    </div>
+  ),
+  args: {
+    messages: [],
+    status: 'idle',
+    placeholder: '输入消息...',
+    inputValue: '',
+    onInputChange: () => {},
+    welcome: (
+      <div style={{ display: 'flex', gap: 8 }}>
+        {['介绍你自己', '写一首诗', '解释量子计算'].map((s) => (
+          <span
+            key={s}
+            style={{
+              padding: '4px 12px',
+              borderRadius: 999,
+              border: '1px solid #d9d9d9',
+              background: '#fff',
+              cursor: 'pointer',
+            }}
+          >
+            {s}
+          </span>
+        ))}
+      </div>
+    ),
+  },
 };
