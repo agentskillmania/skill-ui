@@ -36,6 +36,10 @@ export interface ChatInputProps {
   placeholder?: string;
   prefix?: ReactNode;
   suffix?: ReactNode;
+  /** Full-width content on its own row above the input (mode banners, e.g.
+   * an editing notice). Unlike prefix/suffix — which adorn the input inline,
+   * left and right — the banner stacks above the whole input row. */
+  banner?: ReactNode;
 
   /** Pending attachments (controlled — enables attach button/paste/drop/chips) */
   attachments?: ChatAttachment[];
@@ -89,6 +93,7 @@ export const ChatInput = memo(function ChatInput({
   placeholder,
   prefix,
   suffix,
+  banner,
   attachments,
   onAttachmentsChange,
   attachmentsDisabled = false,
@@ -491,6 +496,7 @@ export const ChatInput = memo(function ChatInput({
         `}
       >
         {toolbarElement}
+        {banner}
         <div
           css={css`
             display: flex;

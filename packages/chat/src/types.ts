@@ -379,6 +379,10 @@ export interface ChatProps {
   inputPrefix?: ReactNode;
   /** Input suffix content */
   inputSuffix?: ReactNode;
+  /** Full-width banner on its own row above the input (mode banners, e.g. an
+   * editing notice). Unlike inputPrefix/inputSuffix (inline adornments), the
+   * banner stacks above the whole input row. */
+  inputBanner?: ReactNode;
   /** Message decorator (add content before/after messages, e.g. timestamps, action buttons) */
   messageDecorator?: (message: Message, element: ReactNode) => ReactNode;
 

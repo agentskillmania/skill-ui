@@ -28,6 +28,7 @@ export function Chat({
   renderers = {},
   inputPrefix,
   inputSuffix,
+  inputBanner,
   messageDecorator,
   maxWidth = '800px',
   placeholder,
@@ -124,6 +125,7 @@ export function Chat({
             placeholder={resolvedPlaceholder}
             prefix={inputPrefix}
             suffix={inputSuffix}
+            banner={inputBanner}
             commands={commands}
             onCommand={onCommand}
             commandTrigger={commandTrigger}

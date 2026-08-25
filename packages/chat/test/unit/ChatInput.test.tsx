@@ -38,6 +38,22 @@ describe('ChatInput', () => {
     expect(screen.getByText('后缀')).toBeInTheDocument();
   });
 
+  it('renders banner on its own row above the input row', () => {
+    render(
+      <ChatWrapper>
+        <ChatInput banner={<div>mode-banner</div>} />
+      </ChatWrapper>
+    );
+    const banner = screen.getByText('mode-banner');
+    const dropzone = document.querySelector('[data-testid="chat-input-dropzone"]');
+    expect(dropzone).toBeTruthy();
+    // Banner precedes the input row in DOM order (stacked above, not inline
+    // like prefix/suffix).
+    expect(
+      banner.compareDocumentPosition(dropzone!) & Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
+  });
+
   it('loading status shows stop button', () => {
     render(
       <ChatWrapper>
