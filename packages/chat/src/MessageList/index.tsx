@@ -3,6 +3,7 @@
  */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
+import { useMemo } from 'react';
 
 import { MessageItem } from '../messages/MessageItem.js';
 import type { MessageListProps } from '../types.js';
@@ -15,13 +16,31 @@ export function MessageList({
   onConfirmHumanRequest,
   onBlockAction,
   onCopyMessage,
-  onResendMessage,
+  onEditMessage,
   onRegenerateMessage,
   onRollbackMessage,
   onForkMessage,
+  hideActions,
 }: MessageListProps) {
   const theme = useTheme();
   const { ref, handleScroll } = useAutoScroll<HTMLDivElement>([messages]);
+
+  // Last-message anchors decide per-position buttons: edit targets the last
+  // user message, regenerate the last completed assistant message (error /
+  // streaming tails are skipped), rollback and fork target earlier turns.
+  const { lastUserMessageId, lastCompletedAssistantId } = useMemo(() => {
+    let lastUser: string | undefined;
+    let lastCompletedAssistant: string | undefined;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const m = messages[i];
+      if (!lastUser && m.role === 'user') lastUser = m.id;
+      if (!lastCompletedAssistant && m.role === 'assistant' && m.status === 'completed') {
+        lastCompletedAssistant = m.id;
+      }
+      if (lastUser && lastCompletedAssistant) break;
+    }
+    return { lastUserMessageId: lastUser, lastCompletedAssistantId: lastCompletedAssistant };
+  }, [messages]);
 
   return (
     <div
@@ -44,10 +63,13 @@ export function MessageList({
           onConfirmHumanRequest={onConfirmHumanRequest}
           onBlockAction={onBlockAction}
           onCopyMessage={onCopyMessage}
-          onResendMessage={onResendMessage}
+          onEditMessage={onEditMessage}
           onRegenerateMessage={onRegenerateMessage}
           onRollbackMessage={onRollbackMessage}
           onForkMessage={onForkMessage}
+          isLastUserMessage={message.id === lastUserMessageId}
+          isLastCompletedAssistant={message.id === lastCompletedAssistantId}
+          hideActions={hideActions}
         />
       ))}
     </div>

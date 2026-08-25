@@ -2,7 +2,7 @@
  * MessageActions component tests
  */
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 import { ChatWrapper } from './testUtils.js';
 import { MessageActions } from '../../src/messages/MessageActions.js';
 import type { Message } from '../../src/types.js';
@@ -20,14 +20,24 @@ const streamingMsg: Message = {
   content: '...',
   status: 'streaming',
 };
+const errorMsg: Message = {
+  id: 'a3',
+  role: 'assistant',
+  content: 'boom',
+  status: 'error',
+};
 const systemMsg: Message = { id: 's1', role: 'system', content: 'notice', status: 'completed' };
 const toolMsg: Message = { id: 't1', role: 'tool', content: 'result', status: 'completed' };
+
+function getButtons(container: HTMLElement) {
+  return container.querySelectorAll('button');
+}
 
 describe('MessageActions', () => {
   it('returns null for system messages', () => {
     const { container } = render(
       <ChatWrapper>
-        <MessageActions message={systemMsg} />
+        <MessageActions message={systemMsg} onCopy={() => {}} />
       </ChatWrapper>
     );
     expect(container.textContent).toBe('');
@@ -36,20 +46,52 @@ describe('MessageActions', () => {
   it('returns null for tool messages', () => {
     const { container } = render(
       <ChatWrapper>
-        <MessageActions message={toolMsg} />
+        <MessageActions message={toolMsg} onCopy={() => {}} />
       </ChatWrapper>
     );
     expect(container.textContent).toBe('');
   });
 
-  it('renders 1 action button (copy) for basic assistant messages', () => {
+  it('returns null when no callback is wired (wiring is the switch)', () => {
     const { container } = render(
       <ChatWrapper>
-        <MessageActions message={assistantMsg} />
+        <MessageActions message={assistantMsg} isLastCompletedAssistant />
       </ChatWrapper>
     );
-    const buttons = container.querySelectorAll('button');
-    expect(buttons.length).toBeGreaterThanOrEqual(1);
+    expect(container.textContent).toBe('');
+  });
+
+  it('returns null when hideActions is set (streaming guard)', () => {
+    const { container } = render(
+      <ChatWrapper>
+        <MessageActions
+          message={assistantMsg}
+          isLastCompletedAssistant
+          hideActions
+          onCopy={() => {}}
+          onRegenerate={() => {}}
+        />
+      </ChatWrapper>
+    );
+    expect(container.textContent).toBe('');
+  });
+
+  it('renders copy only for a non-last user message', () => {
+    const { container } = render(
+      <ChatWrapper>
+        <MessageActions message={userMsg} onCopy={() => {}} onEdit={() => {}} />
+      </ChatWrapper>
+    );
+    expect(getButtons(container).length).toBe(1);
+  });
+
+  it('renders copy + edit for the last user message', () => {
+    const { container } = render(
+      <ChatWrapper>
+        <MessageActions message={userMsg} isLastUserMessage onCopy={() => {}} onEdit={() => {}} />
+      </ChatWrapper>
+    );
+    expect(getButtons(container).length).toBe(2);
   });
 
   it('calls onCopy when copy button clicked', () => {
@@ -59,116 +101,161 @@ describe('MessageActions', () => {
         <MessageActions message={assistantMsg} onCopy={onCopy} />
       </ChatWrapper>
     );
-    const buttons = container.querySelectorAll('button');
-    expect(buttons.length).toBeGreaterThanOrEqual(1);
+    const buttons = getButtons(container);
+    expect(buttons.length).toBe(1);
     fireEvent.click(buttons[0]);
     expect(onCopy).toHaveBeenCalledWith(assistantMsg);
   });
 
-  it('renders resend button for user messages (2 buttons)', () => {
+  it('calls onEdit when edit button clicked on the last user message', () => {
+    const onEdit = vi.fn();
     const { container } = render(
       <ChatWrapper>
-        <MessageActions message={userMsg} />
+        <MessageActions message={userMsg} isLastUserMessage onCopy={() => {}} onEdit={onEdit} />
       </ChatWrapper>
     );
-    const buttons = container.querySelectorAll('button');
-    // user messages have copy + resend
-    expect(buttons.length).toBe(2);
+    const buttons = getButtons(container);
+    fireEvent.click(buttons[1]); // second button is edit
+    expect(onEdit).toHaveBeenCalledWith(userMsg);
   });
 
-  it('calls onResend when resend button clicked on user message', () => {
-    const onResend = vi.fn();
+  it('renders copy + regenerate for the last completed assistant message', () => {
     const { container } = render(
       <ChatWrapper>
-        <MessageActions message={userMsg} onResend={onResend} />
+        <MessageActions
+          message={assistantMsg}
+          isLastCompletedAssistant
+          onCopy={() => {}}
+          onEdit={() => {}}
+          onRegenerate={() => {}}
+          onRollback={() => {}}
+          onFork={() => {}}
+        />
       </ChatWrapper>
     );
-    const buttons = container.querySelectorAll('button');
-    // Second button is resend
-    fireEvent.click(buttons[1]);
-    expect(onResend).toHaveBeenCalledWith(userMsg);
+    expect(getButtons(container).length).toBe(2);
   });
 
-  it('renders 4 action buttons for completed assistant messages', () => {
-    const { container } = render(
-      <ChatWrapper>
-        <MessageActions message={assistantMsg} />
-      </ChatWrapper>
-    );
-    const buttons = container.querySelectorAll('button');
-    // completed assistant has copy + regenerate + rollback + fork
-    expect(buttons.length).toBe(4);
-  });
-
-  it('does not render regenerate/rollback/fork for streaming assistant messages', () => {
-    const { container } = render(
-      <ChatWrapper>
-        <MessageActions message={streamingMsg} />
-      </ChatWrapper>
-    );
-    const buttons = container.querySelectorAll('button');
-    // streaming assistant only has copy
-    expect(buttons.length).toBe(1);
-  });
-
-  it('calls onRegenerate when regenerate button clicked', () => {
+  it('calls onRegenerate when regenerate button clicked on the last completed assistant', () => {
     const onRegenerate = vi.fn();
     const { container } = render(
       <ChatWrapper>
-        <MessageActions message={assistantMsg} onRegenerate={onRegenerate} />
+        <MessageActions
+          message={assistantMsg}
+          isLastCompletedAssistant
+          onCopy={() => {}}
+          onRegenerate={onRegenerate}
+        />
       </ChatWrapper>
     );
-    const buttons = container.querySelectorAll('button');
+    const buttons = getButtons(container);
     fireEvent.click(buttons[1]); // second button is regenerate
     expect(onRegenerate).toHaveBeenCalledWith(assistantMsg);
   });
 
-  it('calls onRollback when rollback button clicked', () => {
+  it('renders copy + rollback + fork for a non-last completed assistant message', () => {
+    const { container } = render(
+      <ChatWrapper>
+        <MessageActions
+          message={assistantMsg}
+          onCopy={() => {}}
+          onRegenerate={() => {}}
+          onRollback={() => {}}
+          onFork={() => {}}
+        />
+      </ChatWrapper>
+    );
+    expect(getButtons(container).length).toBe(3);
+  });
+
+  it('calls onRollback when rollback button clicked on a non-last assistant', () => {
     const onRollback = vi.fn();
     const { container } = render(
       <ChatWrapper>
-        <MessageActions message={assistantMsg} onRollback={onRollback} />
+        <MessageActions message={assistantMsg} onCopy={() => {}} onRollback={onRollback} />
       </ChatWrapper>
     );
-    const buttons = container.querySelectorAll('button');
-    fireEvent.click(buttons[2]); // third button is rollback
+    const buttons = getButtons(container);
+    fireEvent.click(buttons[1]); // second button is rollback
     expect(onRollback).toHaveBeenCalledWith(assistantMsg);
   });
 
-  it('calls onFork when fork button clicked', () => {
+  it('calls onFork when fork button clicked on a non-last assistant', () => {
     const onFork = vi.fn();
     const { container } = render(
       <ChatWrapper>
-        <MessageActions message={assistantMsg} onFork={onFork} />
+        <MessageActions message={assistantMsg} onCopy={() => {}} onFork={onFork} />
       </ChatWrapper>
     );
-    const buttons = container.querySelectorAll('button');
-    fireEvent.click(buttons[3]); // fourth button is fork
+    const buttons = getButtons(container);
+    fireEvent.click(buttons[1]); // second button is fork (rollback not wired)
     expect(onFork).toHaveBeenCalledWith(assistantMsg);
+  });
+
+  it('does not render rollback/fork on the last completed assistant even if wired', () => {
+    const { container } = render(
+      <ChatWrapper>
+        <MessageActions
+          message={assistantMsg}
+          isLastCompletedAssistant
+          onCopy={() => {}}
+          onRollback={() => {}}
+          onFork={() => {}}
+        />
+      </ChatWrapper>
+    );
+    expect(getButtons(container).length).toBe(1); // copy only
+  });
+
+  it('does not render regenerate on a non-last completed assistant even if wired', () => {
+    const { container } = render(
+      <ChatWrapper>
+        <MessageActions message={assistantMsg} onCopy={() => {}} onRegenerate={() => {}} />
+      </ChatWrapper>
+    );
+    expect(getButtons(container).length).toBe(1); // copy only
+  });
+
+  it('returns null for streaming assistant messages', () => {
+    const { container } = render(
+      <ChatWrapper>
+        <MessageActions
+          message={streamingMsg}
+          isLastCompletedAssistant
+          onCopy={() => {}}
+          onRegenerate={() => {}}
+        />
+      </ChatWrapper>
+    );
+    expect(container.textContent).toBe('');
+  });
+
+  it('returns null for error assistant messages', () => {
+    const { container } = render(
+      <ChatWrapper>
+        <MessageActions
+          message={errorMsg}
+          isLastCompletedAssistant
+          onCopy={() => {}}
+          onRegenerate={() => {}}
+        />
+      </ChatWrapper>
+    );
+    expect(container.textContent).toBe('');
   });
 
   it('renders with ghost variant', () => {
     const { container } = render(
       <ChatWrapper>
-        <MessageActions message={assistantMsg} variant="ghost" />
+        <MessageActions
+          message={assistantMsg}
+          variant="ghost"
+          onCopy={() => {}}
+          onRollback={() => {}}
+          onFork={() => {}}
+        />
       </ChatWrapper>
     );
-    const buttons = container.querySelectorAll('button');
-    expect(buttons.length).toBe(4);
-  });
-
-  it('does not crash when callbacks are not provided', () => {
-    const { container } = render(
-      <ChatWrapper>
-        <MessageActions message={userMsg} />
-      </ChatWrapper>
-    );
-    const buttons = container.querySelectorAll('button');
-    expect(buttons.length).toBe(2);
-    // Click without onCopy/onResend should not throw
-    expect(() => {
-      fireEvent.click(buttons[0]);
-      fireEvent.click(buttons[1]);
-    }).not.toThrow();
+    expect(getButtons(container).length).toBe(3);
   });
 });

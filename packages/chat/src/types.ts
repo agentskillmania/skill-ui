@@ -297,9 +297,11 @@ export interface MessageListProps {
   onConfirmHumanRequest?: (requestId: string, response: unknown) => void;
   /** Block action callback (forwarded to blocks) */
   onBlockAction?: (action: BlockAction) => void;
-  /** Message action callbacks */
+  /** Hide all message action buttons (e.g. while the chat is streaming) */
+  hideActions?: boolean;
+  /** Message action callbacks — a button renders only when its callback is wired */
   onCopyMessage?: (message: Message) => void;
-  onResendMessage?: (message: Message) => void;
+  onEditMessage?: (message: Message) => void;
   onRegenerateMessage?: (message: Message) => void;
   onRollbackMessage?: (message: Message) => void;
   onForkMessage?: (message: Message) => void;
@@ -321,15 +323,19 @@ export interface ChatProps {
   onConfirmHumanRequest?: (requestId: string, response: unknown) => void;
   /** Callback for block-emitted actions (e.g. A2UI surface interactions) */
   onBlockAction?: (action: BlockAction) => void;
+  // Message action callbacks. Buttons appear only when their callback is
+  // provided — wiring a callback is the switch. Position rules: edit targets
+  // the last user message; regenerate targets the last completed assistant
+  // message; rollback/fork target earlier completed assistant messages.
   /** Copy message callback */
   onCopyMessage?: (message: Message) => void;
-  /** Resend user message callback */
-  onResendMessage?: (message: Message) => void;
-  /** Regenerate assistant message callback */
+  /** Edit-and-resend the last user message callback */
+  onEditMessage?: (message: Message) => void;
+  /** Regenerate the last completed assistant message callback */
   onRegenerateMessage?: (message: Message) => void;
-  /** Rollback to message callback */
+  /** Rollback (truncate) history after this message callback */
   onRollbackMessage?: (message: Message) => void;
-  /** Fork from message callback */
+  /** Fork a new conversation from this message callback */
   onForkMessage?: (message: Message) => void;
 
   // Controlled input

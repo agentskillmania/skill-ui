@@ -17,10 +17,16 @@ export interface MessageItemProps {
   onConfirmHumanRequest?: (requestId: string, response: unknown) => void;
   onBlockAction?: (action: BlockAction) => void;
   onCopyMessage?: (message: Message) => void;
-  onResendMessage?: (message: Message) => void;
+  onEditMessage?: (message: Message) => void;
   onRegenerateMessage?: (message: Message) => void;
   onRollbackMessage?: (message: Message) => void;
   onForkMessage?: (message: Message) => void;
+  /** Whether this message is the last user message (edit target) */
+  isLastUserMessage?: boolean;
+  /** Whether this message is the last completed assistant message (regenerate target) */
+  isLastCompletedAssistant?: boolean;
+  /** Hide all message action buttons (streaming guard) */
+  hideActions?: boolean;
 }
 
 /** Built-in message renderers */
@@ -37,10 +43,13 @@ export const MessageItem = memo(function MessageItem({
   onConfirmHumanRequest,
   onBlockAction,
   onCopyMessage,
-  onResendMessage,
+  onEditMessage,
   onRegenerateMessage,
   onRollbackMessage,
   onForkMessage,
+  isLastUserMessage,
+  isLastCompletedAssistant,
+  hideActions,
 }: MessageItemProps) {
   // Find renderer: custom first, then built-in, fallback to SystemMessage
   const customRenderer = renderers?.messages?.[message.role];
@@ -51,10 +60,13 @@ export const MessageItem = memo(function MessageItem({
     <MessageWrapper
       message={message}
       onCopy={onCopyMessage}
-      onResend={onResendMessage}
+      onEdit={onEditMessage}
       onRegenerate={onRegenerateMessage}
       onRollback={onRollbackMessage}
       onFork={onForkMessage}
+      isLastUserMessage={isLastUserMessage}
+      isLastCompletedAssistant={isLastCompletedAssistant}
+      hideActions={hideActions}
     >
       <Renderer
         message={message}

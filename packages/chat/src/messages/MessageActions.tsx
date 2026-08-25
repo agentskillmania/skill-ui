@@ -1,10 +1,18 @@
 /**
- * Message action bar — appears on hover, inside message bubble
+ * Message action bar — appears on hover, inside message bubble.
+ *
+ * The button set is baked into the package; hosts only wire callbacks.
+ * A button renders only when its callback is provided (wiring is the
+ * switch), so an unwired host never shows dead buttons. Position rules:
+ * - copy: every user / completed assistant message
+ * - edit (edit-and-resend): the last user message
+ * - regenerate: the last completed assistant message
+ * - rollback / fork: completed assistant messages that are not the last one
  */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Tooltip } from 'antd';
-import { Copy, RefreshCw, GitBranch, Send, Undo2 } from 'lucide-react';
+import { Copy, RefreshCw, GitBranch, Pencil, Undo2 } from 'lucide-react';
 import { memo } from 'react';
 
 import type { Message } from '../types.js';
@@ -14,8 +22,14 @@ export type MessageActionsVariant = 'ghost' | 'pill';
 export interface MessageActionsProps {
   message: Message;
   variant?: MessageActionsVariant;
+  /** Whether this message is the last user message in the list (edit target) */
+  isLastUserMessage?: boolean;
+  /** Whether this message is the last completed assistant message (regenerate target) */
+  isLastCompletedAssistant?: boolean;
+  /** Hide all actions (e.g. while the chat is streaming) */
+  hideActions?: boolean;
   onCopy?: (message: Message) => void;
-  onResend?: (message: Message) => void;
+  onEdit?: (message: Message) => void;
   onRegenerate?: (message: Message) => void;
   onRollback?: (message: Message) => void;
   onFork?: (message: Message) => void;
@@ -84,17 +98,19 @@ function ActionButton({
 export const MessageActions = memo(function MessageActions({
   message,
   variant = 'pill',
+  isLastUserMessage = false,
+  isLastCompletedAssistant = false,
+  hideActions = false,
   onCopy,
-  onResend,
+  onEdit,
   onRegenerate,
   onRollback,
   onFork,
 }: MessageActionsProps) {
   const theme = useTheme();
-  const isUser = message.role === 'user';
 
-  // System / tool messages have no actions
-  if (message.role === 'system' || message.role === 'tool') return null;
+  // System / tool messages have no actions; streaming guard hides the bar entirely
+  if (hideActions || message.role === 'system' || message.role === 'tool') return null;
 
   const containerStyles: Record<MessageActionsVariant, ReturnType<typeof css>> = {
     ghost: css`
@@ -115,51 +131,71 @@ export const MessageActions = memo(function MessageActions({
     `,
   };
 
-  const actions = [
-    <ActionButton
-      key="copy"
-      icon={<Copy size={14} />}
-      title="复制消息"
-      onClick={() => onCopy?.(message)}
-      variant={variant}
-    />,
-  ];
-
-  if (isUser) {
+  const actions: React.ReactElement[] = [];
+  if (onCopy) {
     actions.push(
       <ActionButton
-        key="resend"
-        icon={<Send size={14} />}
-        title="重新发送"
-        onClick={() => onResend?.(message)}
-        variant={variant}
-      />
-    );
-  } else if (message.status === 'completed') {
-    actions.push(
-      <ActionButton
-        key="regenerate"
-        icon={<RefreshCw size={14} />}
-        title="重新生成"
-        onClick={() => onRegenerate?.(message)}
-        variant={variant}
-      />,
-      <ActionButton
-        key="rollback"
-        icon={<Undo2 size={14} />}
-        title="回退到当前位置"
-        onClick={() => onRollback?.(message)}
-        variant={variant}
-      />,
-      <ActionButton
-        key="fork"
-        icon={<GitBranch size={14} />}
-        title="在当前位置 Fork"
-        onClick={() => onFork?.(message)}
+        key="copy"
+        icon={<Copy size={14} />}
+        title="复制消息"
+        onClick={() => onCopy(message)}
         variant={variant}
       />
     );
   }
+
+  if (message.role === 'user') {
+    if (onEdit && isLastUserMessage) {
+      actions.push(
+        <ActionButton
+          key="edit"
+          icon={<Pencil size={14} />}
+          title="编辑消息"
+          onClick={() => onEdit(message)}
+          variant={variant}
+        />
+      );
+    }
+  } else if (message.status === 'completed') {
+    if (onRegenerate && isLastCompletedAssistant) {
+      actions.push(
+        <ActionButton
+          key="regenerate"
+          icon={<RefreshCw size={14} />}
+          title="重新生成"
+          onClick={() => onRegenerate(message)}
+          variant={variant}
+        />
+      );
+    }
+    if (!isLastCompletedAssistant) {
+      if (onRollback) {
+        actions.push(
+          <ActionButton
+            key="rollback"
+            icon={<Undo2 size={14} />}
+            title="回退到此处"
+            onClick={() => onRollback(message)}
+            variant={variant}
+          />
+        );
+      }
+      if (onFork) {
+        actions.push(
+          <ActionButton
+            key="fork"
+            icon={<GitBranch size={14} />}
+            title="从此处 Fork"
+            onClick={() => onFork(message)}
+            variant={variant}
+          />
+        );
+      }
+    }
+  }
+
+  // Nothing wired for this message → no bar at all
+  if (actions.length === 0) return null;
 
   return <div css={containerStyles[variant]}>{actions}</div>;
 });

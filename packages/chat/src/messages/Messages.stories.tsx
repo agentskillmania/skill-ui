@@ -163,7 +163,7 @@ export const WrapperAssistant: Story = {
 
 const actionHandlers = {
   onCopy: (m: Message) => console.log('copy', m.id),
-  onResend: (m: Message) => console.log('resend', m.id),
+  onEdit: (m: Message) => console.log('edit', m.id),
   onRegenerate: (m: Message) => console.log('regenerate', m.id),
   onRollback: (m: Message) => console.log('rollback', m.id),
   onFork: (m: Message) => console.log('fork', m.id),
@@ -172,7 +172,7 @@ const actionHandlers = {
 export const UserWithHoverActions: Story = {
   render: () => (
     <Wrapper>
-      <MessageWrapper message={userMsg} {...actionHandlers}>
+      <MessageWrapper message={userMsg} isLastUserMessage {...actionHandlers}>
         <UserMessage message={userMsg} />
       </MessageWrapper>
     </Wrapper>
@@ -189,7 +189,7 @@ export const AssistantWithHoverActions: Story = {
     };
     return (
       <Wrapper>
-        <MessageWrapper message={msg} {...actionHandlers}>
+        <MessageWrapper message={msg} isLastCompletedAssistant {...actionHandlers}>
           <AssistantMessage message={msg} />
         </MessageWrapper>
       </Wrapper>
@@ -202,7 +202,7 @@ export const AssistantStreamingWithActions: Story = {
     const msg: Message = {
       id: '8',
       role: 'assistant',
-      content: 'streaming 状态下操作栏里不会显示 regenerate/fork/rate，只有 copy/delete。',
+      content: 'streaming 状态下不渲染任何操作按钮，等回答完成后才会出现。',
       status: 'streaming',
     };
     return (
@@ -244,11 +244,21 @@ export const ConversationWithActions: Story = {
         status: 'completed',
       },
     ];
+    const lastUser = [...messages].reverse().find((m) => m.role === 'user');
+    const lastCompletedAssistant = [...messages]
+      .reverse()
+      .find((m) => m.role === 'assistant' && m.status === 'completed');
     return (
       <Wrapper>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {messages.map((m) => (
-            <MessageWrapper key={m.id} message={m} {...actionHandlers}>
+            <MessageWrapper
+              key={m.id}
+              message={m}
+              isLastUserMessage={m.id === lastUser?.id}
+              isLastCompletedAssistant={m.id === lastCompletedAssistant?.id}
+              {...actionHandlers}
+            >
               {m.role === 'user' ? <UserMessage message={m} /> : <AssistantMessage message={m} />}
             </MessageWrapper>
           ))}

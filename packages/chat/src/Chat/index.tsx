@@ -17,7 +17,7 @@ export function Chat({
   onConfirmHumanRequest,
   onBlockAction,
   onCopyMessage,
-  onResendMessage,
+  onEditMessage,
   onRegenerateMessage,
   onRollbackMessage,
   onForkMessage,
@@ -89,10 +89,11 @@ export function Chat({
             onConfirmHumanRequest={onConfirmHumanRequest}
             onBlockAction={onBlockAction}
             onCopyMessage={onCopyMessage}
-            onResendMessage={onResendMessage}
+            onEditMessage={onEditMessage}
             onRegenerateMessage={onRegenerateMessage}
             onRollbackMessage={onRollbackMessage}
             onForkMessage={onForkMessage}
+            hideActions={status === 'streaming'}
           />
         </div>
       </div>

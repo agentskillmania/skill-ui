@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { ChatWrapper } from './testUtils.js';
 import { MessageList } from '../../src/MessageList/index.js';
@@ -48,5 +48,83 @@ describe('MessageList', () => {
     );
     expect(screen.getByText('消息 0')).toBeInTheDocument();
     expect(screen.getByText('消息 49')).toBeInTheDocument();
+  });
+
+  describe('per-position action buttons', () => {
+    const conversation: Message[] = [
+      { id: 'u1', role: 'user', content: '问题一', status: 'completed' },
+      { id: 'a1', role: 'assistant', content: '回答一', status: 'completed' },
+      { id: 'u2', role: 'user', content: '问题二', status: 'completed' },
+      { id: 'a2', role: 'assistant', content: '回答二', status: 'completed' },
+    ];
+
+    function allCallbacks() {
+      return {
+        onCopyMessage: vi.fn(),
+        onEditMessage: vi.fn(),
+        onRegenerateMessage: vi.fn(),
+        onRollbackMessage: vi.fn(),
+        onForkMessage: vi.fn(),
+      };
+    }
+
+    /** Buttons inside the hover action bar of the message with given content */
+    function actionButtons(container: HTMLElement, content: string) {
+      let node = screen.getByText(content) as HTMLElement | null;
+      while (node && !node.querySelector('.msg-actions')) {
+        node = node.parentElement;
+      }
+      expect(node).toBeTruthy();
+      return node!.querySelectorAll('.msg-actions button');
+    }
+
+    it('wires edit to the last user message only, regenerate to the last completed assistant only', () => {
+      const { container } = render(
+        <ChatWrapper>
+          <MessageList messages={conversation} {...allCallbacks()} />
+        </ChatWrapper>
+      );
+      // u1: copy only (non-last user)
+      expect(actionButtons(container, '问题一').length).toBe(1);
+      // u2: copy + edit
+      expect(actionButtons(container, '问题二').length).toBe(2);
+      // a1: copy + rollback + fork
+      expect(actionButtons(container, '回答一').length).toBe(3);
+      // a2: copy + regenerate
+      expect(actionButtons(container, '回答二').length).toBe(2);
+    });
+
+    it('skips an error tail when finding the last completed assistant (regenerate moves up)', () => {
+      const withErrorTail: Message[] = [
+        ...conversation.slice(0, 2), // u1, a1 completed
+        { id: 'u3', role: 'user', content: '问题三', status: 'completed' },
+        { id: 'a3', role: 'assistant', content: '出错了', status: 'error' },
+      ];
+      const { container } = render(
+        <ChatWrapper>
+          <MessageList messages={withErrorTail} {...allCallbacks()} />
+        </ChatWrapper>
+      );
+      // a1 is now the last completed assistant → copy + regenerate
+      expect(actionButtons(container, '回答一').length).toBe(2);
+    });
+
+    it('hides every action bar while streaming (hideActions)', () => {
+      const { container } = render(
+        <ChatWrapper>
+          <MessageList messages={conversation} hideActions {...allCallbacks()} />
+        </ChatWrapper>
+      );
+      expect(container.querySelectorAll('.msg-actions button').length).toBe(0);
+    });
+
+    it('renders no action buttons when no callback is wired', () => {
+      const { container } = render(
+        <ChatWrapper>
+          <MessageList messages={conversation} />
+        </ChatWrapper>
+      );
+      expect(container.querySelectorAll('.msg-actions button').length).toBe(0);
+    });
   });
 });

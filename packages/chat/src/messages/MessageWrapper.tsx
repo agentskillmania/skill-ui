@@ -13,8 +13,12 @@ export interface MessageWrapperProps {
   message: Message;
   children: ReactNode;
   actionsVariant?: MessageActionsVariant;
+  /** Forwarded to MessageActions (last-message flags and streaming guard) */
+  isLastUserMessage?: boolean;
+  isLastCompletedAssistant?: boolean;
+  hideActions?: boolean;
   onCopy?: (message: Message) => void;
-  onResend?: (message: Message) => void;
+  onEdit?: (message: Message) => void;
   onRegenerate?: (message: Message) => void;
   onRollback?: (message: Message) => void;
   onFork?: (message: Message) => void;
@@ -24,8 +28,11 @@ export function MessageWrapper({
   message,
   children,
   actionsVariant,
+  isLastUserMessage,
+  isLastCompletedAssistant,
+  hideActions,
   onCopy,
-  onResend,
+  onEdit,
   onRegenerate,
   onRollback,
   onFork,
@@ -72,8 +79,11 @@ export function MessageWrapper({
           <MessageActions
             message={message}
             variant={actionsVariant}
+            isLastUserMessage={isLastUserMessage}
+            isLastCompletedAssistant={isLastCompletedAssistant}
+            hideActions={hideActions}
             onCopy={onCopy}
-            onResend={onResend}
+            onEdit={onEdit}
             onRegenerate={onRegenerate}
             onRollback={onRollback}
             onFork={onFork}
