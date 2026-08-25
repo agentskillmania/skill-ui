@@ -27,6 +27,7 @@ export function Chat({
   disabled = false,
   renderers = {},
   welcome,
+  autoFocusComposer = 'empty',
   inputPrefix,
   inputSuffix,
   inputBanner,
@@ -166,7 +167,7 @@ export function Chat({
             onCancel={onStop}
             loading={status === 'streaming'}
             disabled={disabled}
-            autoFocus={isEmpty}
+            autoFocus={autoFocusComposer === 'always' ? true : isEmpty}
             placeholder={resolvedPlaceholder}
             prefix={inputPrefix}
             suffix={inputSuffix}

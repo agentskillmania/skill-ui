@@ -133,5 +133,16 @@ describe('Chat', () => {
       render(<Chat messages={[]} />, { wrapper: Wrapper });
       expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).toHaveFocus();
     });
+
+    it('does not auto-focus a restored conversation by default', () => {
+      render(<Chat messages={mockMessages} />, { wrapper: Wrapper });
+      expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).not.toHaveFocus();
+    });
+
+    it("autoFocusComposer='always' focuses even with history present", () => {
+      // 笔记类宿主:打开一条对话 = 接着写,有无历史都要聚焦。
+      render(<Chat messages={mockMessages} autoFocusComposer="always" />, { wrapper: Wrapper });
+      expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).toHaveFocus();
+    });
   });
 });

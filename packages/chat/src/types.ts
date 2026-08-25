@@ -402,6 +402,12 @@ export interface ChatProps {
    * slides to the bottom. undefined = default localized greeting; null = off;
    * a node = fully custom content (interactive nodes stay clickable). */
   welcome?: ReactNode;
+  /** When the composer grabs focus. 'empty' (default) = only empty
+   * conversations (ChatGPT-style: an opened history is for reading).
+   * 'always' = focus on every mount — note-taking hosts where opening a
+   * conversation means continuing to write. Refocuses after composer remounts
+   * too (the ChatInput callback ref covers node churn while the flag is on). */
+  autoFocusComposer?: 'empty' | 'always';
   /** Input prefix content */
   inputPrefix?: ReactNode;
   /** Input suffix content */
