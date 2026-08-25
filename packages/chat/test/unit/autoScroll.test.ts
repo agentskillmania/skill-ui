@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useAutoScroll } from '../../src/utils/autoScroll.js';
 
@@ -114,5 +114,97 @@ describe('useAutoScroll', () => {
       { initialProps: { deps: [1] } }
     );
     expect(() => rerender({ deps: [2] })).not.toThrow();
+  });
+
+  describe('ResizeObserver pinning', () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    const withStubbedRO = (cb: { current?: ResizeObserverCallback }) => {
+      class RO {
+        constructor(callback: ResizeObserverCallback) {
+          cb.current = callback;
+        }
+        observe() {}
+        unobserve() {}
+        disconnect() {}
+      }
+      vi.stubGlobal('ResizeObserver', RO);
+    };
+
+    it('pins to bottom when an observed child grows (image decode / deferred block)', () => {
+      // 恢复历史后图片解码撑高气泡:此时消息列表没变(deps 不触发),
+      // 底部钉住只能靠 ResizeObserver。
+      const roCb: { current?: ResizeObserverCallback } = {};
+      withStubbedRO(roCb);
+
+      const child = document.createElement('div');
+      const container = document.createElement('div');
+      container.appendChild(child);
+      Object.defineProperty(container, 'scrollHeight', { value: 1000, configurable: true });
+      Object.defineProperty(container, 'scrollTop', {
+        value: 800,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(container, 'clientHeight', { value: 200, configurable: true });
+
+      const { result, rerender } = renderHook(
+        ({ deps }: { deps: unknown[] }) => useAutoScroll<HTMLDivElement>(deps),
+        { initialProps: { deps: [1] } }
+      );
+      // 挂载首帧 ref 还是 null;ref 就位后靠 deps 变化触发一次定位+挂观察。
+      result.current.ref.current = container;
+      rerender({ deps: [2] });
+      expect(roCb.current).toBeDefined();
+
+      // 图片解码:内容从 1000 撑到 1400,用户在底部 → 钉住
+      Object.defineProperty(container, 'scrollHeight', { value: 1400, configurable: true });
+      container.scrollTop = 0;
+      roCb.current!([] as never[], {} as ResizeObserver);
+      expect(container.scrollTop).toBe(1400);
+    });
+
+    it('does not pin when the user has scrolled up', () => {
+      const roCb: { current?: ResizeObserverCallback } = {};
+      withStubbedRO(roCb);
+
+      const child = document.createElement('div');
+      const container = document.createElement('div');
+      container.appendChild(child);
+      Object.defineProperty(container, 'scrollHeight', { value: 1000, configurable: true });
+      Object.defineProperty(container, 'scrollTop', {
+        value: 800,
+        writable: true,
+        configurable: true,
+      });
+      Object.defineProperty(container, 'clientHeight', { value: 200, configurable: true });
+
+      const { result, rerender } = renderHook(
+        ({ deps }: { deps: unknown[] }) => useAutoScroll<HTMLDivElement>(deps),
+        { initialProps: { deps: [1] } }
+      );
+      result.current.ref.current = container;
+      rerender({ deps: [2] });
+
+      // 用户上翻(距底 700 > 50)→ shouldAutoScroll = false
+      container.scrollTop = 100;
+      result.current.handleScroll();
+
+      roCb.current!([] as never[], {} as ResizeObserver);
+      expect(container.scrollTop).toBe(100);
+    });
+
+    it('observes nothing and stays safe when ResizeObserver is unavailable', () => {
+      vi.stubGlobal('ResizeObserver', undefined);
+      const container = document.createElement('div');
+      const { result, rerender } = renderHook(
+        ({ deps }: { deps: unknown[] }) => useAutoScroll<HTMLDivElement>(deps),
+        { initialProps: { deps: [1] } }
+      );
+      result.current.ref.current = container;
+      expect(() => rerender({ deps: [2] })).not.toThrow();
+    });
   });
 });
