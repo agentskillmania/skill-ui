@@ -260,3 +260,32 @@ describe('turn usage — fromHistory', () => {
     });
   });
 });
+
+describe('fromHistory — system-reminder rows (per-turn time context)', () => {
+  it('reminder rows are dropped: no message, no marker, no turn split', () => {
+    const state = fromHistory([
+      { role: 'user', content: 'hi', timestamp: 1000 },
+      { role: 'system', type: 'system-reminder', content: '---\nTime: X\n---', timestamp: 1050 },
+      { role: 'assistant', content: 'part one', timestamp: 1200 },
+      // 同轮第二段 assistant 行:reminder 不得把气泡切成两半
+      { role: 'assistant', content: ' part two', timestamp: 1250 },
+    ]);
+    // 不产 system 消息
+    expect(state.main.messages.some((m) => m.role === 'system')).toBe(false);
+    // 两条 assistant 行合并为同一个气泡(轮未被 reminder 断开)
+    const bubbles = state.main.messages.filter((m) => m.role === 'assistant');
+    expect(bubbles).toHaveLength(1);
+    expect(bubbles[0].content).toBe('part one part two');
+  });
+
+  it('plain system marker rows still render as centered markers', () => {
+    const state = fromHistory([
+      { role: 'user', content: 'hi', timestamp: 1000 },
+      { role: 'assistant', content: 'Answer', timestamp: 1100 },
+      { role: 'system', content: '{"kind":"compact"}', timestamp: 1200 },
+    ]);
+    const markers = state.main.messages.filter((m) => m.role === 'system');
+    expect(markers).toHaveLength(1);
+    expect(markers[0].content).toBe('{"kind":"compact"}');
+  });
+});

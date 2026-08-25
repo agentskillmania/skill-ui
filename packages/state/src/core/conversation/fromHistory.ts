@@ -365,6 +365,10 @@ export function fromHistory(
 
     // System messages
     if (msg.role === 'system') {
+      // 轮级动态提醒行(时间上下文,daemon 每轮落盘、装配器合并进 user
+      // 消息发给 LLM):纯 wire 参与者,不进 UI —— 跳过且**不得**重置
+      // `current`,否则会把轮内 assistant 气泡切成两半。
+      if (msg.type === 'system-reminder') continue;
       agentMessages.push({
         id: `hist-msg-${agentMessages.length}`,
         role: 'system',
