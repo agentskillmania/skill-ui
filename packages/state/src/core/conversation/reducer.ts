@@ -15,11 +15,12 @@ import type {
   AgentEvent,
   EventCategory,
   TokenStats,
+  TurnUsage,
   SubAgentRunState,
   TodoItem,
   TodoListSnapshot,
 } from './types.js';
-import { createEmptyRunState } from './types.js';
+import { createEmptyRunState, ZERO_TOKENS } from './types.js';
 import type { SSEEvent } from '../types.js';
 
 // ─── ID generation ────────────────────────────────────────────────
@@ -181,6 +182,28 @@ function extractTokens(data: Record<string, unknown>): TokenStats | undefined {
   };
 }
 
+/** Assemble the per-turn usage stamped on the turn's final assistant message.
+ * Returns undefined when everything is zero (command echoes, turns that
+ * errored before the first step) — absence is the render-side "no usage". */
+function toTurnUsage(tokens: TokenStats, durationMs: number): TurnUsage | undefined {
+  if (
+    tokens.input === 0 &&
+    tokens.output === 0 &&
+    tokens.cacheRead === 0 &&
+    tokens.cacheWrite === 0 &&
+    durationMs === 0
+  ) {
+    return undefined;
+  }
+  return {
+    inputTokens: tokens.input,
+    outputTokens: tokens.output,
+    cacheReadTokens: tokens.cacheRead,
+    cacheWriteTokens: tokens.cacheWrite,
+    durationMs,
+  };
+}
+
 // ─── Message/block helpers ────────────────────────────────────────
 
 /** Find the current streaming assistant message in a run state, or create one */
@@ -301,7 +324,14 @@ function reduceMainEvent(
         status: 'streaming',
         createdAt: Date.now(),
       };
-      return { ...state, messages: [...state.messages, userMsg, pendingAssistant] };
+      // A user message opens a new turn: drop the previous turn's
+      // step-delta accumulators so done/error stamp THIS turn's usage only.
+      return {
+        ...state,
+        turnTokens: { ...ZERO_TOKENS },
+        turnDurationMs: 0,
+        messages: [...state.messages, userMsg, pendingAssistant],
+      };
     }
 
     // ── System marker (host-synthesized: compaction, model switch, …) ──
@@ -758,6 +788,11 @@ function reduceMainEvent(
         ...state,
         tokens: tokens ? addTokens(state.tokens, tokens) : state.tokens,
         duration: state.duration + duration,
+        // Turn-scoped mirror of the accumulators above: done/error prefer the
+        // authoritative turn totals from the terminal payload and only fall
+        // back to these deltas (abort/error paths where done carries nothing).
+        turnTokens: tokens ? addTokens(state.turnTokens, tokens) : state.turnTokens,
+        turnDurationMs: state.turnDurationMs + duration,
       };
     }
 
@@ -799,6 +834,8 @@ function reduceMainEvent(
         todoList: undefined,
         tokens: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
         lastInputTokens: undefined,
+        turnTokens: { ...ZERO_TOKENS },
+        turnDurationMs: 0,
       };
     }
 
@@ -809,6 +846,12 @@ function reduceMainEvent(
       // done 的 tokens 是整轮累计量(wrangler.rs;colts run() 同理),而每个
       // step 的用量已在 step-end 里累加过 —— 这里再加一次会重复计数。
       // duration/totalSteps 则是权威整轮值,覆盖逐步累加的近似。
+      // 轮用量同理:done 的 tokens/duration 是权威整轮值;aborted 的 done
+      // (宿主补发,data 里无 tokens/duration)退回 step-end 增量之和。
+      const usage = toTurnUsage(
+        extractTokens(data) ?? state.turnTokens,
+        duration ?? state.turnDurationMs
+      );
       return {
         ...state,
         status: 'idle',
@@ -821,6 +864,7 @@ function reduceMainEvent(
                 ...m,
                 status: 'completed' as const,
                 blocks: m.blocks ? closeTerminalBlocks(m.blocks, 'completed') : m.blocks,
+                ...(usage ? { usage } : {}),
               }
             : m
         ),
@@ -829,6 +873,9 @@ function reduceMainEvent(
 
     case 'error': {
       const message = (data.message as string) ?? 'Unknown error';
+      // No done frame follows an error — the turn's usage is whatever the
+      // completed steps consumed (may be nothing, hence optional).
+      const usage = toTurnUsage(state.turnTokens, state.turnDurationMs);
       return {
         ...state,
         status: 'error',
@@ -847,7 +894,12 @@ function reduceMainEvent(
             status: 'error',
             content: message,
           };
-          return { ...m, status: 'error' as const, blocks: [...closed, errorBlock] };
+          return {
+            ...m,
+            status: 'error' as const,
+            blocks: [...closed, errorBlock],
+            ...(usage ? { usage } : {}),
+          };
         }),
       };
     }

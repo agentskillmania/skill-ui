@@ -13,6 +13,7 @@ export function MessageList({
   messages,
   renderers,
   messageDecorator,
+  messageMeta,
   onConfirmHumanRequest,
   onBlockAction,
   onCopyMessage,
@@ -60,6 +61,7 @@ export function MessageList({
           message={message}
           renderers={renderers}
           messageDecorator={messageDecorator}
+          messageMeta={messageMeta}
           onConfirmHumanRequest={onConfirmHumanRequest}
           onBlockAction={onBlockAction}
           onCopyMessage={onCopyMessage}

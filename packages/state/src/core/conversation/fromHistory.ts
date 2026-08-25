@@ -330,6 +330,11 @@ export function fromHistory(
           };
           agentMessages.push(current);
         }
+        // 轮用量:wrangler.rs 写在轮末 assistant 行上——谁带着就赋给当前
+        // 气泡(末值胜出 = 轮末值)。旧存档无 usage 键,气泡自然不带。
+        if (msg.usage && current) {
+          current.usage = msg.usage;
+        }
       }
       continue;
     }

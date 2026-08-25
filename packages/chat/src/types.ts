@@ -53,6 +53,24 @@ export interface Message {
   status: MessageStatus;
   /** Creation timestamp */
   createdAt?: number;
+  /** Turn usage (assistant messages; stamped at turn end). Render-only —
+   * the authoritative shape lives in skill-ui-state's TurnUsage; this
+   * standalone copy keeps the chat package dependency-free (fields must
+   * stay in sync, hosts bridge the two). */
+  usage?: TurnUsage;
+}
+
+/**
+ * Per-turn usage summary displayed in the message footer. Standalone copy
+ * of skill-ui-state's TurnUsage (see Message.usage note).
+ */
+export interface TurnUsage {
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  /** Whole-turn wall-clock (ms), tool execution included. */
+  durationMs: number;
 }
 
 /** Execution block */
@@ -293,6 +311,10 @@ export interface MessageListProps {
   renderers?: ChatRenderers;
   /** Message decorator */
   messageDecorator?: (message: Message, element: ReactNode) => ReactNode;
+  /** Message footer meta renderer (timestamp / usage line). Rendered on the
+   * left end of the footer row (right end for user messages), sharing the
+   * row with the hover-revealed action buttons. */
+  messageMeta?: (message: Message) => ReactNode;
   /** Human interaction confirmation (forwarded to blocks) */
   onConfirmHumanRequest?: (requestId: string, response: unknown) => void;
   /** Block action callback (forwarded to blocks) */
@@ -385,6 +407,10 @@ export interface ChatProps {
   inputBanner?: ReactNode;
   /** Message decorator (add content before/after messages, e.g. timestamps, action buttons) */
   messageDecorator?: (message: Message, element: ReactNode) => ReactNode;
+  /** Message footer meta renderer (timestamp / usage line). Rendered on the
+   * left end of the footer row (right end for user messages), sharing the
+   * row with the hover-revealed action buttons. */
+  messageMeta?: (message: Message) => ReactNode;
 
   // Layout
   /** Content area max width */

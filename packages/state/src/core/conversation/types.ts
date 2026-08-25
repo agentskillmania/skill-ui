@@ -63,6 +63,24 @@ export interface MessageAttachment {
 }
 
 /**
+ * Per-turn usage summary, stamped on the turn's final assistant message.
+ * Values come from the daemon's `done` SSE frame when it arrives
+ * (authoritative turn totals), falling back to the step-end deltas the
+ * reducer accumulated (aborted / errored turns where no done payload exists).
+ * fromHistory restores the same shape from the daemon-persisted colts
+ * `Message.usage` (written at run end); old archives lack the key and
+ * simply degrade to time-only display.
+ */
+export interface TurnUsage {
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  /** Whole-turn wall-clock (ms), tool execution included. */
+  durationMs: number;
+}
+
+/**
  * A conversation message. Assistant messages carry blocks.
  */
 export interface AgentMessage {
@@ -80,6 +98,8 @@ export interface AgentMessage {
   attachments?: MessageAttachment[];
   status: MessageStatus;
   createdAt?: number;
+  /** Turn usage (assistant messages; stamped at turn end). */
+  usage?: TurnUsage;
 }
 
 // ─── Event Log Entry (for cockpit) ────────────────────────────────
@@ -166,6 +186,16 @@ export interface AgentRunState {
   todoList?: TodoListSnapshot;
   activeSkill: string | null;
   compression?: { summary: string; removedCount: number };
+  /**
+   * Turn-scoped accumulators (reducer-private bookkeeping): per-step
+   * token/duration deltas since the last user-message. The `done`/`error`
+   * handlers stamp them onto the turn's final assistant message as
+   * `usage` when the terminal payload lacks authoritative totals (abort,
+   * error). Reset by user-message (new turn) and session-cleared. Unlike
+   * `tokens`/`duration`, these never accumulate across turns.
+   */
+  turnTokens: TokenStats;
+  turnDurationMs: number;
 }
 
 /**
@@ -198,6 +228,8 @@ export function createEmptyRunState(): AgentRunState {
     duration: 0,
     messages: [],
     activeSkill: null,
+    turnTokens: { ...ZERO_TOKENS },
+    turnDurationMs: 0,
   };
 }
 

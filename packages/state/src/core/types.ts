@@ -69,4 +69,7 @@ export interface ColtsMessageInput {
   toolName?: string;
   isError?: boolean;
   timestamp?: number;
+  /** 该轮的用量汇总(wrangler.rs 在 run 收尾写到轮末 assistant 行;
+   * camelCase,与 TurnUsage 同形)。旧存档无此键,自然降级。 */
+  usage?: import('./conversation/types.js').TurnUsage;
 }

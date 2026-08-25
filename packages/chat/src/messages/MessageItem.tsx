@@ -14,6 +14,7 @@ export interface MessageItemProps {
   message: Message;
   renderers?: ChatRenderers;
   messageDecorator?: (message: Message, element: ReactNode) => ReactNode;
+  messageMeta?: (message: Message) => ReactNode;
   onConfirmHumanRequest?: (requestId: string, response: unknown) => void;
   onBlockAction?: (action: BlockAction) => void;
   onCopyMessage?: (message: Message) => void;
@@ -40,6 +41,7 @@ export const MessageItem = memo(function MessageItem({
   message,
   renderers,
   messageDecorator,
+  messageMeta,
   onConfirmHumanRequest,
   onBlockAction,
   onCopyMessage,
@@ -59,6 +61,7 @@ export const MessageItem = memo(function MessageItem({
   const element = (
     <MessageWrapper
       message={message}
+      messageMeta={messageMeta}
       onCopy={onCopyMessage}
       onEdit={onEditMessage}
       onRegenerate={onRegenerateMessage}

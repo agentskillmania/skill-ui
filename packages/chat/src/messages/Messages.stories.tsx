@@ -270,17 +270,36 @@ export const ConversationWithActions: Story = {
 
 // ---- UI Variant Mockups ----
 
-export const PillVariantAssistant: Story = {
+export const FooterWithMeta: Story = {
   render: () => {
     const msg: Message = {
-      id: 'p1',
+      id: 'f1',
       role: 'assistant',
-      content: 'Pill（默认）：圆角背景 + 细边框 + 微阴影，有外轮廓。',
+      content: '页脚行内布局：meta 小字在左，ghost 按钮 hover 渐显在行尾，与气泡互不遮挡。',
       status: 'completed',
+      createdAt: Date.now(),
+      usage: {
+        inputTokens: 1872,
+        outputTokens: 412,
+        cacheReadTokens: 0,
+        cacheWriteTokens: 0,
+        durationMs: 7000,
+      },
     };
     return (
       <Wrapper>
-        <MessageWrapper message={msg} {...actionHandlers} actionsVariant="pill">
+        <MessageWrapper
+          message={msg}
+          {...actionHandlers}
+          messageMeta={(m) => (
+            <span>
+              {m.createdAt ? new Date(m.createdAt).toLocaleTimeString() : ''}
+              {m.usage
+                ? ` · ${Math.round(m.usage.durationMs / 1000)}s · ↑${m.usage.inputTokens} ↓${m.usage.outputTokens}`
+                : ''}
+            </span>
+          )}
+        >
           <AssistantMessage message={msg} />
         </MessageWrapper>
       </Wrapper>
@@ -288,52 +307,20 @@ export const PillVariantAssistant: Story = {
   },
 };
 
-export const GhostVariantAssistant: Story = {
+export const FooterActionsOnly: Story = {
   render: () => {
     const msg: Message = {
-      id: 'g1',
+      id: 'f2',
       role: 'assistant',
-      content: 'Ghost：无容器背景，纯图标，无外轮廓。',
+      content:
+        'Ghost：无容器背景，纯图标，无外轮廓。不传 messageMeta 的宿主只看到 hover 渐显按钮。',
       status: 'completed',
     };
     return (
       <Wrapper>
-        <MessageWrapper message={msg} {...actionHandlers} actionsVariant="ghost">
+        <MessageWrapper message={msg} {...actionHandlers}>
           <AssistantMessage message={msg} />
         </MessageWrapper>
-      </Wrapper>
-    );
-  },
-};
-
-export const BothVariantsSideBySide: Story = {
-  render: () => {
-    const msg: Message = {
-      id: 'both',
-      role: 'assistant',
-      content: 'hover 查看两种操作栏样式的对比。',
-      status: 'completed',
-    };
-    return (
-      <Wrapper>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 40 }}>
-          <div>
-            <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 8, fontWeight: 600 }}>
-              Pill（默认 — 有外轮廓）
-            </div>
-            <MessageWrapper message={msg} {...actionHandlers} actionsVariant="pill">
-              <AssistantMessage message={msg} />
-            </MessageWrapper>
-          </div>
-          <div>
-            <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 8, fontWeight: 600 }}>
-              Ghost（无外轮廓）
-            </div>
-            <MessageWrapper message={msg} {...actionHandlers} actionsVariant="ghost">
-              <AssistantMessage message={msg} />
-            </MessageWrapper>
-          </div>
-        </div>
       </Wrapper>
     );
   },

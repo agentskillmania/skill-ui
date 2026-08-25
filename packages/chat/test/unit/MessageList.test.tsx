@@ -50,6 +50,66 @@ describe('MessageList', () => {
     expect(screen.getByText('消息 49')).toBeInTheDocument();
   });
 
+  describe('message footer meta', () => {
+    it('renders messageMeta in the footer row, alongside the actions', () => {
+      const withMeta: Message[] = [
+        {
+          id: 'u1',
+          role: 'user',
+          content: '带时间的提问',
+          status: 'completed',
+          createdAt: 1756089600000,
+        },
+        {
+          id: 'a1',
+          role: 'assistant',
+          content: '带用量的回答',
+          status: 'completed',
+          usage: {
+            inputTokens: 800,
+            outputTokens: 150,
+            cacheReadTokens: 40,
+            cacheWriteTokens: 0,
+            durationMs: 2000,
+          },
+        },
+      ];
+      const { container } = render(
+        <ChatWrapper>
+          <MessageList
+            messages={withMeta}
+            onCopyMessage={vi.fn()}
+            messageMeta={(m) => (
+              <span>
+                {m.createdAt ? 'meta-time' : ''}
+                {m.usage ? ' meta-usage' : ''}
+              </span>
+            )}
+          />
+        </ChatWrapper>
+      );
+      expect(screen.getByText(/meta-time/)).toBeInTheDocument();
+      expect(screen.getByText(/meta-usage/)).toBeInTheDocument();
+      // Meta and the actions live in the same footer row (both are children
+      // of the .msg-footer element).
+      const footers = container.querySelectorAll('.msg-footer');
+      expect(footers.length).toBe(2);
+      expect(footers[0].textContent).toContain('meta-time');
+      expect(footers[1].textContent).toContain('meta-usage');
+      expect(footers[1].querySelector('.msg-actions')).toBeTruthy();
+    });
+
+    it('renders no footer row when neither meta nor any action is wired', () => {
+      const { container } = render(
+        <ChatWrapper>
+          <MessageList messages={messages} />
+        </ChatWrapper>
+      );
+      expect(container.querySelector('.msg-footer')).toBeNull();
+      expect(container.querySelector('.msg-actions')).toBeNull();
+    });
+  });
+
   describe('per-position action buttons', () => {
     const conversation: Message[] = [
       { id: 'u1', role: 'user', content: '问题一', status: 'completed' },

@@ -30,6 +30,7 @@ export function Chat({
   inputSuffix,
   inputBanner,
   messageDecorator,
+  messageMeta,
   maxWidth = '800px',
   placeholder,
   className,
@@ -87,6 +88,7 @@ export function Chat({
             messages={messages}
             renderers={renderers}
             messageDecorator={messageDecorator}
+            messageMeta={messageMeta}
             onConfirmHumanRequest={onConfirmHumanRequest}
             onBlockAction={onBlockAction}
             onCopyMessage={onCopyMessage}

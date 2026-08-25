@@ -22,6 +22,7 @@ export type {
   AgentBlock,
   AgentMessage,
   MessageAttachment,
+  TurnUsage,
   EventCategory,
   AgentEvent,
   AgentRunState,
