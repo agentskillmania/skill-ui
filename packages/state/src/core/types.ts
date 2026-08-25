@@ -69,7 +69,9 @@ export interface ColtsMessageInput {
   toolName?: string;
   isError?: boolean;
   timestamp?: number;
-  /** 该轮的用量汇总(wrangler.rs 在 run 收尾写到轮末 assistant 行;
-   * camelCase,与 TurnUsage 同形)。旧存档无此键,自然降级。 */
-  usage?: import('./conversation/types.js').TurnUsage;
+  /** 该轮的用量汇总(wrangler.rs 在 run 收尾写到轮末 assistant 行)。
+   * wire 键与 TurnUsage 大体同形但缓存两字段是 `cacheRead`/`cacheWrite`
+   * (无 Tokens 后缀)——消费端用 fromHistory 的 normalizeTurnUsage 归一,
+   * 不要直接当 TurnUsage 用。旧存档无此键,自然降级。 */
+  usage?: unknown;
 }

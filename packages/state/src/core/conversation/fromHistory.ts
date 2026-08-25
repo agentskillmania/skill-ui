@@ -29,6 +29,25 @@ import type {
 } from './types.js';
 import { createEmptySessionState, createEmptyRunState } from './types.js';
 import type { ColtsContentPart, ColtsMessageInput } from '../types.js';
+import type { TurnUsage } from './types.js';
+
+/**
+ * 归一持久化的轮用量(wire → TurnUsage)。wrangler.rs 的键是
+ * `cacheRead`/`cacheWrite`(无 Tokens 后缀);顺手对全部字段做类型防御
+ * ——state.json 是外部输入,坏值落到 0 而不是把渲染方炸成 undefined。
+ */
+export function normalizeTurnUsage(raw: unknown): TurnUsage | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const r = raw as Record<string, unknown>;
+  const n = (v: unknown): number => (typeof v === 'number' && Number.isFinite(v) ? v : 0);
+  return {
+    inputTokens: n(r.inputTokens),
+    outputTokens: n(r.outputTokens),
+    cacheReadTokens: n(r.cacheReadTokens ?? r.cacheRead),
+    cacheWriteTokens: n(r.cacheWriteTokens ?? r.cacheWrite),
+    durationMs: n(r.durationMs),
+  };
+}
 
 /** fromHistory 的可选附加输入(daemon 持久化在 context.todoList 的快照)。 */
 export interface FromHistoryExtras {
@@ -331,9 +350,11 @@ export function fromHistory(
           agentMessages.push(current);
         }
         // 轮用量:wrangler.rs 写在轮末 assistant 行上——谁带着就赋给当前
-        // 气泡(末值胜出 = 轮末值)。旧存档无 usage 键,气泡自然不带。
-        if (msg.usage && current) {
-          current.usage = msg.usage;
+        // 气泡(末值胜出 = 轮末值)。wire 键经 normalizeTurnUsage 归一
+        // (缓存字段无 Tokens 后缀,且为多来源防御);旧档无键自然不带。
+        const usage = normalizeTurnUsage(msg.usage);
+        if (usage && current) {
+          current.usage = usage;
         }
       }
       continue;

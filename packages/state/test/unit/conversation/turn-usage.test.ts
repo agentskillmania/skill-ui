@@ -212,4 +212,51 @@ describe('turn usage — fromHistory', () => {
     ]);
     expect(state.main.messages.filter((m) => m.role === 'assistant')[0].usage).toBeUndefined();
   });
+
+  it('normalizes the wrangler.rs wire shape (cacheRead/cacheWrite, no Tokens suffix)', () => {
+    const state = fromHistory([
+      { role: 'user', content: 'hi', timestamp: 1000 },
+      {
+        role: 'assistant',
+        content: 'Answer',
+        timestamp: 1200,
+        // wrangler.rs TurnUsage 的 serde camelCase 原样:缓存字段无 Tokens 后缀。
+        usage: {
+          inputTokens: 800,
+          outputTokens: 150,
+          cacheRead: 40,
+          cacheWrite: 10,
+          durationMs: 2000,
+        },
+      },
+    ]);
+    const usage = state.main.messages.filter((m) => m.role === 'assistant')[0].usage;
+    expect(usage).toEqual({
+      inputTokens: 800,
+      outputTokens: 150,
+      cacheReadTokens: 40,
+      cacheWriteTokens: 10,
+      durationMs: 2000,
+    });
+  });
+
+  it('bad values in a usage object fall to 0 instead of undefined', () => {
+    const state = fromHistory([
+      { role: 'user', content: 'hi', timestamp: 1000 },
+      {
+        role: 'assistant',
+        content: 'Answer',
+        timestamp: 1200,
+        usage: { inputTokens: 'many', cacheRead: null, durationMs: Number.NaN },
+      },
+    ]);
+    const usage = state.main.messages.filter((m) => m.role === 'assistant')[0].usage;
+    expect(usage).toEqual({
+      inputTokens: 0,
+      outputTokens: 0,
+      cacheReadTokens: 0,
+      cacheWriteTokens: 0,
+      durationMs: 0,
+    });
+  });
 });
