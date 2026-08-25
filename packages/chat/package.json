@@ -1,6 +1,6 @@
 {
   "name": "@agentskillmania/skill-ui-chat",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Chat UI components for @agentskillmania — message list, input, execution blocks.",
   "type": "module",
   "main": "dist/index.js",

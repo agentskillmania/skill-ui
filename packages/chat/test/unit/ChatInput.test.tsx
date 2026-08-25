@@ -183,13 +183,79 @@ describe('ChatInput', () => {
     expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).toBeInTheDocument();
   });
 
-  it('renders senderElement directly with empty commands list', () => {
+  it('empty commands list never opens the autocomplete panel', () => {
     render(
       <ChatWrapper>
         <ChatInput value="/" onChange={() => {}} commands={[]} onCommand={() => {}} />
       </ChatWrapper>
     );
     expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).toBeInTheDocument();
+    // onCommand 存在即包 CommandAutocomplete(wrapper 稳定,见下条回归测试),
+    // 但空列表时面板被 visible 抑制 —— 用户不可见。
+    expect(document.querySelector('[data-testid="cmd-empty"]')).toBeNull();
+    expect(document.querySelector('[data-testid="cmd-item"]')).toBeNull();
+  });
+
+  it('commands arriving asynchronously must not remount the textarea or drop focus', () => {
+    // 回归:wrapper 曾按 commands.length>0 条件挂载 —— 宿主命令异步加载
+    // 到达时返回值根类型从 div 翻成 CommandAutocomplete,React 整树重挂载,
+    // textarea 重建、autoFocus 焦点丢失且 [autoFocus] effect 不会重发。
+    const onCommand = vi.fn();
+    const { rerender } = render(
+      <ChatWrapper>
+        <ChatInput autoFocus value="" onChange={() => {}} commands={[]} onCommand={onCommand} />
+      </ChatWrapper>
+    );
+    const before = screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)');
+    expect(before).toHaveFocus();
+
+    rerender(
+      <ChatWrapper>
+        <ChatInput
+          autoFocus
+          value=""
+          onChange={() => {}}
+          commands={mockCommands}
+          onCommand={onCommand}
+        />
+      </ChatWrapper>
+    );
+    const after = screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)');
+    expect(after).toBe(before); // 同一 DOM 节点 = 没有重挂载
+    expect(after).toHaveFocus();
+  });
+
+  it('refocuses the new node if the Sender subtree is remounted while autoFocus stays on', () => {
+    // callback ref 加固:autoFocus 值没变,effect 类方案在重挂载后不会重发;
+    // callback ref 随新节点到达重新聚焦。
+    const onCommand = vi.fn();
+    const { rerender } = render(
+      <ChatWrapper>
+        <ChatInput
+          key="a"
+          autoFocus
+          value=""
+          onChange={() => {}}
+          commands={mockCommands}
+          onCommand={onCommand}
+        />
+      </ChatWrapper>
+    );
+    expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).toHaveFocus();
+
+    rerender(
+      <ChatWrapper>
+        <ChatInput
+          key="b"
+          autoFocus
+          value=""
+          onChange={() => {}}
+          commands={mockCommands}
+          onCommand={onCommand}
+        />
+      </ChatWrapper>
+    );
+    expect(screen.getByPlaceholderText('输入消息... (Shift+Enter 换行)')).toHaveFocus();
   });
 
   it('Shift+Enter does not trigger onSubmit', () => {

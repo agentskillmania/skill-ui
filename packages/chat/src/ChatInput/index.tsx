@@ -5,7 +5,7 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { Sender } from '@ant-design/x';
 import { Tooltip } from 'antd';
 import { css } from '@emotion/react';
-import { memo, useEffect, useRef } from 'react';
+import { memo, useCallback, useRef } from 'react';
 import type { ChangeEvent, ComponentRef, DragEvent, KeyboardEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Image as ImageIcon, X } from 'lucide-react';
@@ -135,12 +135,20 @@ export const ChatInput = memo(function ChatInput({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Sender does not accept an autoFocus prop (it picks only a few textarea
-  // props), so focus programmatically via its ref — on mount and whenever
-  // autoFocus flips back to true (e.g. the conversation becomes empty again).
+  // props), so focus programmatically via its ref. This must be a callback
+  // ref, not a [autoFocus] effect: if the Sender subtree is ever remounted
+  // (parent tree reshaping — a wrapper appearing, a list row reordering),
+  // we get a fresh node whose focus is already lost, and an effect keyed on
+  // the unchanged autoFocus value never refires. A callback ref runs on
+  // every node change and restores focus whenever autoFocus is on.
   const senderRef = useRef<ComponentRef<typeof Sender>>(null);
-  useEffect(() => {
-    if (autoFocus) senderRef.current?.focus();
-  }, [autoFocus]);
+  const handleSenderRef = useCallback(
+    (node: ComponentRef<typeof Sender> | null) => {
+      senderRef.current = node;
+      if (node && autoFocus) node.focus();
+    },
+    [autoFocus]
+  );
 
   // ── Attachments ──
   const attachEnabled = Boolean(onAttachmentsChange);
@@ -538,7 +546,7 @@ export const ChatInput = memo(function ChatInput({
             `}
           >
             <Sender
-              ref={senderRef}
+              ref={handleSenderRef}
               value={value}
               onChange={onChange}
               onSubmit={handleSubmit}
@@ -563,12 +571,19 @@ export const ChatInput = memo(function ChatInput({
     </div>
   );
 
-  // Wrap with CommandAutocomplete when command autocomplete is enabled
-  if (commands && commands.length > 0 && onCommand) {
+  // The wrapper decision must be stable across renders: hosts typically load
+  // commands asynchronously ([] → populated), and flipping the return value's
+  // root type (div → CommandAutocomplete) makes React remount the whole
+  // subtree — the textarea is destroyed and recreated, and focus is lost.
+  // Gate on onCommand alone (a static host capability, present or not for the
+  // component's lifetime); CommandAutocomplete itself suppresses the panel
+  // while commands is empty (visible requires commands.length > 0), so
+  // wrapping early is invisible to the user.
+  if (onCommand) {
     return (
       <CommandAutocomplete
         ref={cmdRef}
-        commands={commands}
+        commands={commands ?? []}
         onCommand={handleCommandSelect}
         inputValue={value ?? ''}
         trigger={commandTrigger}
