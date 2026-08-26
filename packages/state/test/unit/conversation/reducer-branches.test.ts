@@ -824,9 +824,10 @@ describe('reducer — fromHistory defensive paths', () => {
       },
       { role: 'tool', content: 'yes', toolCallId: 'h1', toolName: 'ask_human', timestamp: 2 },
     ]);
+    // 历史路径与 live 共用 blocks.ts 的默认标题(原先各写一份,时态还不同)
     expect(
       state.main.messages[0].blocks?.find((b) => b.type === 'human_input')!.metadata?.title
-    ).toBe('AI needed your input');
+    ).toBe('AI needs your input');
   });
 });
 

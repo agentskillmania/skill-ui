@@ -19,6 +19,19 @@
  * animations are runtime-only and cannot be reconstructed.
  */
 
+import {
+  SKILL_TOOL,
+  HUMAN_TOOL,
+  DELEGATE_TOOL,
+  textBlock,
+  thinkingBlock,
+  skillBlock,
+  toolCallBlock,
+  humanInputBlock,
+  subagentBlock,
+  todoBlock,
+  type HumanInputQuestion,
+} from './blocks.js';
 import type {
   SessionRunState,
   AgentMessage,
@@ -117,10 +130,8 @@ function normalizeUserContent(content: string | ColtsContentPart[]): {
   return { text, attachments: attachments.length > 0 ? attachments : undefined };
 }
 
-/** Tool names that map to special block types */
-const SKILL_TOOL = 'load_skill';
-const HUMAN_TOOL = 'ask_human';
-const DELEGATE_TOOL = 'delegate';
+/** Tool-name → special block type dispatch lives in blocks.ts (single source
+ * shared with the live path); the constants are imported from there. */
 
 /**
  * Reconstruct a SessionRunState from persisted colts messages.
@@ -170,16 +181,11 @@ export function fromHistory(
       const msgText = textOf(msg.content);
       // Check for thinking (type='thought')
       if (msg.type === 'thought') {
-        const thinkingBlock: AgentBlock = {
-          id: genHistBlockId(),
-          type: 'thinking',
-          status: 'completed',
-          content: msgText,
-        };
+        const thought = thinkingBlock(genHistBlockId(), msgText, 'completed');
         // Append in storage order — the thought row sits exactly where the
         // reasoning happened (usually right before its action row).
         if (current) {
-          current.blocks = [...(current.blocks ?? []), thinkingBlock];
+          current.blocks = [...(current.blocks ?? []), thought];
         } else {
           current = {
             id: `hist-msg-${agentMessages.length}`,
@@ -187,7 +193,7 @@ export function fromHistory(
             content: '',
             status: 'completed',
             createdAt: msg.timestamp,
-            blocks: [thinkingBlock],
+            blocks: [thought],
           };
           agentMessages.push(current);
         }
@@ -199,12 +205,7 @@ export function fromHistory(
       // live path streams the tokens before the tool-start events.
       const blocks: AgentBlock[] = [];
       if (msgText) {
-        blocks.push({
-          id: genHistBlockId(),
-          type: 'text',
-          status: 'completed',
-          content: msgText,
-        });
+        blocks.push(textBlock(genHistBlockId(), msgText, 'completed'));
       }
       if (msg.toolCalls && msg.toolCalls.length > 0) {
         for (const tc of msg.toolCalls) {
@@ -212,38 +213,29 @@ export function fromHistory(
           const resultContent = result ? textOf(result.content) : '';
 
           if (tc.name === SKILL_TOOL) {
-            blocks.push({
-              id: genHistBlockId(),
-              type: 'skill',
-              status: 'completed',
-              content: resultContent ? `Result: ${resultContent.slice(0, 200)}` : '',
-              metadata: {
-                skillName: tc.arguments.name ?? '',
+            blocks.push(
+              skillBlock({
+                id: genHistBlockId(),
+                skillName: (tc.arguments.name as string | undefined) ?? '',
                 phase: 'completed',
+                status: 'completed',
                 result: resultContent,
-              },
-            });
+              })
+            );
           } else if (tc.name === HUMAN_TOOL) {
-            // Parse questions from tool arguments
-            const questions =
-              (tc.arguments.questions as Array<{
-                question: string;
-                type: string;
-                options?: string[];
-              }>) ?? [];
-            blocks.push({
-              id: tc.id,
-              type: 'human_input',
-              status: 'completed',
-              content: '',
-              metadata: {
+            // Parse questions from tool arguments; metadata assembly (inputType,
+            // options, title) is the builder's — identical to the live path.
+            const questions = (tc.arguments.questions as HumanInputQuestion[]) ?? [];
+            blocks.push(
+              humanInputBlock({
+                id: tc.id,
                 requestId: tc.id,
-                inputType: 'input',
-                title: tc.arguments.context ?? 'AI needed your input',
-                message: questions.map((q) => q.question).join('\n'),
+                questions,
+                context: tc.arguments.context,
+                status: 'completed',
                 response: resultContent,
-              },
-            });
+              })
+            );
           } else if (tc.name === DELEGATE_TOOL) {
             // Parse DelegateResult from tool result
             const delegateResult = parseDelegateResult(resultContent);
@@ -268,15 +260,13 @@ export function fromHistory(
                   ]
                 : []),
             ];
-            blocks.push({
+            const block = subagentBlock({
               id: genHistBlockId(),
-              type: 'subagent',
+              subtaskId,
+              name: tc.arguments.agent,
+              task: tc.arguments.task,
               status: delegateResult.status === 'error' ? 'error' : 'completed',
-              content: '',
-              metadata: {
-                subtaskId,
-                name: tc.arguments.agent ?? '',
-                task: tc.arguments.task ?? '',
+              summary: {
                 resultStatus: delegateResult.status,
                 steps: delegateResult.totalSteps,
                 // Flat token fields — matches SubAgentBlockMetadata / chat UI.
@@ -287,6 +277,7 @@ export function fromHistory(
                 messages: histMessages,
               },
             });
+            blocks.push(block);
             // Create a minimal SubAgentRunState with summary data (no internal conversation)
             if (delegateResult.status === 'success' || delegateResult.answer) {
               const subRun: SubAgentRunState = {
@@ -294,7 +285,7 @@ export function fromHistory(
                 status: 'idle',
                 name: (tc.arguments.agent as string) ?? '',
                 task: (tc.arguments.task as string) ?? '',
-                parentBlockId: blocks[blocks.length - 1].id,
+                parentBlockId: block.id,
                 resultStatus: delegateResult.status as SubAgentRunState['resultStatus'],
                 totalSteps: delegateResult.totalSteps,
                 tokens: delegateResult.tokens ?? {
@@ -311,19 +302,16 @@ export function fromHistory(
             }
           } else {
             // Regular tool call
-            blocks.push({
-              id: tc.id,
-              type: 'tool_call',
-              status: 'completed',
-              content: '',
-              metadata: {
+            blocks.push(
+              toolCallBlock({
+                id: tc.id,
                 toolName: tc.name,
-                toolArgs: JSON.stringify(tc.arguments),
+                args: tc.arguments,
+                toolType: tc.toolType,
+                status: 'completed',
                 toolResult: resultContent,
-                // 可选来源字段('mcp'|'builtin'|'script'),与实时路径同约定。
-                ...(tc.toolType ? { toolType: tc.toolType } : {}),
-              },
-            });
+              })
+            );
           }
         }
       }
@@ -396,21 +384,14 @@ export function fromHistory(
 
   // todo 快照恢复:state.todoList 供侧栏渲染;内联块只合成一个(快照语义
   // —— 表现最终清单,不为历史里的每次写入补块),挂到最后一条 assistant
-  // 消息末尾。
+  // 消息末尾——与 live 路径同一锚点(live 的卡片跨轮也移动到末条)。
   const snapshot = extras?.todoList;
   if (snapshot && snapshot.items.length > 0) {
     state.main.todoList = snapshot;
     for (let i = agentMessages.length - 1; i >= 0; i--) {
       const m = agentMessages[i];
       if (m.role !== 'assistant') continue;
-      const todoBlock: AgentBlock = {
-        id: genHistBlockId(),
-        type: 'todo',
-        status: 'completed',
-        content: '',
-        metadata: { items: snapshot.items },
-      };
-      m.blocks = [...(m.blocks ?? []), todoBlock];
+      m.blocks = [...(m.blocks ?? []), todoBlock(genHistBlockId(), snapshot.items, 'completed')];
       break;
     }
   }

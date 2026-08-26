@@ -8,6 +8,19 @@
  * set of block handlers (single block semantics).
  */
 
+import {
+  SKILL_TOOL,
+  textBlock,
+  thinkingBlock,
+  errorBlock,
+  skillBlock,
+  completeSkillBlock,
+  toolCallBlock,
+  completeToolCallBlock,
+  humanInputBlock,
+  subagentBlock,
+  todoBlock,
+} from './blocks.js';
 import { normalizeEvent } from './normalize.js';
 import type {
   SessionRunState,
@@ -278,13 +291,8 @@ function reduceMainEvent(
               ),
             };
           }
-          const textBlock: AgentBlock = {
-            id: genBlockId(),
-            type: 'text',
-            status: 'streaming',
-            content: delta,
-          };
-          return { ...m, content: m.content + delta, blocks: [...blocks, textBlock] };
+          const newTextBlock = textBlock(genBlockId(), delta, 'streaming');
+          return { ...m, content: m.content + delta, blocks: [...blocks, newTextBlock] };
         }),
       };
     }
@@ -317,13 +325,7 @@ function reduceMainEvent(
           // `reasoning_content` chunk) — never create an empty thinking block.
           if (!content) return m;
           // Create new thinking block
-          const block: AgentBlock = {
-            id: genBlockId(),
-            type: 'thinking',
-            status: 'streaming',
-            content,
-          };
-          return { ...m, blocks: [...blocks, block] };
+          return { ...m, blocks: [...blocks, thinkingBlock(genBlockId(), content, 'streaming')] };
         }),
       };
     }
@@ -335,32 +337,22 @@ function reduceMainEvent(
       if (!messageId) return state;
       const toolName = (data.name as string) ?? 'unknown';
       const callId = (data.id as string) ?? genBlockId();
-      // load_skill 与 fromHistory 的 SKILL_TOOL 特判保持同构：实时也展示为 skill 块
-      const isSkillTool = toolName === 'load_skill';
-      const block: AgentBlock = isSkillTool
-        ? {
-            id: callId,
-            type: 'skill',
-            status: 'streaming',
-            content: '',
-            metadata: {
+      // load_skill 与 fromHistory 的 SKILL_TOOL 特判同构：实时也展示为 skill 块
+      const block: AgentBlock =
+        toolName === SKILL_TOOL
+          ? skillBlock({
+              id: callId,
               skillName: (data.args as { name?: string } | undefined)?.name ?? '',
               phase: 'loading',
-            },
-          }
-        : {
-            id: callId,
-            type: 'tool_call',
-            status: 'streaming',
-            content: '',
-            metadata: {
+              status: 'streaming',
+            })
+          : toolCallBlock({
+              id: callId,
               toolName,
-              toolArgs: JSON.stringify(data.args ?? {}),
-              // 可选工具来源('mcp'|'builtin'|'script')——由宿主或 daemon
-              // 在帧上补充,这里只负责透传给 ToolCallBlock 的徽章。
-              ...(typeof data.toolType === 'string' ? { toolType: data.toolType } : {}),
-            },
-          };
+              args: data.args,
+              toolType: data.toolType,
+              status: 'streaming',
+            });
       return {
         ...run,
         messages: run.messages.map((m) =>
@@ -391,13 +383,7 @@ function reduceMainEvent(
             return {
               ...m,
               blocks: m.blocks.map((b) =>
-                b.id === fallback.id
-                  ? {
-                      ...b,
-                      status: 'completed' as const,
-                      metadata: { ...b.metadata, toolResult: data.result ?? '' },
-                    }
-                  : b
+                b.id === fallback.id ? completeToolCallBlock(b, data.result) : b
               ),
             };
           }
@@ -409,18 +395,9 @@ function reduceMainEvent(
               if (b.type === 'skill') {
                 const resultStr =
                   typeof data.result === 'string' ? data.result : JSON.stringify(data.result);
-                return {
-                  ...b,
-                  status: 'completed' as const,
-                  content: resultStr ? `Result: ${resultStr.slice(0, 200)}` : '',
-                  metadata: { ...b.metadata, phase: 'completed', result: resultStr },
-                };
+                return completeSkillBlock(b, resultStr);
               }
-              return {
-                ...b,
-                status: 'completed' as const,
-                metadata: { ...b.metadata, toolResult: data.result ?? '' },
-              };
+              return completeToolCallBlock(b, data.result);
             }),
           };
         }),
@@ -432,14 +409,12 @@ function reduceMainEvent(
       const { run, messageId } = ensureStreamingMessage(state);
       // 终态闩:轮已关闭,迟到的 skill-loading 帧直接丢弃。
       if (!messageId) return state;
-      const blockId = genBlockId();
-      const block: AgentBlock = {
-        id: blockId,
-        type: 'skill',
+      const block = skillBlock({
+        id: genBlockId(),
+        skillName: data.name as string | undefined,
+        phase: 'loading',
         status: 'streaming',
-        content: '',
-        metadata: { skillName: data.name, phase: 'loading' },
-      };
+      });
       return {
         ...run,
         activeSkill: (data.name as string) ?? run.activeSkill,
@@ -496,14 +471,7 @@ function reduceMainEvent(
           return {
             ...m,
             blocks: m.blocks.map((b) =>
-              b.id === skillBlock.id
-                ? {
-                    ...b,
-                    status: 'completed' as const,
-                    content: resultStr ? `Result: ${resultStr.slice(0, 200)}` : '',
-                    metadata: { ...b.metadata, phase: 'completed', result: resultStr },
-                  }
-                : b
+              b.id === skillBlock.id ? completeSkillBlock(b, resultStr) : b
             ),
           };
         }),
@@ -523,36 +491,18 @@ function reduceMainEvent(
           type: string;
           options?: string[];
         }>) ?? [];
-      const firstQ = questions[0];
-      let inputType: string = 'input';
-      let options: Array<{ label: string; value: string }> | undefined;
-      if (firstQ) {
-        if (firstQ.type === 'single-select' || firstQ.type === 'multi-select') {
-          inputType = firstQ.type;
-          options = firstQ.options?.map((o) => ({ label: o, value: o }));
-        }
-      }
       // Always assign a requestId: without one, a later human-input-resolved
       // could never match (block stays pending forever), and two resolved
       // events both missing requestId would mass-complete every block
       // (undefined === undefined).
       const requestId = (data.requestId as string) ?? genBlockId();
-      const block: AgentBlock = {
+      const block = humanInputBlock({
         id: requestId,
-        type: 'human_input',
+        requestId,
+        questions,
+        context: data.context,
         status: 'pending',
-        content: '',
-        metadata: {
-          requestId,
-          inputType,
-          title: data.context ?? 'AI needs your input',
-          message: questions.map((q) => q.question).join('\n'),
-          options,
-          // Full question list — HumanInputBlock renders one input per
-          // question when this is present (multi-question ask_human).
-          questions,
-        },
-      };
+      });
       return {
         ...run,
         messages: run.messages.map((m) =>
@@ -642,26 +592,63 @@ function reduceMainEvent(
               : {}),
           })),
       };
-      // 单例内联块:首个非空清单在当前 streaming 消息末尾建 todo 块,后续
-      // 事件原地更新 metadata.items(不新建/不挪位/不累积)。终态由
-      // done/error 的 closeTerminalBlocks 类型无关收尾,无需特判。
+      // 单例内联卡的锚点规则:永远挂在最后一条 assistant 消息末尾——与
+      // fromHistory 同一锚点,"resume 不重排布局"对 todo 卡也成立。轮内
+      // 更新即原地(宿主本就是末条 assistant);跨轮收到非空清单时把卡片
+      // 移动过去(不复制、不累积);空清单只原地更新/记 state,不挪动。
       const existing = findTodoBlock(state.messages);
+      let lastAssistantIdx = -1;
+      for (let i = state.messages.length - 1; i >= 0; i--) {
+        if (state.messages[i].role === 'assistant') {
+          lastAssistantIdx = i;
+          break;
+        }
+      }
+
       if (existing) {
+        const hostIdx = state.messages.findIndex((m) => m.id === existing.messageId);
+        const shouldMove =
+          todoList.items.length > 0 && lastAssistantIdx >= 0 && hostIdx !== lastAssistantIdx;
+        if (!shouldMove) {
+          return {
+            ...state,
+            todoList,
+            messages: state.messages.map((m) =>
+              m.id === existing.messageId
+                ? {
+                    ...m,
+                    blocks: (m.blocks ?? []).map((b) =>
+                      b.id === existing.blockId
+                        ? { ...b, metadata: { ...b.metadata, items: todoList.items } }
+                        : b
+                    ),
+                  }
+                : m
+            ),
+          };
+        }
+        // Move the singleton card to the newest turn's bubble.
+        const host = state.messages[hostIdx];
+        const card = (host.blocks ?? []).find((b) => b.id === existing.blockId);
+        // Defensive: findTodoBlock/host index skew — record the snapshot only.
+        if (!card) return { ...state, todoList };
+        const moved: AgentBlock = {
+          ...card,
+          status: state.status === 'streaming' ? 'streaming' : 'completed',
+          metadata: { ...card.metadata, items: todoList.items },
+        };
         return {
           ...state,
           todoList,
-          messages: state.messages.map((m) =>
-            m.id === existing.messageId
-              ? {
-                  ...m,
-                  blocks: (m.blocks ?? []).map((b) =>
-                    b.id === existing.blockId
-                      ? { ...b, metadata: { ...b.metadata, items: todoList.items } }
-                      : b
-                  ),
-                }
-              : m
-          ),
+          messages: state.messages.map((m, idx) => {
+            if (idx === hostIdx) {
+              return { ...m, blocks: (m.blocks ?? []).filter((b) => b.id !== existing.blockId) };
+            }
+            if (idx === lastAssistantIdx) {
+              return { ...m, blocks: [...(m.blocks ?? []), moved] };
+            }
+            return m;
+          }),
         };
       }
       if (todoList.items.length === 0) {
@@ -676,38 +663,24 @@ function reduceMainEvent(
       //   终态后绝不新开流——turnClosed 闩已把 ensureStreamingMessage 的
       //   创建路径焊死,这里以 completed 块附到末条 assistant 即可。
       if (state.status !== 'streaming') {
-        const todoBlock: AgentBlock = {
-          id: genBlockId(),
-          type: 'todo',
-          status: 'completed',
-          content: '',
-          metadata: { items: todoList.items },
-        };
-        for (let i = state.messages.length - 1; i >= 0; i--) {
-          if (state.messages[i].role === 'assistant') {
-            const messages = state.messages.map((m, idx) =>
-              idx === i ? { ...m, blocks: [...(m.blocks ?? []), todoBlock] } : m
-            );
-            return { ...state, todoList, messages };
-          }
+        const card = todoBlock(genBlockId(), todoList.items, 'completed');
+        if (lastAssistantIdx >= 0) {
+          const messages = state.messages.map((m, idx) =>
+            idx === lastAssistantIdx ? { ...m, blocks: [...(m.blocks ?? []), card] } : m
+          );
+          return { ...state, todoList, messages };
         }
         return { ...state, todoList };
       }
       const { run, messageId } = ensureStreamingMessage(state);
       // Defensive: status/turnClosed skew — record the snapshot, don't attach.
       if (!messageId) return { ...state, todoList };
-      const todoBlock: AgentBlock = {
-        id: genBlockId(),
-        type: 'todo',
-        status: 'streaming',
-        content: '',
-        metadata: { items: todoList.items },
-      };
+      const card = todoBlock(genBlockId(), todoList.items, 'streaming');
       return {
         ...run,
         todoList,
         messages: run.messages.map((m) =>
-          m.id === messageId ? { ...m, blocks: [...(m.blocks ?? []), todoBlock] } : m
+          m.id === messageId ? { ...m, blocks: [...(m.blocks ?? []), card] } : m
         ),
       };
     }
@@ -828,16 +801,10 @@ function reduceMainEvent(
           // The error becomes an in-order block. The old fallback wrote it
           // into `content` only when empty, silently dropping the message
           // whenever the run had already produced text.
-          const errorBlock: AgentBlock = {
-            id: genBlockId(),
-            type: 'error',
-            status: 'error',
-            content: message,
-          };
           return {
             ...m,
             status: 'error' as const,
-            blocks: [...closed, errorBlock],
+            blocks: [...closed, errorBlock(genBlockId(), message)],
             ...(usage ? { usage } : {}),
           };
         }),
@@ -938,17 +905,13 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
     const { run: mainWithBlock } = (() => {
       const { run, messageId } = ensureStreamingMessage(state.main);
       // turnClosed checked above — messageId is always non-null here.
-      const block: AgentBlock = {
+      const block = subagentBlock({
         id: blockId,
-        type: 'subagent',
+        subtaskId,
+        name: data.name,
+        task: data.task,
         status: 'streaming',
-        content: '',
-        metadata: {
-          subtaskId,
-          name: data.name ?? '',
-          task: data.task ?? '',
-        },
-      };
+      });
       return {
         run: {
           ...run,
