@@ -67,9 +67,7 @@ vi.mock('react-i18next', () => ({
   useTranslation: (ns?: string) => ({
     t: (key: string, params?: Record<string, unknown>) => {
       if (KEYS_AS_TEXT) return key;
-      // Portal keys live under a `portal` namespace (useTranslation('skill-ui-portal')).
-      const base =
-        ns === 'skill-ui-portal' ? (mergedTranslations.portal ?? {}) : mergedTranslations;
+      const base = mergedTranslations;
       let result = resolveTranslation(base, key);
       if (params) {
         for (const [k, v] of Object.entries(params)) {
