@@ -190,6 +190,23 @@ describe('todo card — cross-turn anchor (follow the newest turn)', () => {
     expect(cards![0].metadata?.items).toHaveLength(2);
   });
 
+  it('in-place update works when a system marker trails the bubble (host is last assistant, not last message)', () => {
+    const state = run([
+      { event: 'user-message', data: { content: 't1' } },
+      { event: 'todo-list', data: { items: [item1] } },
+      // Auto-compaction marker lands mid-turn, AFTER the bubble:
+      { event: 'system-message', data: { content: 'compacted' } },
+      { event: 'todo-list', data: { items: [item1, item2] } },
+    ]);
+    // Card updated in place on the bubble — never moved onto the marker row
+    const bubble = state.main.messages[1];
+    expect(bubble.role).toBe('assistant');
+    const card = bubble.blocks?.find((b) => b.type === 'todo');
+    expect(card?.metadata?.items).toHaveLength(2);
+    expect(state.main.messages[2].role).toBe('system');
+    expect(state.main.messages[2].blocks ?? []).toHaveLength(0);
+  });
+
   it('resume anchors at the same place: last assistant message', () => {
     const rows: ColtsMessageInput[] = [
       { role: 'user', content: 't1', timestamp: 1 },

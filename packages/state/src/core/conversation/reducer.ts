@@ -38,9 +38,62 @@ import type { SSEEvent } from '../types.js';
 
 // ─── ID generation ────────────────────────────────────────────────
 
-let blockIdCounter = 0;
-function genBlockId(): string {
-  return `blk-${Date.now()}-${++blockIdCounter}`;
+let idCounter = 0;
+/**
+ * One scheme for every live-side id (blocks, messages, markers):
+ * prefix + timestamp + counter + random (the random suffix guards the
+ * same-millisecond multi-reducer-instance case, e.g. two sessions in one
+ * page). History-rebuilt entities keep their own `hist-` ids in
+ * fromHistory on purpose — provenance you can see while debugging, and
+ * `hist-${tc.id}` blocks keep stable React keys across reloads.
+ */
+function genId(prefix: string): string {
+  return `${prefix}-${Date.now()}-${++idCounter}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+// ─── Message-array update helpers ─────────────────────────────────
+
+/**
+ * Update the message with the given id. The target is virtually always the
+ * tail (the streaming bubble), so check that first; fall back to a scan for
+ * the rare mid-conversation target.
+ */
+function updateMessageById(
+  messages: AgentMessage[],
+  id: string,
+  update: (m: AgentMessage) => AgentMessage
+): AgentMessage[] {
+  let idx = messages.length - 1;
+  if (messages[idx]?.id !== id) {
+    idx = messages.findIndex((m) => m.id === id);
+  }
+  if (idx < 0) return messages;
+  const next = [...messages];
+  next[idx] = update(messages[idx]);
+  return next;
+}
+
+/**
+ * Update (scanning from the tail) the first message whose blocks contain a
+ * match; no match → array returned unchanged. Block-targeting events
+ * (tool-end, skill-*, human-input-resolved, subagent-end's parent sync)
+ * almost always hit the live bubble — but NOT necessarily the last MESSAGE:
+ * an auto-compaction system marker can trail the bubble mid-turn. Reverse
+ * scan stays correct in that case while skipping the rest of the history.
+ */
+function updateMessageWithBlock(
+  messages: AgentMessage[],
+  pred: (b: AgentBlock) => boolean,
+  update: (m: AgentMessage) => AgentMessage
+): AgentMessage[] {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (!m.blocks?.some(pred)) continue;
+    const next = [...messages];
+    next[i] = update(m);
+    return next;
+  }
+  return messages;
 }
 
 // ─── Token helpers ────────────────────────────────────────────────
@@ -121,7 +174,7 @@ function ensureStreamingMessage(run: AgentRunState): {
   }
   // Create a new streaming assistant message
   const newMsg: AgentMessage = {
-    id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    id: genId('msg'),
     role: 'assistant',
     content: '',
     status: 'streaming',
@@ -212,7 +265,7 @@ function reduceMainEvent(
     case 'user-message': {
       const attachments = (data.attachments as AgentMessage['attachments']) ?? undefined;
       const userMsg: AgentMessage = {
-        id: `user-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        id: genId('user'),
         role: 'user',
         content: (data.content as string) ?? '',
         // 多模态附件(图片)随消息级透传——不进 blocks(blocks 是 assistant
@@ -224,7 +277,7 @@ function reduceMainEvent(
       // Pre-create an empty streaming assistant message so the typing
       // indicator shows immediately, before the first token/thinking event.
       const pendingAssistant: AgentMessage = {
-        id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        id: genId('msg'),
         role: 'assistant',
         content: '',
         status: 'streaming',
@@ -252,7 +305,7 @@ function reduceMainEvent(
     // next token starts a fresh assistant bubble after it.
     case 'system-message': {
       const sysMsg: AgentMessage = {
-        id: `sys-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        id: genId('sys'),
         role: 'system',
         content: (data.content as string) ?? '',
         status: 'completed',
@@ -274,8 +327,7 @@ function reduceMainEvent(
       if (!messageId) return state;
       return {
         ...run,
-        messages: run.messages.map((m) => {
-          if (m.id !== messageId) return m;
+        messages: updateMessageById(run.messages, messageId, (m) => {
           // Real content closes open thinking blocks — a text segment begins.
           const blocks = closeThinkingBlocks(m.blocks ?? []);
           const last = blocks[blocks.length - 1];
@@ -291,7 +343,7 @@ function reduceMainEvent(
               ),
             };
           }
-          const newTextBlock = textBlock(genBlockId(), delta, 'streaming');
+          const newTextBlock = textBlock(genId('blk'), delta, 'streaming');
           return { ...m, content: m.content + delta, blocks: [...blocks, newTextBlock] };
         }),
       };
@@ -304,8 +356,7 @@ function reduceMainEvent(
       const content = (data.content as string) ?? '';
       return {
         ...run,
-        messages: run.messages.map((m) => {
-          if (m.id !== messageId) return m;
+        messages: updateMessageById(run.messages, messageId, (m) => {
           // Reasoning (re)starts — any open text segment is finished.
           const blocks = closeTextBlocks(m.blocks ?? []);
           // Find an open thinking block
@@ -325,7 +376,7 @@ function reduceMainEvent(
           // `reasoning_content` chunk) — never create an empty thinking block.
           if (!content) return m;
           // Create new thinking block
-          return { ...m, blocks: [...blocks, thinkingBlock(genBlockId(), content, 'streaming')] };
+          return { ...m, blocks: [...blocks, thinkingBlock(genId('blk'), content, 'streaming')] };
         }),
       };
     }
@@ -336,7 +387,7 @@ function reduceMainEvent(
       // 终态闩:轮已关闭,迟到的 tool-start 帧直接丢弃。
       if (!messageId) return state;
       const toolName = (data.name as string) ?? 'unknown';
-      const callId = (data.id as string) ?? genBlockId();
+      const callId = (data.id as string) ?? genId('blk');
       // load_skill 与 fromHistory 的 SKILL_TOOL 特判同构：实时也展示为 skill 块
       const block: AgentBlock =
         toolName === SKILL_TOOL
@@ -355,41 +406,27 @@ function reduceMainEvent(
             });
       return {
         ...run,
-        messages: run.messages.map((m) =>
-          m.id === messageId ? { ...m, blocks: [...closeProseBlocks(m.blocks ?? []), block] } : m
-        ),
+        messages: updateMessageById(run.messages, messageId, (m) => ({
+          ...m,
+          blocks: [...closeProseBlocks(m.blocks ?? []), block],
+        })),
       };
     }
 
     case 'tool-end': {
       const callId = (data.callId as string) ?? '';
+      // Match by block id (set to callId at tool-start time). Both daemons
+      // emit callId unconditionally and old sessions load via fromHistory —
+      // there is no sender left that needs the historical sole-streaming
+      // fallback, so a callId that matches nothing is simply a no-op.
       return {
         ...state,
-        messages: state.messages.map((m) => {
-          if (!m.blocks) return m;
-          // Match by block id (which was set to callId at tool-start time)
-          const targetBlock = m.blocks.find((b) => b.id === callId && b.status === 'streaming');
-          if (!targetBlock) {
-            // Fallback: match the sole streaming tool_call (backward compat).
-            // Only safe when there is exactly one candidate — with parallel
-            // tool calls (or duplicate tool-end frames) the callId is the
-            // only reliable discriminator; matching the first block would
-            // misattribute results and leave blocks spinning forever.
-            const streaming = m.blocks.filter(
-              (b) => b.type === 'tool_call' && b.status === 'streaming'
-            );
-            if (streaming.length !== 1) return m;
-            const fallback = streaming[0];
-            return {
-              ...m,
-              blocks: m.blocks.map((b) =>
-                b.id === fallback.id ? completeToolCallBlock(b, data.result) : b
-              ),
-            };
-          }
-          return {
+        messages: updateMessageWithBlock(
+          state.messages,
+          (b) => b.id === callId && b.status === 'streaming',
+          (m) => ({
             ...m,
-            blocks: m.blocks.map((b) => {
+            blocks: (m.blocks ?? []).map((b) => {
               if (b.id !== callId) return b;
               // load_skill 块按 skill 语义收尾，终态与 fromHistory 一致
               if (b.type === 'skill') {
@@ -399,8 +436,8 @@ function reduceMainEvent(
               }
               return completeToolCallBlock(b, data.result);
             }),
-          };
-        }),
+          })
+        ),
       };
     }
 
@@ -410,7 +447,7 @@ function reduceMainEvent(
       // 终态闩:轮已关闭,迟到的 skill-loading 帧直接丢弃。
       if (!messageId) return state;
       const block = skillBlock({
-        id: genBlockId(),
+        id: genId('blk'),
         skillName: data.name as string | undefined,
         phase: 'loading',
         status: 'streaming',
@@ -418,9 +455,10 @@ function reduceMainEvent(
       return {
         ...run,
         activeSkill: (data.name as string) ?? run.activeSkill,
-        messages: run.messages.map((m) =>
-          m.id === messageId ? { ...m, blocks: [...closeProseBlocks(m.blocks ?? []), block] } : m
-        ),
+        messages: updateMessageById(run.messages, messageId, (m) => ({
+          ...m,
+          blocks: [...closeProseBlocks(m.blocks ?? []), block],
+        })),
       };
     }
 
@@ -429,30 +467,33 @@ function reduceMainEvent(
       const phase = eventName === 'skill-loaded' ? 'loaded' : 'executing';
       return {
         ...state,
-        messages: state.messages.map((m) => {
-          if (!m.blocks) return m;
-          const skillBlock = [...m.blocks]
-            .reverse()
-            .find((b) => b.type === 'skill' && b.status === 'streaming');
-          if (!skillBlock) return m;
-          return {
-            ...m,
-            blocks: m.blocks.map((b) =>
-              b.id === skillBlock.id
-                ? {
-                    ...b,
-                    metadata: {
-                      ...b.metadata,
-                      skillName: data.name ?? b.metadata?.skillName,
-                      phase,
-                      tokenCount: data.tokenCount ?? b.metadata?.tokenCount,
-                      task: data.task ?? b.metadata?.task,
-                    },
-                  }
-                : b
-            ),
-          };
-        }),
+        messages: updateMessageWithBlock(
+          state.messages,
+          (b) => b.type === 'skill' && b.status === 'streaming',
+          (m) => {
+            const found = [...(m.blocks ?? [])]
+              .reverse()
+              .find((b) => b.type === 'skill' && b.status === 'streaming');
+            if (!found) return m;
+            return {
+              ...m,
+              blocks: (m.blocks ?? []).map((b) =>
+                b.id === found.id
+                  ? {
+                      ...b,
+                      metadata: {
+                        ...b.metadata,
+                        skillName: data.name ?? b.metadata?.skillName,
+                        phase,
+                        tokenCount: data.tokenCount ?? b.metadata?.tokenCount,
+                        task: data.task ?? b.metadata?.task,
+                      },
+                    }
+                  : b
+              ),
+            };
+          }
+        ),
       };
     }
 
@@ -460,21 +501,24 @@ function reduceMainEvent(
       return {
         ...state,
         activeSkill: null,
-        messages: state.messages.map((m) => {
-          if (!m.blocks) return m;
-          const skillBlock = [...m.blocks]
-            .reverse()
-            .find((b) => b.type === 'skill' && b.status === 'streaming');
-          if (!skillBlock) return m;
-          const resultStr =
-            typeof data.result === 'string' ? data.result : JSON.stringify(data.result);
-          return {
-            ...m,
-            blocks: m.blocks.map((b) =>
-              b.id === skillBlock.id ? completeSkillBlock(b, resultStr) : b
-            ),
-          };
-        }),
+        messages: updateMessageWithBlock(
+          state.messages,
+          (b) => b.type === 'skill' && b.status === 'streaming',
+          (m) => {
+            const found = [...(m.blocks ?? [])]
+              .reverse()
+              .find((b) => b.type === 'skill' && b.status === 'streaming');
+            if (!found) return m;
+            const resultStr =
+              typeof data.result === 'string' ? data.result : JSON.stringify(data.result);
+            return {
+              ...m,
+              blocks: (m.blocks ?? []).map((b) =>
+                b.id === found.id ? completeSkillBlock(b, resultStr) : b
+              ),
+            };
+          }
+        ),
       };
     }
 
@@ -495,7 +539,7 @@ function reduceMainEvent(
       // could never match (block stays pending forever), and two resolved
       // events both missing requestId would mass-complete every block
       // (undefined === undefined).
-      const requestId = (data.requestId as string) ?? genBlockId();
+      const requestId = (data.requestId as string) ?? genId('blk');
       const block = humanInputBlock({
         id: requestId,
         requestId,
@@ -505,9 +549,10 @@ function reduceMainEvent(
       });
       return {
         ...run,
-        messages: run.messages.map((m) =>
-          m.id === messageId ? { ...m, blocks: [...closeProseBlocks(m.blocks ?? []), block] } : m
-        ),
+        messages: updateMessageById(run.messages, messageId, (m) => ({
+          ...m,
+          blocks: [...closeProseBlocks(m.blocks ?? []), block],
+        })),
       };
     }
 
@@ -518,11 +563,12 @@ function reduceMainEvent(
       if (!reqId) return state;
       return {
         ...state,
-        messages: state.messages.map((m) => {
-          if (!m.blocks) return m;
-          return {
+        messages: updateMessageWithBlock(
+          state.messages,
+          (b) => b.type === 'human_input' && b.metadata?.requestId === reqId,
+          (m) => ({
             ...m,
-            blocks: m.blocks.map((b) =>
+            blocks: (m.blocks ?? []).map((b) =>
               b.type === 'human_input' && b.metadata?.requestId === reqId
                 ? {
                     ...b,
@@ -531,8 +577,8 @@ function reduceMainEvent(
                   }
                 : b
             ),
-          };
-        }),
+          })
+        ),
       };
     }
 
@@ -613,18 +659,14 @@ function reduceMainEvent(
           return {
             ...state,
             todoList,
-            messages: state.messages.map((m) =>
-              m.id === existing.messageId
-                ? {
-                    ...m,
-                    blocks: (m.blocks ?? []).map((b) =>
-                      b.id === existing.blockId
-                        ? { ...b, metadata: { ...b.metadata, items: todoList.items } }
-                        : b
-                    ),
-                  }
-                : m
-            ),
+            messages: updateMessageById(state.messages, existing.messageId, (m) => ({
+              ...m,
+              blocks: (m.blocks ?? []).map((b) =>
+                b.id === existing.blockId
+                  ? { ...b, metadata: { ...b.metadata, items: todoList.items } }
+                  : b
+              ),
+            })),
           };
         }
         // Move the singleton card to the newest turn's bubble.
@@ -663,7 +705,7 @@ function reduceMainEvent(
       //   终态后绝不新开流——turnClosed 闩已把 ensureStreamingMessage 的
       //   创建路径焊死,这里以 completed 块附到末条 assistant 即可。
       if (state.status !== 'streaming') {
-        const card = todoBlock(genBlockId(), todoList.items, 'completed');
+        const card = todoBlock(genId('blk'), todoList.items, 'completed');
         if (lastAssistantIdx >= 0) {
           const messages = state.messages.map((m, idx) =>
             idx === lastAssistantIdx ? { ...m, blocks: [...(m.blocks ?? []), card] } : m
@@ -675,13 +717,14 @@ function reduceMainEvent(
       const { run, messageId } = ensureStreamingMessage(state);
       // Defensive: status/turnClosed skew — record the snapshot, don't attach.
       if (!messageId) return { ...state, todoList };
-      const card = todoBlock(genBlockId(), todoList.items, 'streaming');
+      const card = todoBlock(genId('blk'), todoList.items, 'streaming');
       return {
         ...run,
         todoList,
-        messages: run.messages.map((m) =>
-          m.id === messageId ? { ...m, blocks: [...(m.blocks ?? []), card] } : m
-        ),
+        messages: updateMessageById(run.messages, messageId, (m) => ({
+          ...m,
+          blocks: [...(m.blocks ?? []), card],
+        })),
       };
     }
 
@@ -804,7 +847,7 @@ function reduceMainEvent(
           return {
             ...m,
             status: 'error' as const,
-            blocks: [...closed, errorBlock(genBlockId(), message)],
+            blocks: [...closed, errorBlock(genId('blk'), message)],
             ...(usage ? { usage } : {}),
           };
         }),
@@ -900,11 +943,13 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
     // Generate a subtaskId when the daemon omits it: using '' as the Map key
     // makes two such sub-agents overwrite each other, and the parent block
     // could never be matched by subagent-end.
-    const subtaskId = (data.subtaskId as string) ?? genBlockId();
-    const blockId = genBlockId();
+    const subtaskId = (data.subtaskId as string) ?? genId('blk');
+    const blockId = genId('blk');
     const { run: mainWithBlock } = (() => {
       const { run, messageId } = ensureStreamingMessage(state.main);
-      // turnClosed checked above — messageId is always non-null here.
+      // turnClosed checked above — messageId is always non-null here; the
+      // guard only exists to keep the type honest.
+      if (!messageId) return { run };
       const block = subagentBlock({
         id: blockId,
         subtaskId,
@@ -915,9 +960,10 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
       return {
         run: {
           ...run,
-          messages: run.messages.map((m) =>
-            m.id === messageId ? { ...m, blocks: [...closeProseBlocks(m.blocks ?? []), block] } : m
-          ),
+          messages: updateMessageById(run.messages, messageId, (m) => ({
+            ...m,
+            blocks: [...closeProseBlocks(m.blocks ?? []), block],
+          })),
         },
       };
     })();
@@ -941,11 +987,12 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
     if (sub) {
       main = {
         ...main,
-        messages: main.messages.map((m) => {
-          if (!m.blocks) return m;
-          return {
+        messages: updateMessageWithBlock(
+          main.messages,
+          (b) => b.type === 'subagent' && b.metadata?.subtaskId === id,
+          (m) => ({
             ...m,
-            blocks: m.blocks.map((b) => {
+            blocks: (m.blocks ?? []).map((b) => {
               if (b.type !== 'subagent' || b.metadata?.subtaskId !== id) return b;
               return {
                 ...b,
@@ -967,8 +1014,8 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
                 },
               };
             }),
-          };
-        }),
+          })
+        ),
       };
     }
 

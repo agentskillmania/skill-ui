@@ -48,7 +48,6 @@ export {
 
 // ─── History loading ──────────────────────────────────────────────
 export { fromHistory } from './core/conversation/fromHistory.js';
-export { normalizeTurnUsage } from './core/conversation/fromHistory.js';
 export type { FromHistoryExtras } from './core/conversation/fromHistory.js';
 
 // ─── React hook ───────────────────────────────────────────────────

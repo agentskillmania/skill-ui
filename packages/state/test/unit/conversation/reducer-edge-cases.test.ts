@@ -248,7 +248,10 @@ describe('reducer — tool-end edge cases', () => {
     expect(state.main.messages).toHaveLength(0);
   });
 
-  it('tool-end falls back to the sole streaming tool_call when callId is missing', () => {
+  it('tool-end with a missing callId no-ops even when a tool_call is streaming (no fallback)', () => {
+    // Both daemons emit callId unconditionally — the historical sole-streaming
+    // fallback was deleted; an unmatched tool-end must not misattribute the
+    // result to an unrelated in-flight call.
     const state = pushEvents([
       { event: 'tool-start', data: { id: 'c1', name: 'file_read', args: {} } },
       { event: 'tool-end', data: { name: 'file_read', result: 'content' } },
@@ -256,8 +259,8 @@ describe('reducer — tool-end edge cases', () => {
     const block = state.main.messages
       .flatMap((m) => m.blocks ?? [])
       .find((b) => b.type === 'tool_call');
-    expect(block?.status).toBe('completed');
-    expect(block?.metadata?.toolResult).toBe('content');
+    expect(block?.status).toBe('streaming');
+    expect(block?.metadata?.toolResult).toBeUndefined();
   });
 });
 

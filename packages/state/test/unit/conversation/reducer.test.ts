@@ -143,7 +143,7 @@ describe('reducer — main agent events', () => {
     // Regression: with parallel tool calls and no callId (e.g. a provider
     // that omits it), the old fallback matched the FIRST streaming block,
     // misattributing results and leaving the real target spinning forever.
-    // Now the fallback only fires when there is a single candidate.
+    // There is no fallback anymore — an unmatched tool-end is a no-op.
     const state = pushEvents([
       { event: 'tool-start', data: { id: 'call-1', name: 'web_search', args: { q: 'a' } } },
       { event: 'tool-start', data: { id: 'call-2', name: 'file_read', args: { p: '/x' } } },
@@ -157,19 +157,6 @@ describe('reducer — main agent events', () => {
       expect(b.status).toBe('streaming');
       expect(b.metadata?.toolResult).toBeUndefined();
     }
-  });
-
-  it('single streaming tool_call still completes via fallback when callId is missing', () => {
-    // Backward compat: providers that omit callId on tool-end must still work
-    // for sequential (non-parallel) tool calls.
-    const state = pushEvents([
-      { event: 'tool-start', data: { id: 'call-1', name: 'file_read', args: { path: '/x' } } },
-      { event: 'tool-end', data: { result: 'file content' } },
-    ]);
-    const msg = state.main.messages[state.main.messages.length - 1];
-    const block = msg.blocks?.find((b) => b.type === 'tool_call');
-    expect(block?.status).toBe('completed');
-    expect(block?.metadata?.toolResult).toBe('file content');
   });
 
   it('creates human_input block and resolves it', () => {

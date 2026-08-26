@@ -76,6 +76,11 @@ describe('normalizeEvent — sub-agent envelope unwrap', () => {
     expect(out.event).toBe('token');
   });
 
+  it('subagent-tool-start/end without subtaskId also keep the sub marker', () => {
+    expect(normalizeEvent({ event: 'subagent-tool-start', data: {} }).subtaskId).toBe('');
+    expect(normalizeEvent({ event: 'subagent-tool-end', data: {} }).subtaskId).toBe('');
+  });
+
   it('subagent-start/end keep their names and surface subtaskId', () => {
     const start = normalizeEvent({
       event: 'subagent-start',

@@ -344,7 +344,7 @@ describe('reducer — sub-agent defaults', () => {
     expect(state.subAgents.get('s1')!.messages.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('subagent-tool-end with no callId uses fallback match', () => {
+  it('subagent-tool-end with no callId no-ops (no fallback)', () => {
     const state = run([
       s('subagent-start', { subtaskId: 's1', name: 'sub', task: 'do' }),
       s('subagent-tool-start', {
@@ -356,7 +356,8 @@ describe('reducer — sub-agent defaults', () => {
     const sub = state.subAgents.get('s1')!;
     const msg = sub.messages[sub.messages.length - 1];
     const block = msg.blocks?.find((b) => b.type === 'tool_call');
-    expect(block).toBeDefined();
+    expect(block?.status).toBe('streaming');
+    expect(block?.metadata?.toolResult).toBeUndefined();
   });
 
   it('subagent-end with no status defaults to success', () => {
@@ -424,21 +425,24 @@ describe('reducer — block lifecycle', () => {
     expect(block?.metadata?.toolResult).toBe('output');
   });
 
-  it('tool-end fallback match by toolName when no callId', () => {
+  it('tool-end with only a name (no callId) no-ops (no fallback)', () => {
     const state = run([
       s('tool-start', { id: 'c1', name: 'file_read', args: {} }),
       s('tool-end', { name: 'file_read', result: 'content' }),
     ]);
-    expect(lastMsg(state).blocks?.find((b) => b.type === 'tool_call')?.status).toBe('completed');
+    const block = lastMsg(state).blocks?.find((b) => b.type === 'tool_call');
+    expect(block?.status).toBe('streaming');
+    expect(block?.metadata?.toolResult).toBeUndefined();
   });
 
-  it('tool-end with no callId and no name uses fallback match', () => {
+  it('tool-end with no callId and no name no-ops (no fallback)', () => {
     const state = run([
       s('tool-start', { id: 'c1', name: 'shell', args: {} }),
       s('tool-end', { result: 'orphan' }),
     ]);
-    // Reducer may match the last streaming tool block even without callId/name
-    expect(lastMsg(state).blocks?.find((b) => b.type === 'tool_call')).toBeDefined();
+    const block = lastMsg(state).blocks?.find((b) => b.type === 'tool_call');
+    expect(block?.status).toBe('streaming');
+    expect(block?.metadata?.toolResult).toBeUndefined();
   });
 
   it('done closes all open blocks', () => {
@@ -603,7 +607,7 @@ describe('reducer — sub-agent lifecycle', () => {
     }
   });
 
-  it('subagent-tool-end with unknown callId uses fallback match', () => {
+  it('subagent-tool-end with unknown callId no-ops (no fallback)', () => {
     const state = run([
       s('subagent-start', { subtaskId: 's1', name: 'h', task: 't' }),
       s('subagent-tool-start', {
@@ -614,7 +618,9 @@ describe('reducer — sub-agent lifecycle', () => {
     ]);
     const sub = state.subAgents.get('s1')!;
     const msg = sub.messages[sub.messages.length - 1];
-    expect(msg.blocks?.find((b) => b.type === 'tool_call')).toBeDefined();
+    const block = msg.blocks?.find((b) => b.type === 'tool_call');
+    expect(block?.status).toBe('streaming');
+    expect(block?.metadata?.toolResult).toBeUndefined();
   });
 
   it('subagent-end closes all streaming blocks in sub-agent messages', () => {
