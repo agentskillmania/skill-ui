@@ -173,14 +173,14 @@ describe('reducer — skill defaults with missing fields', () => {
     expect(block!.metadata?.skillName).toBeUndefined();
   });
 
-  it('skill-loaded with no name does not crash and logs event', () => {
+  it('skill-loaded with no name does not crash and leaves state untouched', () => {
     const state = run([s('skill-loaded', {})]);
-    expect(state.events[0].type).toBe('skill-loaded');
+    expect(state.main.messages).toHaveLength(0);
   });
 
   it('skill-start with no name does not crash', () => {
     const state = run([s('skill-start', {})]);
-    expect(state.events[0].type).toBe('skill-start');
+    expect(state.main.messages).toHaveLength(0);
   });
 
   it('skill-start with no task leaves metadata.task undefined', () => {
@@ -226,7 +226,7 @@ describe('reducer — human-input defaults', () => {
 
   it('human-input-resolved with no requestId does not crash', () => {
     const state = run([s('human-input-resolved', {})]);
-    expect(state.events[0].type).toBe('human-input-resolved');
+    expect(state.main.messages).toHaveLength(0);
   });
 });
 
@@ -236,10 +236,9 @@ describe('reducer — step/lifecycle defaults', () => {
     expect(state.main.stepCount).toBe(1);
   });
 
-  it('step-end with no step still logs and accumulates duration 0', () => {
+  it('step-end with no step still accumulates duration 0', () => {
     const state = run([s('step-end', {})]);
     expect(state.main.duration).toBe(0);
-    expect(state.events[0].type).toBe('step-end');
   });
 
   it('step-end with no duration adds 0 to total', () => {
@@ -385,32 +384,6 @@ describe('reducer — sub-agent defaults', () => {
   });
 });
 
-describe('reducer — labelFor and toEventLog defaults', () => {
-  it('unknown event type uses raw event name as label', () => {
-    const state = run([s('totally-unknown-event-type', { foo: 'bar' })]);
-    expect(state.events[0].label).toBe('totally-unknown-event-type');
-    expect(state.events[0].category).toBe('lifecycle');
-  });
-
-  it('error with no message produces label "Error: "', () => {
-    const state = run([s('error', {})]);
-    expect(state.events[0].label).toBe('Error: ');
-  });
-
-  it('compressed with no removedCount produces label with 0', () => {
-    const state = run([s('compressed', {})]);
-    expect(state.events[0].label).toBe('Compressed: -0 messages');
-  });
-
-  it('event with no timestamp uses Date.now()', () => {
-    const before = Date.now();
-    const state = run([s('token', { delta: 'x' })]);
-    const after = Date.now();
-    expect(state.events[0].timestamp).toBeGreaterThanOrEqual(before);
-    expect(state.events[0].timestamp).toBeLessThanOrEqual(after);
-  });
-});
-
 describe('reducer — block lifecycle', () => {
   it('thinking then token closes thinking block', () => {
     const state = run([s('thinking', { content: 'hmm' }), s('token', { delta: 'answer' })]);
@@ -520,8 +493,8 @@ describe('reducer — skill lifecycle', () => {
       s('skill-start', { name: 's1', task: 'do' }),
       s('skill-end', { name: 's1', result: 'done' }),
     ]);
-    // All 4 events logged, no crash
-    expect(state.events).toHaveLength(4);
+    // No skill-loading preceded them — nothing to update, no block created
+    expect(lastMsg(state).blocks?.some((b) => b.type === 'skill') ?? false).toBe(false);
     expect(state.main.activeSkill).toBeNull();
   });
 });
@@ -846,5 +819,55 @@ describe('reducer — fromHistory defensive paths', () => {
     expect(
       state.main.messages[0].blocks?.find((b) => b.type === 'human_input')!.metadata?.title
     ).toBe('AI needed your input');
+  });
+});
+
+describe('reducer — guard branches', () => {
+  it('step-end without tokens leaves totals unchanged', () => {
+    const state = run([s('step-end', { step: 1, duration: 5 })]);
+    expect(state.main.tokens).toEqual({ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
+    expect(state.main.duration).toBe(5);
+  });
+
+  it('step-end with partial token fields fills missing fields with zero', () => {
+    const state = run([s('step-end', { step: 1, tokens: { input: 7 } })]);
+    expect(state.main.tokens).toEqual({ input: 7, output: 0, cacheRead: 0, cacheWrite: 0 });
+  });
+
+  it('subagent events with unknown subtaskId are ignored by every handler', () => {
+    const state = run([
+      s('subagent-thinking', { subtaskId: 'ghost', content: 'x' }),
+      s('subagent-tool-start', { action: { id: 'c1', tool: 't' } }),
+      s('subagent-tool-end', { subtaskId: 'ghost', callId: 'c1' }),
+      s('subagent-end', { subtaskId: 'ghost' }),
+    ]);
+    expect(state.subAgents.size).toBe(0);
+    expect(state.main.messages).toHaveLength(0);
+  });
+
+  it('unknown subagent-* event names fall through to default untouched', () => {
+    const state = run([s('subagent-mystery', { subtaskId: 'x' })]);
+    expect(state.subAgents.size).toBe(0);
+    expect(state.main.messages).toHaveLength(0);
+  });
+
+  it('human-input maps select questions to inputType + options', () => {
+    const state = run([
+      s('human-input', {
+        requestId: 'r1',
+        questions: [{ id: 'q1', question: 'pick one', type: 'single-select', options: ['a', 'b'] }],
+      }),
+      s('human-input', {
+        requestId: 'r2',
+        questions: [{ id: 'q2', question: 'pick many', type: 'multi-select', options: ['x'] }],
+      }),
+    ]);
+    const blocks = lastMsg(state).blocks?.filter((b) => b.type === 'human_input');
+    expect(blocks![0].metadata?.inputType).toBe('single-select');
+    expect(blocks![0].metadata?.options).toEqual([
+      { label: 'a', value: 'a' },
+      { label: 'b', value: 'b' },
+    ]);
+    expect(blocks![1].metadata?.inputType).toBe('multi-select');
   });
 });

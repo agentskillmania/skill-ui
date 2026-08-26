@@ -12,7 +12,6 @@ describe('useConversationState', () => {
     const { result } = renderHook(() => useConversationState());
     expect(result.current.state.main.messages).toHaveLength(0);
     expect(result.current.state.subAgents.size).toBe(0);
-    expect(result.current.state.events).toHaveLength(0);
     expect(result.current.state.main.status).toBe('idle');
     expect(typeof result.current.feed.push).toBe('function');
     expect(typeof result.current.reset).toBe('function');
@@ -57,7 +56,6 @@ describe('useConversationState', () => {
       result.current.reset();
     });
     expect(result.current.state.main.messages).toHaveLength(0);
-    expect(result.current.state.events).toHaveLength(0);
     expect(result.current.state.main.status).toBe('idle');
   });
 

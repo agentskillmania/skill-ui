@@ -249,18 +249,6 @@ describe('reducer — main agent events', () => {
       }
     }
   });
-
-  it('appends every event to the event log', () => {
-    const state = pushEvents([
-      { event: 'token', data: { delta: 'A' } },
-      { event: 'thinking', data: { content: 'B' } },
-      { event: 'done', data: {} },
-    ]);
-    expect(state.events).toHaveLength(3);
-    expect(state.events[0].type).toBe('token');
-    expect(state.events[1].type).toBe('thinking');
-    expect(state.events[2].type).toBe('done');
-  });
 });
 
 describe('reducer — todo-list events', () => {
@@ -288,8 +276,6 @@ describe('reducer — todo-list events', () => {
       { id: 2, subject: 'write report', status: 'in_progress', description: 'md', blocks: [3] },
       { id: 3, subject: 'review', status: 'pending', blocked_by: [2] },
     ]);
-    // Todo events are also recorded in the event log
-    expect(state.events.at(-1)?.type).toBe('todo-list');
   });
 
   it('replaces the previous snapshot when the list changes', () => {
@@ -390,9 +376,7 @@ describe('reducer — sub-agent events', () => {
 describe('reducer — negative paths', () => {
   it('handles unknown event types without crashing', () => {
     const state = pushEvents([{ event: 'unknown-event', data: { foo: 'bar' } }]);
-    // Unknown events should be appended to event log but not modify state
-    expect(state.events).toHaveLength(1);
-    expect(state.events[0].type).toBe('unknown-event');
+    // Unknown events leave state untouched
     expect(state.main.messages).toHaveLength(0);
   });
 
@@ -806,9 +790,6 @@ describe('reducer — session-cleared (destructive reset)', () => {
     expect(state.main.lastInputTokens).toBeUndefined();
     // 子代理卡片随顶层 slice 重置
     expect(state.subAgents.size).toBe(0);
-    // 事件日志是 append-only 审计:保留且含 session-cleared 条目
-    expect(state.events.length).toBeGreaterThan(0);
-    expect(state.events.some((e) => e.type === 'session-cleared')).toBe(true);
   });
 });
 

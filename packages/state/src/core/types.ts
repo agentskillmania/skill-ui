@@ -4,9 +4,9 @@
  * These are the provider-neutral input interfaces to the state machine.
  * The state package is a pure, passive state machine: it consumes SSE
  * events via an EventFeed and history via ColtsMessageInput, producing
- * structured state that chat and cockpit UIs read from via selectors.
+ * structured state that chat UIs read from via selectors.
  *
- * No dependencies on daemon, colts, chat, or cockpit packages.
+ * No dependencies on daemon, colts, or chat packages.
  */
 
 // ─── Input: SSE Event ─────────────────────────────────────────────

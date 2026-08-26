@@ -3,7 +3,7 @@
  *
  * 契约:append 一条 role:'system' 的完成态消息;与 user-message 的关键
  * 差异是不预建 streaming assistant(标记不是回合开场白);content/timestamp
- * 缺省走 fallback;事件日志条目带宿主提供的 label。
+ * 缺省走 fallback。
  */
 import { describe, it, expect } from 'vitest';
 import { reducer } from '../../../src/core/conversation/reducer.js';
@@ -60,19 +60,5 @@ describe('reducer — system-message', () => {
     expect(state.main.messages[2].content).toBe('after');
     // 前一气泡仍是 streaming(done 未到)。
     expect(state.main.messages[0].status).toBe('streaming');
-  });
-
-  it('is preserved by fromHistory system rows in the event log with host label', () => {
-    const state = run([s('system-message', { content: 'x', label: 'Model switched' })]);
-    const entry = state.events[state.events.length - 1];
-    expect(entry.type).toBe('system-message');
-    expect(entry.label).toBe('Model switched');
-    expect(entry.category).toBe('lifecycle');
-  });
-
-  it('defaults the event-log label to "System" when the host provides none', () => {
-    const state = run([s('system-message', { content: 'x' })]);
-    const entry = state.events[state.events.length - 1];
-    expect(entry.label).toBe('System');
   });
 });

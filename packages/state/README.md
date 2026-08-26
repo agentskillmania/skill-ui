@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@agentskillmania/skill-ui-state.svg)](https://www.npmjs.com/package/@agentskillmania/skill-ui-state)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Transport-agnostic state layer for agent frontends. Pure reducers, normalizers, and React hooks — no UI components. Consumers fetch events however they like (SSE, REST, WebSocket, EventEmitter) and push them in.
+Transport-agnostic state layer for agent frontends. A pure conversation reducer plus a React hook — no UI components. Consumers fetch events however they like (SSE, REST, WebSocket, EventEmitter) and push them in.
 
 ## Installation
 
@@ -29,46 +29,34 @@ function Chat() {
   //   reset()            — back to an empty session
   //   loadHistory(state) — rebuild from serialized history
 
-  return <div>{/* render state.messages / state.blocks ... */}</div>;
+  return <div>{/* render state.main.messages / blocks ... */}</div>;
 }
 ```
 
 The legacy alias `useSessionState` is also exported from the barrel.
 
-### Diagnostics state
-
-```typescript
-import { useDiagnosticsState } from '@agentskillmania/skill-ui-state';
-
-const { state, feed, reset } = useDiagnosticsState();
-```
-
-### Resource normalizers (no React needed)
+### Reading state
 
 ```typescript
 import {
-  normalizeSession,
-  normalizeAgent,
-  normalizeSkill,
-  normalizeCrew,
-  findFileNode,
-  flattenTree,
+  selectMainMessages,
+  selectTotalTokens,
+  selectStepCount,
+  selectTodoList,
+  selectLastInputTokens,
 } from '@agentskillmania/skill-ui-state';
 
-const session = normalizeSession(raw);
-const skills = normalizeSkillList(rawSkills);
-const tree = flattenTree(findFileNode(fileTree, '/'));
+const messages = selectMainMessages(state);
+const billing = selectTotalTokens(state); // main + sub-agents, cumulative
+const contextNow = selectLastInputTokens(state); // current context window in use
 ```
 
 ## API Overview
 
 - `reducer` — conversation event reducer (token / thinking / tool / skill / subagent events)
 - `fromHistory` — rebuild conversation state from serialized history
-- `diagnosticsReducer` — agent-diagnostics snapshot reducer
-- `normalizeSession(List)`, `normalizeAgent(List)`, `normalizeSkill(List)`, `normalizeCrew(List)` — typed resource normalizers
-- `findFileNode`, `toggleDirExpanded`, `flattenTree` — file-tree helpers
 - `useConversationState` / `useSessionState` — conversation React hook, returns `{ state, feed, reset, loadHistory }`
-- `useDiagnosticsState`, `useResourceState` — diagnostics / resources React hooks
+- Selectors — `selectMainMessages`, `selectTotalTokens`, `selectStepCount`, `selectTodoList`, `selectLastInputTokens`
 
 ## License
 

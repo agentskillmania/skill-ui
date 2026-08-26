@@ -3,7 +3,7 @@
  */
 import { describe, it, expect } from 'vitest';
 import { fromHistory } from '../../../src/core/conversation/fromHistory.js';
-import { selectSubAgent, selectMainMessages } from '../../../src/core/conversation/selectors.js';
+import { selectMainMessages } from '../../../src/core/conversation/selectors.js';
 import type { ColtsMessageInput } from '../../../src/core/types.js';
 
 describe('fromHistory', () => {
@@ -221,7 +221,7 @@ describe('fromHistory', () => {
 
     // Check sub-agent state
     const subtaskId = subBlock!.metadata?.subtaskId as string;
-    const sub = selectSubAgent(state, subtaskId);
+    const sub = state.subAgents.get(subtaskId);
     expect(sub).toBeDefined();
     expect(sub!.name).toBe('researcher');
     expect(sub!.totalSteps).toBe(3);
@@ -289,7 +289,7 @@ describe('fromHistory — boundary cases', () => {
     const state = fromHistory(messages);
     const subBlock = state.main.messages[0].blocks?.find((b) => b.type === 'subagent');
     const subtaskId = subBlock!.metadata?.subtaskId as string;
-    const sub = selectSubAgent(state, subtaskId);
+    const sub = state.subAgents.get(subtaskId);
     expect(sub).toBeDefined();
     // Missing tokens/duration should fallback to zero values
     expect(sub!.tokens).toEqual({ input: 0, output: 0, cacheRead: 0, cacheWrite: 0 });
@@ -697,5 +697,69 @@ describe('fromHistory — turn-level bubble merging', () => {
     ];
     const assistant = selectMainMessages(fromHistory(messages))[0];
     expect(assistant.content).toBe('图在这里\n[image]');
+  });
+});
+
+describe('fromHistory — defensive branches', () => {
+  it('tolerates assistant rows with nullish content', () => {
+    const messages = [
+      { role: 'user', content: 'hi', timestamp: 1000 },
+      { role: 'assistant', content: undefined, type: 'action', timestamp: 2000 },
+    ] as unknown as ColtsMessageInput[];
+    const msgs = selectMainMessages(fromHistory(messages));
+    // nullish content projects to '' — no text block, no bubble appended
+    expect(msgs).toHaveLength(1);
+    expect(msgs[0].role).toBe('user');
+  });
+
+  it('maps image extensions and data URLs to mime types', () => {
+    const messages: ColtsMessageInput[] = [
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: 'see' },
+          { type: 'image_url', image_url: { url: 'file:a.jpg' } },
+          { type: 'image_url', image_url: { url: 'file:b.gif' } },
+          { type: 'image_url', image_url: { url: 'file:c.webp' } },
+          { type: 'image_url', image_url: { url: 'file:d.svg' } },
+          { type: 'image_url', image_url: { url: 'data:image/png;base64,AA' } },
+        ],
+        timestamp: 1000,
+      },
+    ];
+    const msg = selectMainMessages(fromHistory(messages))[0];
+    expect(msg.attachments!.map((a) => a.mimeType)).toEqual([
+      'image/jpeg',
+      'image/gif',
+      'image/webp',
+      'image/svg+xml',
+      'image/png',
+    ]);
+    // `file:` reference keeps its basename as the attachment name
+    expect(msg.attachments![0].name).toBe('a.jpg');
+  });
+
+  it('delegate result without status falls back to success', () => {
+    const messages: ColtsMessageInput[] = [
+      { role: 'user', content: 'go', timestamp: 1000 },
+      {
+        role: 'assistant',
+        content: '',
+        toolCalls: [{ id: 'd1', name: 'delegate', arguments: { agent: 'a', task: 't' } }],
+        timestamp: 2000,
+      },
+      {
+        role: 'tool',
+        content: JSON.stringify({ answer: 'ok' }),
+        toolCallId: 'd1',
+        timestamp: 3000,
+      },
+    ];
+    const state = fromHistory(messages);
+    const block = state.main.messages
+      .find((m) => m.role === 'assistant')
+      ?.blocks?.find((b) => b.type === 'subagent');
+    expect(block!.status).toBe('completed');
+    expect(block!.metadata?.resultStatus).toBe('success');
   });
 });

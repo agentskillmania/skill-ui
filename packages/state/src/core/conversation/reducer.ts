@@ -4,7 +4,7 @@
  * Pure function: (state, event) → state.
  * Routes events to main agent or sub-agent based on event name prefix.
  * Manages block lifecycle (create/update/complete), token accumulation,
- * message content streaming, and event log append.
+ * and message content streaming.
  */
 
 import type {
@@ -12,8 +12,6 @@ import type {
   AgentRunState,
   AgentMessage,
   AgentBlock,
-  AgentEvent,
-  EventCategory,
   TokenStats,
   TurnUsage,
   SubAgentRunState,
@@ -30,129 +28,11 @@ function genBlockId(): string {
   return `blk-${Date.now()}-${++blockIdCounter}`;
 }
 
-let eventIdCounter = 0;
-function genEventId(): string {
-  return `evt-${Date.now()}-${++eventIdCounter}`;
-}
-
 // ─── Event classification ─────────────────────────────────────────
 
 /** Determine if an event targets a sub-agent (prefix 'subagent-') */
 function isSubAgentEvent(eventName: string): boolean {
   return eventName.startsWith('subagent-') && eventName !== 'subagent-start';
-}
-
-/** Map SSE event name to cockpit category */
-function categorize(eventName: string): EventCategory {
-  if (eventName.startsWith('step-') || eventName === 'done') return 'lifecycle';
-  if (eventName === 'phase-change') return 'phase';
-  if (eventName === 'thinking' || eventName === 'subagent-thinking') return 'thinking';
-  if (eventName === 'token' || eventName === 'subagent-token') return 'token';
-  if (eventName.startsWith('llm-')) return 'llm';
-  if (eventName.startsWith('tool-') || eventName.startsWith('subagent-tool')) return 'tool';
-  if (eventName.startsWith('skill-')) return 'skill';
-  if (eventName.startsWith('subagent')) return 'subagent';
-  if (eventName === 'compressing' || eventName === 'compressed') return 'compressing';
-  if (eventName === 'session-cleared') return 'lifecycle';
-  if (eventName.startsWith('human')) return 'human';
-  if (eventName === 'error') return 'error';
-  return 'lifecycle';
-}
-
-/** Build a human-readable label for an event */
-function labelFor(eventName: string, data: Record<string, unknown>): string {
-  const name = (data.name as string) ?? (data.subagentName as string) ?? '';
-  switch (eventName) {
-    case 'step-start':
-      return `Step ${data.step}`;
-    case 'step-end':
-      return `Step ${data.step} done`;
-    case 'done':
-      return 'Completed';
-    case 'thinking':
-      return 'Thinking';
-    case 'token':
-      return 'Token';
-    case 'tool-start':
-      return `Tool: ${data.name ?? 'unknown'}`;
-    case 'tool-end':
-      return `Tool result: ${data.callId ?? ''}`;
-    case 'skill-loading':
-      return `Loading skill: ${name}`;
-    case 'skill-loaded':
-      return `Skill loaded: ${name}`;
-    case 'skill-start':
-      return `Skill executing: ${name}`;
-    case 'skill-end':
-      return `Skill done: ${name}`;
-    case 'subagent-start':
-      return `Sub-agent: ${name}`;
-    case 'subagent-end':
-      return `Sub-agent done: ${name}`;
-    case 'subagent-token':
-      return `Sub-agent token: ${name}`;
-    case 'subagent-thinking':
-      return `Sub-agent thinking: ${name}`;
-    case 'llm-request':
-      return 'LLM request';
-    case 'llm-response':
-      return 'LLM response';
-    case 'phase-change': {
-      // `to` arrives as an object ({ type }) from one daemon and as a plain
-      // string from the other — handle both.
-      const to = data.to;
-      const toType = typeof to === 'string' ? to : ((to as { type?: string })?.type ?? '');
-      return `Phase: → ${toType}`;
-    }
-    case 'compressing':
-      return 'Compressing context';
-    case 'compressed':
-      return `Compressed: -${data.removedCount ?? 0} messages`;
-    case 'system-message':
-      // Marker rows synthesized by the host (compaction / model switch / …).
-      // The host owns the copy — `label` carries a short one for the event log.
-      return (data.label as string) ?? 'System';
-    case 'session-cleared':
-      return 'Session cleared';
-    case 'human-input':
-      return 'Human input needed';
-    case 'human-input-resolved':
-      return 'Human input resolved';
-    case 'error':
-      return `Error: ${data.message ?? ''}`;
-    default:
-      return eventName;
-  }
-}
-
-/** Build an event log entry from an SSE event */
-function toEventLog(eventName: string, data: Record<string, unknown>): AgentEvent {
-  return {
-    id: genEventId(),
-    timestamp: (data.timestamp as number) ?? Date.now(),
-    type: eventName,
-    category: categorize(eventName),
-    label: labelFor(eventName, data),
-    payload: { ...data },
-  };
-}
-
-// ─── Event log ────────────────────────────────────────────────────
-
-/**
- * Cap the event log. Every reducer call used to copy the full array
- * (`[...events, entry]`), so a long session paid O(n) per token — O(n²)
- * total — and retained every full tool result payload forever. The cockpit
- * event log folds token streams anyway; keeping the newest entries is
- * enough.
- */
-const MAX_EVENT_LOG = 5000;
-
-function appendEvent(events: AgentEvent[], entry: AgentEvent): AgentEvent[] {
-  if (events.length >= MAX_EVENT_LOG) {
-    return [...events.slice(events.length - MAX_EVENT_LOG + 1), entry];
-  }
-  return [...events, entry];
 }
 
 // ─── Token helpers ────────────────────────────────────────────────
@@ -1152,14 +1032,11 @@ function reduceSubAgentEvent(
  * Pure reducer function: (state, event) → new state.
  *
  * Routes subagent-* events to the sub-agent state machine, everything else
- * to the main agent. Always appends to the event log.
+ * to the main agent.
  */
 export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState {
   const eventName = sse.event;
   const data = sse.data;
-
-  // Append to event log (capped at MAX_EVENT_LOG entries)
-  const logEntry = toEventLog(eventName, data);
 
   // Route to sub-agent or main
   if (eventName === 'subagent-start') {
@@ -1198,7 +1075,6 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
     return {
       main: mainWithBlock,
       subAgents,
-      events: appendEvent(state.events, logEntry),
     };
   }
 
@@ -1249,7 +1125,6 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
     return {
       main,
       subAgents,
-      events: appendEvent(state.events, logEntry),
     };
   }
 
@@ -1259,6 +1134,5 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
     main,
     // `/clear` wipes the conversation — sub-agent runs belong to it
     subAgents: eventName === 'session-cleared' ? new Map() : state.subAgents,
-    events: appendEvent(state.events, logEntry),
   };
 }

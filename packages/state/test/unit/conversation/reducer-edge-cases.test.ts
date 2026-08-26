@@ -80,10 +80,10 @@ describe('reducer — uncovered event branches', () => {
     expect(state.main.lastInputTokens).toBe(12_000);
   });
 
-  it('handles compressing event (no-op but logged)', () => {
+  it('handles compressing event (no-op)', () => {
     const state = stateWithOneEvent({ event: 'compressing', data: {} });
-    expect(state.events).toHaveLength(1);
-    expect(state.events[0].category).toBe('compressing');
+    expect(state.main.messages).toHaveLength(0);
+    expect(state.main.status).toBe('idle');
   });
 
   it('handles phase-change event', () => {
@@ -91,8 +91,8 @@ describe('reducer — uncovered event branches', () => {
       event: 'phase-change',
       data: { from: 'thinking', to: 'tool_call' },
     });
-    expect(state.events).toHaveLength(1);
-    expect(state.events[0].category).toBe('phase');
+    // phase-change is a default-case no-op
+    expect(state.main.messages).toHaveLength(0);
   });
 
   it('handles error event', () => {
@@ -101,8 +101,6 @@ describe('reducer — uncovered event branches', () => {
       data: { message: 'Something went wrong' },
     });
     expect(state.main.status).toBe('error');
-    expect(state.events).toHaveLength(1);
-    expect(state.events[0].category).toBe('error');
   });
 
   it('handles done event without tokens', () => {
@@ -118,42 +116,6 @@ describe('reducer — uncovered event branches', () => {
     expect(state.main.totalSteps).toBe(10);
     expect(state.main.status).toBe('idle');
   });
-});
-
-describe('reducer — labelFor coverage', () => {
-  const eventTypes: Array<[string, Record<string, unknown>, string]> = [
-    ['step-start', { step: 1 }, 'Step 1'],
-    ['step-end', { step: 1 }, 'Step 1 done'],
-    ['done', {}, 'Completed'],
-    ['thinking', { content: 'hmm' }, 'Thinking'],
-    ['token', { delta: 'x' }, 'Token'],
-    ['tool-start', { name: 'shell' }, 'Tool: shell'],
-    ['tool-end', { name: 'shell' }, 'Tool result: '],
-    ['skill-loading', { name: 's1' }, 'Loading skill: s1'],
-    ['skill-loaded', { name: 's1' }, 'Skill loaded: s1'],
-    ['skill-start', { name: 's1' }, 'Skill executing: s1'],
-    ['skill-end', { name: 's1' }, 'Skill done: s1'],
-    ['subagent-start', { name: 'sub1' }, 'Sub-agent: sub1'],
-    ['subagent-end', { name: 'sub1' }, 'Sub-agent done: sub1'],
-    ['subagent-token', { token: 'x' }, 'Sub-agent token: '],
-    ['subagent-thinking', { content: 'x' }, 'Sub-agent thinking: '],
-    ['llm-request', {}, 'LLM request'],
-    ['llm-response', {}, 'LLM response'],
-    ['phase-change', { from: 'a', to: 'b' }, 'Phase: → b'],
-    ['compressing', {}, 'Compressing context'],
-    ['compressed', { summary: 's' }, 'Compressed: -0 messages'],
-    ['human-input', { questions: [] }, 'Human input needed'],
-    ['human-input-resolved', {}, 'Human input resolved'],
-    ['error', { message: 'e' }, 'Error: e'],
-  ];
-
-  for (const [eventType, data, expectedLabel] of eventTypes) {
-    it(`labels "${eventType}" as "${expectedLabel}"`, () => {
-      const state = stateWithOneEvent({ event: eventType, data });
-      expect(state.events).toHaveLength(1);
-      expect(state.events[0].label).toBe(expectedLabel);
-    });
-  }
 });
 
 describe('reducer — sub-agent edge cases', () => {
@@ -275,21 +237,24 @@ describe('reducer — token accumulation edge cases', () => {
 });
 
 describe('reducer — tool-end edge cases', () => {
-  it('tool-end with unmatched callId creates fallback block', () => {
+  it('tool-end with unmatched callId is a no-op on empty state', () => {
     const state = stateWithOneEvent({
       event: 'tool-end',
       data: { callId: 'unknown-id', result: 'orphan result' },
     });
-    // Should still create/update a block somehow without crashing
-    expect(state.events).toHaveLength(1);
+    expect(state.main.messages).toHaveLength(0);
   });
 
-  it('tool-end matches by toolName fallback when no callId', () => {
+  it('tool-end falls back to the sole streaming tool_call when callId is missing', () => {
     const state = pushEvents([
       { event: 'tool-start', data: { id: 'c1', name: 'file_read', args: {} } },
       { event: 'tool-end', data: { name: 'file_read', result: 'content' } },
     ]);
-    expect(state.events).toHaveLength(2);
+    const block = state.main.messages
+      .flatMap((m) => m.blocks ?? [])
+      .find((b) => b.type === 'tool_call');
+    expect(block?.status).toBe('completed');
+    expect(block?.metadata?.toolResult).toBe('content');
   });
 });
 
@@ -301,7 +266,11 @@ describe('reducer — human-input edge cases', () => {
         questions: [{ text: 'Choose', type: 'choice', options: ['a', 'b'] }],
       },
     });
-    expect(state.events).toHaveLength(1);
+    const block = state.main.messages
+      .flatMap((m) => m.blocks ?? [])
+      .find((b) => b.type === 'human_input');
+    expect(block).toBeDefined();
+    expect(block?.status).toBe('pending');
   });
 
   it('handles human-input-resolved', () => {
@@ -318,24 +287,22 @@ describe('reducer — human-input edge cases', () => {
         data: { requestId: 'r1', response: { answer: 'yes' } },
       },
     ]);
-    expect(state.events).toHaveLength(2);
+    const block = state.main.messages
+      .flatMap((m) => m.blocks ?? [])
+      .find((b) => b.type === 'human_input');
+    expect(block?.status).toBe('completed');
+    expect(block?.metadata?.response).toEqual({ answer: 'yes' });
   });
 });
 
-describe('reducer — categorize and default', () => {
-  it('categorizes unknown event as lifecycle', () => {
-    const state = stateWithOneEvent({ event: 'some-unknown-event', data: { x: 1 } });
-    expect(state.events).toHaveLength(1);
-    expect(state.events[0].category).toBe('lifecycle');
-  });
-
+describe('reducer — resilience', () => {
   it('handles empty data gracefully', () => {
     const state = stateWithOneEvent({ event: 'token', data: {} });
-    expect(state.main.messages.length).toBeGreaterThanOrEqual(0);
+    expect(state.main.messages).toHaveLength(0);
   });
 
   it('handles null token delta', () => {
     const state = stateWithOneEvent({ event: 'token', data: { delta: null } });
-    expect(state.events).toHaveLength(1);
+    expect(state.main.messages).toHaveLength(0);
   });
 });

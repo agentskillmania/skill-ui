@@ -1,9 +1,8 @@
 /**
  * @fileoverview Conversation slice type definitions
  *
- * Types for the conversation state machine: agent runs, messages, blocks,
- * the event log, and the top-level SessionRunState. These describe the
- * render targets consumed by chat and cockpit UIs via selectors.
+ * Types for the conversation state machine: agent runs, messages, and blocks.
+ * These describe the render targets consumed by chat UIs via selectors.
  */
 
 // ─── Token Stats ──────────────────────────────────────────────────
@@ -102,39 +101,7 @@ export interface AgentMessage {
   usage?: TurnUsage;
 }
 
-// ─── Event Log Entry (for cockpit) ────────────────────────────────
-
-export type EventCategory =
-  | 'lifecycle'
-  | 'phase'
-  | 'thinking'
-  | 'token'
-  | 'llm'
-  | 'tool'
-  | 'skill'
-  | 'subagent'
-  | 'compressing'
-  | 'human'
-  | 'error';
-
-/**
- * A flat event log entry — one per upstream SSE event, nothing dropped.
- * Used by cockpit's event-log panel.
- */
-export interface AgentEvent {
-  id: string;
-  timestamp: number;
-  /** Original event type string (hyphenated SSE name) */
-  type: string;
-  /** Category for grouping/filtering */
-  category: EventCategory;
-  /** Human-readable label */
-  label: string;
-  /** Raw payload */
-  payload?: Record<string, unknown>;
-  /** Link to parent message (for cross-referencing with chat) */
-  relatedMessageId?: string;
-}
+// ─── Todo List ────────────────────────────────────────────────────
 
 /**
  * A single todo item. Wire shape shared by both daemons (TS & Rust emit
@@ -210,12 +177,11 @@ export interface SubAgentRunState extends AgentRunState {
 }
 
 /**
- * Top-level session state — main agent + all sub-agents + global event log.
+ * Top-level session state — main agent + all sub-agents.
  */
 export interface SessionRunState {
   main: AgentRunState;
   subAgents: Map<string, SubAgentRunState>;
-  events: AgentEvent[];
 }
 
 // ─── Factory ──────────────────────────────────────────────────────
@@ -237,6 +203,5 @@ export function createEmptySessionState(): SessionRunState {
   return {
     main: createEmptyRunState(),
     subAgents: new Map(),
-    events: [],
   };
 }
