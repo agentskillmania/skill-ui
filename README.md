@@ -15,7 +15,6 @@ A pnpm monorepo workspace managing UI component packages for the @agentskillmani
 | `@agentskillmania/skill-ui-chat` | Chat UI components — message list, input, execution blocks | [![npm](https://img.shields.io/npm/v/@agentskillmania/skill-ui-chat.svg)](https://www.npmjs.com/package/@agentskillmania/skill-ui-chat) |
 | `@agentskillmania/skill-ui-editor` | Skill editor — file tree, code editor, visual editor | [![npm](https://img.shields.io/npm/v/@agentskillmania/skill-ui-editor.svg)](https://www.npmjs.com/package/@agentskillmania/skill-ui-editor) |
 | `@agentskillmania/skill-ui-frame` | App frame — titlebar, panels, sidebar | [![npm](https://img.shields.io/npm/v/@agentskillmania/skill-ui-frame.svg)](https://www.npmjs.com/package/@agentskillmania/skill-ui-frame) |
-| `@agentskillmania/skill-ui-settings` | Settings UI — configuration panels | [![npm](https://img.shields.io/npm/v/@agentskillmania/skill-ui-settings.svg)](https://www.npmjs.com/package/@agentskillmania/skill-ui-settings) |
 
 ## Development
 
