@@ -129,7 +129,29 @@ export interface TodoListSnapshot {
  * State of a single agent run instance (main agent or sub-agent).
  */
 export interface AgentRunState {
+  /**
+   * Run liveness. 'streaming' iff a turn is currently open (a live assistant
+   * bubble exists); 'idle' at rest; 'error' if the last turn failed.
+   * For the main agent this is wired by user-message / first content event /
+   * done / error / session-cleared; sub-agent runs flip at subagent-start/end.
+   *
+   * NOTE: 'idle' is ambiguous by design — it covers both "no turn yet" and
+   * "turn finished". Where that distinction matters (terminal guard), use
+   * `turnClosed`, not status.
+   */
   status: 'idle' | 'streaming' | 'error';
+  /**
+   * Terminal-event latch: true once this reducer has consumed a `done` or
+   * `error` for the current turn, until `user-message` (new turn) or
+   * `session-cleared` resets it. This is EVENT HISTORY, not state shape —
+   * the three legal scenarios "fresh state", "post-done", and
+   * "loadHistory landed mid-run" (sim_split) are message-shape-identical
+   * yet require opposite answers to "may a late frame open a stream?".
+   * fromHistory-built states therefore always carry `false` (loadHistory
+   * means the reducer has not seen a terminal event), which is what allows
+   * the live event tail to reopen a bubble on a mid-run-restored state.
+   */
+  turnClosed: boolean;
   stepCount: number;
   tokens: TokenStats;
   duration: number;
@@ -189,6 +211,7 @@ export interface SessionRunState {
 export function createEmptyRunState(): AgentRunState {
   return {
     status: 'idle',
+    turnClosed: false,
     stepCount: 0,
     tokens: { ...ZERO_TOKENS },
     duration: 0,

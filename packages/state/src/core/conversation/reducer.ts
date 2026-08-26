@@ -86,8 +86,28 @@ function toTurnUsage(tokens: TokenStats, durationMs: number): TurnUsage | undefi
 
 // ─── Message/block helpers ────────────────────────────────────────
 
-/** Find the current streaming assistant message in a run state, or create one */
-function ensureStreamingMessage(run: AgentRunState): { run: AgentRunState; messageId: string } {
+/**
+ * Find the current streaming assistant message in a run state, or create one.
+ *
+ * TERMINAL GUARD: when `run.turnClosed` is set (this reducer consumed a
+ * `done`/`error` since the last turn opened), refuse to open a new stream —
+ * `messageId` comes back null and every caller drops its event. Without this,
+ * any frame arriving after the terminal event (the daemons merge channels
+ * without cross-channel ordering guarantees) opened a zombie bubble that
+ * streams forever: blinking cursor, no action buttons, no closing event ever
+ * coming. Do NOT re-derive "closed" from message shape here — a state rebuilt
+ * by fromHistory mid-run is shape-identical to a post-done state, yet must
+ * stay open-able for the live event tail (see types.ts `turnClosed`).
+ *
+ * Creating the bubble also flips `status` to 'streaming' (a turn is open).
+ */
+function ensureStreamingMessage(run: AgentRunState): {
+  run: AgentRunState;
+  messageId: string | null;
+} {
+  if (run.turnClosed) {
+    return { run, messageId: null };
+  }
   const msgs = run.messages;
   const last = msgs[msgs.length - 1];
   if (last && last.role === 'assistant' && last.status === 'streaming') {
@@ -102,7 +122,7 @@ function ensureStreamingMessage(run: AgentRunState): { run: AgentRunState; messa
     createdAt: Date.now(),
   };
   return {
-    run: { ...run, messages: [...msgs, newMsg] },
+    run: { ...run, status: 'streaming', messages: [...msgs, newMsg] },
     messageId: newMsg.id,
   };
 }
@@ -206,8 +226,12 @@ function reduceMainEvent(
       };
       // A user message opens a new turn: drop the previous turn's
       // step-delta accumulators so done/error stamp THIS turn's usage only.
+      // It also clears the terminal latch — this is the only way a turn
+      // re-opens after done/error.
       return {
         ...state,
+        status: 'streaming',
+        turnClosed: false,
         turnTokens: { ...ZERO_TOKENS },
         turnDurationMs: 0,
         messages: [...state.messages, userMsg, pendingAssistant],
@@ -240,6 +264,8 @@ function reduceMainEvent(
       // render as a stray gap).
       if (!delta) return state;
       const { run, messageId } = ensureStreamingMessage(state);
+      // 终态闩:轮已关闭,迟到的 token 帧直接丢弃(不开僵尸气泡)。
+      if (!messageId) return state;
       return {
         ...run,
         messages: run.messages.map((m) => {
@@ -272,6 +298,8 @@ function reduceMainEvent(
 
     case 'thinking': {
       const { run, messageId } = ensureStreamingMessage(state);
+      // 终态闩:轮已关闭,迟到的 thinking 帧直接丢弃。
+      if (!messageId) return state;
       const content = (data.content as string) ?? '';
       return {
         ...run,
@@ -310,6 +338,8 @@ function reduceMainEvent(
     // ── Tool calls ──
     case 'tool-start': {
       const { run, messageId } = ensureStreamingMessage(state);
+      // 终态闩:轮已关闭,迟到的 tool-start 帧直接丢弃。
+      if (!messageId) return state;
       const toolName = (data.name as string) ?? 'unknown';
       const callId = (data.id as string) ?? genBlockId();
       // load_skill 与 fromHistory 的 SKILL_TOOL 特判保持同构：实时也展示为 skill 块
@@ -407,6 +437,8 @@ function reduceMainEvent(
     // ── Skill lifecycle ──
     case 'skill-loading': {
       const { run, messageId } = ensureStreamingMessage(state);
+      // 终态闩:轮已关闭,迟到的 skill-loading 帧直接丢弃。
+      if (!messageId) return state;
       const blockId = genBlockId();
       const block: AgentBlock = {
         id: blockId,
@@ -488,6 +520,9 @@ function reduceMainEvent(
     // ── Human input ──
     case 'human-input': {
       const { run, messageId } = ensureStreamingMessage(state);
+      // 终态闩:轮已关闭,迟到的 human-input 帧直接丢弃(轮外弹出的交互
+      // 输入无人作答,块会永远 pending)。
+      if (!messageId) return state;
       const questions =
         (data.questions as Array<{
           id: string;
@@ -639,17 +674,15 @@ function reduceMainEvent(
       if (todoList.items.length === 0) {
         return { ...state, todoList };
       }
-      // The daemon's step loop diffs the todo snapshot AFTER the final step,
-      // and that event can reach us AFTER the terminal `done` frame (it rides
-      // a different event channel than the runner's own frames — SSE merge
-      // order is not guaranteed). Opening a streaming message then would
-      // revive a finished run: the bubble would stream forever (blinking
-      // cursor, no action buttons, no terminal event ever coming). The
-      // "live turn" signal is a trailing streaming assistant message (run
-      // `status` itself stays idle while streaming).
-      const lastMsg = state.messages[state.messages.length - 1];
-      const turnLive = !!lastMsg && lastMsg.role === 'assistant' && lastMsg.status === 'streaming';
-      if (!turnLive) {
+      // 附着决策读两个显式信号,各管一件事(不再从消息形状推断):
+      // - status === 'streaming'(有活气泡)才走流式挂载;光秃 todo-list
+      //   落在 fresh/resting 状态时不得独自开出流式块,快照仍记进
+      //   state.todoList 供侧栏渲染。
+      // - 迟到的非空清单(daemon 步进循环在末步后才 diff 快照,该事件走
+      //   event_tx 广播通道,与 runner 自己的 done 帧无合流顺序保证)在
+      //   终态后绝不新开流——turnClosed 闩已把 ensureStreamingMessage 的
+      //   创建路径焊死,这里以 completed 块附到末条 assistant 即可。
+      if (state.status !== 'streaming') {
         const todoBlock: AgentBlock = {
           id: genBlockId(),
           type: 'todo',
@@ -668,6 +701,8 @@ function reduceMainEvent(
         return { ...state, todoList };
       }
       const { run, messageId } = ensureStreamingMessage(state);
+      // Defensive: status/turnClosed skew — record the snapshot, don't attach.
+      if (!messageId) return { ...state, todoList };
       const todoBlock: AgentBlock = {
         id: genBlockId(),
         type: 'todo',
@@ -728,14 +763,16 @@ function reduceMainEvent(
       // `/clear` reset the conversation on the backend. Drop every message
       // from the local view (the backend state is already empty). The command
       // echo ("Session cleared.") arrives as a subsequent `token` event, which
-      // creates a fresh streaming assistant message via `ensureStreamingMessage`.
-      // Also drop conversation-scoped residue: stale sub-agent cards, todo
-      // snapshot and token gauges would otherwise outlive the clear. The event
-      // log is kept — it is an append-only audit, and the `session-cleared`
-      // entry itself lives there. (subAgents is reset by the top-level
+      // creates a fresh streaming assistant message via `ensureStreamingMessage`
+      // — so the terminal latch and status must reset here, or that echo
+      // would be dropped as a late frame. Also drop conversation-scoped
+      // residue: stale sub-agent cards, todo snapshot and token gauges would
+      // otherwise outlive the clear. (subAgents is reset by the top-level
       // reducer, which owns that slice.)
       return {
         ...state,
+        status: 'idle',
+        turnClosed: false,
         messages: [],
         compression: undefined,
         activeSkill: null,
@@ -763,6 +800,7 @@ function reduceMainEvent(
       return {
         ...state,
         status: 'idle',
+        turnClosed: true,
         activeSkill: null,
         totalSteps: totalSteps ?? state.totalSteps,
         duration: duration ?? state.duration,
@@ -787,6 +825,7 @@ function reduceMainEvent(
       return {
         ...state,
         status: 'error',
+        turnClosed: true,
         activeSkill: null,
         messages: state.messages.map((m) => {
           if (m.status !== 'streaming') return m;
@@ -849,6 +888,9 @@ function reduceSubAgentEvent(
       // blocks nor create empty text blocks.
       if (!delta) return subAgents;
       const { run, messageId } = ensureStreamingMessage(sub);
+      // 终态闩:sub-run 已 end,迟到的 token 帧直接丢弃(否则 SubAgentModal
+      // 里的气泡永远流式)。
+      if (!messageId) return subAgents;
       return new Map(subAgents).set(subtaskId, {
         ...sub,
         ...run,
@@ -883,6 +925,8 @@ function reduceSubAgentEvent(
       if (!sub) return subAgents;
       const content = (data.content as string) ?? '';
       const { run, messageId } = ensureStreamingMessage(sub);
+      // 终态闩:sub-run 已 end,迟到的 thinking 帧直接丢弃。
+      if (!messageId) return subAgents;
       return new Map(subAgents).set(subtaskId, {
         ...sub,
         ...run,
@@ -929,6 +973,8 @@ function reduceSubAgentEvent(
       const toolName = action.tool ?? action.name ?? 'unknown';
       const callId = action.id ?? genBlockId();
       const { run, messageId } = ensureStreamingMessage(sub);
+      // 终态闩:sub-run 已 end,迟到的 tool-start 帧直接丢弃。
+      if (!messageId) return subAgents;
       const block: AgentBlock = {
         id: callId,
         type: 'tool_call',
@@ -1004,6 +1050,8 @@ function reduceSubAgentEvent(
       return new Map(subAgents).set(subtaskId, {
         ...sub,
         status: resultStatus === 'error' ? 'error' : 'idle',
+        // 上闩:此后迟到的 subagent-token/thinking/tool-start 一律丢弃。
+        turnClosed: true,
         resultStatus,
         error: data.error as string | undefined,
         totalSteps: data.totalSteps as number | undefined,
@@ -1040,6 +1088,9 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
 
   // Route to sub-agent or main
   if (eventName === 'subagent-start') {
+    // 终态闩:主 run 的轮已关闭时,迟到的 subagent-start 整帧丢弃——开了
+    // sub-run 却没有活气泡挂载父块,卡片会永远 spinning。
+    if (state.main.turnClosed) return state;
     // Create sub-agent + add block to parent main message
     // Generate a subtaskId when the daemon omits it: using '' as the Map key
     // makes two such sub-agents overwrite each other, and the parent block
@@ -1048,6 +1099,7 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
     const blockId = genBlockId();
     const { run: mainWithBlock } = (() => {
       const { run, messageId } = ensureStreamingMessage(state.main);
+      // turnClosed checked above — messageId is always non-null here.
       const block: AgentBlock = {
         id: blockId,
         type: 'subagent',

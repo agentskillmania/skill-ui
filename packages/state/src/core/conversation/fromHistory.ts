@@ -385,6 +385,12 @@ export function fromHistory(
     ...createEmptyRunState(),
     status: 'idle',
     messages: agentMessages,
+    // turnClosed stays false (createEmptyRunState default) ON PURPOSE:
+    // loadHistory replacing state mid-run is a supported race (sim_split) —
+    // the snapshot's completed bubbles are message-shape-identical to a
+    // post-done state, but this reducer instance has consumed no terminal
+    // event, so the live event tail must still be allowed to open a fresh
+    // streaming bubble. "Closed" is event history, never message shape.
   };
   state.subAgents = subAgents;
 

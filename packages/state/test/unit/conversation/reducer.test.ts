@@ -698,9 +698,8 @@ describe('reducer — text blocks & interleaved ordering', () => {
       empty.main.messages.flatMap((m) => m.blocks?.filter((b) => b.type === 'todo') ?? [])
     ).toHaveLength(0);
 
-    // No trailing streaming assistant → not a live turn (post-done strays,
-    // bare streams): never open a streaming message; with no assistant
-    // message to host the block, only state.todoList is recorded.
+    // status !== 'streaming'(无活气泡:post-done 迟到帧、光秃流)时绝不
+    // 开流式消息;没有 assistant 消息可挂载块,只记 state.todoList。
     const bare = pushEvents([
       { event: 'todo-list', data: { items: [{ id: 1, subject: 't', status: 'completed' }] } },
       { event: 'done', data: { status: 'success' } },
