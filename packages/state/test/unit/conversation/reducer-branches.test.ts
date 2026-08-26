@@ -478,7 +478,10 @@ describe('reducer — skill lifecycle', () => {
       s('skill-loading', { name: 's1' }),
       s('skill-end', { name: 's1', result: { key: 'value' } }),
     ]);
-    expect(lastMsg(state).blocks?.find((b) => b.type === 'skill')?.content).toMatch(/"key"/);
+    const block = lastMsg(state).blocks?.find((b) => b.type === 'skill');
+    // 表现已外移:content 不再烤展示串,原始结果全量在 metadata.result
+    expect(block?.content).toBe('');
+    expect(String(block?.metadata?.result)).toMatch(/"key"/);
   });
 
   it('skill-end with missing result produces empty content', () => {
@@ -808,7 +811,7 @@ describe('reducer — fromHistory defensive paths', () => {
     expect(sub.duration).toBe(0);
   });
 
-  it('human_input with no context arg uses default title', () => {
+  it('human_input with no context arg carries no title (chat i18n owns the default)', () => {
     const state = fromHistory([
       {
         role: 'assistant',
@@ -824,10 +827,10 @@ describe('reducer — fromHistory defensive paths', () => {
       },
       { role: 'tool', content: 'yes', toolCallId: 'h1', toolName: 'ask_human', timestamp: 2 },
     ]);
-    // 历史路径与 live 共用 blocks.ts 的默认标题(原先各写一份,时态还不同)
+    // 无 context 时不设 title——默认文案归 chat 的 i18n 兜底,state 不烤英文串
     expect(
       state.main.messages[0].blocks?.find((b) => b.type === 'human_input')!.metadata?.title
-    ).toBe('AI needs your input');
+    ).toBeUndefined();
   });
 });
 

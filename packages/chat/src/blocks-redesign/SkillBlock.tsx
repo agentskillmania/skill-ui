@@ -105,6 +105,11 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const meta = block.metadata as SkillBlockMetadata | undefined;
+  // Result preview: legacy state baked `Result: …(200 chars)` into content;
+  // newer state leaves content empty and carries the raw result in
+  // metadata.result — derive the same preview here so both render identically.
+  const resultPreview =
+    block.content || (meta?.result ? `Result: ${meta.result.slice(0, 200)}` : '');
   const { title, tag, icon, tagBg, tagText } = getPhaseDisplay(meta, block.status, theme, t);
   // 技能执行结束后收起；错误保持展开
   const { expanded, toggle } = useBlockCollapse(
@@ -231,7 +236,7 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
       </div>
 
       {/* Content */}
-      {expanded && block.content && (
+      {expanded && resultPreview && (
         <div
           css={css`
             padding: ${theme.spacing[2]} ${theme.spacing[4]};
@@ -240,7 +245,7 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
             color: ${theme.color.textSecondary};
           `}
         >
-          {block.content}
+          {resultPreview}
         </div>
       )}
 

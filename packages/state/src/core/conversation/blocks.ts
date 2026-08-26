@@ -49,7 +49,9 @@ export function skillBlock(opts: {
     id,
     type: 'skill',
     status,
-    content: skillContentPreview(result),
+    // 表现归 UI 层:content 不烤展示串,全量原始结果在 metadata.result,
+    // 预览(截断/前缀)由 chat 的 SkillBlock 自行派生。
+    content: '',
     metadata: { skillName, phase, ...(result !== undefined ? { result } : {}) },
   };
 }
@@ -60,13 +62,8 @@ export function completeSkillBlock(block: AgentBlock, result: string): AgentBloc
   return {
     ...block,
     status: 'completed',
-    content: skillContentPreview(result),
     metadata: { ...block.metadata, phase: 'completed', result },
   };
-}
-
-function skillContentPreview(result: string | undefined): string {
-  return result ? `Result: ${result.slice(0, 200)}` : '';
 }
 
 export function toolCallBlock(opts: {
@@ -133,7 +130,9 @@ export function humanInputBlock(opts: {
     metadata: {
       requestId,
       inputType,
-      title: context ?? 'AI needs your input',
+      // 无 context 时不设 title——默认文案是 chat HumanInputBlock 的 i18n
+      // 兜底(原先这里烤英文默认串,把本地化遮蔽掉了)。
+      ...(context !== undefined && context !== null ? { title: context } : {}),
       message: questions.map((q) => q.question).join('\n'),
       options,
       // Full question list — HumanInputBlock renders one input per question

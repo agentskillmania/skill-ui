@@ -100,6 +100,36 @@ describe('SkillBlock', () => {
     expect(screen.getByText('搜索结果: AI 技术发展迅速')).toBeInTheDocument();
   });
 
+  it('derives the result preview from metadata.result when content is empty (new state shape)', () => {
+    const block: Block = {
+      ...baseSkillBlock,
+      content: '',
+      metadata: { skillName: 'web-search', phase: 'executing', result: 'x'.repeat(250) },
+    };
+    render(
+      <ChatWrapper>
+        <SkillBlock block={block} />
+      </ChatWrapper>
+    );
+    // Same preview the state layer used to bake: `Result: ` + first 200 chars
+    expect(screen.getByText(`Result: ${'x'.repeat(200)}`)).toBeInTheDocument();
+  });
+
+  it('prefers baked content over metadata.result (legacy archives)', () => {
+    const block: Block = {
+      ...baseSkillBlock,
+      content: 'Result: 旧存档内容',
+      metadata: { skillName: 'web-search', phase: 'executing', result: 'ignored' },
+    };
+    render(
+      <ChatWrapper>
+        <SkillBlock block={block} />
+      </ChatWrapper>
+    );
+    expect(screen.getByText('Result: 旧存档内容')).toBeInTheDocument();
+    expect(screen.queryByText(/ignored/)).not.toBeInTheDocument();
+  });
+
   it('does not render content area when no content', () => {
     render(
       <ChatWrapper>
