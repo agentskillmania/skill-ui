@@ -759,6 +759,34 @@ function reduceMainEvent(
       if (todoList.items.length === 0) {
         return { ...state, todoList };
       }
+      // The daemon's step loop diffs the todo snapshot AFTER the final step,
+      // and that event can reach us AFTER the terminal `done` frame (it rides
+      // a different event channel than the runner's own frames — SSE merge
+      // order is not guaranteed). Opening a streaming message then would
+      // revive a finished run: the bubble would stream forever (blinking
+      // cursor, no action buttons, no terminal event ever coming). The
+      // "live turn" signal is a trailing streaming assistant message (run
+      // `status` itself stays idle while streaming).
+      const lastMsg = state.messages[state.messages.length - 1];
+      const turnLive = !!lastMsg && lastMsg.role === 'assistant' && lastMsg.status === 'streaming';
+      if (!turnLive) {
+        const todoBlock: AgentBlock = {
+          id: genBlockId(),
+          type: 'todo',
+          status: 'completed',
+          content: '',
+          metadata: { items: todoList.items },
+        };
+        for (let i = state.messages.length - 1; i >= 0; i--) {
+          if (state.messages[i].role === 'assistant') {
+            const messages = state.messages.map((m, idx) =>
+              idx === i ? { ...m, blocks: [...(m.blocks ?? []), todoBlock] } : m
+            );
+            return { ...state, todoList, messages };
+          }
+        }
+        return { ...state, todoList };
+      }
       const { run, messageId } = ensureStreamingMessage(state);
       const todoBlock: AgentBlock = {
         id: genBlockId(),

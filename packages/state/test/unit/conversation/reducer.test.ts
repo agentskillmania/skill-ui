@@ -707,19 +707,22 @@ describe('reducer — text blocks & interleaved ordering', () => {
     expect(items[1].subject).toBe('task B');
   });
 
-  it('todo-list with empty items does not create a block; done closes it', () => {
+  it('todo-list with empty items does not create a block; a bare one (no live turn) only records state', () => {
     const empty = pushEvents([{ event: 'todo-list', data: { items: [] } }]);
     expect(empty.main.todoList?.items).toHaveLength(0);
     expect(
       empty.main.messages.flatMap((m) => m.blocks?.filter((b) => b.type === 'todo') ?? [])
     ).toHaveLength(0);
 
-    const done = pushEvents([
+    // No trailing streaming assistant → not a live turn (post-done strays,
+    // bare streams): never open a streaming message; with no assistant
+    // message to host the block, only state.todoList is recorded.
+    const bare = pushEvents([
       { event: 'todo-list', data: { items: [{ id: 1, subject: 't', status: 'completed' }] } },
       { event: 'done', data: { status: 'success' } },
     ]);
-    const todo = done.main.messages.flatMap((m) => m.blocks ?? []).find((b) => b.type === 'todo');
-    expect(todo?.status).toBe('completed');
+    expect(bare.main.messages).toHaveLength(0);
+    expect(bare.main.todoList?.items).toHaveLength(1);
   });
 });
 
