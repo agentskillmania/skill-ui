@@ -504,7 +504,9 @@ describe('reducer — sub-agent lifecycle', () => {
     const state = run([
       s('subagent-start', { subtaskId: 's1', name: 'helper', task: 'research' }),
       s('subagent-thinking', { subtaskId: 's1', content: 'analyzing...' }),
-      s('subagent-token', { subtaskId: 's1', token: 'result' }),
+      // Wire field is `delta` (both daemons) — an earlier version of this test
+      // pushed `token`, which was silently dropped and asserted nothing.
+      s('subagent-token', { subtaskId: 's1', delta: 'result' }),
       s('subagent-tool-start', {
         subtaskId: 's1',
         action: { id: 'tc1', tool: 'search', arguments: {} },
@@ -517,6 +519,12 @@ describe('reducer — sub-agent lifecycle', () => {
     expect(sub.totalSteps).toBe(3);
     expect(sub.duration).toBe(5000);
     expect(sub.status).toBe('idle');
+    // Content actually accumulated through the shared main handlers
+    expect(sub.messages).toHaveLength(1);
+    expect(sub.messages[0].content).toBe('result');
+    const toolBlock = sub.messages[0].blocks?.find((b) => b.type === 'tool_call');
+    expect(toolBlock?.status).toBe('completed');
+    expect(toolBlock?.metadata?.toolResult).toBe('found');
   });
 
   it('subagent-end with error sets status and error message', () => {

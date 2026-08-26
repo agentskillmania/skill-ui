@@ -2,11 +2,13 @@
  * @fileoverview Core reducer — SSE event → SessionRunState
  *
  * Pure function: (state, event) → state.
- * Routes events to main agent or sub-agent based on event name prefix.
- * Manages block lifecycle (create/update/complete), token accumulation,
- * and message content streaming.
+ * Every event first passes through normalizeEvent (wire variants → canonical
+ * shape), then routes to the main agent or a sub-agent run — sub-agent content
+ * events are normalized to the main event shape, so both run kinds share one
+ * set of block handlers (single block semantics).
  */
 
+import { normalizeEvent } from './normalize.js';
 import type {
   SessionRunState,
   AgentRunState,
@@ -28,13 +30,6 @@ function genBlockId(): string {
   return `blk-${Date.now()}-${++blockIdCounter}`;
 }
 
-// ─── Event classification ─────────────────────────────────────────
-
-/** Determine if an event targets a sub-agent (prefix 'subagent-') */
-function isSubAgentEvent(eventName: string): boolean {
-  return eventName.startsWith('subagent-') && eventName !== 'subagent-start';
-}
-
 // ─── Token helpers ────────────────────────────────────────────────
 
 function addTokens(a: TokenStats, b?: Partial<TokenStats>): TokenStats {
@@ -47,18 +42,16 @@ function addTokens(a: TokenStats, b?: Partial<TokenStats>): TokenStats {
   };
 }
 
+/** Read the canonical TokenStats off a normalized event (normalizeEvent has
+ * already folded the daemons' casing variants — see normalize.ts). */
 function extractTokens(data: Record<string, unknown>): TokenStats | undefined {
-  // 线上格式有两种:wanderer TS(colts)发 camelCase,wrangler.rs(Rust)的
-  // TokenStats 无 serde rename,发 snake_case。两者都接。
-  const t = data.tokens as
-    | (Partial<TokenStats> & { cache_read?: number; cache_write?: number })
-    | undefined;
+  const t = data.tokens as Partial<TokenStats> | undefined;
   if (!t) return undefined;
   return {
     input: t.input ?? 0,
     output: t.output ?? 0,
-    cacheRead: t.cacheRead ?? t.cache_read ?? 0,
-    cacheWrite: t.cacheWrite ?? t.cache_write ?? 0,
+    cacheRead: t.cacheRead ?? 0,
+    cacheWrite: t.cacheWrite ?? 0,
   };
 }
 
@@ -858,6 +851,12 @@ function reduceMainEvent(
 
 // ─── Sub-agent event handlers ─────────────────────────────────────
 
+/**
+ * Sub-agent lifecycle handlers: subagent-start (create run) and subagent-end
+ * (summary + latch). Content events (token/thinking/tool-start/tool-end)
+ * never reach here — normalizeEvent rewrites them to the main event shape and
+ * the top-level reducer drives the sub-run through reduceMainEvent directly.
+ */
 function reduceSubAgentEvent(
   subAgents: Map<string, SubAgentRunState>,
   eventName: string,
@@ -878,168 +877,6 @@ function reduceSubAgentEvent(
         parentBlockId: (data.parentBlockId as string) ?? '',
       };
       return new Map(subAgents).set(subtaskId, subRun);
-    }
-
-    case 'subagent-token': {
-      const sub = subAgents.get(subtaskId);
-      if (!sub) return subAgents;
-      const delta = (data.delta as string) ?? '';
-      // Mirror the main token handler: empty frames neither close thinking
-      // blocks nor create empty text blocks.
-      if (!delta) return subAgents;
-      const { run, messageId } = ensureStreamingMessage(sub);
-      // 终态闩:sub-run 已 end,迟到的 token 帧直接丢弃(否则 SubAgentModal
-      // 里的气泡永远流式)。
-      if (!messageId) return subAgents;
-      return new Map(subAgents).set(subtaskId, {
-        ...sub,
-        ...run,
-        messages: run.messages.map((m) => {
-          if (m.id !== messageId) return m;
-          const blocks = closeThinkingBlocks(m.blocks ?? []);
-          const last = blocks[blocks.length - 1];
-          // Text segments interleave with thinking/tool blocks in arrival
-          // order, exactly like the main agent's token handler.
-          if (last?.type === 'text' && last.status === 'streaming') {
-            return {
-              ...m,
-              content: m.content + delta,
-              blocks: blocks.map((b) =>
-                b.id === last.id ? { ...b, content: b.content + delta } : b
-              ),
-            };
-          }
-          const textBlock: AgentBlock = {
-            id: genBlockId(),
-            type: 'text',
-            status: 'streaming',
-            content: delta,
-          };
-          return { ...m, content: m.content + delta, blocks: [...blocks, textBlock] };
-        }),
-      });
-    }
-
-    case 'subagent-thinking': {
-      const sub = subAgents.get(subtaskId);
-      if (!sub) return subAgents;
-      const content = (data.content as string) ?? '';
-      const { run, messageId } = ensureStreamingMessage(sub);
-      // 终态闩:sub-run 已 end,迟到的 thinking 帧直接丢弃。
-      if (!messageId) return subAgents;
-      return new Map(subAgents).set(subtaskId, {
-        ...sub,
-        ...run,
-        messages: run.messages.map((m) => {
-          if (m.id !== messageId) return m;
-          // Mirror the main thinking handler: an open text segment closes.
-          const blocks = closeTextBlocks(m.blocks ?? []);
-          const openThinking = blocks.find(
-            (b) => b.type === 'thinking' && b.status === 'streaming'
-          );
-          if (openThinking) {
-            return {
-              ...m,
-              blocks: blocks.map((b) =>
-                b.id === openThinking.id ? { ...b, content: b.content + content } : b
-              ),
-            };
-          }
-          // Mirror the main-agent guard: an empty first chunk means the model
-          // produced no reasoning — never create an empty thinking block.
-          if (!content) return m;
-          const block: AgentBlock = {
-            id: genBlockId(),
-            type: 'thinking',
-            status: 'streaming',
-            content,
-          };
-          return { ...m, blocks: [...blocks, block] };
-        }),
-      });
-    }
-
-    case 'subagent-tool-start': {
-      const sub = subAgents.get(subtaskId);
-      if (!sub) return subAgents;
-      const action =
-        (data.action as {
-          id?: string;
-          tool?: string;
-          name?: string;
-          arguments?: unknown;
-          toolType?: string;
-        }) ?? {};
-      const toolName = action.tool ?? action.name ?? 'unknown';
-      const callId = action.id ?? genBlockId();
-      const { run, messageId } = ensureStreamingMessage(sub);
-      // 终态闩:sub-run 已 end,迟到的 tool-start 帧直接丢弃。
-      if (!messageId) return subAgents;
-      const block: AgentBlock = {
-        id: callId,
-        type: 'tool_call',
-        status: 'streaming',
-        content: '',
-        metadata: {
-          toolName,
-          toolArgs: JSON.stringify(action.arguments ?? {}),
-          // 与主 agent 的 tool-start 同约定:可选来源字段,仅透传。
-          ...(typeof action.toolType === 'string' ? { toolType: action.toolType } : {}),
-        },
-      };
-      return new Map(subAgents).set(subtaskId, {
-        ...sub,
-        ...run,
-        messages: run.messages.map((m) =>
-          m.id === messageId ? { ...m, blocks: [...closeProseBlocks(m.blocks ?? []), block] } : m
-        ),
-      });
-    }
-
-    case 'subagent-tool-end': {
-      const sub = subAgents.get(subtaskId);
-      if (!sub) return subAgents;
-      const callId = (data.callId as string) ?? '';
-      return new Map(subAgents).set(subtaskId, {
-        ...sub,
-        messages: sub.messages.map((m) => {
-          if (!m.blocks) return m;
-          // Match by block id (which was set to callId at subagent-tool-start time)
-          const target = m.blocks.find((b) => b.id === callId && b.status === 'streaming');
-          if (!target) {
-            // Fallback: only safe with a single streaming tool_call (parallel
-            // calls cannot be disambiguated without callId)
-            const streaming = m.blocks.filter(
-              (b) => b.type === 'tool_call' && b.status === 'streaming'
-            );
-            if (streaming.length !== 1) return m;
-            return {
-              ...m,
-              blocks: m.blocks.map((b) =>
-                b.id === streaming[0].id
-                  ? {
-                      ...b,
-                      status: 'completed' as const,
-                      metadata: { ...b.metadata, toolResult: data.result ?? '' },
-                    }
-                  : b
-              ),
-            };
-          }
-          return {
-            ...m,
-            blocks: m.blocks.map((b) =>
-              b.id === target.id
-                ? {
-                    ...b,
-                    status: 'completed' as const,
-                    metadata: { ...b.metadata, toolResult: data.result ?? '' },
-                  }
-                : b
-            ),
-          };
-        }),
-      });
     }
 
     case 'subagent-end': {
@@ -1079,12 +916,13 @@ function reduceSubAgentEvent(
 /**
  * Pure reducer function: (state, event) → new state.
  *
- * Routes subagent-* events to the sub-agent state machine, everything else
- * to the main agent.
+ * Step 0 normalizes the wire frame (normalizeEvent). Sub-agent lifecycle
+ * events (subagent-start/end) get their own handlers; sub-agent CONTENT
+ * events arrive already normalized to the main event shape and are driven
+ * through reduceMainEvent on the sub-run — one block semantics for both.
  */
 export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState {
-  const eventName = sse.event;
-  const data = sse.data;
+  const { event: eventName, data, subtaskId } = normalizeEvent(sse);
 
   // Route to sub-agent or main
   if (eventName === 'subagent-start') {
@@ -1130,54 +968,62 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
     };
   }
 
-  if (isSubAgentEvent(eventName)) {
+  if (eventName === 'subagent-end') {
     const subAgents = reduceSubAgentEvent(state.subAgents, eventName, data);
 
-    // For subagent-end, also update the parent block status
+    // Also update the parent block status
     let main = state.main;
-    if (eventName === 'subagent-end') {
-      const subtaskId = (data.subtaskId as string) ?? '';
-      const sub = subAgents.get(subtaskId);
-      if (sub) {
-        main = {
-          ...main,
-          messages: main.messages.map((m) => {
-            if (!m.blocks) return m;
-            return {
-              ...m,
-              blocks: m.blocks.map((b) => {
-                if (b.type !== 'subagent' || b.metadata?.subtaskId !== subtaskId) return b;
-                return {
-                  ...b,
-                  status:
-                    sub.resultStatus === 'error' ? ('error' as const) : ('completed' as const),
-                  metadata: {
-                    ...b.metadata,
-                    resultStatus: sub.resultStatus,
-                    steps: sub.totalSteps,
-                    // Flat token fields — the shape SubAgentBlockMetadata
-                    // declares and the chat UI reads (inputTokens/outputTokens).
-                    inputTokens: sub.tokens.input,
-                    outputTokens: sub.tokens.output,
-                    duration: sub.duration,
-                    error: sub.error,
-                    // Full sub-run conversation for the SubAgentModal.
-                    // AgentMessage is structurally compatible with chat's
-                    // Message (same role/content/status/createdAt shape).
-                    messages: sub.messages,
-                  },
-                };
-              }),
-            };
-          }),
-        };
-      }
+    const id = subtaskId ?? '';
+    const sub = subAgents.get(id);
+    if (sub) {
+      main = {
+        ...main,
+        messages: main.messages.map((m) => {
+          if (!m.blocks) return m;
+          return {
+            ...m,
+            blocks: m.blocks.map((b) => {
+              if (b.type !== 'subagent' || b.metadata?.subtaskId !== id) return b;
+              return {
+                ...b,
+                status: sub.resultStatus === 'error' ? ('error' as const) : ('completed' as const),
+                metadata: {
+                  ...b.metadata,
+                  resultStatus: sub.resultStatus,
+                  steps: sub.totalSteps,
+                  // Flat token fields — the shape SubAgentBlockMetadata
+                  // declares and the chat UI reads (inputTokens/outputTokens).
+                  inputTokens: sub.tokens.input,
+                  outputTokens: sub.tokens.output,
+                  duration: sub.duration,
+                  error: sub.error,
+                  // Full sub-run conversation for the SubAgentModal.
+                  // AgentMessage is structurally compatible with chat's
+                  // Message (same role/content/status/createdAt shape).
+                  messages: sub.messages,
+                },
+              };
+            }),
+          };
+        }),
+      };
     }
 
     return {
       main,
       subAgents,
     };
+  }
+
+  // Sub-agent content event (normalized to the main event shape): drive the
+  // sub-run through the SAME handlers as the main run — one block semantics.
+  // SubAgentRunState extends AgentRunState; the handlers' spreads carry the
+  // sub-specific fields (name/task/parentBlockId/resultStatus) along.
+  if (subtaskId !== undefined) {
+    const sub = state.subAgents.get(subtaskId);
+    if (!sub) return state;
+    const next = reduceMainEvent(sub, eventName, data) as SubAgentRunState;
+    return { ...state, subAgents: new Map(state.subAgents).set(subtaskId, next) };
   }
 
   // Main agent event

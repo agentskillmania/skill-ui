@@ -149,17 +149,20 @@ describe('reducer — sub-agent edge cases', () => {
   it('handles subagent-token after start', () => {
     const state = pushEvents([
       { event: 'subagent-start', data: { subtaskId: 'sub-1', name: 'helper', task: 'do' } },
-      { event: 'subagent-token', data: { subtaskId: 'sub-1', token: 'Hello' } },
-      { event: 'subagent-token', data: { subtaskId: 'sub-1', token: ' world' } },
+      // Wire field is `delta` (both daemons emit {subtaskId, name, delta}).
+      { event: 'subagent-token', data: { subtaskId: 'sub-1', delta: 'Hello' } },
+      { event: 'subagent-token', data: { subtaskId: 'sub-1', delta: ' world' } },
     ]);
     const sub = state.subAgents.get('sub-1');
     expect(sub).toBeDefined();
+    expect(sub!.messages).toHaveLength(1);
+    expect(sub!.messages[0].content).toBe('Hello world');
   });
 
   it('ignores subagent events for unknown subtaskId', () => {
     const state = stateWithOneEvent({
       event: 'subagent-token',
-      data: { subtaskId: 'unknown', token: 'x' },
+      data: { subtaskId: 'unknown', delta: 'x' },
     });
     expect(state.subAgents.size).toBe(0);
   });
