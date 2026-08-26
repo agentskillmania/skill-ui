@@ -5,13 +5,13 @@
  * lightTheme/darkTheme exports, so existing consumers are unaffected.
  */
 import type { Theme } from '../../types.js';
-import { lightTheme } from '../light.js';
 import { darkTheme } from '../dark.js';
-import { paperLightTheme, paperDarkTheme } from './paper.js';
-import { inkLightTheme, inkDarkTheme } from './ink.js';
-import { tideLightTheme, tideDarkTheme } from './tide.js';
-import { emberLightTheme, emberDarkTheme } from './ember.js';
+import { lightTheme } from '../light.js';
 import { blossomLightTheme, blossomDarkTheme } from './blossom.js';
+import { emberLightTheme, emberDarkTheme } from './ember.js';
+import { inkLightTheme, inkDarkTheme } from './ink.js';
+import { paperLightTheme, paperDarkTheme } from './paper.js';
+import { tideLightTheme, tideDarkTheme } from './tide.js';
 
 export type ThemeId = 'slate' | 'paper' | 'ink' | 'tide' | 'ember' | 'blossom';
 

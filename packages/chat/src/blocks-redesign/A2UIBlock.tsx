@@ -128,22 +128,27 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
     [onAction, surfaceId]
   );
 
-  // Status tag
+  // Status tag — paired semantic colors (bg always matches its fg)
   const statusConfig = (() => {
     switch (block.status) {
       case 'streaming':
-        return { label: t('a2ui.streaming'), color: theme.color.info };
+        return {
+          label: t('a2ui.streaming'),
+          color: theme.color.primary,
+          bg: theme.color.primaryBg,
+        };
       case 'completed':
-        return { label: t('a2ui.completed'), color: theme.color.success };
+        return {
+          label: t('a2ui.completed'),
+          color: theme.color.success,
+          bg: theme.color.successBg,
+        };
       case 'error':
-        return { label: t('a2ui.error'), color: theme.color.error };
+        return { label: t('a2ui.error'), color: theme.color.error, bg: theme.color.errorBg };
       case 'pending':
-        return { label: t('a2ui.waiting'), color: theme.color.warning };
+        return { label: t('a2ui.waiting'), color: theme.color.warning, bg: theme.color.warningBg };
     }
   })();
-
-  const accentColor = theme.blockColor.a2ui?.text ?? theme.color.primary;
-  const accentBg = theme.blockColor.a2ui?.bg ?? theme.color.primaryBg;
 
   // 内容块默认展开，仅手动收起
   const { expanded, toggle } = useBlockCollapse(false);
@@ -173,7 +178,6 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
           align-items: center;
           justify-content: space-between;
           padding: ${theme.spacing[2]} ${theme.spacing[4]};
-          background: ${theme.color.fill};
           border-bottom: 1px solid ${theme.color.borderSecondary};
           ${expanded ? '' : 'border-bottom: none;'}
           cursor: pointer;
@@ -194,8 +198,8 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
               width: 22px;
               height: 22px;
               border-radius: ${theme.radius.md};
-              background: ${accentBg};
-              color: ${accentColor};
+              background: ${theme.color.fillLight};
+              color: ${theme.color.textSecondary};
             `}
           >
             <Monitor size={13} />
@@ -245,7 +249,7 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
                 padding: 2px 8px;
                 border-radius: ${theme.radius.sm};
                 color: ${statusConfig.color};
-                background: ${accentBg};
+                background: ${statusConfig.bg};
               `}
             >
               {statusConfig.label}

@@ -19,16 +19,16 @@ function getPhaseDisplay(
   status: string,
   theme: Theme,
   t: TFunction
-): { title: string; tag?: string; icon: React.ReactNode; accentColor: string } {
+): { title: string; tag?: string; icon: React.ReactNode; tagBg: string; tagText: string } {
   const name = meta?.skillName ?? t('skill.defaultName');
-  const skillAccent = theme.blockColor.skill.text;
 
   if (status === 'error') {
     return {
       title: `${name} ${t('skill.executionFailed')}`,
       tag: t('skill.failed'),
       icon: <XCircle size={13} />,
-      accentColor: theme.color.error,
+      tagBg: theme.color.errorBg,
+      tagText: theme.color.error,
     };
   }
 
@@ -38,33 +38,38 @@ function getPhaseDisplay(
         title: t('skill.loading', { name }),
         tag: t('skill.loadingShort'),
         icon: <Loader2 size={13} />,
-        accentColor: skillAccent,
+        tagBg: theme.color.primaryBg,
+        tagText: theme.color.primary,
       };
     case 'loaded':
       return {
         title: name,
         tag: t('skill.loaded'),
         icon: <Sparkles size={13} />,
-        accentColor: skillAccent,
+        tagBg: theme.color.primaryBg,
+        tagText: theme.color.primary,
       };
     case 'executing':
       return {
         title: t('skill.executing', { name }),
         tag: meta?.task ?? t('skill.executingShort'),
         icon: <Loader2 size={13} />,
-        accentColor: skillAccent,
+        tagBg: theme.color.primaryBg,
+        tagText: theme.color.primary,
       };
     case 'completed':
       return {
         title: t('skill.completed', { name }),
         icon: <CheckCircle2 size={13} />,
-        accentColor: theme.color.success,
+        tagBg: theme.color.successBg,
+        tagText: theme.color.success,
       };
     default:
       return {
         title: name,
         icon: <Sparkles size={13} />,
-        accentColor: skillAccent,
+        tagBg: theme.color.primaryBg,
+        tagText: theme.color.primary,
       };
   }
 }
@@ -100,7 +105,7 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const meta = block.metadata as SkillBlockMetadata | undefined;
-  const { title, tag, icon, accentColor } = getPhaseDisplay(meta, block.status, theme, t);
+  const { title, tag, icon, tagBg, tagText } = getPhaseDisplay(meta, block.status, theme, t);
   // 技能执行结束后收起；错误保持展开
   const { expanded, toggle } = useBlockCollapse(
     block.status === 'completed' && meta?.phase === 'completed'
@@ -150,12 +155,12 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
               ? theme.color.errorBg
               : meta?.phase === 'completed'
                 ? theme.color.successBg
-                : theme.blockColor.skill.bg};
+                : theme.color.fillLight};
             color: ${block.status === 'error'
               ? theme.color.error
               : meta?.phase === 'completed'
                 ? theme.color.success
-                : theme.blockColor.skill.text};
+                : theme.color.textSecondary};
             ${isSpinning
               ? css`
                   & > * {
@@ -207,9 +212,8 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
               font-weight: ${theme.font.weight.semibold};
               padding: 2px 8px;
               border-radius: ${theme.radius.full};
-              background: ${accentColor}15;
-              color: ${accentColor};
-              border: 1px solid ${accentColor}30;
+              background: ${tagBg};
+              color: ${tagText};
               flex-shrink: 0;
             `}
           >
@@ -281,8 +285,8 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
                         `
                       : phaseStatus === 'active'
                         ? css`
-                            color: ${theme.blockColor.skill.text};
-                            background: ${theme.blockColor.skill.bg};
+                            color: ${theme.color.primary};
+                            background: ${theme.color.primaryBg};
                           `
                         : css`
                             color: ${theme.color.textQuaternary};

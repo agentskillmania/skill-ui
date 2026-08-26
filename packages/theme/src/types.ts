@@ -2,14 +2,6 @@
  * Theme type definitions
  */
 
-/** Block component color items */
-export interface BlockColorItem {
-  /** Text color */
-  text: string;
-  /** Background color */
-  bg: string;
-}
-
 /** Event type status colors for Cockpit EventLogPanel */
 export interface EventStatusColorItem {
   /** Text color */
@@ -45,8 +37,6 @@ export interface Theme {
    * interaction states (hoverOverlay/activeOverlay)
    */
   color: Record<string, string>;
-  /** Block component dedicated colors (thinking/toolMcp/toolScript/toolBuiltin/plan, etc.) */
-  blockColor: Record<string, BlockColorItem>;
   /** Event type status colors for Cockpit */
   eventStatusColor: Record<string, EventStatusColorItem>;
   /** Agent status colors */

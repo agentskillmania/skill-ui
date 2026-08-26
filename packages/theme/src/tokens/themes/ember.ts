@@ -93,19 +93,6 @@ export const emberLightColor: Theme['color'] = {
   activeOverlay: 'rgba(41, 32, 24, 0.09)',
 };
 
-export const emberLightBlockColor: Theme['blockColor'] = {
-  thinking: { text: '#6b21a8', bg: 'rgba(107, 33, 168, 0.08)' },
-  plan: { text: '#1e40af', bg: 'rgba(30, 64, 175, 0.08)' },
-  toolMcp: { text: '#155e75', bg: 'rgba(21, 94, 117, 0.08)' },
-  toolScript: { text: '#b45309', bg: 'rgba(180, 83, 9, 0.08)' },
-  toolBuiltin: { text: '#4d7c0f', bg: 'rgba(77, 124, 15, 0.08)' },
-  humanInput: { text: '#b45309', bg: 'rgba(180, 83, 9, 0.08)' },
-  skill: { text: '#6b21a8', bg: 'rgba(107, 33, 168, 0.08)' },
-  a2ui: { text: '#0c4a6e', bg: 'rgba(12, 74, 110, 0.08)' },
-  subagent: { text: '#155e75', bg: 'rgba(21, 94, 117, 0.08)' },
-  todo: { text: '#9f1239', bg: 'rgba(159, 18, 57, 0.08)' },
-};
-
 export const emberLightEventStatusColor: Theme['eventStatusColor'] = {
   lifecycle: { text: '#4d7c0f', bg: 'rgba(77, 124, 15, 0.08)' },
   phase: { text: '#5a4a3a', bg: 'rgba(90, 74, 58, 0.08)' },
@@ -212,19 +199,6 @@ export const emberDarkColor: Theme['color'] = {
   activeOverlay: 'rgba(255, 255, 255, 0.09)',
 };
 
-export const emberDarkBlockColor: Theme['blockColor'] = {
-  thinking: { text: '#d8b4fe', bg: 'rgba(216, 180, 254, 0.15)' },
-  plan: { text: '#93c5fd', bg: 'rgba(147, 197, 253, 0.15)' },
-  toolMcp: { text: '#67e8f9', bg: 'rgba(103, 232, 249, 0.15)' },
-  toolScript: { text: '#fde68a', bg: 'rgba(253, 230, 138, 0.15)' },
-  toolBuiltin: { text: '#86efac', bg: 'rgba(134, 239, 172, 0.15)' },
-  humanInput: { text: '#fde68a', bg: 'rgba(253, 230, 138, 0.15)' },
-  skill: { text: '#d8b4fe', bg: 'rgba(216, 180, 254, 0.15)' },
-  a2ui: { text: '#7dd3fc', bg: 'rgba(125, 211, 252, 0.15)' },
-  subagent: { text: '#67e8f9', bg: 'rgba(103, 232, 249, 0.15)' },
-  todo: { text: '#fda4af', bg: 'rgba(253, 164, 175, 0.15)' },
-};
-
 export const emberDarkEventStatusColor: Theme['eventStatusColor'] = {
   lifecycle: { text: '#86efac', bg: 'rgba(134, 239, 172, 0.15)' },
   phase: { text: '#cfc0ac', bg: 'rgba(207, 192, 172, 0.15)' },
@@ -258,7 +232,6 @@ export const emberDarkSkillStatusColor: Theme['skillStatusColor'] = {
 export const emberLightTheme: Theme = {
   mode: 'light',
   color: emberLightColor,
-  blockColor: emberLightBlockColor,
   eventStatusColor: emberLightEventStatusColor,
   agentStatusColor: emberLightAgentStatusColor,
   skillStatusColor: emberLightSkillStatusColor,
@@ -274,7 +247,6 @@ export const emberLightTheme: Theme = {
 export const emberDarkTheme: Theme = {
   mode: 'dark',
   color: emberDarkColor,
-  blockColor: emberDarkBlockColor,
   eventStatusColor: emberDarkEventStatusColor,
   agentStatusColor: emberDarkAgentStatusColor,
   skillStatusColor: emberDarkSkillStatusColor,

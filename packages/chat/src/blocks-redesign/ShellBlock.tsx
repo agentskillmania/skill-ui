@@ -1,7 +1,8 @@
 /**
  * Shell tool block — renders a command execution as a terminal window.
  * Collapses to a prompt-line summary once the command exits successfully;
- * the palette follows the current light/dark theme mode.
+ * the terminal palette is derived from theme tokens, so it follows every
+ * theme (and its light/dark mode) instead of a hardcoded slate palette.
  */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css, keyframes } from '@emotion/react';
@@ -17,28 +18,6 @@ const blinkKeyframes = keyframes`
   0%, 49% { opacity: 1; }
   50%, 100% { opacity: 0; }
 `;
-
-/** Terminal palettes per theme mode */
-const palettes = {
-  light: {
-    bodyBg: '#f8fafc',
-    text: '#334155',
-    command: '#0f172a',
-    prompt: '#16a34a',
-    dim: '#94a3b8',
-    scrollbar: '#cbd5e1',
-    exitFail: '#dc2626',
-  },
-  dark: {
-    bodyBg: '#0f172a',
-    text: '#cbd5e1',
-    command: '#f8fafc',
-    prompt: '#4ade80',
-    dim: '#64748b',
-    scrollbar: '#334155',
-    exitFail: '#f87171',
-  },
-} as const;
 
 /** Strip ANSI escape sequences and normalize carriage returns.
  * Follow-up: swap for ansi-to-react to render colors instead of stripping. */
@@ -60,8 +39,15 @@ export const ShellBlock = memo(function ShellBlock({ block }: BlockProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const meta = block.metadata as ShellMetadata | undefined;
-  const accent = theme.blockColor.toolScript;
-  const term = palettes[theme.mode === 'dark' ? 'dark' : 'light'];
+  const term = {
+    bodyBg: theme.color.fillSecondary,
+    command: theme.color.text,
+    prompt: theme.color.primary,
+    output: theme.color.textSecondary,
+    scrollbar: theme.color.border,
+    exitFail: theme.color.error,
+    exitOk: theme.color.success,
+  };
   const isRunning = block.status === 'streaming' || block.status === 'pending';
   const exitCode = meta?.exitCode;
   const failed = block.status === 'error' || (exitCode !== undefined && exitCode !== 0);
@@ -106,7 +92,6 @@ export const ShellBlock = memo(function ShellBlock({ block }: BlockProps) {
           justify-content: space-between;
           gap: ${theme.spacing[2]};
           padding: ${theme.spacing[2]} ${theme.spacing[4]};
-          background: ${theme.color.fill};
           border-bottom: 1px solid ${theme.color.borderSecondary};
           cursor: pointer;
         `}
@@ -127,8 +112,8 @@ export const ShellBlock = memo(function ShellBlock({ block }: BlockProps) {
               width: 22px;
               height: 22px;
               border-radius: ${theme.radius.md};
-              background: ${accent.bg};
-              color: ${accent.text};
+              background: ${theme.color.fillLight};
+              color: ${theme.color.textSecondary};
               flex-shrink: 0;
             `}
           >
@@ -194,7 +179,7 @@ export const ShellBlock = memo(function ShellBlock({ block }: BlockProps) {
           >
             <span css={css({ color: term.prompt, userSelect: 'none' })}>❯ </span>
             {meta?.command ?? ''}
-          </div>
+          </div>{' '}
           {expanded && (output || isRunning) && (
             <div
               ref={outputRef}
@@ -204,7 +189,7 @@ export const ShellBlock = memo(function ShellBlock({ block }: BlockProps) {
                 overflow-y: auto;
                 scrollbar-width: thin;
                 scrollbar-color: ${term.scrollbar} transparent;
-                color: ${term.text};
+                color: ${term.output};
                 white-space: pre-wrap;
                 word-break: break-all;
               `}
@@ -230,7 +215,7 @@ export const ShellBlock = memo(function ShellBlock({ block }: BlockProps) {
                 <div
                   css={css`
                     margin-top: ${theme.spacing[1]};
-                    color: ${failed ? term.exitFail : term.prompt};
+                    color: ${failed ? term.exitFail : term.exitOk};
                   `}
                 >
                   ↳ exit {exitCode ?? 0}

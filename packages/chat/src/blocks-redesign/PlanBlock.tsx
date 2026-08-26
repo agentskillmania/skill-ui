@@ -33,7 +33,7 @@ function getStepColor(step: PlanStep, theme: Theme): string {
     case 'completed':
       return theme.color.success;
     case 'running':
-      return theme.blockColor.plan.text;
+      return theme.color.primary;
     case 'error':
       return theme.color.error;
     case 'skipped':
@@ -49,7 +49,7 @@ function getStepIconBg(step: PlanStep, theme: Theme): string {
     case 'completed':
       return theme.color.successBg;
     case 'running':
-      return theme.blockColor.plan.bg;
+      return theme.color.primaryBg;
     case 'error':
       return theme.color.errorBg;
     case 'skipped':
@@ -95,7 +95,6 @@ export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
           align-items: center;
           justify-content: space-between;
           padding: ${theme.spacing[2]} ${theme.spacing[4]};
-          background: ${theme.color.fill};
           border-bottom: 1px solid ${theme.color.borderSecondary};
           ${expanded ? '' : 'border-bottom: none;'}
           cursor: pointer;
@@ -116,8 +115,8 @@ export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
               width: 22px;
               height: 22px;
               border-radius: ${theme.radius.md};
-              background: ${theme.blockColor.plan.bg};
-              color: ${theme.blockColor.plan.text};
+              background: ${theme.color.fillLight};
+              color: ${theme.color.textSecondary};
             `}
           >
             <FileText size={13} />
@@ -152,7 +151,7 @@ export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
               css={css`
                 height: 100%;
                 border-radius: ${theme.radius.full};
-                background: ${theme.blockColor.plan.text};
+                background: ${theme.color.primary};
                 transition: width ${theme.motion.duration.slow} ${theme.motion.easing.out};
               `}
               style={{ width: `${progress}%` }}

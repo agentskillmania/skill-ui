@@ -8,7 +8,6 @@ export { breakpoints } from './shared.js';
 export {
   lightTheme,
   lightColor,
-  lightBlockColor,
   lightEventStatusColor,
   lightAgentStatusColor,
   lightSkillStatusColor,
@@ -16,7 +15,6 @@ export {
 export {
   darkTheme,
   darkColor,
-  darkBlockColor,
   darkEventStatusColor,
   darkAgentStatusColor,
   darkSkillStatusColor,

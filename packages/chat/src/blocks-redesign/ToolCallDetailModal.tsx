@@ -1,18 +1,17 @@
 /**
  * Tool call detail modal — shows input/output with JSON tree and raw Monaco views
  */
+import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import JsonViewPkg from '@microlink/react-json-view';
 import { Modal, Tabs, Input } from 'antd';
 import { Wrench, X } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const JsonView = JsonViewPkg as unknown as React.ComponentType<any>;
-import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { useTranslation } from 'react-i18next';
 
-import { getToolColorKey } from './toolColorUtils.js';
 import { NAMESPACE } from '../locales/index.js';
 
 export interface ToolCallDetailModalProps {
@@ -172,13 +171,6 @@ export function ToolCallDetailModal({
 
   const jsonViewTheme = useMemo(() => buildJsonViewTheme(theme), [theme]);
 
-  const colorKey = getToolColorKey(toolType);
-  const accentColor =
-    theme.blockColor[colorKey as keyof typeof theme.blockColor]?.text ?? theme.color.primary;
-
-  const accentBg =
-    theme.blockColor[colorKey as keyof typeof theme.blockColor]?.bg ?? theme.color.primaryBg;
-
   const tabItems = [
     ...(resultParsed.isJson
       ? [
@@ -256,7 +248,7 @@ export function ToolCallDetailModal({
           boxShadow: theme.shadow.lg,
         },
         mask: {
-          backgroundColor: 'rgba(0,0,0,0.4)',
+          backgroundColor: theme.color.bgMask,
         },
       }}
       title={
@@ -275,8 +267,8 @@ export function ToolCallDetailModal({
               width: 32px;
               height: 32px;
               border-radius: ${theme.radius.md};
-              background: ${accentBg};
-              color: ${accentColor};
+              background: ${theme.color.fillLight};
+              color: ${theme.color.textSecondary};
               flex-shrink: 0;
             `}
           >
@@ -300,8 +292,8 @@ export function ToolCallDetailModal({
                 letter-spacing: 0.06em;
                 padding: 2px 8px;
                 border-radius: ${theme.radius.sm};
-                background: ${accentBg};
-                color: ${accentColor};
+                background: ${theme.color.fillSubtle};
+                color: ${theme.color.textTertiary};
                 flex-shrink: 0;
               `}
             >
@@ -335,7 +327,7 @@ export function ToolCallDetailModal({
               width: 6px;
               height: 6px;
               border-radius: ${theme.radius.full};
-              background: ${theme.color.info};
+              background: ${theme.color.textQuaternary};
             `}
           />
           {t('toolCall.inputParams')}

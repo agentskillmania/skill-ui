@@ -331,8 +331,6 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
   const isPending = block.status === 'pending' || block.status === 'streaming';
   // 已回复后自动收起；待回复时不可收起
   const { expanded, toggle } = useBlockCollapse(!isPending);
-  const accentColor = theme.blockColor.humanInput.text;
-  const accentBg = theme.blockColor.humanInput.bg;
 
   const handleSubmit = (response: unknown) => {
     onConfirm?.(requestId, response);
@@ -343,14 +341,13 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
       css={css`
         border-radius: ${theme.radius.lg};
         background: ${theme.color.bgContainer};
-        /* 黄色是 HumanInput 的身份色（同 ErrorBlock 红边先例）；完成与否由绿色 pill/正文表达 */
-        border: 1px solid ${accentColor};
+        border: 1px solid ${theme.color.border};
         overflow: hidden;
         transition:
           border-color ${theme.motion.duration.normal} ${theme.motion.easing.out},
           box-shadow ${theme.motion.duration.normal} ${theme.motion.easing.out};
         &:hover {
-          border-color: ${accentColor};
+          border-color: ${theme.color.borderHover};
           box-shadow: ${theme.shadow.sm};
         }
       `}
@@ -364,8 +361,7 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
           align-items: center;
           gap: ${theme.spacing[2]};
           padding: ${theme.spacing[2]} ${theme.spacing[4]};
-          background: ${accentBg};
-          border-bottom: 1px solid ${accentColor};
+          border-bottom: 1px solid ${theme.color.borderSecondary};
           ${!isPending && !expanded ? 'border-bottom: none;' : ''}
           ${!isPending ? 'cursor: pointer;' : ''}
         `}
@@ -378,7 +374,8 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
             width: 22px;
             height: 22px;
             border-radius: ${theme.radius.md};
-            background: ${accentColor};
+            /* 用户输入 = 品牌色身份（同 ErrorBlock 实心红先例） */
+            background: ${theme.color.primary};
             color: ${theme.color.textInverse};
             flex-shrink: 0;
           `}
@@ -407,9 +404,9 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
             font-weight: ${theme.font.weight.semibold};
             padding: ${isPending ? '2px 8px' : '0'};
             border-radius: ${theme.radius.full};
-            background: ${isPending ? accentBg : 'transparent'};
-            color: ${isPending ? accentColor : theme.color.success};
-            border: ${isPending ? `1px solid ${accentColor}` : 'none'};
+            background: ${isPending ? theme.color.primaryBg : 'transparent'};
+            color: ${isPending ? theme.color.primary : theme.color.success};
+            border: none;
             flex-shrink: 0;
           `}
         >

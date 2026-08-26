@@ -2,7 +2,6 @@ import { useState, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import { useTheme, getTheme, themeMetas, type Theme, type ThemeId } from '../src/index';
 import { ColorTokens } from './sections/ColorTokens';
-import { BlockColors } from './sections/BlockColors';
 import { Typography } from './sections/Typography';
 import { Spacing } from './sections/Spacing';
 import { Effects } from './sections/Effects';
@@ -142,10 +141,6 @@ export function App() {
         >
           <Section title="颜色 Token" theme={currentTheme}>
             <ColorTokens theme={currentTheme} />
-          </Section>
-
-          <Section title="Block 颜色" theme={currentTheme}>
-            <BlockColors theme={currentTheme} />
           </Section>
 
           <Section title="字体排版" theme={currentTheme}>

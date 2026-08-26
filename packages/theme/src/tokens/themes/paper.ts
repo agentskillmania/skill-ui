@@ -93,19 +93,6 @@ export const paperLightColor: Theme['color'] = {
   activeOverlay: 'rgba(28, 25, 23, 0.08)',
 };
 
-export const paperLightBlockColor: Theme['blockColor'] = {
-  thinking: { text: '#6d28d9', bg: 'rgba(109, 40, 217, 0.08)' },
-  plan: { text: '#1d4ed8', bg: 'rgba(29, 78, 216, 0.08)' },
-  toolMcp: { text: '#0e7490', bg: 'rgba(14, 116, 144, 0.08)' },
-  toolScript: { text: '#b45309', bg: 'rgba(180, 83, 9, 0.08)' },
-  toolBuiltin: { text: '#047857', bg: 'rgba(4, 120, 87, 0.08)' },
-  humanInput: { text: '#b45309', bg: 'rgba(180, 83, 9, 0.08)' },
-  skill: { text: '#6d28d9', bg: 'rgba(109, 40, 217, 0.08)' },
-  a2ui: { text: '#0369a1', bg: 'rgba(3, 105, 161, 0.08)' },
-  subagent: { text: '#0e7490', bg: 'rgba(14, 116, 144, 0.08)' },
-  todo: { text: '#be123c', bg: 'rgba(190, 18, 60, 0.08)' },
-};
-
 export const paperLightEventStatusColor: Theme['eventStatusColor'] = {
   lifecycle: { text: '#047857', bg: 'rgba(4, 120, 87, 0.08)' },
   phase: { text: '#78716c', bg: 'rgba(120, 113, 108, 0.08)' },
@@ -212,19 +199,6 @@ export const paperDarkColor: Theme['color'] = {
   activeOverlay: 'rgba(255, 255, 255, 0.08)',
 };
 
-export const paperDarkBlockColor: Theme['blockColor'] = {
-  thinking: { text: '#a78bfa', bg: 'rgba(167, 139, 250, 0.15)' },
-  plan: { text: '#60a5fa', bg: 'rgba(96, 165, 250, 0.15)' },
-  toolMcp: { text: '#22d3ee', bg: 'rgba(34, 211, 238, 0.15)' },
-  toolScript: { text: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)' },
-  toolBuiltin: { text: '#34d399', bg: 'rgba(52, 211, 153, 0.15)' },
-  humanInput: { text: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)' },
-  skill: { text: '#a78bfa', bg: 'rgba(167, 139, 250, 0.15)' },
-  a2ui: { text: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)' },
-  subagent: { text: '#22d3ee', bg: 'rgba(34, 211, 238, 0.15)' },
-  todo: { text: '#fb7185', bg: 'rgba(251, 113, 133, 0.15)' },
-};
-
 export const paperDarkEventStatusColor: Theme['eventStatusColor'] = {
   lifecycle: { text: '#4ade80', bg: 'rgba(74, 222, 128, 0.15)' },
   phase: { text: '#a8a29e', bg: 'rgba(168, 162, 158, 0.15)' },
@@ -258,7 +232,6 @@ export const paperDarkSkillStatusColor: Theme['skillStatusColor'] = {
 export const paperLightTheme: Theme = {
   mode: 'light',
   color: paperLightColor,
-  blockColor: paperLightBlockColor,
   eventStatusColor: paperLightEventStatusColor,
   agentStatusColor: paperLightAgentStatusColor,
   skillStatusColor: paperLightSkillStatusColor,
@@ -274,7 +247,6 @@ export const paperLightTheme: Theme = {
 export const paperDarkTheme: Theme = {
   mode: 'dark',
   color: paperDarkColor,
-  blockColor: paperDarkBlockColor,
   eventStatusColor: paperDarkEventStatusColor,
   agentStatusColor: paperDarkAgentStatusColor,
   skillStatusColor: paperDarkSkillStatusColor,

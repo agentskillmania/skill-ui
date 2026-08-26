@@ -93,19 +93,6 @@ export const blossomLightColor: Theme['color'] = {
   activeOverlay: 'rgba(67, 39, 47, 0.09)',
 };
 
-export const blossomLightBlockColor: Theme['blockColor'] = {
-  thinking: { text: '#a21caf', bg: 'rgba(162, 28, 175, 0.08)' },
-  plan: { text: '#6d28d9', bg: 'rgba(109, 40, 217, 0.08)' },
-  toolMcp: { text: '#0e7490', bg: 'rgba(14, 116, 144, 0.08)' },
-  toolScript: { text: '#c2410c', bg: 'rgba(194, 65, 12, 0.08)' },
-  toolBuiltin: { text: '#1f7a55', bg: 'rgba(31, 122, 85, 0.08)' },
-  humanInput: { text: '#c2410c', bg: 'rgba(194, 65, 12, 0.08)' },
-  skill: { text: '#a21caf', bg: 'rgba(162, 28, 175, 0.08)' },
-  a2ui: { text: '#0c4a6e', bg: 'rgba(12, 74, 110, 0.08)' },
-  subagent: { text: '#0e7490', bg: 'rgba(14, 116, 144, 0.08)' },
-  todo: { text: '#be185d', bg: 'rgba(190, 24, 93, 0.08)' },
-};
-
 export const blossomLightEventStatusColor: Theme['eventStatusColor'] = {
   lifecycle: { text: '#1f7a55', bg: 'rgba(31, 122, 85, 0.08)' },
   phase: { text: '#6e4a54', bg: 'rgba(110, 74, 84, 0.08)' },
@@ -212,19 +199,6 @@ export const blossomDarkColor: Theme['color'] = {
   activeOverlay: 'rgba(255, 255, 255, 0.09)',
 };
 
-export const blossomDarkBlockColor: Theme['blockColor'] = {
-  thinking: { text: '#d8b4fe', bg: 'rgba(216, 180, 254, 0.15)' },
-  plan: { text: '#a5b4fc', bg: 'rgba(165, 180, 252, 0.15)' },
-  toolMcp: { text: '#7dd3fc', bg: 'rgba(125, 211, 252, 0.15)' },
-  toolScript: { text: '#fde68a', bg: 'rgba(253, 230, 138, 0.15)' },
-  toolBuiltin: { text: '#6ee7b7', bg: 'rgba(110, 231, 183, 0.15)' },
-  humanInput: { text: '#fde68a', bg: 'rgba(253, 230, 138, 0.15)' },
-  skill: { text: '#d8b4fe', bg: 'rgba(216, 180, 254, 0.15)' },
-  a2ui: { text: '#93c5fd', bg: 'rgba(147, 197, 253, 0.15)' },
-  subagent: { text: '#7dd3fc', bg: 'rgba(125, 211, 252, 0.15)' },
-  todo: { text: '#f9a8d4', bg: 'rgba(249, 168, 212, 0.15)' },
-};
-
 export const blossomDarkEventStatusColor: Theme['eventStatusColor'] = {
   lifecycle: { text: '#6ee7b7', bg: 'rgba(110, 231, 183, 0.15)' },
   phase: { text: '#d0b8c2', bg: 'rgba(208, 184, 194, 0.15)' },
@@ -258,7 +232,6 @@ export const blossomDarkSkillStatusColor: Theme['skillStatusColor'] = {
 export const blossomLightTheme: Theme = {
   mode: 'light',
   color: blossomLightColor,
-  blockColor: blossomLightBlockColor,
   eventStatusColor: blossomLightEventStatusColor,
   agentStatusColor: blossomLightAgentStatusColor,
   skillStatusColor: blossomLightSkillStatusColor,
@@ -274,7 +247,6 @@ export const blossomLightTheme: Theme = {
 export const blossomDarkTheme: Theme = {
   mode: 'dark',
   color: blossomDarkColor,
-  blockColor: blossomDarkBlockColor,
   eventStatusColor: blossomDarkEventStatusColor,
   agentStatusColor: blossomDarkAgentStatusColor,
   skillStatusColor: blossomDarkSkillStatusColor,

@@ -11,12 +11,6 @@ import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps } from '../types.js';
 import { CollapseChevron, useBlockCollapse } from './collapse.js';
 
-const pulseRing = keyframes`
-  0% { box-shadow: 0 0 0 0 var(--pulse-color); }
-  70% { box-shadow: 0 0 0 5px transparent; }
-  100% { box-shadow: 0 0 0 0 transparent; }
-`;
-
 const subtlePulse = keyframes`
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
@@ -26,8 +20,6 @@ export const ThinkingBlock = memo(function ThinkingBlock({ block }: BlockProps) 
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
   const isStreaming = block.status === 'streaming';
-  const accentColor = theme.blockColor.thinking.text;
-  const accentBg = theme.blockColor.thinking.bg;
 
   // 思考结束后收起——思考内容本就不引导细读
   const { expanded, toggle } = useBlockCollapse(!isStreaming);
@@ -48,16 +40,13 @@ export const ThinkingBlock = memo(function ThinkingBlock({ block }: BlockProps) 
         position: relative;
         padding: ${theme.spacing[2]} ${theme.spacing[4]};
         border-radius: ${theme.radius.md};
-        background: ${isStreaming ? accentBg : 'transparent'};
-        border: 1px solid ${isStreaming ? accentBg : 'transparent'};
+        background: ${isStreaming ? theme.color.fillSubtle : 'transparent'};
+        border: 1px solid transparent;
         transition:
           background ${theme.motion.duration.normal} ${theme.motion.easing.out},
           border-color ${theme.motion.duration.normal} ${theme.motion.easing.out};
         ${isStreaming
-          ? css`
-              --pulse-color: ${accentBg};
-              animation: ${pulseRing} 2s ease-out infinite;
-            `
+          ? ''
           : css`
               &:hover {
                 background: ${theme.color.fillSubtle};
@@ -76,7 +65,7 @@ export const ThinkingBlock = memo(function ThinkingBlock({ block }: BlockProps) 
           margin-bottom: ${expanded ? theme.spacing[1] : '0'};
           font-size: ${theme.font.size.sm};
           font-weight: ${theme.font.weight.semibold};
-          color: ${accentColor};
+          color: ${theme.color.textTertiary};
           text-transform: uppercase;
           letter-spacing: 0.04em;
           cursor: pointer;
@@ -90,7 +79,7 @@ export const ThinkingBlock = memo(function ThinkingBlock({ block }: BlockProps) 
               width: 5px;
               height: 5px;
               border-radius: ${theme.radius.full};
-              background: ${accentColor};
+              background: ${theme.color.primary};
               animation: ${subtlePulse} 1.5s ease-in-out infinite;
             `}
           />

@@ -93,19 +93,6 @@ export const inkLightColor: Theme['color'] = {
   activeOverlay: 'rgba(28, 25, 23, 0.09)',
 };
 
-export const inkLightBlockColor: Theme['blockColor'] = {
-  thinking: { text: '#5b21b6', bg: 'rgba(91, 33, 182, 0.08)' },
-  plan: { text: '#1e40af', bg: 'rgba(30, 64, 175, 0.08)' },
-  toolMcp: { text: '#155e75', bg: 'rgba(21, 94, 117, 0.08)' },
-  toolScript: { text: '#92400e', bg: 'rgba(146, 64, 14, 0.08)' },
-  toolBuiltin: { text: '#166534', bg: 'rgba(22, 101, 52, 0.08)' },
-  humanInput: { text: '#92400e', bg: 'rgba(146, 64, 14, 0.08)' },
-  skill: { text: '#5b21b6', bg: 'rgba(91, 33, 182, 0.08)' },
-  a2ui: { text: '#0c4a6e', bg: 'rgba(12, 74, 110, 0.08)' },
-  subagent: { text: '#155e75', bg: 'rgba(21, 94, 117, 0.08)' },
-  todo: { text: '#9f1239', bg: 'rgba(159, 18, 57, 0.08)' },
-};
-
 export const inkLightEventStatusColor: Theme['eventStatusColor'] = {
   lifecycle: { text: '#166534', bg: 'rgba(22, 101, 52, 0.08)' },
   phase: { text: '#57534e', bg: 'rgba(87, 83, 78, 0.08)' },
@@ -212,19 +199,6 @@ export const inkDarkColor: Theme['color'] = {
   activeOverlay: 'rgba(255, 255, 255, 0.09)',
 };
 
-export const inkDarkBlockColor: Theme['blockColor'] = {
-  thinking: { text: '#c4b5fd', bg: 'rgba(196, 181, 253, 0.15)' },
-  plan: { text: '#93c5fd', bg: 'rgba(147, 197, 253, 0.15)' },
-  toolMcp: { text: '#67e8f9', bg: 'rgba(103, 232, 249, 0.15)' },
-  toolScript: { text: '#fcd34d', bg: 'rgba(252, 211, 77, 0.15)' },
-  toolBuiltin: { text: '#86efac', bg: 'rgba(134, 239, 172, 0.15)' },
-  humanInput: { text: '#fcd34d', bg: 'rgba(252, 211, 77, 0.15)' },
-  skill: { text: '#c4b5fd', bg: 'rgba(196, 181, 253, 0.15)' },
-  a2ui: { text: '#7dd3fc', bg: 'rgba(125, 211, 252, 0.15)' },
-  subagent: { text: '#67e8f9', bg: 'rgba(103, 232, 249, 0.15)' },
-  todo: { text: '#fda4af', bg: 'rgba(253, 164, 175, 0.15)' },
-};
-
 export const inkDarkEventStatusColor: Theme['eventStatusColor'] = {
   lifecycle: { text: '#4ade80', bg: 'rgba(74, 222, 128, 0.15)' },
   phase: { text: '#b5aea4', bg: 'rgba(181, 174, 164, 0.15)' },
@@ -258,7 +232,6 @@ export const inkDarkSkillStatusColor: Theme['skillStatusColor'] = {
 export const inkLightTheme: Theme = {
   mode: 'light',
   color: inkLightColor,
-  blockColor: inkLightBlockColor,
   eventStatusColor: inkLightEventStatusColor,
   agentStatusColor: inkLightAgentStatusColor,
   skillStatusColor: inkLightSkillStatusColor,
@@ -274,7 +247,6 @@ export const inkLightTheme: Theme = {
 export const inkDarkTheme: Theme = {
   mode: 'dark',
   color: inkDarkColor,
-  blockColor: inkDarkBlockColor,
   eventStatusColor: inkDarkEventStatusColor,
   agentStatusColor: inkDarkAgentStatusColor,
   skillStatusColor: inkDarkSkillStatusColor,

@@ -2,8 +2,8 @@
  * Todo list block — session checklist, plan-like step visuals.
  * Collapses to a summary line once every item is completed.
  */
-import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { css, keyframes } from '@emotion/react';
+import { useTheme, spinKeyframes } from '@agentskillmania/skill-ui-theme';
+import { css } from '@emotion/react';
 import { Check, Circle, ListChecks, Loader2 } from 'lucide-react';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -11,11 +11,6 @@ import { useTranslation } from 'react-i18next';
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, TodoItem, TodoMetadata } from '../types.js';
 import { CollapseChevron, useBlockCollapse } from './collapse.js';
-
-const spinKeyframes = keyframes`
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-`;
 
 function itemIcon(item: TodoItem) {
   switch (item.status) {
@@ -43,7 +38,6 @@ export const TodoBlock = memo(function TodoBlock({ block }: BlockProps) {
   const { t } = useTranslation(NAMESPACE);
   const meta = block.metadata as TodoMetadata | undefined;
   const items = meta?.items ?? [];
-  const accent = theme.blockColor.todo;
   const doneCount = items.filter((i) => i.status === 'completed').length;
   const allDone = items.length > 0 && doneCount === items.length;
 
@@ -77,7 +71,6 @@ export const TodoBlock = memo(function TodoBlock({ block }: BlockProps) {
           justify-content: space-between;
           gap: ${theme.spacing[2]};
           padding: ${theme.spacing[2]} ${theme.spacing[4]};
-          background: ${theme.color.fill};
           border-bottom: ${showList ? `1px solid ${theme.color.borderSecondary}` : 'none'};
           cursor: pointer;
         `}
@@ -98,8 +91,8 @@ export const TodoBlock = memo(function TodoBlock({ block }: BlockProps) {
               width: 22px;
               height: 22px;
               border-radius: ${theme.radius.md};
-              background: ${accent.bg};
-              color: ${accent.text};
+              background: ${theme.color.fillLight};
+              color: ${theme.color.textSecondary};
               flex-shrink: 0;
             `}
           >
@@ -152,7 +145,7 @@ export const TodoBlock = memo(function TodoBlock({ block }: BlockProps) {
                 css={css`
                   height: 100%;
                   border-radius: ${theme.radius.full};
-                  background: ${accent.text};
+                  background: ${theme.color.primary};
                   transition: width ${theme.motion.duration.slow} ${theme.motion.easing.out};
                 `}
                 style={{ width: `${items.length ? (doneCount / items.length) * 100 : 0}%` }}
@@ -196,8 +189,8 @@ export const TodoBlock = memo(function TodoBlock({ block }: BlockProps) {
                   `
                 : item.status === 'in_progress'
                   ? css`
-                      background: ${accent.bg};
-                      color: ${accent.text};
+                      background: ${theme.color.primaryBg};
+                      color: ${theme.color.primary};
                     `
                   : css`
                       background: transparent;

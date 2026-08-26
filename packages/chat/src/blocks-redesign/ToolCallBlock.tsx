@@ -2,7 +2,7 @@
  * Tool call block — single-line rows with detail modal
  */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import { Wrench } from 'lucide-react';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -10,8 +10,12 @@ import { useTranslation } from 'react-i18next';
 import type { BlockProps, ToolCallMetadata } from '../types.js';
 import { CollapseChevron, useBlockCollapse } from './collapse.js';
 import { ToolCallDetailModal } from './ToolCallDetailModal.js';
-import { getToolColorKey } from './toolColorUtils.js';
 import { NAMESPACE } from '../locales/index.js';
+
+const subtlePulse = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+`;
 
 /** Single-line code row with ellipsis */
 function CodeRow({
@@ -105,11 +109,8 @@ export const ToolCallBlock = memo(function ToolCallBlock({ block }: BlockProps) 
   const meta = block.metadata as ToolCallMetadata | undefined;
   const toolName = meta?.toolName ?? t('toolCall.unknownTool');
   const toolType = meta?.toolType;
-  const colorKey = getToolColorKey(toolType);
-  const accentColor =
-    theme.blockColor[colorKey as keyof typeof theme.blockColor]?.text ?? theme.color.primary;
-  const accentBg =
-    theme.blockColor[colorKey as keyof typeof theme.blockColor]?.bg ?? theme.color.primaryBg;
+  const isRunning = block.status === 'streaming' || block.status === 'pending';
+  const isError = block.status === 'error';
   const args = meta?.toolArgs;
   const result = meta?.toolResult;
 
@@ -144,7 +145,6 @@ export const ToolCallBlock = memo(function ToolCallBlock({ block }: BlockProps) 
             align-items: center;
             justify-content: space-between;
             padding: ${theme.spacing[2]} ${theme.spacing[4]};
-            background: ${theme.color.fill};
             border-bottom: 1px solid ${theme.color.borderSecondary};
             ${expanded ? '' : 'border-bottom: none;'}
             cursor: pointer;
@@ -165,8 +165,8 @@ export const ToolCallBlock = memo(function ToolCallBlock({ block }: BlockProps) 
                 width: 22px;
                 height: 22px;
                 border-radius: ${theme.radius.md};
-                background: ${accentBg};
-                color: ${accentColor};
+                background: ${theme.color.fillLight};
+                color: ${theme.color.textSecondary};
               `}
             >
               <Wrench size={13} />
@@ -199,11 +199,54 @@ export const ToolCallBlock = memo(function ToolCallBlock({ block }: BlockProps) 
                   letter-spacing: 0.06em;
                   padding: 2px 8px;
                   border-radius: ${theme.radius.sm};
-                  background: ${accentBg};
-                  color: ${accentColor};
+                  background: ${theme.color.fillSubtle};
+                  color: ${theme.color.textTertiary};
                 `}
               >
                 {toolType}
+              </span>
+            )}
+            {isRunning && (
+              <span
+                css={css`
+                  display: inline-flex;
+                  align-items: center;
+                  gap: ${theme.spacing[1]};
+                  font-size: ${theme.font.size.xs};
+                  font-weight: ${theme.font.weight.semibold};
+                  padding: 2px 8px;
+                  border-radius: ${theme.radius.full};
+                  background: ${theme.color.primaryBg};
+                  color: ${theme.color.primary};
+                `}
+              >
+                <span
+                  css={css`
+                    width: 5px;
+                    height: 5px;
+                    border-radius: ${theme.radius.full};
+                    background: ${theme.color.primary};
+                    animation: ${subtlePulse} 1.2s ease-in-out infinite;
+                  `}
+                />
+                {t('toolCall.running')}
+              </span>
+            )}
+            {isError && (
+              <span
+                css={css`
+                  display: inline-flex;
+                  align-items: center;
+                  gap: ${theme.spacing[1]};
+                  font-size: ${theme.font.size.xs};
+                  font-weight: ${theme.font.weight.semibold};
+                  padding: 2px 8px;
+                  border-radius: ${theme.radius.full};
+                  background: ${theme.color.errorBg};
+                  color: ${theme.color.error};
+                `}
+              >
+                {t('toolCall.error')}
               </span>
             )}
             <CollapseChevron expanded={expanded} />
@@ -219,7 +262,7 @@ export const ToolCallBlock = memo(function ToolCallBlock({ block }: BlockProps) 
           >
             <CodeRow
               label={t('toolCall.input')}
-              dotColor={theme.color.info}
+              dotColor={theme.color.textQuaternary}
               content={args}
               onClick={() => setDetailOpen(true)}
             />

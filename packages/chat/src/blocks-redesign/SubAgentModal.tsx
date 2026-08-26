@@ -41,7 +41,6 @@ export function SubAgentModal({
 }: SubAgentModalProps) {
   const theme = useTheme();
   const { t } = useTranslation(NAMESPACE);
-  const accent = theme.blockColor.subagent ?? { text: theme.color.primary, bg: 'transparent' };
   const hasMessages = messages && messages.length > 0;
 
   return (
@@ -71,7 +70,7 @@ export function SubAgentModal({
           overflow: 'hidden',
           boxShadow: theme.shadow.lg,
         },
-        mask: { backgroundColor: 'rgba(0,0,0,0.4)' },
+        mask: { backgroundColor: theme.color.bgMask },
       }}
       title={
         <div
@@ -86,13 +85,14 @@ export function SubAgentModal({
               width: 28px;
               height: 28px;
               border-radius: ${theme.radius.md};
-              background: ${accent.bg};
+              background: ${theme.color.fillLight};
+              color: ${theme.color.textSecondary};
               display: flex;
               align-items: center;
               justify-content: center;
             `}
           >
-            <Bot size={16} style={{ color: accent.text }} />
+            <Bot size={16} />
           </div>
           <span
             css={css`

@@ -18,6 +18,8 @@
     "unknownTool": "Unknown tool",
     "input": "Input",
     "output": "Output",
+    "running": "Running",
+    "error": "Error",
     "preview": "Preview",
     "rawData": "Raw data",
     "inputParams": "Input parameters",

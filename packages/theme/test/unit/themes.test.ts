@@ -11,7 +11,6 @@ import {
 import { getAntdConfig } from '../../src/antd/index.js';
 
 const COLOR_KEYS = Object.keys(lightTheme.color);
-const BLOCK_KEYS = Object.keys(lightTheme.blockColor);
 const EVENT_KEYS = Object.keys(lightTheme.eventStatusColor);
 const AGENT_KEYS = Object.keys(lightTheme.agentStatusColor);
 const SKILL_KEYS = Object.keys(lightTheme.skillStatusColor);
@@ -35,11 +34,10 @@ describe('themeRegistry', () => {
     }
   });
 
-  it('every variant has the full token surface (color/blockColor/status colors)', () => {
+  it('every variant has the full token surface (color/status colors)', () => {
     for (const entry of Object.values(themeRegistry)) {
       for (const variant of [entry.light, entry.dark]) {
         expect(Object.keys(variant.color).sort()).toEqual([...COLOR_KEYS].sort());
-        expect(Object.keys(variant.blockColor).sort()).toEqual([...BLOCK_KEYS].sort());
         expect(Object.keys(variant.eventStatusColor).sort()).toEqual([...EVENT_KEYS].sort());
         expect(Object.keys(variant.agentStatusColor).sort()).toEqual([...AGENT_KEYS].sort());
         expect(Object.keys(variant.skillStatusColor).sort()).toEqual([...SKILL_KEYS].sort());

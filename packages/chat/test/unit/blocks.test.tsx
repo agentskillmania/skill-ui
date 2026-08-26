@@ -1,7 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { lightTheme, ThemeProvider } from '@agentskillmania/skill-ui-theme';
-import type { Theme } from '@agentskillmania/skill-ui-theme';
 import { ChatWrapper, expandAllCollapsed } from './testUtils.js';
 import { BlocksRenderer } from '../../src/blocks-redesign/BlocksRenderer.js';
 import { TextBlock } from '../../src/blocks-redesign/TextBlock.js';
@@ -212,23 +210,35 @@ describe('ToolCallBlock', () => {
     expect(screen.getByText('{"q":"test"}')).toBeInTheDocument();
   });
 
-  it('falls back to primary color when no corresponding key in blockColor', () => {
-    // use a theme without blockColor to trigger ?.text ?? branch
-    const minimalTheme = { ...lightTheme, blockColor: {} } as unknown as Theme;
-    const noColorBlock: Block = {
-      id: 'tc1',
+  it('shows running pill on streaming tool call, error pill on failed one', () => {
+    const runningBlock: Block = {
+      id: 'tc-run',
       type: 'tool_call',
-      status: 'completed',
+      status: 'streaming',
       content: '',
-      metadata: { toolName: 'test-tool', toolType: 'mcp' },
+      metadata: { toolName: 'run-a', toolType: 'mcp' },
     };
-    render(
-      <ThemeProvider theme={minimalTheme}>
-        <ToolCallBlock block={noColorBlock} />
-      </ThemeProvider>
+    const failedBlock: Block = {
+      id: 'tc-fail',
+      type: 'tool_call',
+      status: 'error',
+      content: '',
+      metadata: { toolName: 'run-b', toolType: 'script' },
+    };
+    const { rerender } = render(
+      <ChatWrapper>
+        <ToolCallBlock block={runningBlock} />
+      </ChatWrapper>
     );
     expandAllCollapsed();
-    expect(screen.getByText('test-tool')).toBeInTheDocument();
+    expect(screen.getByText('运行中')).toBeInTheDocument();
+    rerender(
+      <ChatWrapper>
+        <ToolCallBlock block={failedBlock} />
+      </ChatWrapper>
+    );
+    expect(screen.getByText('错误')).toBeInTheDocument();
+    expect(screen.queryByText('运行中')).not.toBeInTheDocument();
   });
 
   it('clicking input row opens detail modal', () => {

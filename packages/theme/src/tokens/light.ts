@@ -25,8 +25,7 @@ export const lightColor: Theme['color'] = {
   infoBg: 'rgba(67, 97, 238, 0.1)',
   infoBorder: 'rgba(67, 97, 238, 0.3)',
 
-  // Extended colors (600-level hues — 500-level looked fluorescent on light surfaces
-  // and drifted from the blockColor palette, which already used 600-level)
+  // Extended colors (600-level hues — 500-level looked fluorescent on light surfaces)
   green: '#16a34a',
   greenBg: 'rgba(22, 163, 74, 0.1)',
   blue: '#4361ee',
@@ -84,19 +83,6 @@ export const lightColor: Theme['color'] = {
   activeOverlay: 'rgba(0, 0, 0, 0.08)',
 };
 
-export const lightBlockColor: Theme['blockColor'] = {
-  thinking: { text: '#7c3aed', bg: 'rgba(124, 58, 237, 0.10)' },
-  plan: { text: '#2563eb', bg: 'rgba(37, 99, 235, 0.10)' },
-  toolMcp: { text: '#0891b2', bg: 'rgba(8, 145, 178, 0.10)' },
-  toolScript: { text: '#d97706', bg: 'rgba(217, 119, 6, 0.10)' },
-  toolBuiltin: { text: '#059669', bg: 'rgba(5, 150, 105, 0.10)' },
-  humanInput: { text: '#ca8a04', bg: 'rgba(202, 138, 4, 0.10)' },
-  skill: { text: '#8b5cf6', bg: 'rgba(139, 92, 246, 0.10)' },
-  a2ui: { text: '#0ea5e9', bg: 'rgba(14, 165, 233, 0.10)' },
-  subagent: { text: '#0891b2', bg: 'rgba(8, 145, 178, 0.10)' },
-  todo: { text: '#e11d48', bg: 'rgba(225, 29, 72, 0.10)' },
-};
-
 export const lightEventStatusColor: Theme['eventStatusColor'] = {
   lifecycle: { text: '#16a34a', bg: 'rgba(22, 163, 74, 0.1)' },
   phase: { text: '#6b7280', bg: 'rgba(107, 114, 128, 0.1)' },
@@ -130,7 +116,6 @@ export const lightSkillStatusColor: Theme['skillStatusColor'] = {
 export const lightTheme: Theme = {
   mode: 'light',
   color: lightColor,
-  blockColor: lightBlockColor,
   eventStatusColor: lightEventStatusColor,
   agentStatusColor: lightAgentStatusColor,
   skillStatusColor: lightSkillStatusColor,

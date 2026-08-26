@@ -80,19 +80,6 @@ export const darkColor: Theme['color'] = {
   activeOverlay: 'rgba(255, 255, 255, 0.08)',
 };
 
-export const darkBlockColor: Theme['blockColor'] = {
-  thinking: { text: '#a78bfa', bg: 'rgba(167, 139, 250, 0.15)' },
-  plan: { text: '#60a5fa', bg: 'rgba(96, 165, 250, 0.15)' },
-  toolMcp: { text: '#22d3ee', bg: 'rgba(34, 211, 238, 0.15)' },
-  toolScript: { text: '#fbbf24', bg: 'rgba(251, 191, 36, 0.15)' },
-  toolBuiltin: { text: '#34d399', bg: 'rgba(52, 211, 153, 0.15)' },
-  humanInput: { text: '#facc15', bg: 'rgba(250, 204, 21, 0.15)' },
-  skill: { text: '#a78bfa', bg: 'rgba(167, 139, 250, 0.15)' },
-  a2ui: { text: '#38bdf8', bg: 'rgba(56, 189, 248, 0.15)' },
-  subagent: { text: '#22d3ee', bg: 'rgba(34, 211, 238, 0.15)' },
-  todo: { text: '#fb7185', bg: 'rgba(251, 113, 133, 0.15)' },
-};
-
 export const darkEventStatusColor: Theme['eventStatusColor'] = {
   lifecycle: { text: '#4ade80', bg: 'rgba(74, 222, 128, 0.15)' },
   phase: { text: '#94a3b8', bg: 'rgba(148, 163, 184, 0.15)' },
@@ -126,7 +113,6 @@ export const darkSkillStatusColor: Theme['skillStatusColor'] = {
 export const darkTheme: Theme = {
   mode: 'dark',
   color: darkColor,
-  blockColor: darkBlockColor,
   eventStatusColor: darkEventStatusColor,
   agentStatusColor: darkAgentStatusColor,
   skillStatusColor: darkSkillStatusColor,

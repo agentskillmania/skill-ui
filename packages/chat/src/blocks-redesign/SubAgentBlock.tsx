@@ -3,8 +3,8 @@
  * Sub-agent delegation block — summary card with detail modal
  *
  * Follows the shared card pattern used by ToolCallBlock / SkillBlock /
- * PlanBlock: container with radius.lg + border + hover, header with fill
- * background + bottom border, body rows below. Clicking opens SubAgentModal
+ * PlanBlock: container with radius.lg + border + hover, transparent header
+ * with bottom border, body rows below. Clicking opens SubAgentModal
  * which embeds a MessageList showing the sub-agent's full conversation.
  */
 import { formatTokens, formatDuration } from '@agentskillmania/skill-ui-shared';
@@ -35,8 +35,8 @@ interface StatusConfig {
   icon: typeof Bot;
   /** theme.color key for status accent */
   colorKey: 'primary' | 'success' | 'error' | 'warning' | 'textTertiary';
-  /** theme blockColor/error/success key for tag background */
-  tagColorKey: 'subagent' | 'success' | 'error' | 'warning';
+  /** theme.color key pair for the status pill background/foreground */
+  tagColorKey: 'primary' | 'success' | 'error' | 'warning' | 'neutral';
 }
 
 function getStatusConfig(
@@ -57,7 +57,7 @@ function getStatusConfig(
       label: t('subagent.streaming'),
       icon: Loader2,
       colorKey: 'primary',
-      tagColorKey: 'subagent',
+      tagColorKey: 'primary',
     };
   }
   switch (meta?.resultStatus) {
@@ -80,7 +80,7 @@ function getStatusConfig(
         label: t('subagent.aborted'),
         icon: XCircle,
         colorKey: 'textTertiary',
-        tagColorKey: 'subagent',
+        tagColorKey: 'neutral',
       };
     default:
       return {
@@ -101,7 +101,6 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
   const name = meta?.name ?? t('subagent.title');
   const statusConfig = getStatusConfig(block.status, meta, t);
   const StatusIcon = statusConfig.icon;
-  const accent = theme.blockColor.subagent ?? { text: theme.color.primary, bg: 'transparent' };
   const isStreaming = block.status === 'streaming';
   const isError = block.status === 'error' || meta?.resultStatus === 'error';
   // 子代理完成后收起；错误保持展开
@@ -115,7 +114,9 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
         ? { bg: theme.color.successBg, fg: theme.color.success }
         : statusConfig.tagColorKey === 'warning'
           ? { bg: theme.color.warningBg, fg: theme.color.warning }
-          : { bg: accent.bg, fg: accent.text };
+          : statusConfig.tagColorKey === 'primary'
+            ? { bg: theme.color.primaryBg, fg: theme.color.primary }
+            : { bg: theme.color.fillSubtle, fg: theme.color.textTertiary };
 
   return (
     <>
@@ -136,7 +137,7 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
           }
         `}
       >
-        {/* Header — fill background + bottom border, matches ToolCallBlock/SkillBlock */}
+        {/* Header */}
         <div
           onClick={toggle}
           aria-expanded={expanded}
@@ -145,7 +146,7 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
             align-items: center;
             justify-content: space-between;
             padding: ${theme.spacing[2]} ${theme.spacing[4]};
-            background: ${isError ? theme.color.errorBg : theme.color.fill};
+            background: ${isError ? theme.color.errorBg : 'transparent'};
             border-bottom: 1px solid ${isError ? theme.color.error : theme.color.borderSecondary};
             ${expanded ? '' : 'border-bottom: none;'}
             cursor: pointer;
@@ -168,8 +169,8 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
                 width: 22px;
                 height: 22px;
                 border-radius: ${theme.radius.md};
-                background: ${accent.bg};
-                color: ${accent.text};
+                background: ${theme.color.fillLight};
+                color: ${theme.color.textSecondary};
                 flex-shrink: 0;
               `}
             >

@@ -93,19 +93,6 @@ export const tideLightColor: Theme['color'] = {
   activeOverlay: 'rgba(18, 36, 49, 0.09)',
 };
 
-export const tideLightBlockColor: Theme['blockColor'] = {
-  thinking: { text: '#6d28d9', bg: 'rgba(109, 40, 217, 0.08)' },
-  plan: { text: '#1d4ed8', bg: 'rgba(29, 78, 216, 0.08)' },
-  toolMcp: { text: '#0e7490', bg: 'rgba(14, 116, 144, 0.08)' },
-  toolScript: { text: '#b45309', bg: 'rgba(180, 83, 9, 0.08)' },
-  toolBuiltin: { text: '#15803d', bg: 'rgba(21, 128, 61, 0.08)' },
-  humanInput: { text: '#b45309', bg: 'rgba(180, 83, 9, 0.08)' },
-  skill: { text: '#6d28d9', bg: 'rgba(109, 40, 217, 0.08)' },
-  a2ui: { text: '#0c4a6e', bg: 'rgba(12, 74, 110, 0.08)' },
-  subagent: { text: '#0e7490', bg: 'rgba(14, 116, 144, 0.08)' },
-  todo: { text: '#9f1239', bg: 'rgba(159, 18, 57, 0.08)' },
-};
-
 export const tideLightEventStatusColor: Theme['eventStatusColor'] = {
   lifecycle: { text: '#15803d', bg: 'rgba(21, 128, 61, 0.08)' },
   phase: { text: '#3c5265', bg: 'rgba(60, 82, 101, 0.08)' },
@@ -212,19 +199,6 @@ export const tideDarkColor: Theme['color'] = {
   activeOverlay: 'rgba(255, 255, 255, 0.09)',
 };
 
-export const tideDarkBlockColor: Theme['blockColor'] = {
-  thinking: { text: '#c4b5fd', bg: 'rgba(196, 181, 253, 0.15)' },
-  plan: { text: '#93c5fd', bg: 'rgba(147, 197, 253, 0.15)' },
-  toolMcp: { text: '#22d3ee', bg: 'rgba(34, 211, 238, 0.15)' },
-  toolScript: { text: '#fcd34d', bg: 'rgba(252, 211, 77, 0.15)' },
-  toolBuiltin: { text: '#4ade80', bg: 'rgba(74, 222, 128, 0.15)' },
-  humanInput: { text: '#fcd34d', bg: 'rgba(252, 211, 77, 0.15)' },
-  skill: { text: '#c4b5fd', bg: 'rgba(196, 181, 253, 0.15)' },
-  a2ui: { text: '#7dd3fc', bg: 'rgba(125, 211, 252, 0.15)' },
-  subagent: { text: '#22d3ee', bg: 'rgba(34, 211, 238, 0.15)' },
-  todo: { text: '#f9a8d4', bg: 'rgba(249, 168, 212, 0.15)' },
-};
-
 export const tideDarkEventStatusColor: Theme['eventStatusColor'] = {
   lifecycle: { text: '#4ade80', bg: 'rgba(74, 222, 128, 0.15)' },
   phase: { text: '#b0c2d3', bg: 'rgba(176, 194, 211, 0.15)' },
@@ -258,7 +232,6 @@ export const tideDarkSkillStatusColor: Theme['skillStatusColor'] = {
 export const tideLightTheme: Theme = {
   mode: 'light',
   color: tideLightColor,
-  blockColor: tideLightBlockColor,
   eventStatusColor: tideLightEventStatusColor,
   agentStatusColor: tideLightAgentStatusColor,
   skillStatusColor: tideLightSkillStatusColor,
@@ -274,7 +247,6 @@ export const tideLightTheme: Theme = {
 export const tideDarkTheme: Theme = {
   mode: 'dark',
   color: tideDarkColor,
-  blockColor: tideDarkBlockColor,
   eventStatusColor: tideDarkEventStatusColor,
   agentStatusColor: tideDarkAgentStatusColor,
   skillStatusColor: tideDarkSkillStatusColor,

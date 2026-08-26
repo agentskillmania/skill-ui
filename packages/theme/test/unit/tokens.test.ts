@@ -1,13 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  getTheme,
-  lightTheme,
-  darkTheme,
-  lightColor,
-  darkColor,
-  lightBlockColor,
-  darkBlockColor,
-} from '../../src/tokens/index.js';
+import { getTheme, lightTheme, darkTheme, lightColor, darkColor } from '../../src/tokens/index.js';
 import {
   spacing,
   radius,
@@ -25,14 +17,12 @@ describe('getTheme', () => {
     const theme = getTheme('light');
     expect(theme.mode).toBe('light');
     expect(theme.color).toBe(lightColor);
-    expect(theme.blockColor).toBe(lightBlockColor);
   });
 
   it('returns dark theme', () => {
     const theme = getTheme('dark');
     expect(theme.mode).toBe('dark');
     expect(theme.color).toBe(darkColor);
-    expect(theme.blockColor).toBe(darkBlockColor);
   });
 });
 
@@ -54,14 +44,9 @@ describe('lightTheme', () => {
     expect(lightTheme.color.borderActive).toBe('#94a3b8');
   });
 
-  it('contains blockColor (nested structure)', () => {
-    expect(lightTheme.blockColor.thinking.text).toBe('#7c3aed');
-    expect(lightTheme.blockColor.thinking.bg).toBe('rgba(124, 58, 237, 0.10)');
-    expect(lightTheme.blockColor.humanInput.text).toBe('#ca8a04');
-    expect(lightTheme.blockColor.humanInput.bg).toBe('rgba(202, 138, 4, 0.10)');
-    expect(lightTheme.blockColor.toolMcp.text).toBe('#0891b2');
-    expect(lightTheme.blockColor.toolBuiltin.text).toBe('#059669');
-    expect(lightTheme.blockColor.plan.text).toBe('#2563eb');
+  it('no longer carries blockColor (blocks use semantic color tokens)', () => {
+    expect('blockColor' in lightTheme).toBe(false);
+    expect('blockColor' in darkTheme).toBe(false);
   });
 
   it('reuses shared non-color tokens', () => {
