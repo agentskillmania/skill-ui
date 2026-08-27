@@ -983,3 +983,55 @@ describe('TextBlock', () => {
     expect(container.textContent).toContain('进行中');
   });
 });
+
+// 多问题 HITL 应答显示:实时路径(human-input-resolved 信封)与历史路径
+// (裸 answers map)都必须完整显示两题,不再只剩第一题(回归:旧的
+// "首个键为对象即解包"启发式把问题 id 当 serde 标签误拆)。
+describe('HumanInputBlock > multi-question answered display', () => {
+  const questions = [
+    { id: 'q1', question: 'Which way?', type: 'single-select', options: ['A', 'B'] },
+    { id: 'q2', question: 'Feedback?', type: 'text' },
+  ];
+  const answers = {
+    q1: { type: 'direct', value: 'A' },
+    q2: { type: 'free-text', value: 'looks good' },
+  };
+
+  it('live path: renders every answer from the resolved-event envelope', () => {
+    render(
+      <ChatWrapper>
+        <HumanInputBlock
+          block={{
+            id: 'b1',
+            type: 'human_input',
+            status: 'completed',
+            content: '',
+            metadata: { requestId: 'r1', questions, response: { type: 'question', answers } },
+          }}
+        />
+      </ChatWrapper>
+    );
+    expandAllCollapsed();
+    expect(screen.getByText('Which way?: A')).toBeInTheDocument();
+    expect(screen.getByText('Feedback?: looks good')).toBeInTheDocument();
+  });
+
+  it('history path: renders every answer from the raw answers map', () => {
+    render(
+      <ChatWrapper>
+        <HumanInputBlock
+          block={{
+            id: 'b1',
+            type: 'human_input',
+            status: 'completed',
+            content: '',
+            metadata: { requestId: 'r1', questions, response: answers },
+          }}
+        />
+      </ChatWrapper>
+    );
+    expandAllCollapsed();
+    expect(screen.getByText('Which way?: A')).toBeInTheDocument();
+    expect(screen.getByText('Feedback?: looks good')).toBeInTheDocument();
+  });
+});

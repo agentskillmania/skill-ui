@@ -57,24 +57,78 @@ const disabledButtonCss = css`
 `;
 
 /** Format human input response for display */
+/**
+ * Known serde tags of the daemon's HumanResponse wire shape. The unwrap below
+ * must ONLY treat these as envelope tags — a generic "first key whose value is
+ * an object" heuristic misreads an answers map ({qid: {type, value}}) as an
+ * envelope and recurses into the first question's answer, silently dropping
+ * every other answer from the display (seen live with multi-question HITL).
+ */
+const RESPONSE_TAGS = new Set(['question', 'tool-confirm']);
+
+/** Unwrap one serde-tag level: {question: {answers}} → {answers}. */
+function unwrapResponse(response: unknown): unknown {
+  if (typeof response !== 'object' || response === null || Array.isArray(response)) return response;
+  const obj = response as Record<string, unknown>;
+  const tag = Object.keys(obj)[0];
+  if (tag && RESPONSE_TAGS.has(tag) && typeof obj[tag] === 'object' && obj[tag] !== null) {
+    return obj[tag];
+  }
+  return response;
+}
+
+/** A single answer value ({type: 'direct' | 'free-text', value} and friends). */
+function formatAnswerValue(ans: unknown): string {
+  if (typeof ans === 'object' && ans !== null && 'value' in (ans as Record<string, unknown>)) {
+    const value = (ans as { value?: unknown }).value;
+    if (Array.isArray(value)) return value.join(', ');
+    return typeof value === 'object' && value !== null
+      ? JSON.stringify(value)
+      : String(value ?? '');
+  }
+  if (typeof ans === 'string') return ans;
+  return JSON.stringify(ans);
+}
+
+/**
+ * Extract the answers map ({questionId: answer}) from a response payload, if
+ * it is one: the envelope's `answers` object, or the payload itself when it
+ * maps question ids to answer objects (the history path stores the raw tool
+ * result, which is exactly this map).
+ */
+function answersMapOf(response: unknown): Record<string, unknown> | null {
+  const payload = unwrapResponse(response);
+  if (typeof payload !== 'object' || payload === null || Array.isArray(payload)) return null;
+  const obj = payload as Record<string, unknown>;
+  const answers = (obj as { answers?: unknown }).answers;
+  const map =
+    answers && typeof answers === 'object' && !Array.isArray(answers)
+      ? (answers as Record<string, unknown>)
+      : obj;
+  const entries = Object.entries(map);
+  if (entries.length === 0) return null;
+  // 值必须是答案形状({type, value} 对象):宽松匹配会把任意单键对象
+  // (如 {text: "hello"})误判成答案映射,把 JSON 兜底显示吞掉。
+  const looksLikeAnswers = entries.every(
+    ([, v]) => typeof v === 'object' && v !== null && 'value' in (v as Record<string, unknown>)
+  );
+  return looksLikeAnswers ? map : null;
+}
+
 function formatResponse(response: unknown, t: (key: string) => string): string {
   if (response === true) return t('humanInput.confirmed');
   if (response === false) return t('humanInput.cancelled');
   if (typeof response === 'string') return response;
   if (typeof response === 'number') return String(response);
   if (response === null || response === undefined) return '';
-  // The daemon serializes HumanResponse as a tagged enum, e.g.
-  // { "Question": { "answers": ... } } or { "ToolConfirm": { "approved": ... } }.
-  // Unwrap one level so we display the inner value, not "[object Object]".
   if (typeof response === 'object' && !Array.isArray(response)) {
-    const obj = response as Record<string, unknown>;
-    const tag = Object.keys(obj)[0];
-    if (tag && typeof obj[tag] === 'object' && obj[tag] !== null) {
-      return formatResponse(obj[tag], t);
-    }
-    const answers = (obj as { answers?: unknown }).answers;
-    if (answers !== undefined) return formatResponse(answers, t);
-    return JSON.stringify(obj);
+    const payload = unwrapResponse(response);
+    if (payload !== response) return formatResponse(payload, t);
+    const answers = answersMapOf(response);
+    if (answers) return Object.values(answers).map(formatAnswerValue).join('；');
+    const approved = (payload as { approved?: unknown }).approved;
+    if (approved !== undefined) return formatResponse(approved, t);
+    return JSON.stringify(payload as Record<string, unknown>);
   }
   if (Array.isArray(response)) return response.join(', ');
   return String(response);
@@ -432,16 +486,48 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
           <div
             css={css`
               display: flex;
-              align-items: center;
-              gap: ${theme.spacing[2]};
+              flex-direction: column;
+              align-items: flex-start;
+              gap: ${theme.spacing[1]};
               padding: ${theme.spacing[2]} ${theme.spacing[4]};
               font-size: ${theme.font.size.base};
               color: ${theme.color.success};
               font-weight: ${theme.font.weight.medium};
             `}
           >
-            <Check size={12} style={{ opacity: 0.6 }} />
-            {formatResponse(meta?.response, t) || t('humanInput.completed')}
+            <div
+              css={css`
+                display: flex;
+                align-items: center;
+                gap: ${theme.spacing[2]};
+              `}
+            >
+              <Check size={12} style={{ opacity: 0.6 }} />
+              {formatResponse(meta?.response, t) || t('humanInput.completed')}
+            </div>
+            {/* 多问题应答逐题补显:总览行(formatResponse)只拼答案值,这里按
+                问题逐一列出,长问卷的"哪题答了啥"一眼可读。 */}
+            {(() => {
+              const answers = answersMapOf(meta?.response);
+              const questions = meta?.questions;
+              if (!answers || !questions || questions.length < 2) return null;
+              return questions
+                .filter((q) => answers[q.id] !== undefined)
+                .map((q) => (
+                  <div
+                    key={q.id}
+                    css={css`
+                      font-size: ${theme.font.size.sm};
+                      font-weight: ${theme.font.weight.normal};
+                      color: ${theme.color.textSecondary};
+                      padding-left: ${theme.spacing[5]};
+                      max-width: 100%;
+                    `}
+                  >
+                    {q.question}: {formatAnswerValue(answers[q.id])}
+                  </div>
+                ));
+            })()}
           </div>
         )
       ) : (
