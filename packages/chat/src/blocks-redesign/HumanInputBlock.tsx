@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, HumanInputMetadata, HumanInputQuestion } from '../types.js';
+import { BlockBadge } from './BlockBadge.js';
 import { CollapseChevron, useBlockCollapse } from './collapse.js';
 
 /**
@@ -452,20 +453,11 @@ export function HumanInputBlock({ block, onConfirm }: BlockProps) {
             {meta?.title ?? t('humanInput.needConfirm')}
           </div>
         </div>
-        <span
-          css={css`
-            font-size: ${theme.font.size.xs};
-            font-weight: ${theme.font.weight.semibold};
-            padding: ${isPending ? '2px 8px' : '0'};
-            border-radius: ${theme.radius.full};
-            background: ${isPending ? theme.color.primaryBg : 'transparent'};
-            color: ${isPending ? theme.color.primary : theme.color.success};
-            border: none;
-            flex-shrink: 0;
-          `}
-        >
-          {isPending ? t('humanInput.pending') : t('humanInput.replied')}
-        </span>
+        {isPending ? (
+          <BlockBadge variant="primary">{t('humanInput.pending')}</BlockBadge>
+        ) : (
+          <BlockBadge variant="success">{t('humanInput.replied')}</BlockBadge>
+        )}
         {!isPending && (
           <span
             css={css`

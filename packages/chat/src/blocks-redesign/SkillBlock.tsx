@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, SkillBlockMetadata } from '../types.js';
+import { BlockBadge, type BlockBadgeVariant } from './BlockBadge.js';
 import { CollapseChevron, useBlockCollapse } from './collapse.js';
 
 type TFunction = (key: string, params?: Record<string, unknown>) => string;
@@ -19,7 +20,7 @@ function getPhaseDisplay(
   status: string,
   theme: Theme,
   t: TFunction
-): { title: string; tag?: string; icon: React.ReactNode; tagBg: string; tagText: string } {
+): { title: string; tag?: string; icon: React.ReactNode; tagVariant: BlockBadgeVariant } {
   const name = meta?.skillName ?? t('skill.defaultName');
 
   if (status === 'error') {
@@ -27,8 +28,7 @@ function getPhaseDisplay(
       title: `${name} ${t('skill.executionFailed')}`,
       tag: t('skill.failed'),
       icon: <XCircle size={13} />,
-      tagBg: theme.color.errorBg,
-      tagText: theme.color.error,
+      tagVariant: 'error',
     };
   }
 
@@ -38,38 +38,33 @@ function getPhaseDisplay(
         title: t('skill.loading', { name }),
         tag: t('skill.loadingShort'),
         icon: <Loader2 size={13} />,
-        tagBg: theme.color.primaryBg,
-        tagText: theme.color.primary,
+        tagVariant: 'primary',
       };
     case 'loaded':
       return {
         title: name,
         tag: t('skill.loaded'),
         icon: <Sparkles size={13} />,
-        tagBg: theme.color.primaryBg,
-        tagText: theme.color.primary,
+        tagVariant: 'primary',
       };
     case 'executing':
       return {
         title: t('skill.executing', { name }),
         tag: meta?.task ?? t('skill.executingShort'),
         icon: <Loader2 size={13} />,
-        tagBg: theme.color.primaryBg,
-        tagText: theme.color.primary,
+        tagVariant: 'primary',
       };
     case 'completed':
       return {
         title: t('skill.completed', { name }),
         icon: <CheckCircle2 size={13} />,
-        tagBg: theme.color.successBg,
-        tagText: theme.color.success,
+        tagVariant: 'success',
       };
     default:
       return {
         title: name,
         icon: <Sparkles size={13} />,
-        tagBg: theme.color.primaryBg,
-        tagText: theme.color.primary,
+        tagVariant: 'primary',
       };
   }
 }
@@ -110,7 +105,7 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
   // metadata.result — derive the same preview here so both render identically.
   const resultPreview =
     block.content || (meta?.result ? `Result: ${meta.result.slice(0, 200)}` : '');
-  const { title, tag, icon, tagBg, tagText } = getPhaseDisplay(meta, block.status, theme, t);
+  const { title, tag, icon, tagVariant } = getPhaseDisplay(meta, block.status, theme, t);
   // 技能执行结束后收起；错误保持展开
   const { expanded, toggle } = useBlockCollapse(
     block.status === 'completed' && meta?.phase === 'completed'
@@ -210,21 +205,7 @@ export const SkillBlock = memo(function SkillBlock({ block }: BlockProps) {
             </div>
           )}
         </div>
-        {tag && (
-          <span
-            css={css`
-              font-size: ${theme.font.size.xs};
-              font-weight: ${theme.font.weight.semibold};
-              padding: 2px 8px;
-              border-radius: ${theme.radius.full};
-              background: ${tagBg};
-              color: ${tagText};
-              flex-shrink: 0;
-            `}
-          >
-            {tag}
-          </span>
-        )}
+        {tag && <BlockBadge variant={tagVariant}>{tag}</BlockBadge>}
         <span
           css={css`
             color: ${theme.color.textTertiary};

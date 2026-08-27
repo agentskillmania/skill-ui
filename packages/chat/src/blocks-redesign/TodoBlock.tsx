@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, TodoItem, TodoMetadata } from '../types.js';
+import { BlockBadge } from './BlockBadge.js';
 import { CollapseChevron, useBlockCollapse } from './collapse.js';
 
 function itemIcon(item: TodoItem) {
@@ -114,13 +115,12 @@ export const TodoBlock = memo(function TodoBlock({ block }: BlockProps) {
               display: inline-flex;
               align-items: center;
               gap: ${theme.spacing[1]};
-              font-size: ${theme.font.size.xs};
-              font-weight: ${theme.font.weight.semibold};
-              color: ${theme.color.success};
               flex-shrink: 0;
             `}
           >
-            {t('todo.allDone', { done: doneCount, total: items.length })}
+            <BlockBadge variant="success">
+              {t('todo.allDone', { done: doneCount, total: items.length })}
+            </BlockBadge>
             <CollapseChevron expanded={expanded} />
           </span>
         ) : (
@@ -151,15 +151,9 @@ export const TodoBlock = memo(function TodoBlock({ block }: BlockProps) {
                 style={{ width: `${items.length ? (doneCount / items.length) * 100 : 0}%` }}
               />
             </div>
-            <span
-              css={css`
-                font-size: ${theme.font.size.sm};
-                font-weight: ${theme.font.weight.semibold};
-                color: ${theme.color.textTertiary};
-              `}
-            >
+            <BlockBadge variant="neutral">
               {t('todo.count', { done: doneCount, total: items.length })}
-            </span>
+            </BlockBadge>
             <span
               css={css`
                 color: ${theme.color.textTertiary};

@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, A2UIBlockMetadata, BlockAction } from '../types.js';
+import { BlockBadge } from './BlockBadge.js';
 import { CollapseChevron, useBlockCollapse } from './collapse.js';
 
 /** Dynamically loaded genui module */
@@ -128,25 +129,17 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
     [onAction, surfaceId]
   );
 
-  // Status tag — paired semantic colors (bg always matches its fg)
+  // Status tag — shared badge style, paired semantic colors
   const statusConfig = (() => {
     switch (block.status) {
       case 'streaming':
-        return {
-          label: t('a2ui.streaming'),
-          color: theme.color.primary,
-          bg: theme.color.primaryBg,
-        };
+        return { label: t('a2ui.streaming'), variant: 'primary' as const };
       case 'completed':
-        return {
-          label: t('a2ui.completed'),
-          color: theme.color.success,
-          bg: theme.color.successBg,
-        };
+        return { label: t('a2ui.completed'), variant: 'success' as const };
       case 'error':
-        return { label: t('a2ui.error'), color: theme.color.error, bg: theme.color.errorBg };
+        return { label: t('a2ui.error'), variant: 'error' as const };
       case 'pending':
-        return { label: t('a2ui.waiting'), color: theme.color.warning, bg: theme.color.warningBg };
+        return { label: t('a2ui.waiting'), variant: 'warning' as const };
     }
   })();
 
@@ -240,20 +233,7 @@ export function A2UIBlock({ block, onAction }: BlockProps) {
           `}
         >
           {statusConfig && (
-            <span
-              css={css`
-                font-size: ${theme.font.size.xs};
-                font-weight: ${theme.font.weight.bold};
-                text-transform: uppercase;
-                letter-spacing: 0.06em;
-                padding: 2px 8px;
-                border-radius: ${theme.radius.sm};
-                color: ${statusConfig.color};
-                background: ${statusConfig.bg};
-              `}
-            >
-              {statusConfig.label}
-            </span>
+            <BlockBadge variant={statusConfig.variant}>{statusConfig.label}</BlockBadge>
           )}
           <button
             onClick={(e) => {

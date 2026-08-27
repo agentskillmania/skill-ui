@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const JsonView = JsonViewPkg as unknown as React.ComponentType<any>;
 
+import { BlockBadge } from './BlockBadge.js';
 import { NAMESPACE } from '../locales/index.js';
 
 export interface ToolCallDetailModalProps {
@@ -284,21 +285,9 @@ export function ToolCallDetailModal({
             {toolName}
           </span>
           {toolType && (
-            <span
-              css={css`
-                font-size: ${theme.font.size.xs};
-                font-weight: ${theme.font.weight.bold};
-                text-transform: uppercase;
-                letter-spacing: 0.06em;
-                padding: 2px 8px;
-                border-radius: ${theme.radius.sm};
-                background: ${theme.color.fillSubtle};
-                color: ${theme.color.textTertiary};
-                flex-shrink: 0;
-              `}
-            >
+            <BlockBadge variant="neutral" uppercase>
               {toolType}
-            </span>
+            </BlockBadge>
           )}
         </div>
       }

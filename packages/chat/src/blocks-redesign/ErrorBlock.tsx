@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, ErrorMetadata } from '../types.js';
+import { BlockBadge } from './BlockBadge.js';
 import { CollapseChevron, useBlockCollapse } from './collapse.js';
 
 export const ErrorBlock = memo(function ErrorBlock({ block }: BlockProps) {
@@ -73,21 +74,9 @@ export const ErrorBlock = memo(function ErrorBlock({ block }: BlockProps) {
           {t('error.executionError')}
         </span>
         {meta?.errorCode && (
-          <span
-            css={css`
-              font-size: ${theme.font.size.xs};
-              font-weight: ${theme.font.weight.semibold};
-              text-transform: uppercase;
-              letter-spacing: 0.04em;
-              padding: 2px 8px;
-              border-radius: ${theme.radius.sm};
-              background: ${theme.color.error};
-              color: ${theme.color.textInverse};
-              flex-shrink: 0;
-            `}
-          >
+          <BlockBadge variant="solidError" uppercase>
             {meta.errorCode}
-          </span>
+          </BlockBadge>
         )}
         <span
           css={css`

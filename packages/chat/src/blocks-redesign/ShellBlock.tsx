@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, ShellMetadata } from '../types.js';
+import { BlockBadge } from './BlockBadge.js';
 import { CollapseChevron, useBlockCollapse } from './collapse.js';
 
 const blinkKeyframes = keyframes`
@@ -137,19 +138,13 @@ export const ShellBlock = memo(function ShellBlock({ block }: BlockProps) {
             flex-shrink: 0;
           `}
         >
-          <span
-            css={css`
-              font-size: ${theme.font.size.xs};
-              font-weight: ${theme.font.weight.semibold};
-              ${isRunning
-                ? `color: ${theme.color.textTertiary};`
-                : failed
-                  ? `color: ${theme.color.error};`
-                  : `color: ${theme.color.success};`}
-            `}
-          >
-            {isRunning ? t('shell.running') : `exit ${exitCode ?? 0}`}
-          </span>
+          {isRunning ? (
+            <BlockBadge variant="primary" pulse>
+              {t('shell.running')}
+            </BlockBadge>
+          ) : (
+            <BlockBadge variant={failed ? 'error' : 'success'}>exit {exitCode ?? 0}</BlockBadge>
+          )}
           <CollapseChevron expanded={expanded} />
         </div>
       </div>

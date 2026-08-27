@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, SubAgentBlockMetadata, BlockStatus } from '../types.js';
+import { BlockBadge, type BlockBadgeVariant } from './BlockBadge.js';
 import { CollapseChevron, useBlockCollapse } from './collapse.js';
 
 /**
@@ -33,10 +34,8 @@ type TFunction = (key: string, params?: Record<string, unknown>) => string;
 interface StatusConfig {
   label: string;
   icon: typeof Bot;
-  /** theme.color key for status accent */
-  colorKey: 'primary' | 'success' | 'error' | 'warning' | 'textTertiary';
-  /** theme.color key pair for the status pill background/foreground */
-  tagColorKey: 'primary' | 'success' | 'error' | 'warning' | 'neutral';
+  /** BlockBadge variant for the status pill */
+  tagVariant: BlockBadgeVariant;
 }
 
 function getStatusConfig(
@@ -48,16 +47,14 @@ function getStatusConfig(
     return {
       label: t('subagent.error'),
       icon: XCircle,
-      colorKey: 'error',
-      tagColorKey: 'error',
+      tagVariant: 'solidError',
     };
   }
   if (status === 'streaming') {
     return {
       label: t('subagent.streaming'),
       icon: Loader2,
-      colorKey: 'primary',
-      tagColorKey: 'primary',
+      tagVariant: 'primary',
     };
   }
   switch (meta?.resultStatus) {
@@ -65,29 +62,25 @@ function getStatusConfig(
       return {
         label: t('subagent.maxSteps'),
         icon: AlertTriangle,
-        colorKey: 'warning',
-        tagColorKey: 'warning',
+        tagVariant: 'warning',
       };
     case 'timeout':
       return {
         label: t('subagent.timeout'),
         icon: Clock,
-        colorKey: 'warning',
-        tagColorKey: 'warning',
+        tagVariant: 'warning',
       };
     case 'abort':
       return {
         label: t('subagent.aborted'),
         icon: XCircle,
-        colorKey: 'textTertiary',
-        tagColorKey: 'neutral',
+        tagVariant: 'neutral',
       };
     default:
       return {
         label: t('subagent.completed'),
         icon: CheckCircle2,
-        colorKey: 'success',
-        tagColorKey: 'success',
+        tagVariant: 'success',
       };
   }
 }
@@ -105,18 +98,6 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
   const isError = block.status === 'error' || meta?.resultStatus === 'error';
   // 子代理完成后收起；错误保持展开
   const { expanded, toggle } = useBlockCollapse(block.status === 'completed' && !isError);
-
-  // Tag background/color — mirrors the pill style used by SkillBlock/ErrorBlock
-  const tagColors =
-    statusConfig.tagColorKey === 'error'
-      ? { bg: theme.color.error, fg: theme.color.textInverse }
-      : statusConfig.tagColorKey === 'success'
-        ? { bg: theme.color.successBg, fg: theme.color.success }
-        : statusConfig.tagColorKey === 'warning'
-          ? { bg: theme.color.warningBg, fg: theme.color.warning }
-          : statusConfig.tagColorKey === 'primary'
-            ? { bg: theme.color.primaryBg, fg: theme.color.primary }
-            : { bg: theme.color.fillSubtle, fg: theme.color.textTertiary };
 
   return (
     <>
@@ -189,36 +170,27 @@ export const SubAgentBlock = memo(function SubAgentBlock({ block }: BlockProps) 
               {name}
             </span>
           </div>
-          {/* Status tag — pill style, matches SkillBlock/ErrorBlock */}
-          <span
-            css={css`
-              display: inline-flex;
-              align-items: center;
-              gap: ${theme.spacing[1]};
-              font-size: ${theme.font.size.xs};
-              font-weight: ${theme.font.weight.semibold};
-              padding: 2px 8px;
-              border-radius: ${theme.radius.sm};
-              background: ${tagColors.bg};
-              color: ${tagColors.fg};
-              flex-shrink: 0;
-            `}
+          {/* Status tag — shared badge style */}
+          <BlockBadge
+            variant={statusConfig.tagVariant}
+            icon={
+              <StatusIcon
+                size={12}
+                {...(isStreaming
+                  ? {
+                      css: css`
+                        animation: ${spinKeyframes} 1s linear infinite;
+                        @media (prefers-reduced-motion: reduce) {
+                          animation: none;
+                        }
+                      `,
+                    }
+                  : {})}
+              />
+            }
           >
-            <StatusIcon
-              size={12}
-              {...(isStreaming
-                ? {
-                    css: css`
-                      animation: ${spinKeyframes} 1s linear infinite;
-                      @media (prefers-reduced-motion: reduce) {
-                        animation: none;
-                      }
-                    `,
-                  }
-                : {})}
-            />
             {statusConfig.label}
-          </span>
+          </BlockBadge>
           <span
             css={css`
               color: ${theme.color.textTertiary};

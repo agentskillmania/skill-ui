@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../locales/index.js';
 import type { BlockProps, PlanMetadata, PlanStep } from '../types.js';
+import { BlockBadge } from './BlockBadge.js';
 import { CollapseChevron, useBlockCollapse } from './collapse.js';
 
 /** Get icon component for step status */
@@ -157,15 +158,9 @@ export const PlanBlock = memo(function PlanBlock({ block }: BlockProps) {
               style={{ width: `${progress}%` }}
             />
           </div>
-          <span
-            css={css`
-              font-size: ${theme.font.size.sm};
-              font-weight: ${theme.font.weight.semibold};
-              color: ${theme.color.textTertiary};
-            `}
-          >
+          <BlockBadge variant="neutral">
             {completedCount}/{steps.length}
-          </span>
+          </BlockBadge>
           <span
             css={css`
               color: ${theme.color.textTertiary};

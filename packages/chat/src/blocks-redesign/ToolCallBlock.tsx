@@ -2,20 +2,16 @@
  * Tool call block — single-line rows with detail modal
  */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { css, keyframes } from '@emotion/react';
+import { css } from '@emotion/react';
 import { Wrench } from 'lucide-react';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import type { BlockProps, ToolCallMetadata } from '../types.js';
+import { BlockBadge } from './BlockBadge.js';
 import { CollapseChevron, useBlockCollapse } from './collapse.js';
 import { ToolCallDetailModal } from './ToolCallDetailModal.js';
 import { NAMESPACE } from '../locales/index.js';
-
-const subtlePulse = keyframes`
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-`;
 
 /** Single-line code row with ellipsis */
 function CodeRow({
@@ -191,64 +187,16 @@ export const ToolCallBlock = memo(function ToolCallBlock({ block }: BlockProps) 
             `}
           >
             {toolType && (
-              <span
-                css={css`
-                  font-size: ${theme.font.size.xs};
-                  font-weight: ${theme.font.weight.bold};
-                  text-transform: uppercase;
-                  letter-spacing: 0.06em;
-                  padding: 2px 8px;
-                  border-radius: ${theme.radius.sm};
-                  background: ${theme.color.fillSubtle};
-                  color: ${theme.color.textTertiary};
-                `}
-              >
+              <BlockBadge variant="neutral" uppercase>
                 {toolType}
-              </span>
+              </BlockBadge>
             )}
             {isRunning && (
-              <span
-                css={css`
-                  display: inline-flex;
-                  align-items: center;
-                  gap: ${theme.spacing[1]};
-                  font-size: ${theme.font.size.xs};
-                  font-weight: ${theme.font.weight.semibold};
-                  padding: 2px 8px;
-                  border-radius: ${theme.radius.full};
-                  background: ${theme.color.primaryBg};
-                  color: ${theme.color.primary};
-                `}
-              >
-                <span
-                  css={css`
-                    width: 5px;
-                    height: 5px;
-                    border-radius: ${theme.radius.full};
-                    background: ${theme.color.primary};
-                    animation: ${subtlePulse} 1.2s ease-in-out infinite;
-                  `}
-                />
+              <BlockBadge variant="primary" pulse>
                 {t('toolCall.running')}
-              </span>
+              </BlockBadge>
             )}
-            {isError && (
-              <span
-                css={css`
-                  display: inline-flex;
-                  align-items: center;
-                  gap: ${theme.spacing[1]};
-                  font-size: ${theme.font.size.xs};
-                  font-weight: ${theme.font.weight.semibold};
-                  padding: 2px 8px;
-                  border-radius: ${theme.radius.full};
-                  background: ${theme.color.errorBg};
-                  color: ${theme.color.error};
-                `}
-              >
-                {t('toolCall.error')}
-              </span>
-            )}
+            {isError && <BlockBadge variant="error">{t('toolCall.error')}</BlockBadge>}
             <CollapseChevron expanded={expanded} />
           </div>
         </div>
