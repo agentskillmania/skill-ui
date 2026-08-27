@@ -24,6 +24,14 @@ import type { AgentBlock, BlockStatus, TodoItem } from './types.js';
 export const SKILL_TOOL = 'load_skill';
 export const HUMAN_TOOL = 'ask_human';
 export const DELEGATE_TOOL = 'delegate';
+export const TODO_TOOL = 'todolist_write';
+
+/** Tool calls whose tool_call block is suppressed on BOTH paths because a
+ * dedicated presentation block carries the information (ask_human → the
+ * human_input question card; todolist_write → the todo card). Rendering a
+ * generic tool_call block for them was pure noise and made live vs resume
+ * inconsistent (live showed both, history only one of the two). */
+export const PRESENTED_TOOLS: ReadonlySet<string> = new Set([HUMAN_TOOL, TODO_TOOL]);
 
 export function textBlock(id: string, content: string, status: BlockStatus): AgentBlock {
   return { id, type: 'text', status, content };

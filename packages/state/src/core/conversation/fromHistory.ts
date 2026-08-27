@@ -31,6 +31,7 @@ import {
   subagentBlock,
   todoBlock,
   type HumanInputQuestion,
+  TODO_TOOL,
 } from './blocks.js';
 import type {
   SessionRunState,
@@ -211,6 +212,11 @@ export function fromHistory(
         for (const tc of msg.toolCalls) {
           const result = toolResults.get(tc.id);
           const resultContent = result ? textOf(result.content) : '';
+
+          // todolist_write 不渲染 tool_call 块(与 live 的 PRESENTED_TOOLS
+          // 跳过同构):todo 卡由 extras.todoList 快照合成,工具块是噪音。
+          // ask_human 走下方 HUMAN_TOOL 分支(问答块),不受此影响。
+          if (tc.name === TODO_TOOL) continue;
 
           if (tc.name === SKILL_TOOL) {
             blocks.push(

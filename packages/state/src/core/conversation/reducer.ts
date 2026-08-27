@@ -20,6 +20,7 @@ import {
   humanInputBlock,
   subagentBlock,
   todoBlock,
+  PRESENTED_TOOLS,
 } from './blocks.js';
 import { normalizeEvent } from './normalize.js';
 import type {
@@ -388,6 +389,19 @@ function reduceMainEvent(
       if (!messageId) return state;
       const toolName = (data.name as string) ?? 'unknown';
       const callId = (data.id as string) ?? genId('blk');
+      // 自带表现块的工具(PRESENTED_TOOLS,见 blocks.ts)不渲染 tool_call 块:
+      // 问答卡/todo 卡随后由各自的专用事件(human-input / todo-list)追加,
+      // 与 fromHistory 的跳过同构。气泡与 prose 收拢照常,保证后续表现块
+      // 的锚点与常规路径一致。
+      if (PRESENTED_TOOLS.has(toolName)) {
+        return {
+          ...run,
+          messages: updateMessageById(run.messages, messageId, (m) => ({
+            ...m,
+            blocks: closeProseBlocks(m.blocks ?? []),
+          })),
+        };
+      }
       // load_skill 与 fromHistory 的 SKILL_TOOL 特判同构：实时也展示为 skill 块
       const block: AgentBlock =
         toolName === SKILL_TOOL

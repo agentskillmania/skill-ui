@@ -167,13 +167,14 @@ describe('respond-stream second question (full round-2 sequence)', () => {
     const pendingQ = blocks.filter((b) => b.type === 'human_input' && b.status === 'pending');
     expect(pendingQ).toHaveLength(1);
     expect((pendingQ[0].metadata as Record<string, unknown>)?.requestId).toBe('call-2');
-    // round-1 的块已答,round-2 的工具块先于问题块(blocks 顺序即渲染顺序)。
-    const idxTool = blocks.findIndex((b) => b.type === 'tool_call');
+    // round-2:ask_human 的 tool-start 被 PRESENTED_TOOLS 抑制(问答卡是
+    // 唯一表现),问题块直接跟在收拢的 thinking 之后。
+    expect(blocks.some((b) => b.type === 'tool_call')).toBe(false);
+    const idxThinking = blocks.findIndex((b) => b.type === 'thinking');
     const idxPending = blocks.findIndex(
       (b) => b.type === 'human_input' && b.status === 'pending' && b.id === 'call-2'
     );
-    expect(idxTool).toBeGreaterThan(0);
-    expect(idxPending).toBeGreaterThan(idxTool);
+    expect(idxPending).toBeGreaterThan(idxThinking);
     expect(resumed.main.status).toBe('idle');
     expect(resumed.main.turnClosed).toBe(true);
   });
