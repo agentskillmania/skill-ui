@@ -62,7 +62,7 @@ export function normalizeTurnUsage(raw: unknown): TurnUsage | undefined {
   };
 }
 
-/** fromHistory 的可选附加输入(daemon 持久化在 context.todoList 的快照)。 */
+/** fromHistory 的可选附加输入(daemon 持久化的快照)。 */
 export interface FromHistoryExtras {
   /** 给了就恢复 state.todoList(侧栏据此渲染),并合成一个内联 todo 块。 */
   todoList?: TodoListSnapshot;
@@ -226,13 +226,18 @@ export function fromHistory(
             // Parse questions from tool arguments; metadata assembly (inputType,
             // options, title) is the builder's — identical to the live path.
             const questions = (tc.arguments.questions as HumanInputQuestion[]) ?? [];
+            // 中断终态:挂起的 ask_human 没有配对的 tool 结果行 —— 按缺失
+            // 推导为 pending(问题就放在 toolCalls.arguments 里),刷新/重启
+            // 后待答交互入口重现;应答走 /respond 续跑,宿主先注入
+            // run-resumed 重开轮次。
+            const unanswered = !result;
             blocks.push(
               humanInputBlock({
                 id: tc.id,
                 requestId: tc.id,
                 questions,
                 context: tc.arguments.context,
-                status: 'completed',
+                status: unanswered ? 'pending' : 'completed',
                 response: resultContent,
               })
             );
@@ -395,6 +400,10 @@ export function fromHistory(
       break;
     }
   }
+
+  // 未答 HITL 重建(中断终态):挂起的 ask_human 工具调用没有配对的
+  // tool 结果行 —— 由 HUMAN_TOOL 分支按"结果缺失即未答"推导 pending 块,
+  // 不需要额外输入(questions 就在 toolCalls.arguments 里)。
 
   return state;
 }

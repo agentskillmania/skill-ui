@@ -797,6 +797,10 @@ function reduceMainEvent(
     case 'done': {
       const totalSteps = data.totalSteps as number | undefined;
       const duration = data.duration as number | undefined;
+      // HITL 中断终态(wrangler-daemon):done{type:"waiting_human"} 表示
+      // "run 正常结束、暂停等人类回答" —— 待答的 human_input 块必须保持
+      // pending(交互入口还在),只有普通终态才关闭它们。
+      const waitingHuman = data.type === 'waiting_human';
       // done 的 tokens 是整轮累计量(wrangler.rs;colts run() 同理),而每个
       // step 的用量已在 step-end 里累加过 —— 这里再加一次会重复计数。
       // duration/totalSteps 则是权威整轮值,覆盖逐步累加的近似。
@@ -818,11 +822,38 @@ function reduceMainEvent(
             ? {
                 ...m,
                 status: 'completed' as const,
-                blocks: m.blocks ? closeTerminalBlocks(m.blocks, 'completed') : m.blocks,
+                blocks: m.blocks
+                  ? waitingHuman
+                    ? closeAllBlocks(m.blocks)
+                    : closeTerminalBlocks(m.blocks, 'completed')
+                  : m.blocks,
                 ...(usage ? { usage } : {}),
               }
             : m
         ),
+      };
+    }
+
+    // ── HITL continuation (host-synthesized) ──
+    case 'run-resumed': {
+      // /respond 应答后的续跑流没有 user 消息,而 done 已把终态闩
+      // (turnClosed)扣上 —— 宿主在消费续流前注入本事件重开轮次:翻回
+      // streaming、清闩,并预铺一个空的 streaming assistant 气泡(与
+      // user-message 同款打字指示,但没有 user 行)。
+      const resumed: AgentMessage = {
+        id: genId('msg'),
+        role: 'assistant',
+        content: '',
+        status: 'streaming',
+        createdAt: Date.now(),
+      };
+      return {
+        ...state,
+        status: 'streaming',
+        turnClosed: false,
+        turnTokens: { ...ZERO_TOKENS },
+        turnDurationMs: 0,
+        messages: [...state.messages, resumed],
       };
     }
 
