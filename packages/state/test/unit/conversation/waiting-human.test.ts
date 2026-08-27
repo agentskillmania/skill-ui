@@ -136,3 +136,45 @@ describe('fromHistory derives pending human_input from unanswered ask_human rows
     expect(block?.status).toBe('completed');
   });
 });
+
+describe('respond-stream second question (full round-2 sequence)', () => {
+  it('pending block survives the exact wire sequence incl. noise events', () => {
+    // 与 wrangler-daemon 两轮 e2e 的 respond 流逐帧对齐(resolved → 续跑
+    // 噪声帧 → tool-start → phase-change → step-end → human-input →
+    // done{waiting_human} → todo-list),run-resumed 在消费流前注入。
+    const afterRound1 = waitingTurn();
+    const resumed = [
+      s('human-input-resolved', { requestId: 'human-1', response: { q1: 'A' } }),
+      s('run-resumed', {}),
+      s('phase-change', { from: { type: 'idle' }, to: { type: 'preparing' } }),
+      s('llm-request', { messages: [], tools: [], skill: null, model: 'm', contextWindow: 128000 }),
+      s('thinking', { content: 'round two thinking' }),
+      s('llm-response', { text: '', toolCalls: [], tokens: { input: 10 } }),
+      s('phase-change', { from: { type: 'parsing' }, to: { type: 'parsed' } }),
+      s('tool-start', { id: 'call-2', name: 'ask_human', args: { questions: [] } }),
+      s('phase-change', { from: { type: 'executing-tool' }, to: { type: 'waiting-human' } }),
+      s('step-end', { step: 0, type: 'waiting-human', duration: 8, tokens: {} }),
+      s('human-input', {
+        requestId: 'call-2',
+        questions: [{ id: 'q2', question: 'second?', type: 'text' }],
+        context: null,
+      }),
+      s('done', { type: 'waiting_human', totalSteps: 1, duration: 8, tokens: {} }),
+      s('todo-list', { items: [] }),
+    ].reduce(reducer, afterRound1);
+
+    const blocks = resumed.main.messages.flatMap((m) => m.blocks ?? []);
+    const pendingQ = blocks.filter((b) => b.type === 'human_input' && b.status === 'pending');
+    expect(pendingQ).toHaveLength(1);
+    expect((pendingQ[0].metadata as Record<string, unknown>)?.requestId).toBe('call-2');
+    // round-1 的块已答,round-2 的工具块先于问题块(blocks 顺序即渲染顺序)。
+    const idxTool = blocks.findIndex((b) => b.type === 'tool_call');
+    const idxPending = blocks.findIndex(
+      (b) => b.type === 'human_input' && b.status === 'pending' && b.id === 'call-2'
+    );
+    expect(idxTool).toBeGreaterThan(0);
+    expect(idxPending).toBeGreaterThan(idxTool);
+    expect(resumed.main.status).toBe('idle');
+    expect(resumed.main.turnClosed).toBe(true);
+  });
+});
