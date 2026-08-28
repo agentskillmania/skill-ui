@@ -18,9 +18,8 @@
 
 import type { AgentBlock, BlockStatus, TodoItem } from './types.js';
 
-/** Tool names that map to special block types. fromHistory dispatches all
- * three; the live path receives dedicated events for ask_human/delegate and
- * only ever sees load_skill arrive as a tool-start. */
+/** Tool names that map to special block types. fromHistory dispatches on it;
+ * the live path sees load_skill arrive as a tool-start just like any tool. */
 export const SKILL_TOOL = 'load_skill';
 export const HUMAN_TOOL = 'ask_human';
 export const DELEGATE_TOOL = 'delegate';
@@ -45,14 +44,16 @@ export function errorBlock(id: string, message: string): AgentBlock {
   return { id, type: 'error', status: 'error', content: message };
 }
 
+/** skill 块 = load_skill 工具调用的专用展示:一次调用一个块,无生命周期
+ * (skill 只有加载、没有执行——tool-start 建块,tool-end 收尾)。 */
 export function skillBlock(opts: {
   id: string;
   skillName?: string;
-  phase: string;
+  task?: string;
   status: BlockStatus;
   result?: string;
 }): AgentBlock {
-  const { id, skillName, phase, status, result } = opts;
+  const { id, skillName, task, status, result } = opts;
   return {
     id,
     type: 'skill',
@@ -60,17 +61,20 @@ export function skillBlock(opts: {
     // 表现归 UI 层:content 不烤展示串,全量原始结果在 metadata.result,
     // 预览(截断/前缀)由 chat 的 SkillBlock 自行派生。
     content: '',
-    metadata: { skillName, phase, ...(result !== undefined ? { result } : {}) },
+    metadata: {
+      skillName,
+      ...(task !== undefined ? { task } : {}),
+      ...(result !== undefined ? { result } : {}),
+    },
   };
 }
 
-/** Terminal transition for a live skill block (tool-end on load_skill, or
- * skill-end) — identical shape to the history-rebuilt completed block. */
+/** tool-end on load_skill — identical shape to the history-rebuilt block. */
 export function completeSkillBlock(block: AgentBlock, result: string): AgentBlock {
   return {
     ...block,
     status: 'completed',
-    metadata: { ...block.metadata, phase: 'completed', result },
+    metadata: { ...block.metadata, result },
   };
 }
 

@@ -164,43 +164,6 @@ describe('reducer — tool defaults with missing fields', () => {
   });
 });
 
-describe('reducer — skill defaults with missing fields', () => {
-  it('skill-loading with no name sets activeSkill to null', () => {
-    const state = run([s('skill-loading', {})]);
-    expect(state.main.activeSkill).toBeNull();
-    const block = lastMsg(state).blocks?.find((b) => b.type === 'skill');
-    expect(block).toBeDefined();
-    expect(block!.metadata?.skillName).toBeUndefined();
-  });
-
-  it('skill-loaded with no name does not crash and leaves state untouched', () => {
-    const state = run([s('skill-loaded', {})]);
-    expect(state.main.messages).toHaveLength(0);
-  });
-
-  it('skill-start with no name does not crash', () => {
-    const state = run([s('skill-start', {})]);
-    expect(state.main.messages).toHaveLength(0);
-  });
-
-  it('skill-start with no task leaves metadata.task undefined', () => {
-    const state = run([s('skill-loading', { name: 's1' }), s('skill-start', { name: 's1' })]);
-    const block = lastMsg(state).blocks?.find((b) => b.type === 'skill');
-    expect(block!.metadata?.task).toBeUndefined();
-  });
-
-  it('skill-end with no name still clears activeSkill', () => {
-    const state = run([s('skill-loading', { name: 's1' }), s('skill-end', {})]);
-    expect(state.main.activeSkill).toBeNull();
-  });
-
-  it('skill-end with no result produces empty content', () => {
-    const state = run([s('skill-loading', { name: 's1' }), s('skill-end', { name: 's1' })]);
-    const block = lastMsg(state).blocks?.find((b) => b.type === 'skill');
-    expect(block!.content).toBe('');
-  });
-});
-
 describe('reducer — human-input defaults', () => {
   it('human-input with no questions creates human_input block', () => {
     const state = run([s('human-input', {})]);
@@ -457,52 +420,6 @@ describe('reducer — block lifecycle', () => {
   it('error sets status to error and fills content', () => {
     const state = run([s('thinking', { content: 'thinking' }), s('error', { message: 'crashed' })]);
     expect(state.main.status).toBe('error');
-  });
-});
-
-describe('reducer — skill lifecycle', () => {
-  it('full skill lifecycle completes skill block and clears activeSkill', () => {
-    const state = run([
-      s('skill-loading', { name: 'my-skill' }),
-      s('skill-loaded', { name: 'my-skill', tokenCount: 500 }),
-      s('skill-start', { name: 'my-skill', task: 'do stuff' }),
-      s('skill-end', { name: 'my-skill', result: 'done' }),
-    ]);
-    expect(lastMsg(state).blocks?.find((b) => b.type === 'skill')?.status).toBe('completed');
-    expect(state.main.activeSkill).toBeNull();
-  });
-
-  it('skill-end without prior skill-start does not crash', () => {
-    const state = run([s('skill-end', { name: 's1', result: 'ok' })]);
-    expect(state.main.activeSkill).toBeNull();
-  });
-
-  it('skill-end with non-string result stringifies it', () => {
-    const state = run([
-      s('skill-loading', { name: 's1' }),
-      s('skill-end', { name: 's1', result: { key: 'value' } }),
-    ]);
-    const block = lastMsg(state).blocks?.find((b) => b.type === 'skill');
-    // 表现已外移:content 不再烤展示串,原始结果全量在 metadata.result
-    expect(block?.content).toBe('');
-    expect(String(block?.metadata?.result)).toMatch(/"key"/);
-  });
-
-  it('skill-end with missing result produces empty content', () => {
-    const state = run([s('skill-loading', { name: 's1' }), s('skill-end', { name: 's1' })]);
-    expect(lastMsg(state).blocks?.find((b) => b.type === 'skill')?.content).toBe('');
-  });
-
-  it('skill events on message with no blocks do not crash', () => {
-    const state = run([
-      s('user-message', { content: 'hi' }),
-      s('skill-loaded', { name: 's1', tokenCount: 100 }),
-      s('skill-start', { name: 's1', task: 'do' }),
-      s('skill-end', { name: 's1', result: 'done' }),
-    ]);
-    // No skill-loading preceded them — nothing to update, no block created
-    expect(lastMsg(state).blocks?.some((b) => b.type === 'skill') ?? false).toBe(false);
-    expect(state.main.activeSkill).toBeNull();
   });
 });
 

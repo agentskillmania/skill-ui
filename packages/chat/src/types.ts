@@ -164,17 +164,14 @@ export interface ErrorMetadata {
   hint?: string;
 }
 
-/** Skill block metadata */
+/** Skill block metadata — load_skill 工具调用的展示形状:一次调用一个块,
+ * 块状态即工具调用状态(streaming/completed/error),无独立生命周期。 */
 export interface SkillBlockMetadata {
   /** Skill name */
   skillName?: string;
-  /** Skill execution phase */
-  phase?: 'loading' | 'loaded' | 'executing' | 'completed';
-  /** Execution task description */
+  /** Task description (from the load_skill tool arguments) */
   task?: string;
-  /** Skill document token count */
-  tokenCount?: number;
-  /** Execution result summary */
+  /** Loaded skill instructions (raw tool result) */
   result?: string;
 }
 

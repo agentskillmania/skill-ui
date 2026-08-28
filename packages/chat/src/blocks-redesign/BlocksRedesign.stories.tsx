@@ -714,7 +714,7 @@ export const SkillLoading: Story = {
       content: '',
       metadata: {
         skillName: 'ai-news',
-        phase: 'loading',
+        task: '搜索多来源新闻',
       },
     };
     return (
@@ -734,49 +734,8 @@ export const SkillLoaded: Story = {
       content: '',
       metadata: {
         skillName: 'ai-news',
-        phase: 'loaded',
-        tokenCount: 3420,
-      },
-    };
-    return (
-      <Wrapper>
-        <SkillBlock block={block} />
-      </Wrapper>
-    );
-  },
-};
-
-export const SkillExecuting: Story = {
-  render: () => {
-    const block: Block = {
-      id: 'b18',
-      type: 'skill',
-      status: 'streaming',
-      content: '',
-      metadata: {
-        skillName: 'ai-news',
-        phase: 'executing',
         task: '搜索多来源新闻',
-      },
-    };
-    return (
-      <Wrapper>
-        <SkillBlock block={block} />
-      </Wrapper>
-    );
-  },
-};
-
-export const SkillCompleted: Story = {
-  render: () => {
-    const block: Block = {
-      id: 'b19',
-      type: 'skill',
-      status: 'completed',
-      content: '发现 3 条最新 AI 新闻，已整理汇总。',
-      metadata: {
-        skillName: 'ai-news',
-        phase: 'completed',
+        result: 'You are an AI news curator…',
       },
     };
     return (
@@ -1340,7 +1299,6 @@ export const AllBlocks: Story = {
         content: '已整理 3 条最新 AI 新闻。',
         metadata: {
           skillName: 'ai-news',
-          phase: 'completed',
         },
       },
       makeA2UIBlock('chart-1', '趋势图', 'completed', a2uiComponents),

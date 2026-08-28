@@ -25,7 +25,6 @@ function makeSubAgent(id: string, overrides?: Partial<SubAgentRunState>): SubAge
     tokens: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
     duration: 0,
     messages: [],
-    activeSkill: null,
     ...overrides,
   };
 }

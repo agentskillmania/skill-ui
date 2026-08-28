@@ -402,13 +402,15 @@ function reduceMainEvent(
           })),
         };
       }
-      // load_skill 与 fromHistory 的 SKILL_TOOL 特判同构：实时也展示为 skill 块
+      // load_skill 与 fromHistory 的 SKILL_TOOL 特判同构：实时也展示为 skill 块。
+      // 块语义 = 一次工具调用:tool-start 建块(streaming),tool-end 收尾;
+      // task 取自工具参数,没有独立的技能生命周期事件。
       const block: AgentBlock =
         toolName === SKILL_TOOL
           ? skillBlock({
               id: callId,
               skillName: (data.args as { name?: string } | undefined)?.name ?? '',
-              phase: 'loading',
+              task: (data.args as { task?: string } | undefined)?.task,
               status: 'streaming',
             })
           : toolCallBlock({
@@ -451,87 +453,6 @@ function reduceMainEvent(
               return completeToolCallBlock(b, data.result);
             }),
           })
-        ),
-      };
-    }
-
-    // ── Skill lifecycle ──
-    case 'skill-loading': {
-      const { run, messageId } = ensureStreamingMessage(state);
-      // 终态闩:轮已关闭,迟到的 skill-loading 帧直接丢弃。
-      if (!messageId) return state;
-      const block = skillBlock({
-        id: genId('blk'),
-        skillName: data.name as string | undefined,
-        phase: 'loading',
-        status: 'streaming',
-      });
-      return {
-        ...run,
-        activeSkill: (data.name as string) ?? run.activeSkill,
-        messages: updateMessageById(run.messages, messageId, (m) => ({
-          ...m,
-          blocks: [...closeProseBlocks(m.blocks ?? []), block],
-        })),
-      };
-    }
-
-    case 'skill-loaded':
-    case 'skill-start': {
-      const phase = eventName === 'skill-loaded' ? 'loaded' : 'executing';
-      return {
-        ...state,
-        messages: updateMessageWithBlock(
-          state.messages,
-          (b) => b.type === 'skill' && b.status === 'streaming',
-          (m) => {
-            const found = [...(m.blocks ?? [])]
-              .reverse()
-              .find((b) => b.type === 'skill' && b.status === 'streaming');
-            if (!found) return m;
-            return {
-              ...m,
-              blocks: (m.blocks ?? []).map((b) =>
-                b.id === found.id
-                  ? {
-                      ...b,
-                      metadata: {
-                        ...b.metadata,
-                        skillName: data.name ?? b.metadata?.skillName,
-                        phase,
-                        tokenCount: data.tokenCount ?? b.metadata?.tokenCount,
-                        task: data.task ?? b.metadata?.task,
-                      },
-                    }
-                  : b
-              ),
-            };
-          }
-        ),
-      };
-    }
-
-    case 'skill-end': {
-      return {
-        ...state,
-        activeSkill: null,
-        messages: updateMessageWithBlock(
-          state.messages,
-          (b) => b.type === 'skill' && b.status === 'streaming',
-          (m) => {
-            const found = [...(m.blocks ?? [])]
-              .reverse()
-              .find((b) => b.type === 'skill' && b.status === 'streaming');
-            if (!found) return m;
-            const resultStr =
-              typeof data.result === 'string' ? data.result : JSON.stringify(data.result);
-            return {
-              ...m,
-              blocks: (m.blocks ?? []).map((b) =>
-                b.id === found.id ? completeSkillBlock(b, resultStr) : b
-              ),
-            };
-          }
         ),
       };
     }
@@ -798,7 +719,6 @@ function reduceMainEvent(
         turnClosed: false,
         messages: [],
         compression: undefined,
-        activeSkill: null,
         todoList: undefined,
         tokens: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
         lastInputTokens: undefined,
@@ -828,7 +748,6 @@ function reduceMainEvent(
         ...state,
         status: 'idle',
         turnClosed: true,
-        activeSkill: null,
         totalSteps: totalSteps ?? state.totalSteps,
         duration: duration ?? state.duration,
         messages: state.messages.map((m) =>
@@ -880,7 +799,6 @@ function reduceMainEvent(
         ...state,
         status: 'error',
         turnClosed: true,
-        activeSkill: null,
         messages: state.messages.map((m) => {
           if (m.status !== 'streaming') return m;
           // Close open blocks — otherwise thinking/tool blocks keep their

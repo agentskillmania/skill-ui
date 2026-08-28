@@ -124,7 +124,9 @@ describe('fromHistory', () => {
       {
         role: 'assistant',
         content: '',
-        toolCalls: [{ id: 'call-s1', name: 'load_skill', arguments: { name: 'poet' } }],
+        toolCalls: [
+          { id: 'call-s1', name: 'load_skill', arguments: { name: 'poet', task: 'write a haiku' } },
+        ],
         timestamp: 1000,
       },
       {
@@ -139,8 +141,10 @@ describe('fromHistory', () => {
     const msgs = selectMainMessages(state);
     const skillBlock = msgs[0].blocks?.find((b) => b.type === 'skill');
     expect(skillBlock).toBeDefined();
+    expect(skillBlock!.status).toBe('completed');
     expect(skillBlock!.metadata?.skillName).toBe('poet');
-    expect(skillBlock!.metadata?.phase).toBe('completed');
+    expect(skillBlock!.metadata?.task).toBe('write a haiku');
+    expect(skillBlock!.metadata?.result).toBe('You are a poet.');
   });
 
   it('reconstructs human_input blocks from ask_human tool calls', () => {

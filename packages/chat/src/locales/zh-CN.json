@@ -27,20 +27,9 @@
   },
   "skill": {
     "defaultName": "技能",
-    "loading": "加载技能: {{name}}...",
     "loadingShort": "加载中",
     "loaded": "已加载",
-    "executing": "执行技能: {{name}}",
-    "executingShort": "执行中",
-    "completed": "{{name}} 完成",
-    "failed": "失败",
-    "executionFailed": "执行失败",
-    "phase": {
-      "loading": "加载",
-      "loaded": "就绪",
-      "executing": "执行",
-      "completed": "完成"
-    }
+    "failed": "失败"
   },
   "humanInput": {
     "needConfirm": "需要确认",

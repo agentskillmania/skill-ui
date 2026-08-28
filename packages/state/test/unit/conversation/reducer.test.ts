@@ -74,26 +74,14 @@ describe('reducer — main agent events', () => {
     expect(blocks?.[1].metadata).not.toHaveProperty('toolType');
   });
 
-  it('manages skill lifecycle: loading → loaded → start → end', () => {
-    const state = pushEvents([
-      { event: 'skill-loading', data: { name: 'poet' } },
-      { event: 'skill-loaded', data: { name: 'poet', tokenCount: 500 } },
-      { event: 'skill-start', data: { name: 'poet', task: 'write a haiku' } },
-      { event: 'skill-end', data: { name: 'poet', result: '樱花飘落\n春风中\n寂静' } },
-    ]);
-    const msg = state.main.messages[state.main.messages.length - 1];
-    const skillBlock = msg.blocks?.find((b) => b.type === 'skill');
-    expect(skillBlock).toBeDefined();
-    expect(skillBlock!.status).toBe('completed');
-    expect(skillBlock!.metadata?.phase).toBe('completed');
-    expect(state.main.activeSkill).toBeNull();
-  });
-
   it('renders live load_skill tool call as skill block (parity with history)', () => {
-    // daemon 实时以 tool-start/tool-end 携带 load_skill，不另发 skill-* 事件；
-    // 展示必须与 fromHistory 的 SKILL_TOOL 特判一致，否则只有历史会话能看到 skill 块
+    // load_skill 就是一次普通工具调用:tool-start 建块(带 name/task 参数),
+    // tool-end 收尾。技能生命周期事件已删除,没有第二条事件路径。
     const state = pushEvents([
-      { event: 'tool-start', data: { id: 'call-s1', name: 'load_skill', args: { name: 'poet' } } },
+      {
+        event: 'tool-start',
+        data: { id: 'call-s1', name: 'load_skill', args: { name: 'poet', task: 'write a haiku' } },
+      },
       { event: 'tool-end', data: { callId: 'call-s1', result: 'loaded 3 instructions' } },
     ]);
     const msg = state.main.messages[state.main.messages.length - 1];
@@ -101,9 +89,46 @@ describe('reducer — main agent events', () => {
     expect(skillBlock).toBeDefined();
     expect(skillBlock!.status).toBe('completed');
     expect(skillBlock!.metadata?.skillName).toBe('poet');
-    expect(skillBlock!.metadata?.phase).toBe('completed');
+    expect(skillBlock!.metadata?.task).toBe('write a haiku');
     expect(skillBlock!.metadata?.result).toBe('loaded 3 instructions');
     expect(msg.blocks?.some((b) => b.type === 'tool_call')).toBe(false);
+  });
+
+  it('drops legacy skill lifecycle frames as no-ops (forward compatibility)', () => {
+    // 旧 daemon 可能仍在发 skill-* 帧;新 reducer 没有对应 case,落进
+    // default 分支静默忽略 —— 不会重复建块或破坏既有 skill 块。
+    const state = pushEvents([
+      {
+        event: 'tool-start',
+        data: { id: 'call-s1', name: 'load_skill', args: { name: 'poet' } },
+      },
+      { event: 'skill-loading', data: { name: 'poet' } },
+      { event: 'skill-loaded', data: { name: 'poet', tokenCount: 500 } },
+      { event: 'tool-end', data: { callId: 'call-s1', result: 'loaded 3 instructions' } },
+      { event: 'skill-end', data: { name: 'poet', result: 'done' } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    const skillBlocks = msg.blocks?.filter((b) => b.type === 'skill');
+    expect(skillBlocks?.length).toBe(1);
+    expect(skillBlocks![0].status).toBe('completed');
+    expect(skillBlocks![0].metadata?.result).toBe('loaded 3 instructions');
+  });
+
+  it('leaves no streaming skill block after done (no eternal spinner)', () => {
+    // 回归守护:旧实现的 skill 块依赖 skill-end 收尾,而该事件从不发出,
+    // 块永远停在"执行中"。新契约下 tool-end 即终态;即使 tool-end 缺失,
+    // done 的终态清理也必须把 skill 块翻成 completed。
+    const state = pushEvents([
+      {
+        event: 'tool-start',
+        data: { id: 'call-s1', name: 'load_skill', args: { name: 'poet' } },
+      },
+      { event: 'done', data: { totalSteps: 1 } },
+    ]);
+    const msg = state.main.messages[state.main.messages.length - 1];
+    const skillBlock = msg.blocks?.find((b) => b.type === 'skill');
+    expect(skillBlock).toBeDefined();
+    expect(skillBlock!.status).toBe('completed');
   });
 
   it('completes ALL parallel tool_call blocks with their own results', () => {
@@ -772,7 +797,6 @@ describe('reducer — session-cleared (destructive reset)', () => {
     // 会话级残留清空
     expect(state.main.todoList).toBeUndefined();
     expect(state.main.compression).toBeUndefined();
-    expect(state.main.activeSkill).toBeNull();
     expect(state.main.lastInputTokens).toBeUndefined();
     // 子代理卡片随顶层 slice 重置
     expect(state.subAgents.size).toBe(0);

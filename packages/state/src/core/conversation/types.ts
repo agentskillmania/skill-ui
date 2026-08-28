@@ -173,7 +173,6 @@ export interface AgentRunState {
   lastInputTokens?: number;
   /** Latest todo-list snapshot (updated only when the list changes) */
   todoList?: TodoListSnapshot;
-  activeSkill: string | null;
   compression?: { summary: string; removedCount: number };
   /**
    * Turn-scoped accumulators (reducer-private bookkeeping): per-step
@@ -216,7 +215,6 @@ export function createEmptyRunState(): AgentRunState {
     tokens: { ...ZERO_TOKENS },
     duration: 0,
     messages: [],
-    activeSkill: null,
     turnTokens: { ...ZERO_TOKENS },
     turnDurationMs: 0,
   };

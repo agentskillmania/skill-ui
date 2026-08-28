@@ -27,20 +27,9 @@
   },
   "skill": {
     "defaultName": "Skill",
-    "loading": "Loading skill: {{name}}...",
     "loadingShort": "Loading",
     "loaded": "Loaded",
-    "executing": "Executing skill: {{name}}",
-    "executingShort": "Executing",
-    "completed": "{{name}} completed",
-    "failed": "Failed",
-    "executionFailed": "Execution failed",
-    "phase": {
-      "loading": "Loading",
-      "loaded": "Ready",
-      "executing": "Executing",
-      "completed": "Done"
-    }
+    "failed": "Failed"
   },
   "humanInput": {
     "needConfirm": "Confirmation required",

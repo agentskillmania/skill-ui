@@ -96,14 +96,6 @@ describe('turn lifecycle — terminal guard (late frames dropped)', () => {
     ).toBe(false);
   });
 
-  it('late skill-loading after done is dropped and does not set activeSkill', () => {
-    const state = run([...closedTurn, s('skill-loading', { name: 'late-skill' })]);
-    expect(state.main.messages.flatMap((m) => m.blocks ?? []).some((b) => b.type === 'skill')).toBe(
-      false
-    );
-    expect(state.main.activeSkill).toBeNull();
-  });
-
   it('late human-input after done is dropped (no forever-pending block)', () => {
     const state = run([
       ...closedTurn,

@@ -219,11 +219,13 @@ export function fromHistory(
           if (tc.name === TODO_TOOL) continue;
 
           if (tc.name === SKILL_TOOL) {
+            // skill 块 = load_skill 调用本身:name/task 取自工具参数,
+            // result 为手册文本 —— 与 live 的 tool-start/tool-end 路径同构。
             blocks.push(
               skillBlock({
                 id: genHistBlockId(),
                 skillName: (tc.arguments.name as string | undefined) ?? '',
-                phase: 'completed',
+                task: tc.arguments.task as string | undefined,
                 status: 'completed',
                 result: resultContent,
               })
