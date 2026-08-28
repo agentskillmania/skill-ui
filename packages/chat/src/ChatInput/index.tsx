@@ -13,6 +13,7 @@ import { Image as ImageIcon, X } from 'lucide-react';
 import { ContextUsage } from './ContextUsage.js';
 import { ModelSelector } from './ModelSelector.js';
 import { ThinkingToggle } from './ThinkingToggle.js';
+import { useInputHistory } from './useInputHistory.js';
 import type { CommandAutocompleteRef } from '../commands/CommandAutocomplete.js';
 import { CommandAutocomplete } from '../commands/CommandAutocomplete.js';
 import { NAMESPACE } from '../locales/index.js';
@@ -128,6 +129,10 @@ export const ChatInput = memo(function ChatInput({
   // that immediately follows it.
   const lastCompositionEndRef = useRef(0);
 
+  // Input history recall: ArrowUp/ArrowDown walk through previously sent
+  // messages. Component-internal by design — no props, per-instance lifetime.
+  const historyNav = useInputHistory(onChange);
+
   // Command autocomplete panel control. The panel keeps focus in the input and
   // exposes a keydown handler for navigation; we delegate to it here so
   // ArrowUp/Down/Enter/Escape drive the panel while the user keeps typing.
@@ -225,7 +230,12 @@ export const ChatInput = memo(function ChatInput({
     }
     // Delegate to the command autocomplete. Returns false on Enter-select so
     // the Sender skips its submit (see TextArea.js `eventRes === false`).
-    return cmdRef.current?.handleKeyDown(e);
+    const eventRes = cmdRef.current?.handleKeyDown(e);
+    if (eventRes === false) return false;
+    // History recall comes after the panel: it consumes arrows by calling
+    // preventDefault, so defaultPrevented marks the key as taken.
+    if (!e.defaultPrevented) historyNav.handleArrowKey(e);
+    return undefined;
   };
 
   const handleSubmit = (val: string) => {
@@ -234,6 +244,9 @@ export const ChatInput = memo(function ChatInput({
     if (!trimmed && !(attachments && attachments.length > 0)) {
       return;
     }
+    // 记入输入历史(↑/↓ 回溯用)。命令消息与纯文本都记;纯图消息
+    // commit('') 是 no-op。
+    historyNav.commit(trimmed);
     // A leading trigger (e.g. "/") means a command message: resolve it to a
     // ChatCommand and fire onCommand instead of sending it as plain text.
     // This keeps onCommand's "execute the command" semantics — it fires when

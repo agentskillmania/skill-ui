@@ -630,3 +630,250 @@ describe('ChatInput — attachments', () => {
     expect(onSubmit.mock.calls[0]).toHaveLength(1);
   });
 });
+
+describe('ChatInput — input history recall', () => {
+  const PLACEHOLDER = '输入消息... (Shift+Enter 换行)';
+
+  /** 提交一条消息:受控 rerender 到该值 + Enter。返回 rerender 供继续编排。 */
+  function setup(initialValue = '') {
+    const onChange = vi.fn();
+    const onSubmit = vi.fn();
+    const view = render(
+      <ChatWrapper>
+        <ChatInput value={initialValue} onChange={onChange} onSubmit={onSubmit} />
+      </ChatWrapper>
+    );
+    const textarea = () => screen.getByPlaceholderText(PLACEHOLDER) as HTMLTextAreaElement;
+    const send = (text: string) => {
+      view.rerender(
+        <ChatWrapper>
+          <ChatInput value={text} onChange={onChange} onSubmit={onSubmit} />
+        </ChatWrapper>
+      );
+      fireEvent.keyDown(textarea(), { key: 'Enter', code: 'Enter' });
+      // 宿主契约:提交后清空输入(草稿基线为 '')
+      view.rerender(
+        <ChatWrapper>
+          <ChatInput value="" onChange={onChange} onSubmit={onSubmit} />
+        </ChatWrapper>
+      );
+    };
+    const up = (init?: Record<string, unknown>) =>
+      fireEvent.keyDown(textarea(), { key: 'ArrowUp', code: 'ArrowUp', ...init });
+    const down = (init?: Record<string, unknown>) =>
+      fireEvent.keyDown(textarea(), { key: 'ArrowDown', code: 'ArrowDown', ...init });
+    return { onChange, onSubmit, send, up, down, textarea, ...view };
+  }
+
+  it('ArrowUp recalls the last submitted message', () => {
+    const { send, up, onChange } = setup();
+    send('第一条');
+    onChange.mockClear();
+    up();
+    expect(onChange).toHaveBeenCalledWith('第一条');
+  });
+
+  it('ArrowUp/Down walk through history; past the newest restores the draft', () => {
+    const { send, up, down, onChange } = setup();
+    send('旧消息');
+    send('新消息');
+    onChange.mockClear();
+    up(); // → 新消息
+    up(); // → 旧消息
+    expect(onChange).toHaveBeenLastCalledWith('旧消息');
+    down(); // → 新消息
+    expect(onChange).toHaveBeenLastCalledWith('新消息');
+    down(); // past newest → draft ('' at this point)
+    expect(onChange).toHaveBeenLastCalledWith('');
+  });
+
+  it('a non-empty in-progress draft is restored when walking back down', () => {
+    const { send, rerender, up, down, onChange } = setup();
+    send('已发送');
+    rerender(
+      <ChatWrapper>
+        <ChatInput value="写到一半" onChange={onChange} onSubmit={vi.fn()} />
+      </ChatWrapper>
+    );
+    up(); // → 已发送 (draft saved: 写到一半)
+    down(); // → draft restored
+    expect(onChange).toHaveBeenLastCalledWith('写到一半');
+  });
+
+  it('ArrowUp clamps at the oldest entry (value unchanged, key consumed)', () => {
+    const { send, up, onChange } = setup();
+    send('only-one');
+    onChange.mockClear();
+    up();
+    up();
+    up();
+    // 仍然是最旧(也是唯一)一条,不越界、不重复触发其它值。
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith('only-one');
+  });
+
+  // JSX 属性字符串不做 \n 转义(HTML 属性语义),多行值必须走 JS 表达式。
+  const MULTILINE = 'line1\nline2';
+
+  it('ArrowUp does not recall when the caret is not on the first line', () => {
+    const { send, rerender, up, onChange, textarea } = setup();
+    send('历史');
+    onChange.mockClear();
+    // 宿主回显多行草稿,光标放第二行(rerender 而非 fireEvent.change:
+    // 受控组件的 DOM 值由 React 还原,change 模拟不真实)
+    rerender(
+      <ChatWrapper>
+        <ChatInput value={MULTILINE} onChange={onChange} onSubmit={vi.fn()} />
+      </ChatWrapper>
+    );
+    textarea().selectionStart = 6; // 换行符之后 = 第二行行首
+    up();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('ArrowDown does not recall when the caret is not on the last line', () => {
+    const { send, rerender, up, down, onChange, textarea } = setup();
+    send('历史');
+    onChange.mockClear();
+    up(); // 进入回溯态
+    onChange.mockClear();
+    rerender(
+      <ChatWrapper>
+        <ChatInput value={MULTILINE} onChange={onChange} onSubmit={vi.fn()} />
+      </ChatWrapper>
+    );
+    textarea().selectionStart = 0; // 第一行
+    down();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('ArrowDown outside browsing mode passes through (no onChange)', () => {
+    const { down, onChange } = setup('随便打点字');
+    down();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('consecutive duplicate submits collapse into one entry', () => {
+    const { send, up, onChange } = setup();
+    send('更旧的一条');
+    send('重复');
+    send('重复');
+    onChange.mockClear();
+    up(); // → 重复(最新)
+    up(); // 越过重复 → 更旧的一条
+    expect(onChange).toHaveBeenLastCalledWith('更旧的一条');
+    up(); // 已是最旧,停住
+    expect(onChange).toHaveBeenCalledTimes(2);
+  });
+
+  it('resending a recalled message resets the pointer (no stack growth)', () => {
+    const { send, up, onChange } = setup();
+    send('A');
+    send('B');
+    onChange.mockClear();
+    up(); // → B(最新)
+    // 宿主回显召回值后直接回车重发:连续去重,栈不增长、指针归位
+    send('B');
+    onChange.mockClear();
+    up(); // → 仍是 B(未重复入栈)
+    up(); // → A
+    expect(onChange).toHaveBeenLastCalledWith('A');
+  });
+
+  it('command panel visible: ArrowUp drives the panel, not history', async () => {
+    const onChange = vi.fn();
+    const view = render(
+      <ChatWrapper>
+        <ChatInput
+          value="历史文本"
+          onChange={onChange}
+          onSubmit={vi.fn()}
+          onCommand={vi.fn()}
+          commands={mockCommands}
+        />
+      </ChatWrapper>
+    );
+    const textarea = screen.getByPlaceholderText(PLACEHOLDER) as HTMLTextAreaElement;
+    fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' }); // 纯文本提交,入历史
+    view.rerender(
+      <ChatWrapper>
+        <ChatInput value="/" onChange={onChange} onCommand={vi.fn()} commands={mockCommands} />
+      </ChatWrapper>
+    );
+    await waitFor(() => {
+      expect(document.querySelector('[data-testid="cmd-panel"]')).toBeTruthy();
+    });
+    onChange.mockClear();
+    fireEvent.keyDown(textarea, { key: 'ArrowUp', code: 'ArrowUp' });
+    // 面板消费按键(preventDefault):历史不写值,active 高亮 wrap 到最后一项
+    expect(onChange).not.toHaveBeenCalled();
+    const active = document.querySelector('[data-testid="cmd-item"][data-active]');
+    expect(active?.getAttribute('data-index')).toBe('1');
+  });
+
+  it('ArrowUp does not recall during IME composition', () => {
+    const { send, up, onChange } = setup();
+    send('历史');
+    onChange.mockClear();
+    up({ isComposing: true });
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('modified arrows do not recall', () => {
+    const { send, up, onChange } = setup();
+    send('历史');
+    onChange.mockClear();
+    up({ shiftKey: true });
+    up({ ctrlKey: true });
+    up({ metaKey: true });
+    up({ altKey: true });
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('ArrowUp with empty history passes through', () => {
+    const { up, onChange } = setup();
+    up();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('caps history at 50 entries (oldest fall off)', () => {
+    const { send, up, onChange } = setup();
+    for (let i = 1; i <= 55; i++) send(`msg-${i}`);
+    onChange.mockClear();
+    up(); // → msg-55
+    expect(onChange).toHaveBeenLastCalledWith('msg-55');
+    // 到最旧(msg-6)需 49 次有效 ↑;多按的停在最旧不再写值
+    for (let i = 0; i < 54; i++) up();
+    expect(onChange).toHaveBeenLastCalledWith('msg-6');
+    up(); // 已是最旧,停住
+    // 1 次进入回溯 + 49 次有效前翻 = 50 次写值
+    expect(onChange).toHaveBeenCalledTimes(50);
+  });
+
+  it('slash command submissions are recorded in history', () => {
+    const onChange = vi.fn();
+    const onCommand = vi.fn();
+    const view = render(
+      <ChatWrapper>
+        <ChatInput
+          value="/search"
+          onChange={onChange}
+          onCommand={onCommand}
+          commands={mockCommands}
+        />
+      </ChatWrapper>
+    );
+    const textarea = screen.getByPlaceholderText(PLACEHOLDER) as HTMLTextAreaElement;
+    fireEvent.keyDown(textarea, { key: 'Enter', code: 'Enter' });
+    expect(onCommand).toHaveBeenCalled();
+    // 命令面板此时应已因值变化关闭(dismissed);值为空时按 ↑ 召回命令
+    view.rerender(
+      <ChatWrapper>
+        <ChatInput value="" onChange={onChange} onCommand={onCommand} commands={mockCommands} />
+      </ChatWrapper>
+    );
+    onChange.mockClear();
+    fireEvent.keyDown(textarea, { key: 'ArrowUp', code: 'ArrowUp' });
+    expect(onChange).toHaveBeenCalledWith('/search');
+  });
+});
