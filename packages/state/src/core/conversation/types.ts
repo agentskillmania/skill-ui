@@ -123,6 +123,24 @@ export interface TodoListSnapshot {
   items: TodoItem[];
 }
 
+// ─── A2UI Surfaces ────────────────────────────────────────────────
+
+/**
+ * Materialized state of one A2UI surface. The a2ui_* tools carry their whole
+ * payload in the tool-start args (backend is ack-only), so the frontend keeps
+ * the resolved component tree / data model / title here to serialize
+ * self-contained genui protocol blocks — including the reopen replay when a
+ * later turn touches a surface created in an earlier one.
+ */
+export interface A2uiSurfaceState {
+  components: unknown[];
+  dataModel: unknown;
+  title?: string;
+}
+
+/** Per-conversation surface registry, keyed by surfaceId. */
+export type A2uiSurfaces = Record<string, A2uiSurfaceState>;
+
 // ─── Agent Run State ──────────────────────────────────────────────
 
 /**
@@ -184,6 +202,15 @@ export interface AgentRunState {
    */
   turnTokens: TokenStats;
   turnDurationMs: number;
+  /**
+   * A2UI surface registry (reducer-private bookkeeping, never serialized):
+   * materialized component trees and data models for surfaces touched by
+   * a2ui_* tool calls in this run. Maintained by the a2ui.ts pure helpers on
+   * both the live path (reducer) and the resume path (fromHistory), so a
+   * block reopened in a later turn can replay full state. Sub-agent runs
+   * each carry their own registry.
+   */
+  a2uiSurfaces: A2uiSurfaces;
 }
 
 /**
@@ -217,6 +244,7 @@ export function createEmptyRunState(): AgentRunState {
     messages: [],
     turnTokens: { ...ZERO_TOKENS },
     turnDurationMs: 0,
+    a2uiSurfaces: {},
   };
 }
 

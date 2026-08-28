@@ -10,13 +10,16 @@
  * - row content → text block (before the row's tool blocks — live SSE also
  *   delivers the tokens of a completion before its tool-start events, so
  *   both paths agree)
- * - toolCalls + role:'tool' result → tool_call / skill / human_input / subagent block
+ * - toolCalls + role:'tool' result → tool_call / skill / human_input / subagent /
+ *   a2ui block
  *
  * The result is block-for-block identical to what the live reducer produces
  * for the same conversation — resume must never reshuffle the layout.
  *
- * Limitations: sub-agent internal conversations, a2ui, and streaming
- * animations are runtime-only and cannot be reconstructed.
+ * Limitations: sub-agent internal conversations and streaming animations are
+ * runtime-only and cannot be reconstructed. a2ui blocks ARE rebuilt (same
+ * applyA2uiCall pure fold as the live path; the materialized surface
+ * registry is restored onto state.main for later-turn reopen replays).
  */
 
 import {
@@ -30,9 +33,12 @@ import {
   humanInputBlock,
   subagentBlock,
   todoBlock,
+  a2uiBlock,
+  appendA2uiLines,
   type HumanInputQuestion,
   TODO_TOOL,
 } from './blocks.js';
+import { A2UI_TOOLS, applyA2uiCall, a2uiBlockOpeningLines } from './a2ui.js';
 import type {
   SessionRunState,
   AgentMessage,
@@ -41,6 +47,7 @@ import type {
   SubAgentRunState,
   TodoListSnapshot,
   TurnUsage,
+  A2uiSurfaces,
 } from './types.js';
 import { createEmptySessionState, createEmptyRunState } from './types.js';
 import type { ColtsContentPart, ColtsMessageInput } from '../types.js';
@@ -148,6 +155,9 @@ export function fromHistory(
   const state = createEmptySessionState();
   const agentMessages: AgentMessage[] = [];
   const subAgents = new Map<string, SubAgentRunState>();
+  // a2ui surface 物化状态:顺序重放全部工具调用,与 live 的逐事件 fold 同构;
+  // 结束后写回 state.main,供 loadHistory 后的 live 尾流继续跨 turn 重放。
+  let a2uiSurfaces: A2uiSurfaces = {};
   // The assistant bubble currently being built. One turn spans multiple
   // persisted rows (per LLM call), so consecutive assistant rows without an
   // intervening user message merge into this single bubble.
@@ -222,6 +232,47 @@ export function fromHistory(
           // 跳过同构):todo 卡由 extras.todoList 快照合成,工具块是噪音。
           // ask_human 走下方 HUMAN_TOOL 分支(问答块),不受此影响。
           if (tc.name === TODO_TOOL) continue;
+
+          // a2ui_*:与 live 的 tool-start 特判同构 —— args 物化成 genui 协议
+          // 行,按 surfaceId 聚合进一个 a2ui 块(跨行聚到同一气泡内的块,
+          // 跨 turn 则重开新块并前缀重放全量状态)。args 不可用(老档/协议
+          // 漂移)时落回普通 tool_call 块,不丢调用。
+          if (A2UI_TOOLS.has(tc.name)) {
+            const res = applyA2uiCall(a2uiSurfaces, tc.name, tc.arguments);
+            if (res) {
+              a2uiSurfaces = res.surfaces;
+              const findA2ui = (arr: AgentBlock[] | undefined) =>
+                arr?.find((b) => b.type === 'a2ui' && b.metadata?.surfaceId === res.surfaceId);
+              const inRow = findA2ui(blocks);
+              const inBubble = inRow ?? findA2ui(current?.blocks);
+              if (inBubble) {
+                // 历史路径无在途概念:合并行后直接落 completed、清空在途表。
+                const appended = appendA2uiLines(inBubble, res.lines, tc.id, res.title);
+                const merged = {
+                  ...appended,
+                  status: 'completed' as const,
+                  metadata: { ...appended.metadata, pendingCallIds: [] as string[] },
+                };
+                if (inRow) {
+                  blocks[blocks.indexOf(inRow)] = merged;
+                } else if (current) {
+                  current.blocks = (current.blocks ?? []).map((b) => (b === inBubble ? merged : b));
+                }
+              } else {
+                const content = [...a2uiBlockOpeningLines(tc.name, res), ...res.lines].join('\n');
+                const b = a2uiBlock({
+                  id: genHistBlockId(),
+                  surfaceId: res.surfaceId,
+                  content,
+                  status: 'completed',
+                  title: res.title,
+                  callId: tc.id,
+                });
+                blocks.push({ ...b, metadata: { ...b.metadata, pendingCallIds: [] } });
+              }
+              continue;
+            }
+          }
 
           if (tc.name === SKILL_TOOL) {
             // skill 块 = load_skill 调用本身:name/task 取自工具参数,
@@ -399,6 +450,7 @@ export function fromHistory(
     // streaming bubble. "Closed" is event history, never message shape.
   };
   state.subAgents = subAgents;
+  state.main.a2uiSurfaces = a2uiSurfaces;
 
   // todo 快照恢复:state.todoList 供侧栏渲染;内联块只合成一个(快照语义
   // —— 表现最终清单,不为历史里的每次写入补块),挂到最后一条 assistant

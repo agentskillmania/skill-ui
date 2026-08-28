@@ -20,8 +20,12 @@ import {
   humanInputBlock,
   subagentBlock,
   todoBlock,
+  a2uiBlock,
+  appendA2uiLines,
+  resolveA2uiCall,
   PRESENTED_TOOLS,
 } from './blocks.js';
+import { A2UI_TOOLS, applyA2uiCall, a2uiBlockOpeningLines } from './a2ui.js';
 import { normalizeEvent } from './normalize.js';
 import type {
   SessionRunState,
@@ -402,6 +406,39 @@ function reduceMainEvent(
           })),
         };
       }
+      // a2ui_* 特判:surface 数据全在工具 args 里(后端纯 ack,无专用事件),
+      // 在此物化成 genui 协议行并按 surfaceId 聚合成块;args 不可用时返回
+      // null,落回下方普通 tool_call 块(降级,不丢调用)。
+      if (A2UI_TOOLS.has(toolName)) {
+        const res = applyA2uiCall(run.a2uiSurfaces, toolName, data.args);
+        if (res) {
+          return {
+            ...run,
+            a2uiSurfaces: res.surfaces,
+            messages: updateMessageById(run.messages, messageId, (m) => {
+              const blocks = m.blocks ?? [];
+              const idx = blocks.findIndex(
+                (b) => b.type === 'a2ui' && b.metadata?.surfaceId === res.surfaceId
+              );
+              if (idx >= 0) {
+                const next = [...blocks];
+                next[idx] = appendA2uiLines(blocks[idx], res.lines, callId, res.title);
+                return { ...m, blocks: next };
+              }
+              const content = [...a2uiBlockOpeningLines(toolName, res), ...res.lines].join('\n');
+              const a2ui = a2uiBlock({
+                id: genId('a2ui'),
+                surfaceId: res.surfaceId,
+                content,
+                status: 'streaming',
+                title: res.title,
+                callId,
+              });
+              return { ...m, blocks: [...closeProseBlocks(blocks), a2ui] };
+            }),
+          };
+        }
+      }
       // load_skill 与 fromHistory 的 SKILL_TOOL 特判同构：实时也展示为 skill 块。
       // 块语义 = 一次工具调用:tool-start 建块(streaming),tool-end 收尾;
       // task 取自工具参数,没有独立的技能生命周期事件。
@@ -431,6 +468,20 @@ function reduceMainEvent(
 
     case 'tool-end': {
       const callId = (data.callId as string) ?? '';
+      // a2ui 聚合块按 metadata.pendingCallIds 配对(块 id 是 surface 级,
+      // 不是 callId);命中即收尾。未命中(a2ui 调用走了降级路径)时
+      // updateMessageWithBlock 原样返回数组,落回下方按块 id 的通用配对。
+      const isA2uiPending = (b: AgentBlock) =>
+        b.type === 'a2ui' &&
+        Array.isArray(b.metadata?.pendingCallIds) &&
+        (b.metadata.pendingCallIds as string[]).includes(callId);
+      const a2uiMessages = updateMessageWithBlock(state.messages, isA2uiPending, (m) => ({
+        ...m,
+        blocks: (m.blocks ?? []).map((b) => (isA2uiPending(b) ? resolveA2uiCall(b, callId) : b)),
+      }));
+      if (a2uiMessages !== state.messages) {
+        return { ...state, messages: a2uiMessages };
+      }
       // Match by block id (set to callId at tool-start time). Both daemons
       // emit callId unconditionally and old sessions load via fromHistory —
       // there is no sender left that needs the historical sole-streaming

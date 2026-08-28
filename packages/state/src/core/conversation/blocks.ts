@@ -176,3 +176,68 @@ export function subagentBlock(opts: {
 export function todoBlock(id: string, items: TodoItem[], status: BlockStatus): AgentBlock {
   return { id, type: 'todo', status, content: '', metadata: { items } };
 }
+
+// ─── A2UI blocks ──────────────────────────────────────────────────
+
+/** a2ui 块 = 同一 surface 的多次 a2ui_* 工具调用聚合的专用展示。content 是
+ * genui 流协议的 NDJSON(只追加,渲染端按差分喂 SurfaceManager),原始工具
+ * 调用不再另出 tool_call 块(同 PRESENTED_TOOLS 的降噪理由)。 */
+export function a2uiBlock(opts: {
+  id: string;
+  surfaceId: string;
+  content: string;
+  status: BlockStatus;
+  title?: string;
+  callId: string;
+}): AgentBlock {
+  const { id, surfaceId, content, status, title, callId } = opts;
+  return {
+    id,
+    type: 'a2ui',
+    status,
+    content,
+    metadata: {
+      surfaceId,
+      pendingCallIds: [callId],
+      ...(title !== undefined ? { title } : {}),
+    },
+  };
+}
+
+/** 同 surface 的后续调用:追加协议行(append-only),callId 计入在途。 */
+export function appendA2uiLines(
+  block: AgentBlock,
+  lines: string[],
+  callId: string,
+  title?: string
+): AgentBlock {
+  const pending = [
+    ...(Array.isArray(block.metadata?.pendingCallIds)
+      ? (block.metadata.pendingCallIds as string[])
+      : []),
+    callId,
+  ];
+  const joined = lines.join('\n');
+  return {
+    ...block,
+    status: 'streaming',
+    content: block.content && joined ? `${block.content}\n${joined}` : block.content || joined,
+    metadata: {
+      ...block.metadata,
+      pendingCallIds: pending,
+      ...(title !== undefined ? { title } : {}),
+    },
+  };
+}
+
+/** tool-end 配对:移除在途 callId,全部落地后块转 completed。 */
+export function resolveA2uiCall(block: AgentBlock, callId: string): AgentBlock {
+  const pending = (
+    Array.isArray(block.metadata?.pendingCallIds) ? (block.metadata.pendingCallIds as string[]) : []
+  ).filter((id) => id !== callId);
+  return {
+    ...block,
+    status: pending.length > 0 ? 'streaming' : 'completed',
+    metadata: { ...block.metadata, pendingCallIds: pending },
+  };
+}
