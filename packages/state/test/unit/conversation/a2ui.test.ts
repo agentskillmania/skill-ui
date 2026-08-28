@@ -53,6 +53,18 @@ describe('applyA2uiCall — pure fold', () => {
     expect(line.updateComponents.components).toEqual([comp('root', 'Column')]);
   });
 
+  it('skill dialect: any verb + path /components + array value is a full replacement', () => {
+    // 实测模型会发 op:'insert' 携带全量数组(path/value 方言语义只认寻址,
+    // 不认动词)——曾因此把整棵树静默丢弃,渲染出空白 surface。
+    for (const verb of ['insert', 'replace', 'set', 'update']) {
+      const res = applyA2uiCall({}, 'a2ui_update_components', {
+        surfaceId: 's1',
+        operations: [{ op: verb, path: '/components', value: [comp('root', 'Row')] }],
+      });
+      expect(res!.surfaces['s1'].components).toEqual([comp('root', 'Row')]);
+    }
+  });
+
   it('wrangler dialect: insert honors afterId over parentId', () => {
     let surfaces = {};
     surfaces = applyA2uiCall(surfaces, 'a2ui_update_components', {

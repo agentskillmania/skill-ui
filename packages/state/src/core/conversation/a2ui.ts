@@ -94,10 +94,12 @@ function applyOperations(components: unknown[], ops: unknown[]): unknown[] {
   for (const raw of ops) {
     if (!isRecord(raw)) continue;
     const op = typeof raw.op === 'string' ? raw.op : '';
-    // Skill dialect: full-tree replace addressed by JSON-Pointer.
-    const isFullReplacePath =
-      op === 'replace' && (raw.path === '/components' || raw.path === '/' || raw.path === '');
-    if (isFullReplacePath && Array.isArray(raw.value)) {
+    // Skill dialect: full-tree payload addressed by JSON-Pointer. The verb is
+    // NOT part of the semantics — models emit replace/insert/set alike with
+    // path '/components' + a full array (observed live: op:'insert' carrying
+    // the whole tree). Anything matching that shape is a full replacement.
+    const isFullTreePath = raw.path === '/components' || raw.path === '/' || raw.path === '';
+    if (isFullTreePath && Array.isArray(raw.value)) {
       list.length = 0;
       list.push(...cloneJson(raw.value));
       continue;
