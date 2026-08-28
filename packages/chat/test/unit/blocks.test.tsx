@@ -931,6 +931,93 @@ describe('BlocksRenderer', () => {
     expect(screen.getByText('custom shell: pwd')).toBeInTheDocument();
   });
 
+  it('adapts file_edit tool_calls to FileEditBlock (diff from args, count from receipt)', () => {
+    const editCall: Block = {
+      id: 'fe1',
+      type: 'tool_call',
+      status: 'completed',
+      content: '',
+      metadata: {
+        toolName: 'file_edit',
+        toolArgs: JSON.stringify({ filePath: 'a.ts', oldString: 'x\n', newString: 'y\n' }),
+        toolResult: 'Edited a.ts: Successfully replaced 1 occurrence\nUpdated region:\n7→y;',
+      },
+    };
+    const { container } = render(
+      <ChatWrapper>
+        <BlocksRenderer blocks={[editCall]} />
+      </ChatWrapper>
+    );
+    expandAllCollapsed();
+    const text = container.textContent ?? '';
+    expect(text).toContain('文件编辑');
+    expect(text).toContain('+1');
+    expect(text).toContain('-1');
+  });
+
+  it('falls back to generic tool_call rendering for file_edit with corrupted args', () => {
+    const editCall: Block = {
+      id: 'fe2',
+      type: 'tool_call',
+      status: 'completed',
+      content: '',
+      metadata: { toolName: 'file_edit', toolArgs: '{not-json', toolResult: 'Error: bad' },
+    };
+    render(
+      <ChatWrapper>
+        <BlocksRenderer blocks={[editCall]} />
+      </ChatWrapper>
+    );
+    // 专用块未命中:无 diff 徽标,通用块直接展示工具名
+    expect(screen.queryByText('文件编辑')).not.toBeInTheDocument();
+    expect(screen.getByText('file_edit')).toBeInTheDocument();
+  });
+
+  it('lets a custom file_edit renderer override the adaptation', () => {
+    const editCall: Block = {
+      id: 'fe3',
+      type: 'tool_call',
+      status: 'completed',
+      content: '',
+      metadata: {
+        toolName: 'file_edit',
+        toolArgs: JSON.stringify({ filePath: 'a.ts', oldString: 'x\n', newString: 'y\n' }),
+      },
+    };
+    const CustomEdit = ({ block }: { block: Block }) => (
+      <div>custom edit: {(block.metadata as { filePath?: string }).filePath}</div>
+    );
+    render(
+      <ChatWrapper>
+        <BlocksRenderer blocks={[editCall]} renderers={{ blocks: { file_edit: CustomEdit } }} />
+      </ChatWrapper>
+    );
+    expect(screen.getByText('custom edit: a.ts')).toBeInTheDocument();
+  });
+
+  it('tool_call-level custom renderer wins over the file_edit adaptation', () => {
+    const editCall: Block = {
+      id: 'fe4',
+      type: 'tool_call',
+      status: 'completed',
+      content: '',
+      metadata: {
+        toolName: 'file_edit',
+        toolArgs: JSON.stringify({ filePath: 'a.ts', oldString: 'x\n', newString: 'y\n' }),
+      },
+    };
+    const CustomGeneric = ({ block }: { block: Block }) => (
+      <div>generic: {(block.metadata as { toolName?: string }).toolName}</div>
+    );
+    render(
+      <ChatWrapper>
+        <BlocksRenderer blocks={[editCall]} renderers={{ blocks: { tool_call: CustomGeneric } }} />
+      </ChatWrapper>
+    );
+    expect(screen.getByText('generic: file_edit')).toBeInTheDocument();
+    expect(screen.queryByText('文件编辑')).not.toBeInTheDocument();
+  });
+
   it('shell adaptation: metadata.command wins, output falls back to block content', () => {
     // command provided directly (no toolArgs parse) + no toolResult →
     // ShellBlock output comes from block.content; running status keeps the

@@ -45,6 +45,7 @@
   "dependencies": {
     "@agentskillmania/skill-ui-theme": "workspace:*",
     "@microlink/react-json-view": "^1.31.18",
+    "diff": "^9.0.0",
     "monaco-editor": "^0.55.1",
     "@agentskillmania/skill-ui-shared": "workspace:*",
     "@monaco-editor/react": "^4.7.0",

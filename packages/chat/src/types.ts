@@ -134,6 +134,24 @@ export interface ShellMetadata {
   exitCode?: number;
 }
 
+/** File edit tool metadata — parsed from the file_edit tool call args and receipt */
+export interface FileEditMetadata {
+  /** Path to the edited file, relative to workspace */
+  filePath?: string;
+  /** Exact text being replaced (before) */
+  oldString?: string;
+  /** Replacement text (after) */
+  newString?: string;
+  /** Whether all occurrences were replaced */
+  replaceAll?: boolean;
+  /** Parsed from receipt: number of replacements (>1 when replaceAll hit multiple sites) */
+  occurrences?: number;
+  /** Parsed from receipt: line number of the updated region start (1-based, new-content coordinates) */
+  startLine?: number;
+  /** Parsed from receipt: raw guard message when the edit was rejected (receipt starts with "Error:") */
+  errorMessage?: string;
+}
+
 /** Human interaction metadata */
 /** A single question in a multi-question human-input request (mirrors the
  * daemon's HumanQuestion). */

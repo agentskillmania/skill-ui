@@ -55,6 +55,10 @@
     "title": "Shell",
     "running": "Running"
   },
+  "fileEdit": {
+    "title": "File Edit",
+    "running": "Running"
+  },
   "commands": {
     "noMatch": "No matching commands",
     "defaultGroup": "Common"

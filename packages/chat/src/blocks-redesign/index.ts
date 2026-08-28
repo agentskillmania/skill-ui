@@ -11,3 +11,4 @@ export { SubAgentBlock } from './SubAgentBlock.js';
 export { SubAgentModal } from './SubAgentModal.js';
 export { TodoBlock } from './TodoBlock.js';
 export { ShellBlock } from './ShellBlock.js';
+export { FileEditBlock } from './FileEditBlock.js';

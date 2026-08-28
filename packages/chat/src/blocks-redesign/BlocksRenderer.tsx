@@ -5,9 +5,11 @@ import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css, keyframes } from '@emotion/react';
 
 import type { Block, BlockProps, ChatRenderers, BlockAction } from '../types.js';
-import type { ShellMetadata, ToolCallMetadata } from '../types.js';
+import type { FileEditMetadata, ShellMetadata, ToolCallMetadata } from '../types.js';
 import { A2UIBlock } from './A2UIBlock.js';
 import { ErrorBlock } from './ErrorBlock.js';
+import { parseFileEditReceipt } from './file-edit.js';
+import { FileEditBlock } from './FileEditBlock.js';
 import { HumanInputBlock } from './HumanInputBlock.js';
 import { PlanBlock } from './PlanBlock.js';
 import { ShellBlock } from './ShellBlock.js';
@@ -46,6 +48,7 @@ const builtinBlockRenderers: Record<string, React.ComponentType<BlockProps>> = {
   subagent: SubAgentBlock,
   todo: TodoBlock,
   shell: ShellBlock,
+  file_edit: FileEditBlock,
 };
 
 /** tool_call 块是否为 shell 工具(命中专用块渲染)。 */
@@ -76,7 +79,56 @@ function asShellBlock(block: Block): Block {
     const m = /^Exit code: (\d+)/m.exec(output);
     exitCode = m ? Number(m[1]) : 0;
   }
-  return { ...block, type: 'shell', metadata: { command, output, exitCode } };
+  return {
+    ...block,
+    type: 'shell',
+    // keep the raw tool_call fields so tool_call-level custom renderers
+    // still see the original shape (same contract as asFileEditBlock)
+    metadata: { ...block.metadata, command, output, exitCode },
+  };
+}
+
+/** tool_call 块是否为 file_edit 工具(命中专用块渲染)。 */
+function isFileEditToolCall(block: Block): boolean {
+  return (
+    block.type === 'tool_call' &&
+    (block.metadata as ToolCallMetadata | undefined)?.toolName === 'file_edit'
+  );
+}
+
+/** tool_call(file_edit) → FileEditBlock 适配:oldString/newString/replaceAll 取自
+ * toolArgs,occurrences/startLine/errorMessage 按 wrangler file_edit 回执约定从
+ * toolResult 解析。args 缺失或损坏时返回 null,回落通用 ToolCallBlock。 */
+function asFileEditBlock(block: Block): Block | null {
+  const meta = (block.metadata ?? {}) as Partial<ToolCallMetadata> & Partial<FileEditMetadata>;
+  let args: {
+    filePath?: unknown;
+    oldString?: unknown;
+    newString?: unknown;
+    replaceAll?: unknown;
+  } = {};
+  try {
+    args = meta.toolArgs ? (JSON.parse(meta.toolArgs) as typeof args) : {};
+  } catch {
+    return null;
+  }
+  if (typeof args.oldString !== 'string' || typeof args.newString !== 'string') {
+    return null;
+  }
+  return {
+    ...block,
+    type: 'file_edit',
+    metadata: {
+      // keep the raw tool_call fields (toolName/toolType/toolArgs/toolResult)
+      // so tool_call-level custom renderers still see the original shape
+      ...block.metadata,
+      filePath: typeof args.filePath === 'string' ? args.filePath : undefined,
+      oldString: args.oldString,
+      newString: args.newString,
+      replaceAll: args.replaceAll === true,
+      ...parseFileEditReceipt(meta.toolResult ?? ''),
+    },
+  };
 }
 
 export function BlocksRenderer({
@@ -96,15 +148,21 @@ export function BlocksRenderer({
       `}
     >
       {blocks.map((block, index) => {
-        // shell 工具的 tool_call 走专用终端块(命令/输出/退出码结构化展示)
+        // shell/file_edit 工具的 tool_call 走各自专用块(结构化展示);
+        // file_edit 的 args 损坏时适配返回 null,回落通用 ToolCallBlock。
         const shell = isShellToolCall(block);
-        const effective = shell ? asShellBlock(block) : block;
-        // Custom renderer takes priority:tool_call 级定制优先,其次 shell
-        // 专用块的定制,最后内置渲染器。
+        const edit = isFileEditToolCall(block) ? asFileEditBlock(block) : null;
+        const effective = shell ? asShellBlock(block) : (edit ?? block);
+        // Custom renderer takes priority:tool_call 级定制优先,其次专用块
+        // (shell/file_edit)的定制,最后内置渲染器。
         const CustomRenderer =
           renderers?.blocks?.[block.type] ??
-          (shell ? renderers?.blocks?.[effective.type] : undefined);
-        const BuiltinRenderer = shell ? ShellBlock : builtinBlockRenderers[block.type];
+          (shell || edit ? renderers?.blocks?.[effective.type] : undefined);
+        const BuiltinRenderer = shell
+          ? ShellBlock
+          : edit
+            ? FileEditBlock
+            : builtinBlockRenderers[block.type];
         const Renderer = CustomRenderer ?? BuiltinRenderer;
 
         if (!Renderer) return null;

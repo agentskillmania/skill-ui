@@ -55,6 +55,10 @@
     "title": "终端",
     "running": "运行中"
   },
+  "fileEdit": {
+    "title": "文件编辑",
+    "running": "运行中"
+  },
   "commands": {
     "noMatch": "无匹配指令",
     "defaultGroup": "常用"

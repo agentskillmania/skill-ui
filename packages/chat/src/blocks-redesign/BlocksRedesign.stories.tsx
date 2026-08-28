@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { ThinkingBlock } from './ThinkingBlock.js';
 import { TodoBlock } from './TodoBlock.js';
 import { ShellBlock } from './ShellBlock.js';
+import { FileEditBlock } from './FileEditBlock.js';
 import { ToolCallBlock } from './ToolCallBlock.js';
 import { PlanBlock } from './PlanBlock.js';
 import { ErrorBlock } from './ErrorBlock.js';
@@ -498,6 +499,155 @@ export const ShellDarkTheme: Story = {
         <SkillThemeProvider defaultMode="dark">
           <Wrapper>
             <ShellBlock block={block} />
+          </Wrapper>
+        </SkillThemeProvider>
+      </div>
+    );
+  },
+};
+
+// ---- FileEditBlock ----
+
+export const FileEditRunning: Story = {
+  name: 'FileEdit Running',
+  render: () => {
+    const block: Block = {
+      id: 'file-edit-1',
+      type: 'file_edit',
+      status: 'streaming',
+      content: '',
+      metadata: {
+        filePath: 'src/session/run.ts',
+        oldString: 'open(connection);\nconst timeout = 5_000;\nflush(connection);',
+        newString: 'open(connection);\nconst timeout = 10_000;\nflush(connection);',
+      },
+    };
+    return (
+      <Wrapper>
+        <FileEditBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+export const FileEditCompleted: Story = {
+  name: 'FileEdit Completed',
+  render: () => {
+    const block: Block = {
+      id: 'file-edit-2',
+      type: 'file_edit',
+      status: 'completed',
+      content: '',
+      metadata: {
+        filePath: 'src/session/run.ts',
+        oldString: 'open(connection);\nconst timeout = 5_000;\nflush(connection);',
+        newString: 'open(connection);\nconst timeout = 10_000;\nflush(connection);',
+        occurrences: 1,
+        startLine: 41,
+      },
+    };
+    return (
+      <Wrapper>
+        <FileEditBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+export const FileEditReplaceAll: Story = {
+  name: 'FileEdit Replace All',
+  render: () => {
+    const block: Block = {
+      id: 'file-edit-3',
+      type: 'file_edit',
+      status: 'completed',
+      content: '',
+      metadata: {
+        filePath: 'config/settings.yaml',
+        oldString: 'retries: 3',
+        newString: 'retries: 5',
+        replaceAll: true,
+        occurrences: 3,
+        startLine: 7,
+      },
+    };
+    return (
+      <Wrapper>
+        <FileEditBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+export const FileEditDeleted: Story = {
+  name: 'FileEdit Deleted',
+  render: () => {
+    const block: Block = {
+      id: 'file-edit-4',
+      type: 'file_edit',
+      status: 'completed',
+      content: '',
+      metadata: {
+        filePath: 'src/legacy/deprecated.ts',
+        oldString: '// @deprecated since 0.9\nexport const legacyHelper = () => {};',
+        newString: '',
+        occurrences: 1,
+        startLine: 12,
+      },
+    };
+    return (
+      <Wrapper>
+        <FileEditBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+export const FileEditFailed: Story = {
+  name: 'FileEdit Failed',
+  render: () => {
+    const block: Block = {
+      id: 'file-edit-5',
+      type: 'file_edit',
+      status: 'completed',
+      content: '',
+      metadata: {
+        filePath: 'src/session/run.ts',
+        oldString: 'const timeout = 5_000;',
+        newString: 'const timeout = 10_000;',
+        errorMessage:
+          'Error: "const timeout = 5_000;" not found in file. Check for: the N→ line-number prefixes from file_read, invisible whitespace, or CRLF (\\r) line endings',
+      },
+    };
+    return (
+      <Wrapper>
+        <FileEditBlock block={block} />
+      </Wrapper>
+    );
+  },
+};
+
+export const FileEditDarkTheme: Story = {
+  name: 'FileEdit Dark Theme',
+  render: () => {
+    const block: Block = {
+      id: 'file-edit-dark',
+      type: 'file_edit',
+      status: 'completed',
+      content: '',
+      metadata: {
+        filePath: 'src/session/run.ts',
+        oldString: 'open(connection);\nconst timeout = 5_000;\nflush(connection);',
+        newString: 'open(connection);\nconst timeout = 10_000;\nflush(connection);',
+        occurrences: 1,
+        startLine: 41,
+      },
+    };
+    return (
+      <div style={{ background: '#0f172a', padding: 16 }}>
+        <SkillThemeProvider defaultMode="dark">
+          <Wrapper>
+            <FileEditBlock block={block} />
           </Wrapper>
         </SkillThemeProvider>
       </div>

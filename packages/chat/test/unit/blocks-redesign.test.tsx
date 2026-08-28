@@ -179,6 +179,121 @@ describe('ShellBlock', () => {
   });
 });
 
+// ── FileEditBlock ───────────────────────────────────────────────────────────
+
+describe('FileEditBlock', () => {
+  /** tool_call(file_edit) 块工厂:args 必填,回执可选 */
+  const editCall = (
+    status: Block['status'],
+    toolArgs: Record<string, unknown>,
+    toolResult?: string
+  ): Block => ({
+    id: 'fe1',
+    type: 'tool_call',
+    status,
+    content: '',
+    metadata: {
+      toolName: 'file_edit',
+      toolArgs: JSON.stringify(toolArgs),
+      ...(toolResult !== undefined ? { toolResult } : {}),
+    },
+  });
+
+  it('adapts tool_call(file_edit) to a diff block: collapsed on success, expands on click', () => {
+    renderBlock(
+      editCall(
+        'completed',
+        { filePath: 'src/app.ts', oldString: 'const a = old;\n', newString: 'const a = new;\n' },
+        'Edited src/app.ts: Successfully replaced 1 occurrence\nUpdated region:\n10→const a = new;'
+      )
+    );
+    // 成功后折叠:头部摘要可见,diff 行不可见
+    expect(screen.getByText('文件编辑')).toBeInTheDocument();
+    expect(screen.getByText('app.ts')).toBeInTheDocument();
+    expect(screen.queryByText('const a = old;')).not.toBeInTheDocument();
+    // 点标题栏展开:diff 行 + 统计徽标 + 行号出现
+    fireEvent.click(document.querySelector('[aria-expanded="false"]') as HTMLElement);
+    expect(screen.getByText('const a = old;')).toBeInTheDocument();
+    expect(screen.getByText('const a = new;')).toBeInTheDocument();
+    expect(screen.getByText('+1')).toBeInTheDocument();
+    expect(screen.getByText('-1')).toBeInTheDocument();
+    expect(screen.getAllByText('10').length).toBeGreaterThan(0);
+  });
+
+  it('stays expanded while running: diff visible without line numbers, running badge', () => {
+    renderBlock(
+      editCall('streaming', {
+        filePath: 'src/app.ts',
+        oldString: 'const a = old;\n',
+        newString: 'const a = new;\n',
+      })
+    );
+    expect(screen.getByText('运行中')).toBeInTheDocument();
+    expect(screen.getByText('const a = old;')).toBeInTheDocument();
+    expect(screen.getByText('const a = new;')).toBeInTheDocument();
+    // 回执未到:startLine 未知,行号槽整体隐藏
+    expect(screen.queryByText('10')).not.toBeInTheDocument();
+  });
+
+  it('shows the guard rejection message when the receipt starts with Error:', () => {
+    renderBlock(
+      editCall(
+        'completed',
+        { filePath: 'a.txt', oldString: 'x', newString: 'y' },
+        'Error: "x" not found in file. Check for invisible whitespace'
+      )
+    );
+    // 被拒:保持展开,错误文案直接可见,无统计徽标
+    expect(screen.getByText(/not found in file/)).toBeInTheDocument();
+    expect(screen.queryByText('+1')).not.toBeInTheDocument();
+  });
+
+  it('shows the ×N badge for replace_all edits hitting multiple sites', () => {
+    renderBlock(
+      editCall(
+        'completed',
+        {
+          filePath: 'a.txt',
+          oldString: 'let x = 1;\n',
+          newString: 'let x = 2;\n',
+          replaceAll: true,
+        },
+        'Edited a.txt: Successfully replaced 3 occurrences\nUpdated region:\n42→let x = 2;'
+      )
+    );
+    fireEvent.click(document.querySelector('[aria-expanded="false"]') as HTMLElement);
+    expect(screen.getByText('×3')).toBeInTheDocument();
+    expect(screen.getAllByText('42').length).toBe(2);
+  });
+
+  it('falls back to generic tool_call rendering when args are corrupted', () => {
+    renderBlock({
+      id: 'fe2',
+      type: 'tool_call',
+      status: 'completed',
+      content: '',
+      metadata: { toolName: 'file_edit', toolArgs: '{not-json', toolResult: 'Error: bad' },
+    });
+    expect(screen.queryByText('文件编辑')).not.toBeInTheDocument();
+    expect(screen.getByText('file_edit')).toBeInTheDocument();
+  });
+
+  it('renders a direct file_edit block without args: header only, replaceAll badge', () => {
+    // 直构 file_edit 块(如 stories/自定义渲染):无 args 不构建 diff 行;
+    // replaceAll 单次替换且次数未知时显示 replaceAll 徽标
+    renderBlock({
+      id: 'fe3',
+      type: 'file_edit',
+      status: 'completed',
+      content: '',
+      metadata: { filePath: 'notes.md', replaceAll: true },
+    });
+    expect(screen.getByText('文件编辑')).toBeInTheDocument();
+    expect(screen.getByText('replaceAll')).toBeInTheDocument();
+    expect(screen.queryByText('+1')).not.toBeInTheDocument();
+  });
+});
+
 // ── SubAgentBlock ───────────────────────────────────────────────────────────
 
 describe('SubAgentBlock', () => {
