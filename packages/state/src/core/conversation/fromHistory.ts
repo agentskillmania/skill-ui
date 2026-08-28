@@ -163,6 +163,11 @@ export function fromHistory(
 
   for (const msg of messages) {
     if (msg.role === 'user') {
+      // 引擎注入的技能指令(load_skill 成功后驱动下一轮,type=
+      // 'skill-directive'):不渲染气泡、不切断助手回合 —— live 从不
+      // 显示它,resume 必须同构,否则 skill 块与后续内容会被一条
+      // "用户没说过的话"隔开。LLM 侧照常发送,纯展示层跳过。
+      if (msg.type === 'skill-directive') continue;
       const { text, attachments } = normalizeUserContent(msg.content);
       agentMessages.push({
         id: `hist-msg-${agentMessages.length}`,

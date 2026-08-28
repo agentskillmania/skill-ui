@@ -147,6 +147,50 @@ describe('fromHistory', () => {
     expect(skillBlock!.metadata?.result).toBe('You are a poet.');
   });
 
+  it('skills injected skill-directive user rows: no bubble, no turn break', () => {
+    // 引擎在 load_skill 成功后注入 type='skill-directive' 的 user 行驱动
+    // 下一轮。历史重建必须跳过它:既不渲染成用户气泡(用户没说过这句
+    // 话),也不切断助手回合 —— skill 块与后续内容留在同一 assistant
+    // 气泡里,与 live 渲染同构。
+    const messages: ColtsMessageInput[] = [
+      { role: 'user', content: '帮我写首诗', timestamp: 0 },
+      {
+        role: 'assistant',
+        content: '',
+        toolCalls: [{ id: 'call-s1', name: 'load_skill', arguments: { name: 'poet' } }],
+        timestamp: 1000,
+      },
+      {
+        role: 'tool',
+        content: 'You are a poet.',
+        toolCallId: 'call-s1',
+        toolName: 'load_skill',
+        timestamp: 2000,
+      },
+      {
+        role: 'user',
+        content: 'Follow the loaded skill instructions to complete the user request.',
+        type: 'skill-directive',
+        timestamp: 3000,
+      },
+      { role: 'assistant', content: '好的,按手册来。', timestamp: 4000 },
+    ];
+    const state = fromHistory(messages);
+    const msgs = selectMainMessages(state);
+    // 真实用户消息 + 一个 assistant 气泡,directive 行不产生任何消息。
+    expect(msgs).toHaveLength(2);
+    expect(msgs[0].role).toBe('user');
+    expect(msgs[0].content).toBe('帮我写首诗');
+    expect(msgs[1].role).toBe('assistant');
+    // skill 块与后续文本同气泡。
+    const types = msgs[1].blocks?.map((b) => b.type);
+    expect(types).toContain('skill');
+    expect(msgs[1].content).toBe('好的,按手册来。');
+    expect(
+      msgs.some((m) => m.role === 'user' && m.content.includes('Follow the loaded skill'))
+    ).toBe(false);
+  });
+
   it('reconstructs human_input blocks from ask_human tool calls', () => {
     const messages: ColtsMessageInput[] = [
       {
