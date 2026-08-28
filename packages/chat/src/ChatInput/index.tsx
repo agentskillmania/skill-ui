@@ -273,7 +273,9 @@ export const ChatInput = memo(function ChatInput({
     onChange?.(`${commandTrigger}${command.command}`);
   };
 
-  // ---- Toolbar (above the input) ----
+  // ---- Toolbar (Sender footer slot — inside the input box, below the
+  // textarea). Fused look: no divider, the slot's default padding gives a
+  // ~4px gap above the row. ----
   const showCommands = Boolean(commands && commands.length > 0 && onCommand);
   const showModel = Boolean(models && models.length > 0 && onModelChange);
   const showThinking = Boolean(onThinkingChange);
@@ -528,7 +530,6 @@ export const ChatInput = memo(function ChatInput({
           gap: ${theme.spacing[2]};
         `}
       >
-        {toolbarElement}
         {banner}
         <div
           css={css`
@@ -582,7 +583,7 @@ export const ChatInput = memo(function ChatInput({
               // 看到输入栏缩一下。这里把 textarea 的过渡全关掉:本组件已剥掉
               // 边框/背景,没有依赖过渡的视觉态。
               styles={{ input: { transition: 'none' } }}
-              footer={null}
+              footer={toolbarElement ?? undefined}
             />
           </div>
           {suffix}
