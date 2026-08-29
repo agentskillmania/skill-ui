@@ -70,7 +70,34 @@ function cloneJson<T>(v: T): T {
 }
 
 function isComponent(v: unknown): v is Record<string, unknown> {
-  return isRecord(v) && typeof v.id === 'string' && typeof v.component === 'string';
+  return (
+    isRecord(v) &&
+    typeof v.id === 'string' &&
+    (typeof v.component === 'string' || typeof v.type === 'string')
+  );
+}
+
+/**
+ * Normalize a component node to the genui flat shape the renderer consumes.
+ *
+ * Models follow the a2ui tool schema's ComponentNode (`{id, type, properties,
+ * styles}`) just as often as the genui shape (`{id, component, ...flat props}`).
+ * A `type`-shaped tree reaching the renderer is all-unknown components and
+ * renders as a blank surface, so wrangler-shaped nodes are folded here:
+ * `type` → `component`, `properties` spread flat, `styles` → `style`.
+ * Idempotent: genui-shaped nodes pass through untouched.
+ */
+function normalizeNode(v: unknown): unknown {
+  if (!isRecord(v)) return v;
+  if (typeof v.component === 'string') return v;
+  const type = v.type;
+  if (typeof type !== 'string') return v;
+  const node: Record<string, unknown> = { id: v.id, component: type };
+  if (isRecord(v.properties)) Object.assign(node, v.properties);
+  if (isRecord(v.styles)) {
+    node.style = { ...(isRecord(node.style) ? node.style : {}), ...v.styles };
+  }
+  return node;
 }
 
 function findById(components: unknown[], id: unknown): number {
@@ -88,6 +115,9 @@ function findById(components: unknown[], id: unknown): number {
 // 2. wrangler struct dialect (ComponentOperation in operations.rs):
 //    insert/update/delete/replace addressed by component/parent ids.
 // Both are normalized below; anything else is dropped per the no-throw rule.
+// Node shapes are normalized too (normalizeNode): the tool schema's
+// `{id, type, properties, styles}` and genui's `{id, component, …}` both
+// reach this fold, and only the latter renders.
 
 function applyOperations(components: unknown[], ops: unknown[]): unknown[] {
   const list = cloneJson(components);
@@ -101,7 +131,7 @@ function applyOperations(components: unknown[], ops: unknown[]): unknown[] {
     const isFullTreePath = raw.path === '/components' || raw.path === '/' || raw.path === '';
     if (isFullTreePath && Array.isArray(raw.value)) {
       list.length = 0;
-      list.push(...cloneJson(raw.value));
+      list.push(...cloneJson(raw.value).map(normalizeNode));
       continue;
     }
     switch (op) {
@@ -111,7 +141,7 @@ function applyOperations(components: unknown[], ops: unknown[]): unknown[] {
         let idx = parentIdx >= 0 ? parentIdx + 1 : list.length;
         const afterIdx = findById(list, raw.afterId);
         if (afterIdx >= 0) idx = afterIdx + 1;
-        list.splice(Math.min(idx, list.length), 0, cloneJson(raw.component));
+        list.splice(Math.min(idx, list.length), 0, normalizeNode(cloneJson(raw.component)));
         break;
       }
       case 'update': {
@@ -133,7 +163,7 @@ function applyOperations(components: unknown[], ops: unknown[]): unknown[] {
       }
       case 'replace': {
         if (!isComponent(raw.component)) break;
-        const comp = cloneJson(raw.component);
+        const comp = normalizeNode(cloneJson(raw.component)) as Record<string, unknown>;
         const i = findById(list, comp.id);
         if (i >= 0) list[i] = comp;
         else list.push(comp);

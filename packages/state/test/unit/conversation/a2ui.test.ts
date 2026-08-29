@@ -65,6 +65,59 @@ describe('applyA2uiCall — pure fold', () => {
     }
   });
 
+  it('normalizes wrangler-shaped nodes ({id,type,properties,styles}) in full-tree ops', () => {
+    // 模型照工具 schema 发 type 形状节点,genui 只认 component 形状——
+    // 不归一化整棵树都是 unknown component,渲染为空白 surface。
+    const res = applyA2uiCall({}, 'a2ui_update_components', {
+      surfaceId: 's1',
+      operations: [
+        {
+          op: 'replace',
+          path: '/components',
+          value: [
+            { id: 'root', type: 'Column', properties: { gap: 16 }, styles: { padding: 8 } },
+            { id: 'title', type: 'Text', properties: { text: { path: '/page/title' } } },
+          ],
+        },
+      ],
+    })!;
+    expect(res.surfaces['s1'].components).toEqual([
+      { id: 'root', component: 'Column', gap: 16, style: { padding: 8 } },
+      { id: 'title', component: 'Text', text: { path: '/page/title' } },
+    ]);
+    const line = JSON.parse(res.lines[0]);
+    expect(line.updateComponents.components[0].component).toBe('Column');
+  });
+
+  it('normalizes wrangler-shaped nodes in insert/replace ops and passes genui-shaped through', () => {
+    let surfaces = applyA2uiCall({}, 'a2ui_update_components', {
+      surfaceId: 's1',
+      operations: [
+        {
+          op: 'replace',
+          path: '/components',
+          value: [{ id: 'a', type: 'Row', properties: { gutter: 8 } }],
+        },
+      ],
+    })!.surfaces;
+    surfaces = applyA2uiCall(surfaces, 'a2ui_update_components', {
+      surfaceId: 's1',
+      operations: [
+        {
+          op: 'insert',
+          parentId: 'a',
+          component: { id: 'b', type: 'Text', properties: { text: 'hi' } },
+        },
+        { op: 'replace', component: { id: 'c', component: 'Card', title: 'T' } },
+      ],
+    })!.surfaces;
+    expect(surfaces['s1'].components).toEqual([
+      { id: 'a', component: 'Row', gutter: 8 },
+      { id: 'b', component: 'Text', text: 'hi' },
+      { id: 'c', component: 'Card', title: 'T' },
+    ]);
+  });
+
   it('wrangler dialect: insert honors afterId over parentId', () => {
     let surfaces = {};
     surfaces = applyA2uiCall(surfaces, 'a2ui_update_components', {
