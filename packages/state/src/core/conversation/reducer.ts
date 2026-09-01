@@ -716,7 +716,11 @@ function reduceMainEvent(
 
     // ── Step lifecycle ──
     case 'step-start': {
-      return { ...state, stepCount: (data.step as number) ?? state.stepCount + 1 };
+      // 多轮流(events 常驻接口):done 扣闩后的 step-start 是新一轮
+      // (消费轮/后台轮——没有用户消息开路,turnClosed 闩会把帧全部
+      // 丢弃)。先按 run-resumed 同款语义重开轮次,再走正常 step-start。
+      const run = state.turnClosed ? reopenTurn(state) : state;
+      return { ...run, stepCount: (data.step as number) ?? run.stepCount + 1 };
     }
 
     case 'step-end': {
@@ -820,25 +824,7 @@ function reduceMainEvent(
 
     // ── HITL continuation (host-synthesized) ──
     case 'run-resumed': {
-      // /respond 应答后的续跑流没有 user 消息,而 done 已把终态闩
-      // (turnClosed)扣上 —— 宿主在消费续流前注入本事件重开轮次:翻回
-      // streaming、清闩,并预铺一个空的 streaming assistant 气泡(与
-      // user-message 同款打字指示,但没有 user 行)。
-      const resumed: AgentMessage = {
-        id: genId('msg'),
-        role: 'assistant',
-        content: '',
-        status: 'streaming',
-        createdAt: Date.now(),
-      };
-      return {
-        ...state,
-        status: 'streaming',
-        turnClosed: false,
-        turnTokens: { ...ZERO_TOKENS },
-        turnDurationMs: 0,
-        messages: [...state.messages, resumed],
-      };
+      return reopenTurn(state);
     }
 
     case 'error': {
@@ -935,6 +921,28 @@ function reduceSubAgentEvent(
   }
 }
 
+/// done/error 扣闩(turnClosed)之后重开一轮:翻回 streaming、清闩,
+/// 并预铺一个空的 streaming assistant 气泡(与 user-message 同款打字
+/// 指示,但没有 user 行)。run-resumed(宿主合成)与 step-start-after-done
+/// (多轮流:消费轮/后台轮)共用。
+function reopenTurn(state: AgentRunState): AgentRunState {
+  const resumed: AgentMessage = {
+    id: genId('msg'),
+    role: 'assistant',
+    content: '',
+    status: 'streaming',
+    createdAt: Date.now(),
+  };
+  return {
+    ...state,
+    status: 'streaming',
+    turnClosed: false,
+    turnTokens: { ...ZERO_TOKENS },
+    turnDurationMs: 0,
+    messages: [...state.messages, resumed],
+  };
+}
+
 // ─── Top-level reducer ────────────────────────────────────────────
 
 /**
@@ -989,6 +997,38 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
       main: mainWithBlock,
       subAgents,
     };
+  }
+
+  if (eventName === 'delivery') {
+    // 异步委派投递回执(wrangler 的 delivery 事件):子任务结果已进主
+    // 会话邮箱。给子运行与父块都打"已送达"标记——异步模式下子块不
+    // 再以"工具结果形式"收尾,受理与送达是两个独立信号。
+    // delivery 不带 subagent- 前缀,normalizeEvent 不提取 subtaskId,
+    // 直接从载荷里取。
+    const id = (data.subtaskId as string) ?? '';
+    const sub = state.subAgents.get(id);
+    if (!sub) return state;
+    const subAgents = new Map(state.subAgents).set(id, {
+      ...sub,
+      delivered: true,
+      deliveryStatus: data.status as string | undefined,
+      deliveryContent: data.content as string | undefined,
+    });
+    const main = {
+      ...state.main,
+      messages: updateMessageWithBlock(
+        state.main.messages,
+        (b) => b.type === 'subagent' && b.metadata?.subtaskId === id,
+        (m) => ({
+          ...m,
+          blocks: (m.blocks ?? []).map((b) => {
+            if (b.type !== 'subagent' || b.metadata?.subtaskId !== id) return b;
+            return { ...b, metadata: { ...b.metadata, delivered: true } };
+          }),
+        })
+      ),
+    };
+    return { main, subAgents };
   }
 
   if (eventName === 'subagent-end') {

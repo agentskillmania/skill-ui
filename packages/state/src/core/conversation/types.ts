@@ -222,6 +222,10 @@ export interface SubAgentRunState extends AgentRunState {
   parentBlockId: string;
   resultStatus?: 'success' | 'max_steps' | 'error' | 'abort' | 'timeout';
   error?: string;
+  /// 异步委派的投递回执:子任务结果已进主会话邮箱(delivery 事件)。
+  delivered?: boolean;
+  deliveryStatus?: string;
+  deliveryContent?: string;
 }
 
 /**
