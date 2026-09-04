@@ -171,6 +171,21 @@ export function fromHistory(
     }
   }
 
+  // 预扫投递标记:消费轮的 user 消息用 <delivery ...> 包裹异步子女的结果
+  // (wrangler 的邮箱消化格式)。reload 后 delivered/deliveryStatus 据此
+  // 重建——live 的 delivery 帧在重放里没有对应物,持久事实只在这里。
+  const deliveredBySubtask = new Map<string, { status: string; content: string }>();
+  for (const msg of messages) {
+    if (msg.role !== 'user') continue;
+    const text = typeof msg.content === 'string' ? msg.content : textOf(msg.content);
+    for (const m of text.matchAll(DELIVERY_MARKER_RE)) {
+      deliveredBySubtask.set(m[2] ?? '', {
+        status: m[3] ?? '',
+        content: (m[4] ?? '').trim(),
+      });
+    }
+  }
+
   for (const msg of messages) {
     if (msg.role === 'user') {
       // 引擎注入的技能指令(load_skill 成功后驱动下一轮,type=
@@ -308,7 +323,12 @@ export function fromHistory(
           } else if (tc.name === DELEGATE_TOOL) {
             // Parse DelegateResult from tool result
             const delegateResult = parseDelegateResult(resultContent);
-            const subtaskId = `hist-${tc.id}`;
+            // 异步受理(accepted 回执)带真实的 subtaskId——用它做键,live
+            // 的 delivery 帧与下次 reload 才能配上对;同步结果没有
+            // subtaskId,沿用 hist- 前缀。
+            const receiptId = extractReceiptSubtaskId(resultContent);
+            const subtaskId = receiptId ?? `hist-${tc.id}`;
+            const delivered = deliveredBySubtask.get(subtaskId);
             // Minimal sub-run conversation (task + final answer) shared by the
             // parent block metadata (SubAgentModal) and the SubAgentRunState.
             const histMessages = [
@@ -346,9 +366,13 @@ export function fromHistory(
                 messages: histMessages,
               },
             });
-            blocks.push(block);
-            // Create a minimal SubAgentRunState with summary data (no internal conversation)
-            if (delegateResult.status === 'success' || delegateResult.answer) {
+            blocks.push(
+              delivered ? { ...block, metadata: { ...block.metadata, delivered: true } } : block
+            );
+            // Create a minimal SubAgentRunState with summary data (no internal
+            // conversation)。异步受理(accepted 回执)也建——投递标记按
+            // 真实 subtaskId 匹配,建了才能重建 delivered 状态。
+            if (delegateResult.status === 'success' || delegateResult.answer || receiptId) {
               const subRun: SubAgentRunState = {
                 ...createEmptyRunState(),
                 status: 'idle',
@@ -366,6 +390,13 @@ export function fromHistory(
                 duration: delegateResult.duration ?? 0,
                 error: delegateResult.error,
                 messages: histMessages,
+                ...(delivered
+                  ? {
+                      delivered: true,
+                      deliveryStatus: delivered.status,
+                      deliveryContent: delivered.content,
+                    }
+                  : {}),
               };
               subAgents.set(subtaskId, subRun);
             }
@@ -474,6 +505,23 @@ export function fromHistory(
 }
 
 /** Parse a DelegateResult from a tool result string */
+/// 投递标记(wrangler 消费轮的 user 消息格式):
+/// `<delivery agent="..." subtaskId="..." status="...">\n内容\n</delivery>`。
+/// 属性顺序与 wrangler 的 format_deliveries 一一对应。
+const DELIVERY_MARKER_RE =
+  /<delivery\s+agent="([^"]*)"\s+subtaskId="([^"]*)"\s+status="([^"]*)"\s*>\n?([\s\S]*?)\n<\/delivery>/g;
+
+/// 从 delegate 工具结果里提取异步受理回执的真实 subtaskId;同步结果
+/// (无 subtaskId 字段)返回 undefined。
+function extractReceiptSubtaskId(resultStr: string): string | undefined {
+  try {
+    const parsed = JSON.parse(resultStr);
+    return typeof parsed?.subtaskId === 'string' ? parsed.subtaskId : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function parseDelegateResult(resultStr: string): {
   status: string;
   answer?: string;

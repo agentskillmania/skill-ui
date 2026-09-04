@@ -718,8 +718,11 @@ function reduceMainEvent(
     case 'step-start': {
       // 多轮流(events 常驻接口):done 扣闩后的 step-start 是新一轮
       // (消费轮/后台轮——没有用户消息开路,turnClosed 闩会把帧全部
-      // 丢弃)。先按 run-resumed 同款语义重开轮次,再走正常 step-start。
-      const run = state.turnClosed ? reopenTurn(state) : state;
+      // 丢弃)。判别式:只有 step===0(新轮首步)才重开——流是 FIFO,
+      // 同轮迟到的 step>0 不重开(僵尸气泡面缩到零)。重开是惰性的:
+      // 只翻状态清账,不预铺气泡,首个内容帧经 ensureStreamingMessage
+      // 开泡(空轮不留空壳)。
+      const run = state.turnClosed && (data.step as number) === 0 ? reopenTurn(state) : state;
       return { ...run, stepCount: (data.step as number) ?? run.stepCount + 1 };
     }
 
@@ -921,25 +924,18 @@ function reduceSubAgentEvent(
   }
 }
 
-/// done/error 扣闩(turnClosed)之后重开一轮:翻回 streaming、清闩,
-/// 并预铺一个空的 streaming assistant 气泡(与 user-message 同款打字
-/// 指示,但没有 user 行)。run-resumed(宿主合成)与 step-start-after-done
-/// (多轮流:消费轮/后台轮)共用。
+/// done/error 扣闩(turnClosed)之后重开一轮:翻回 streaming、清闩、
+/// 清零本轮用量账目。run-resumed(宿主合成)与 step-start-after-done
+/// (多轮流:消费轮/后台轮)共用。**惰性**:不预铺空气泡——首个内容
+/// 帧(token/thinking)经 ensureStreamingMessage 开泡,迟到的杂帧最多
+/// 翻一下状态,不再制造永久打字的僵尸气泡。
 function reopenTurn(state: AgentRunState): AgentRunState {
-  const resumed: AgentMessage = {
-    id: genId('msg'),
-    role: 'assistant',
-    content: '',
-    status: 'streaming',
-    createdAt: Date.now(),
-  };
   return {
     ...state,
     status: 'streaming',
     turnClosed: false,
     turnTokens: { ...ZERO_TOKENS },
     turnDurationMs: 0,
-    messages: [...state.messages, resumed],
   };
 }
 
@@ -958,9 +954,11 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
 
   // Route to sub-agent or main
   if (eventName === 'subagent-start') {
-    // 终态闩:主 run 的轮已关闭时,迟到的 subagent-start 整帧丢弃——开了
-    // sub-run 却没有活气泡挂载父块,卡片会永远 spinning。
-    if (state.main.turnClosed) return state;
+    // 会话级路由(与 delivery 同款):后台子女的 start 可能晚于主轮
+    // done——排队等并发闸门的子女恰在主轮结束后才起飞。主轮已闩则
+    // 惰性重开一个后台轮容器,子块照常挂载;不再整帧丢弃(丢弃会让
+    // 该子女的后续帧因 lookup miss 全部静默蒸发)。
+    const base = state.main.turnClosed ? reopenTurn(state.main) : state.main;
     // Create sub-agent + add block to parent main message
     // Generate a subtaskId when the daemon omits it: using '' as the Map key
     // makes two such sub-agents overwrite each other, and the parent block
@@ -968,9 +966,8 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
     const subtaskId = (data.subtaskId as string) ?? genId('blk');
     const blockId = genId('blk');
     const { run: mainWithBlock } = (() => {
-      const { run, messageId } = ensureStreamingMessage(state.main);
-      // turnClosed checked above — messageId is always non-null here; the
-      // guard only exists to keep the type honest.
+      const { run, messageId } = ensureStreamingMessage(base);
+      // turnClosed 已在上方重开——messageId 必非空;守卫只为类型诚实。
       if (!messageId) return { run };
       const block = subagentBlock({
         id: blockId,

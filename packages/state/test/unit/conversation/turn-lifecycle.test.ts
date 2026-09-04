@@ -106,15 +106,20 @@ describe('turn lifecycle — terminal guard (late frames dropped)', () => {
     ).toBe(false);
   });
 
-  it('late subagent-start after done is dropped wholesale', () => {
+  it('late subagent-start after done registers in a reopened background turn (queued children)', () => {
+    // 契约变更:排队的子女(等并发闸门)可能在主轮 done 之后才起飞——
+    // subagent-start 与 delivery 同等会话级路由,不再整帧丢弃;主轮已闩
+    // 则惰性重开一个后台轮容器挂载子块。真迟到的旧轮帧(token 等)
+    // 仍被闩挡住(见前后用例)。
     const state = run([
       ...closedTurn,
       s('subagent-start', { subtaskId: 'sub-1', name: 'ghost', task: 't' }),
     ]);
-    expect(state.subAgents.size).toBe(0);
+    expect(state.subAgents.size).toBe(1);
+    expect(state.main.turnClosed).toBe(false, 'background turn reopened');
     expect(
       state.main.messages.flatMap((m) => m.blocks ?? []).some((b) => b.type === 'subagent')
-    ).toBe(false);
+    ).toBe(true);
   });
 
   it('late token after error is dropped', () => {
