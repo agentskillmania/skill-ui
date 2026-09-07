@@ -275,7 +275,7 @@ export function ProjectEditor({
           activePanel={layout.activePanel ?? ''}
           items={sidebarItems}
           onToggleCollapse={() => {
-            // UI2: layout.isCollapsed is the value BEFORE the toggle. If
+            // layout.isCollapsed is the value BEFORE the toggle. If
             // currently expanded (false), the toggle will collapse → notify
             // parent with null. If currently collapsed (true), the toggle
             // will expand → notify parent with the active panel.

@@ -57,9 +57,10 @@ const disabledButtonCss = css`
   }
 `;
 
-/** Format human input response for display */
 /**
- * Known serde tags of the daemon's HumanResponse wire shape. The unwrap below
+ * Format human input response for display.
+ *
+ * Known serde tags of the backend's HumanResponse wire shape. The unwrap below
  * must ONLY treat these as envelope tags — a generic "first key whose value is
  * an object" heuristic misreads an answers map ({qid: {type, value}}) as an
  * envelope and recurses into the first question's answer, silently dropping

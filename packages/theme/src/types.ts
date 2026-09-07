@@ -2,7 +2,7 @@
  * Theme type definitions
  */
 
-/** Event type status colors for Cockpit EventLogPanel */
+/** Event type status colors for the event log panel */
 export interface EventStatusColorItem {
   /** Text color */
   text: string;
@@ -37,7 +37,7 @@ export interface Theme {
    * interaction states (hoverOverlay/activeOverlay)
    */
   color: Record<string, string>;
-  /** Event type status colors for Cockpit */
+  /** Event type status colors for the event log panel */
   eventStatusColor: Record<string, EventStatusColorItem>;
   /** Agent status colors */
   agentStatusColor: Record<string, AgentStatusColorItem>;

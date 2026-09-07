@@ -664,7 +664,7 @@ export const ErrorWithHint: Story = {
       type: 'error',
       status: 'error',
       content:
-        'ToolCall timed out after 30000ms\n  at web_search (mcp://search-provider)\n  at AgentRunner.executeTool (colts/runner.ts:234)\n  at async AgentRunner.step (colts/runner.ts:189)',
+        'ToolCall timed out after 30000ms\n  at web_search (mcp://search-provider)\n  at AgentRunner.executeTool (agent/runner.ts:234)\n  at async AgentRunner.step (agent/runner.ts:189)',
       metadata: {
         errorCode: 'TIMEOUT',
         hint: '可能是网络问题，建议重试或检查 MCP 服务状态',

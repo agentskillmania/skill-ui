@@ -1,7 +1,7 @@
 /**
  * 自带表现块的工具(PRESENTED_TOOLS:ask_human / todolist_write)在两条
  * 渲染路径上都不再产出 tool_call 块 —— 信息由问答卡/todo 卡承载,
- * 双份是噪音且造成 live 与 resume 的渲染漂移(实测:live 两个块、
+ * 双份是噪音且造成 live 与 loadHistory 的渲染漂移(实测:live 两个块、
  * history 只剩其一,两个工具方向相反)。见 blocks.ts。
  */
 import { describe, it, expect } from 'vitest';

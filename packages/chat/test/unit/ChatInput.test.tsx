@@ -39,7 +39,7 @@ describe('ChatInput', () => {
 
   it('disables textarea transitions (autoSize mount correction must not animate)', () => {
     // autoSize 初次校正在挂载后落地,antd .ant-input 的 transition:all 会把
-    // 高度校正播成渐变 —— 按会话重挂载输入框的宿主(gmemo)每次切换都会
+    // 高度校正播成渐变 —— 按会话重挂载输入框的宿主每次切换都会
     // 看到输入栏缩一下。inline transition:none 钉死这个契约。
     render(
       <ChatWrapper>

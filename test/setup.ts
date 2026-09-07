@@ -81,7 +81,7 @@ vi.mock('react-i18next', () => ({
 }));
 
 // ── Package-specific mocks (shared by several package setups) ────────────────
-// @tanstack/react-virtual — jsdom has no real layout (cockpit setup)
+// @tanstack/react-virtual — jsdom has no real layout (the host test uses it)
 vi.mock('@tanstack/react-virtual', () => ({
   useVirtualizer: (opts: { count: number; estimateSize?: (i: number) => number }) => {
     const estimateSize = opts.estimateSize ?? (() => 48);
@@ -102,8 +102,8 @@ vi.mock('@tanstack/react-virtual', () => ({
 }));
 
 // skill-ui-chat: keep the real module (editor's CopilotPanel imports
-// MessageList/ChatInput) but stub `Chat` for cockpit's setup, which cannot
-// render it in jsdom.
+// MessageList/ChatInput) but stub `Chat` for the host test setup, which
+// cannot render it in jsdom.
 vi.mock('@agentskillmania/skill-ui-chat', async (importOriginal) => {
   const actual = (await importOriginal()) as Record<string, unknown>;
   return {

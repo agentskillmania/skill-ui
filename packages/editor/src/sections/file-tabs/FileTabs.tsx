@@ -2,7 +2,7 @@
 /**
  * File tab component
  *
- * Adapted from skill-studio PanelTabs, adapted for the editor package.
+ * Adapted from the studio app's PanelTabs, adapted for the editor package.
  * Supports elastic shrinkage, unsaved indicator, close button.
  */
 import { useTheme, interactiveItem, borderSeparator } from '@agentskillmania/skill-ui-theme';

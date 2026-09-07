@@ -59,7 +59,7 @@ export function VisualEditor({
   useEffect(() => {
     if (!rootRef.current) return;
 
-    // UI1: track whether the effect has been cleaned up before the async
+    // Track whether the effect has been cleaned up before the async
     // crepe.create() resolves. Without this, a fast unmount would run
     // crepe.destroy() first, then create() resolves and we'd bind listeners
     // onto a destroyed editor (orphan + console errors).

@@ -3,10 +3,10 @@
  *
  * These are the provider-neutral input interfaces to the state machine.
  * The state package is a pure, passive state machine: it consumes SSE
- * events via an EventFeed and history via ColtsMessageInput, producing
- * structured state that chat UIs read from via selectors.
+ * events via an EventFeed and history via persisted message input,
+ * producing structured state that chat UIs read from via selectors.
  *
- * No dependencies on daemon, colts, or chat packages.
+ * No dependencies on agent backends or the chat package.
  */
 
 // ─── Input: SSE Event ─────────────────────────────────────────────
@@ -14,7 +14,7 @@
 /**
  * Provider-neutral SSE event envelope.
  *
- * The `event` field uses hyphenated names matching the daemon's SSE stream
+ * The `event` field uses hyphenated names matching the backend's SSE stream
  * (e.g. 'tool-start', 'subagent-token', 'done'). The `data` field carries
  * the event payload as a loose record.
  */
@@ -27,7 +27,7 @@ export interface SSEEvent {
 
 /**
  * The sole input interface for the state machine.
- * Upper layers (demo SSE reader, daemon EventEmitter listener, tests)
+ * Upper layers (SSE reader, EventEmitter listener, tests)
  * implement this to push events into the reducer.
  */
 export interface EventFeed {
@@ -37,18 +37,19 @@ export interface EventFeed {
 // ─── History Loading Input ────────────────────────────────────────
 
 /**
- * One element of a colts multimodal `content[]` (OpenAI content-parts shape).
- * `image_url.url` may be a data URL, http(s) URL, or a `file:` reference
- * (relative to the session dir — the host resolves it before rendering).
+ * One element of the backend's multimodal `content[]` (OpenAI content-parts
+ * shape). `image_url.url` may be a data URL, http(s) URL, or a `file:`
+ * reference (relative to the session dir — the host resolves it before
+ * rendering).
  */
 export type ColtsContentPart =
   | { type: 'text'; text: string }
   | { type: 'image_url'; image_url: { url: string; detail?: string | null } };
 
 /**
- * Minimal representation of a colts Message, used for history loading.
- * The state package does not depend on colts — this is a structural type
- * that accepts colts Message[] without importing it.
+ * Minimal representation of a persisted message, used for history loading.
+ * The state package does not depend on the backend — this is a structural
+ * type that accepts the backend's Message[] without importing it.
  *
  * `content` is a bare string for plain-text messages (the untagged wire
  * shape) or a content-parts array for multimodal messages.
@@ -61,7 +62,7 @@ export interface ColtsMessageInput {
     id: string;
     name: string;
     arguments: Record<string, unknown>;
-    /** 可选工具来源('mcp'|'builtin'|'script')——宿主或 daemon 补充,
+    /** 可选工具来源('mcp'|'builtin'|'script')——宿主补充,
      * 透传到 tool_call 块的 metadata 供徽章渲染。 */
     toolType?: string;
   }>;
@@ -69,7 +70,7 @@ export interface ColtsMessageInput {
   toolName?: string;
   isError?: boolean;
   timestamp?: number;
-  /** 该轮的用量汇总(wrangler.rs 在 run 收尾写到轮末 assistant 行)。
+  /** 该轮的用量汇总(后端在 run 收尾写到轮末 assistant 行)。
    * wire 键与 TurnUsage 大体同形但缓存两字段是 `cacheRead`/`cacheWrite`
    * (无 Tokens 后缀)——消费端用 fromHistory 的 normalizeTurnUsage 归一,
    * 不要直接当 TurnUsage 用。旧存档无此键,自然降级。 */

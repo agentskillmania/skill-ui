@@ -2,8 +2,8 @@
  * @fileoverview React hook — useConversationState
  *
  * Creates a SessionRunState driven by useReducer, exposes an EventFeed
- * for upper layers to push events into. Upper layers (demo SSE reader,
- * daemon EventEmitter listener) are responsible for obtaining events
+ * for upper layers to push events into. Upper layers (SSE reader,
+ * EventEmitter listener) are responsible for obtaining events
  * and calling feed.push().
  *
  * Backward-compatible alias `useSessionState` is exported from the

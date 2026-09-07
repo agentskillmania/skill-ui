@@ -3,17 +3,17 @@
  *
  * Both producers of conversation blocks — the live reducer and fromHistory —
  * build through these constructors, so block semantics cannot drift between
- * the live and resume paths (the old "block-for-block identical" comment was
+ * the live and restore paths (the old "block-for-block identical" comment was
  * a convention; this module makes it structural). ID generation stays at the
  * call sites (live uses genBlockId, history uses hist- prefixed ids).
  *
- * Known intentional live/resume differences (NOT shape drift):
- * - sub-agent blocks: resume cannot reconstruct the sub-run's internal
+ * Known intentional live/restore differences (NOT shape drift):
+ * - sub-agent blocks: restore cannot reconstruct the sub-run's internal
  *   conversation (metadata.messages is a task+answer summary there)
  * - human_input: live `metadata.response` is the host-pushed response object;
  *   history's is the persisted tool-result string (render side handles both)
  * - todo card: within-bubble position is chronological-arrival live vs
- *   tail-of-last-assistant on resume (arrival time is not persisted)
+ *   tail-of-last-assistant on restore (arrival time is not persisted)
  */
 
 import type { AgentBlock, BlockStatus, TodoItem } from './types.js';
@@ -28,7 +28,7 @@ export const TODO_TOOL = 'todolist_write';
 /** Tool calls whose tool_call block is suppressed on BOTH paths because a
  * dedicated presentation block carries the information (ask_human → the
  * human_input question card; todolist_write → the todo card). Rendering a
- * generic tool_call block for them was pure noise and made live vs resume
+ * generic tool_call block for them was pure noise and made live vs restore
  * inconsistent (live showed both, history only one of the two). */
 export const PRESENTED_TOOLS: ReadonlySet<string> = new Set([HUMAN_TOOL, TODO_TOOL]);
 
@@ -204,7 +204,7 @@ export function a2uiBlock(opts: {
   };
 }
 
-/** 同 surface 的后续调用:追加协议行(append-only),callId 计入在途。 */
+/** 同 surface 的后续调用:追加协议行(只追加),callId 计入待配对列表。 */
 export function appendA2uiLines(
   block: AgentBlock,
   lines: string[],
@@ -230,7 +230,7 @@ export function appendA2uiLines(
   };
 }
 
-/** tool-end 配对:移除在途 callId,全部落地后块转 completed。 */
+/** tool-end 配对:移除待配对 callId,全部配对完成后块转 completed。 */
 export function resolveA2uiCall(block: AgentBlock, callId: string): AgentBlock {
   const pending = (
     Array.isArray(block.metadata?.pendingCallIds) ? (block.metadata.pendingCallIds as string[]) : []

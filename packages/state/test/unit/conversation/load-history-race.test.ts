@@ -1,5 +1,5 @@
 /**
- * Live-split race simulation: history load lands mid-run. Guards the
+ * History-load race simulation: loadHistory lands mid-run. Guards the
  * user-visible outcome (no duplicated user bubble, one assistant message
  * with completed tool block), not internal transitions.
  */
@@ -13,14 +13,14 @@ function feed(events: SSEEvent[]) {
   return events.reduce(reducer, createEmptySessionState());
 }
 
-describe('live split simulation', () => {
+describe('history load mid-run', () => {
   it('race: loadHistory lands mid-run — one user bubble, one assistant with completed tool block', () => {
     // 1. user sends message
     let s = feed([{ event: 'user-message', data: { content: 'hi' } }]);
-    // 2. GET /messages raced while run in flight: daemon persisted [user] at run start
+    // 2. GET /messages raced while run in flight: the backend persisted [user] at run start
     const raced = fromHistory([{ role: 'user', content: 'hi', timestamp: Date.now() }]);
     s = { ...raced };
-    // 3. live SSE events (real daemon sequence)
+    // 3. live SSE events (real backend sequence)
     s = [
       { event: 'step-start', data: { step: 0 } },
       {

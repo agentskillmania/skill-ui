@@ -1,25 +1,24 @@
 /**
  * @fileoverview normalize.ts — wire event → canonical internal event
  *
- * The single adaptation boundary between the daemons' SSE wire shapes and the
- * reducer. `reducer()` calls this as step 0, so every entry point (feed.push,
- * tests, direct reducer use) gets the canonical shape for free.
+ * The single adaptation boundary between the backends' SSE wire shapes and
+ * the reducer. `reducer()` calls this as step 0, so every entry point
+ * (feed.push, tests, direct reducer use) gets the canonical shape for free.
  *
- * Ground truth on who emits what (recon 2026-08, wrangler.rs sse.rs +
- * wrangler TS agent-session.ts mapEvent):
+ * Ground truth on who emits what (Rust sse.rs + TS agent-session.ts mapEvent):
  *
- * | variant                    | TS daemon (colts)     | Rust daemon (wrangler.rs)        |
- * |----------------------------|-----------------------|----------------------------------|
+ * | variant                    | TS implementation     | Rust implementation            |
+ * |----------------------------|-----------------------|--------------------------------|
  * | TokenStats casing          | camelCase everywhere  | snake_case — EXCEPT subagent-end,|
- * |                            |                       | which Rust hand-builds as camel  |
- * | subagent-tool-end `result` | may be an object      | always a string                  |
- * | subagent-tool-start        | action:{id,tool,arguments} wrapper (colts Action) — both |
+ * |                            |                       | which is hand-built as camel   |
+ * | subagent-tool-end `result` | may be an object      | always a string                |
+ * | subagent-tool-start        | action:{id,tool,arguments} wrapper (TS Action) — both |
  * | subagent-token/thinking    | {subtaskId, name, delta|content} — both                  |
  *
- * Everything else is wire-identical across the daemons. Leniency beyond this
- * table is dead defense and does not belong here; input *validation* (garbage
- * filtering, e.g. todo items) stays in the handlers — this module only folds
- * real wire VARIANTS into one shape.
+ * Everything else is wire-identical across the backends. Leniency beyond
+ * this table is unnecessary and does not belong here; input *validation*
+ * (garbage filtering, e.g. todo items) stays in the handlers — this module
+ * only folds real wire VARIANTS into one shape.
  */
 
 import type { SSEEvent } from '../types.js';
@@ -85,8 +84,9 @@ export function normalizeEvent(sse: SSEEvent): NormalizedEvent {
           id: action.id,
           name: action.tool,
           args: action.arguments,
-          // toolType is a host-decoration channel (never emitted by daemons) —
-          // the sub path keeps the same passthrough contract as the main one.
+          // toolType is host-provided metadata (never emitted by the
+          // backend) — the sub path keeps the same passthrough contract as
+          // the main one.
           ...(typeof action.toolType === 'string' ? { toolType: action.toolType } : {}),
         },
         subtaskId: subtaskId ?? '',

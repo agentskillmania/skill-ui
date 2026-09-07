@@ -108,7 +108,7 @@ export interface PlanMetadata {
   steps?: PlanStep[];
 }
 
-/** Todo item。`subject` 是 wire/daemon 的真实字段(state 包 TodoItem);
+/** Todo item。`subject` 是后端 wire 的真实字段(state 包 TodoItem);
  * `content` 是旧形状,保留兼容(stories 在用)。渲染时 subject 优先。 */
 export interface TodoItem {
   id?: number;
@@ -154,7 +154,7 @@ export interface FileEditMetadata {
 
 /** Human interaction metadata */
 /** A single question in a multi-question human-input request (mirrors the
- * daemon's HumanQuestion). */
+ * backend's HumanQuestion). */
 export interface HumanInputQuestion {
   id: string;
   question: string;

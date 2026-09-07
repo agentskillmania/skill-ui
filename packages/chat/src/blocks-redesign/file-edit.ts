@@ -1,6 +1,6 @@
 /**
  * Pure helpers for the FileEditBlock — receipt parsing and diff-row building.
- * The wrangler file_edit receipt is a text protocol (see ShellBlock's
+ * The backend's file_edit receipt is a text protocol (see ShellBlock's
  * "Exit code: N" precedent): everything here parses defensively and leaves
  * fields absent rather than throwing on unexpected shapes.
  */

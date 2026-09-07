@@ -47,7 +47,7 @@ describe('TodoBlock', () => {
     expect(screen.getByText('1/3')).toBeInTheDocument();
   });
 
-  it('renders wire-shaped items (subject) — daemon 真实数据形状', () => {
+  it('renders wire-shaped items (subject) — 后端真实数据形状', () => {
     renderBlock(
       todoBlock([
         { id: 1, subject: '搜索资料', status: 'completed' },

@@ -1,12 +1,12 @@
 /**
  * @fileoverview a2ui.ts — a2ui_* tool calls → genui protocol lines
  *
- * The wrangler a2ui tools are ack-only: the surface data lives entirely in
+ * The backend's a2ui tools are ack-only: the surface data lives entirely in
  * the tool-start args and there is no dedicated SSE event for it. This module
  * turns those args into NDJSON lines of the genui stream protocol
  * (`{"createSurface":…}` / `{"updateComponents":…}` / …, one JSON object per
  * line) that the chat A2UIBlock feeds into its SurfaceManager, while
- * maintaining the materialized per-surface state needed to keep every block
+ * maintaining the resolved per-surface state needed to keep every block
  * self-contained (a block opened in a later turn replays full state).
  *
  * Everything here is pure: (surfaces, toolName, args) → result, with
@@ -83,8 +83,8 @@ function isComponent(v: unknown): v is Record<string, unknown> {
  * Models follow the a2ui tool schema's ComponentNode (`{id, type, properties,
  * styles}`) just as often as the genui shape (`{id, component, ...flat props}`).
  * A `type`-shaped tree reaching the renderer is all-unknown components and
- * renders as a blank surface, so wrangler-shaped nodes are folded here:
- * `type` → `component`, `properties` spread flat, `styles` → `style`.
+ * renders as a blank surface, so the backend's ComponentNode shape is folded
+ * here: `type` → `component`, `properties` spread flat, `styles` → `style`.
  * Idempotent: genui-shaped nodes pass through untouched.
  */
 function normalizeNode(v: unknown): unknown {
@@ -109,10 +109,10 @@ function findById(components: unknown[], id: unknown): number {
 //
 // update_components args carry an `operations` array that appears in two
 // shapes in the wild:
-// 1. skill dialect (what the a2ui-generation skill teaches): one
+// 1. full-tree dialect (what the a2ui-generation skill teaches): one
 //    `{op:'replace', path:'/components', value:[full array]}` carrying the
 //    whole tree — the overwhelmingly common case.
-// 2. wrangler struct dialect (ComponentOperation in operations.rs):
+// 2. struct dialect (ComponentOperation in the backend's operations.rs):
 //    insert/update/delete/replace addressed by component/parent ids.
 // Both are normalized below; anything else is dropped per the no-throw rule.
 // Node shapes are normalized too (normalizeNode): the tool schema's
@@ -124,10 +124,11 @@ function applyOperations(components: unknown[], ops: unknown[]): unknown[] {
   for (const raw of ops) {
     if (!isRecord(raw)) continue;
     const op = typeof raw.op === 'string' ? raw.op : '';
-    // Skill dialect: full-tree payload addressed by JSON-Pointer. The verb is
-    // NOT part of the semantics — models emit replace/insert/set alike with
-    // path '/components' + a full array (observed live: op:'insert' carrying
-    // the whole tree). Anything matching that shape is a full replacement.
+    // Full-tree dialect: whole-tree payload addressed by JSON-Pointer. The
+    // verb is NOT part of the semantics — models emit replace/insert/set
+    // alike with path '/components' + a full array (op:'insert' carrying the
+    // whole tree is seen live). Anything matching that shape is a full
+    // replacement.
     const isFullTreePath = raw.path === '/components' || raw.path === '/' || raw.path === '';
     if (isFullTreePath && Array.isArray(raw.value)) {
       list.length = 0;
@@ -149,7 +150,7 @@ function applyOperations(components: unknown[], ops: unknown[]): unknown[] {
         if (i < 0) break;
         const node = list[i] as Record<string, unknown>;
         // genui nodes are flat (props at the top level, style nested) —
-        // the wrangler properties/styles split folds onto that shape.
+        // the backend's properties/styles split folds onto that shape.
         if (isRecord(raw.properties)) Object.assign(node, raw.properties);
         if (isRecord(raw.styles)) {
           node.style = { ...(isRecord(node.style) ? node.style : {}), ...raw.styles };

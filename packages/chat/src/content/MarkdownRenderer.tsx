@@ -1,8 +1,8 @@
 /**
  * Markdown renderer
  *
- * Based on @ant-design/x-markdown (marked.js), consistent with skill-studio.
- * Supports streaming rendering, code highlighting, GFM syntax.
+ * Based on @ant-design/x-markdown (marked.js), consistent with the studio
+ * app's rendering. Supports streaming rendering, code highlighting, GFM syntax.
  */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { CodeHighlighter } from '@ant-design/x';

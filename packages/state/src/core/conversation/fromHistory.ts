@@ -1,9 +1,10 @@
 /**
- * @fileoverview fromHistory — reconstruct SessionRunState from colts Message[]
+ * @fileoverview fromHistory — reconstruct SessionRunState from persisted
+ * Message[]
  *
- * Colts persists flat messages (role/content/toolCalls/toolName) in strict
- * chronological order: per LLM call the thought row comes first, then the
- * action/text row (prose + toolCalls of the same completion), then the
+ * The backend persists flat messages (role/content/toolCalls/toolName) in
+ * strict chronological order: per LLM call the thought row comes first, then
+ * the action/text row (prose + toolCalls of the same completion), then the
  * tool result rows. This module rebuilds structured AgentMessage[] by
  * APPENDING blocks in that exact order:
  * - type:'thought' → thinking block
@@ -14,12 +15,14 @@
  *   a2ui block
  *
  * The result is block-for-block identical to what the live reducer produces
- * for the same conversation — resume must never reshuffle the layout.
+ * for the same conversation — a restored session must never reshuffle the
+ * layout.
  *
  * Limitations: sub-agent internal conversations and streaming animations are
  * runtime-only and cannot be reconstructed. a2ui blocks ARE rebuilt (same
- * applyA2uiCall pure fold as the live path; the materialized surface
- * registry is restored onto state.main for later-turn reopen replays).
+ * applyA2uiCall pure fold as the live path; the resolved surface registry is
+ * restored onto state.main so a block reopened in a later turn can replay
+ * full state).
  */
 
 import {
@@ -53,9 +56,10 @@ import { createEmptySessionState, createEmptyRunState } from './types.js';
 import type { ColtsContentPart, ColtsMessageInput } from '../types.js';
 
 /**
- * 归一持久化的轮用量(wire → TurnUsage)。wrangler.rs 的键是
- * `cacheRead`/`cacheWrite`(无 Tokens 后缀);顺手对全部字段做类型防御
- * ——state.json 是外部输入,坏值落到 0 而不是把渲染方炸成 undefined。
+ * 归一持久化的轮用量(wire → TurnUsage)。键名是 `cacheRead`/`cacheWrite`
+ * (无 Tokens 后缀——后端两类实现的差异也在此归一);顺手对全部字段做
+ * 类型防御——state.json 是外部输入,坏值落到 0 而不是把渲染方炸成
+ * undefined。
  */
 export function normalizeTurnUsage(raw: unknown): TurnUsage | undefined {
   if (!raw || typeof raw !== 'object') return undefined;
@@ -70,7 +74,7 @@ export function normalizeTurnUsage(raw: unknown): TurnUsage | undefined {
   };
 }
 
-/** fromHistory 的可选附加输入(daemon 持久化的快照)。 */
+/** fromHistory 的可选附加输入(后端持久化的快照)。 */
 export interface FromHistoryExtras {
   /** 给了就恢复 state.todoList(侧栏据此渲染),并合成一个内联 todo 块。 */
   todoList?: TodoListSnapshot;
@@ -83,8 +87,8 @@ function genHistBlockId(): string {
 
 let histAttachmentIdCounter = 0;
 
-/** colts content 的文本投影:字符串原样;parts 按 plain_text 规则拼接
- * (text 段 + 图片 [image] 占位),与 daemon 的事件/token 估算口径一致。 */
+/** content 的文本投影:字符串原样;parts 按 plain_text 规则拼接
+ * (text 段 + 图片 [image] 占位),与后端的事件/token 估算口径一致。 */
 function textOf(content: string | ColtsContentPart[] | undefined): string {
   if (content == null) return '';
   if (typeof content === 'string') return content;
@@ -103,7 +107,7 @@ function attachmentNameOf(url: string): string {
   return 'image';
 }
 
-/** 从 data URL 或文件扩展名猜 mime,兜底 image/png。 */
+/** 从 data URL 或文件扩展名猜 mime,默认 image/png。 */
 function attachmentMimeOf(url: string): string {
   const dataMatch = /^data:([^;,]+)[;,]/.exec(url);
   if (dataMatch) return dataMatch[1];
@@ -116,7 +120,7 @@ function attachmentMimeOf(url: string): string {
 }
 
 /** user 消息的 content 拆分:文本进 content,图片成 attachments。
- * `file:` 引用的 url 原样保留——宿主(gmemo)在渲染前自行解析成可展示 URL。 */
+ * `file:` 引用的 url 原样保留——宿主在渲染前自行解析成可展示 URL。 */
 function normalizeUserContent(content: string | ColtsContentPart[]): {
   text: string;
   attachments?: MessageAttachment[];
@@ -142,7 +146,7 @@ function normalizeUserContent(content: string | ColtsContentPart[]): {
  * shared with the live path); the constants are imported from there. */
 
 /**
- * Reconstruct a SessionRunState from persisted colts messages.
+ * Reconstruct a SessionRunState from persisted messages.
  *
  * Messages are processed sequentially. Assistant messages with toolCalls
  * are paired with their subsequent role:'tool' result messages to build
@@ -155,8 +159,9 @@ export function fromHistory(
   const state = createEmptySessionState();
   const agentMessages: AgentMessage[] = [];
   const subAgents = new Map<string, SubAgentRunState>();
-  // a2ui surface 物化状态:顺序重放全部工具调用,与 live 的逐事件 fold 同构;
-  // 结束后写回 state.main,供 loadHistory 后的 live 尾流继续跨 turn 重放。
+  // a2ui surface 聚合状态:顺序重放全部工具调用,与 live 的逐事件 fold
+  // 一致;结束后写回 state.main,供 loadHistory 后的 live 尾流继续
+  // 跨 turn 重放。
   let a2uiSurfaces: A2uiSurfaces = {};
   // The assistant bubble currently being built. One turn spans multiple
   // persisted rows (per LLM call), so consecutive assistant rows without an
@@ -171,9 +176,10 @@ export function fromHistory(
     }
   }
 
-  // 预扫投递标记:消费轮的 user 消息用 <delivery ...> 包裹异步子女的结果
-  // (wrangler 的邮箱消化格式)。reload 后 delivered/deliveryStatus 据此
-  // 重建——live 的 delivery 帧在重放里没有对应物,持久事实只在这里。
+  // 预先扫描投递标记:后续轮的 user 消息用 <delivery ...> 包裹异步子
+  // 会话的结果(后端消化委派结果的格式)。reload 后 delivered/
+  // deliveryStatus 据此重建——live 的 delivery 帧在重放里没有对应物,
+  // 持久事实只在这里。
   const deliveredBySubtask = new Map<string, { status: string; content: string }>();
   for (const msg of messages) {
     if (msg.role !== 'user') continue;
@@ -190,8 +196,8 @@ export function fromHistory(
     if (msg.role === 'user') {
       // 引擎注入的技能指令(load_skill 成功后驱动下一轮,type=
       // 'skill-directive'):不渲染气泡、不切断助手回合 —— live 从不
-      // 显示它,resume 必须同构,否则 skill 块与后续内容会被一条
-      // "用户没说过的话"隔开。LLM 侧照常发送,纯展示层跳过。
+      // 显示它,loadHistory 必须保持一致,否则 skill 块与后续内容会被
+      // 一条"用户没说过的话"隔开。LLM 侧照常发送,纯展示层跳过。
       if (msg.type === 'skill-directive') continue;
       const { text, attachments } = normalizeUserContent(msg.content);
       agentMessages.push({
@@ -244,14 +250,14 @@ export function fromHistory(
           const resultContent = result ? textOf(result.content) : '';
 
           // todolist_write 不渲染 tool_call 块(与 live 的 PRESENTED_TOOLS
-          // 跳过同构):todo 卡由 extras.todoList 快照合成,工具块是噪音。
+          // 跳过一致):todo 卡由 extras.todoList 快照合成,工具块是噪音。
           // ask_human 走下方 HUMAN_TOOL 分支(问答块),不受此影响。
           if (tc.name === TODO_TOOL) continue;
 
-          // a2ui_*:与 live 的 tool-start 特判同构 —— args 物化成 genui 协议
+          // a2ui_*:与 live 的 tool-start 分支一致 —— args 转成 genui 协议
           // 行,按 surfaceId 聚合进一个 a2ui 块(跨行聚到同一气泡内的块,
           // 跨 turn 则重开新块并前缀重放全量状态)。args 不可用(老档/协议
-          // 漂移)时落回普通 tool_call 块,不丢调用。
+          // 漂移)时回退普通 tool_call 块,不丢调用。
           if (A2UI_TOOLS.has(tc.name)) {
             const res = applyA2uiCall(a2uiSurfaces, tc.name, tc.arguments);
             if (res) {
@@ -261,7 +267,8 @@ export function fromHistory(
               const inRow = findA2ui(blocks);
               const inBubble = inRow ?? findA2ui(current?.blocks);
               if (inBubble) {
-                // 历史路径无在途概念:合并行后直接落 completed、清空在途表。
+                // 历史路径没有进行中状态:合并行后直接标记 completed、
+                // 清空 pendingCallIds。
                 const appended = appendA2uiLines(inBubble, res.lines, tc.id, res.title);
                 const merged = {
                   ...appended,
@@ -291,7 +298,7 @@ export function fromHistory(
 
           if (tc.name === SKILL_TOOL) {
             // skill 块 = load_skill 调用本身:name/task 取自工具参数,
-            // result 为手册文本 —— 与 live 的 tool-start/tool-end 路径同构。
+            // result 为手册文本 —— 与 live 的 tool-start/tool-end 路径一致。
             blocks.push(
               skillBlock({
                 id: genHistBlockId(),
@@ -307,8 +314,7 @@ export function fromHistory(
             const questions = (tc.arguments.questions as HumanInputQuestion[]) ?? [];
             // 中断终态:挂起的 ask_human 没有配对的 tool 结果行 —— 按缺失
             // 推导为 pending(问题就放在 toolCalls.arguments 里),刷新/重启
-            // 后待答交互入口重现;应答走 /respond 续跑,宿主先注入
-            // run-resumed 重开轮次。
+            // 后待答交互入口重现;应答后宿主先注入 run-resumed 重开轮次。
             const unanswered = !result;
             blocks.push(
               humanInputBlock({
@@ -323,7 +329,7 @@ export function fromHistory(
           } else if (tc.name === DELEGATE_TOOL) {
             // Parse DelegateResult from tool result
             const delegateResult = parseDelegateResult(resultContent);
-            // 异步受理(accepted 回执)带真实的 subtaskId——用它做键,live
+            // 异步受理(accepted)带真实的 subtaskId——用它做键,live
             // 的 delivery 帧与下次 reload 才能配上对;同步结果没有
             // subtaskId,沿用 hist- 前缀。
             const receiptId = extractReceiptSubtaskId(resultContent);
@@ -370,7 +376,7 @@ export function fromHistory(
               delivered ? { ...block, metadata: { ...block.metadata, delivered: true } } : block
             );
             // Create a minimal SubAgentRunState with summary data (no internal
-            // conversation)。异步受理(accepted 回执)也建——投递标记按
+            // conversation)。异步受理(accepted)也建——投递标记按
             // 真实 subtaskId 匹配,建了才能重建 delivered 状态。
             if (delegateResult.status === 'success' || delegateResult.answer || receiptId) {
               const subRun: SubAgentRunState = {
@@ -437,7 +443,7 @@ export function fromHistory(
           };
           agentMessages.push(current);
         }
-        // 轮用量:wrangler.rs 写在轮末 assistant 行上——谁带着就赋给当前
+        // 轮用量:后端写在轮末 assistant 行上——谁带着就赋给当前
         // 气泡(末值胜出 = 轮末值)。wire 键经 normalizeTurnUsage 归一
         // (缓存字段无 Tokens 后缀,且为多来源防御);旧档无键自然不带。
         const usage = normalizeTurnUsage(msg.usage);
@@ -453,7 +459,7 @@ export function fromHistory(
 
     // System messages
     if (msg.role === 'system') {
-      // 轮级动态提醒行(时间上下文,daemon 每轮落盘、装配器合并进 user
+      // 轮级动态提醒行(时间上下文,后端每轮落盘、装配器合并进 user
       // 消息发给 LLM):纯 wire 参与者,不进 UI —— 跳过且**不得**重置
       // `current`,否则会把轮内 assistant 气泡切成两半。
       if (msg.type === 'system-reminder') continue;
@@ -474,8 +480,8 @@ export function fromHistory(
     status: 'idle',
     messages: agentMessages,
     // turnClosed stays false (createEmptyRunState default) ON PURPOSE:
-    // loadHistory replacing state mid-run is a supported race (sim_split) —
-    // the snapshot's completed bubbles are message-shape-identical to a
+    // loadHistory replacing state mid-run is a supported race — the
+    // snapshot's completed bubbles are message-shape-identical to a
     // post-done state, but this reducer instance has consumed no terminal
     // event, so the live event tail must still be allowed to open a fresh
     // streaming bubble. "Closed" is event history, never message shape.
@@ -505,13 +511,13 @@ export function fromHistory(
 }
 
 /** Parse a DelegateResult from a tool result string */
-/// 投递标记(wrangler 消费轮的 user 消息格式):
+/// 投递标记(后端消化委派结果的 user 消息格式):
 /// `<delivery agent="..." subtaskId="..." status="...">\n内容\n</delivery>`。
-/// 属性顺序与 wrangler 的 format_deliveries 一一对应。
+/// 属性顺序与后端的 format_deliveries 一一对应。
 const DELIVERY_MARKER_RE =
   /<delivery\s+agent="([^"]*)"\s+subtaskId="([^"]*)"\s+status="([^"]*)"\s*>\n?([\s\S]*?)\n<\/delivery>/g;
 
-/// 从 delegate 工具结果里提取异步受理回执的真实 subtaskId;同步结果
+/// 从 delegate 工具结果里提取异步受理的真实 subtaskId;同步结果
 /// (无 subtaskId 字段)返回 undefined。
 function extractReceiptSubtaskId(resultStr: string): string | undefined {
   try {

@@ -65,7 +65,7 @@ describe('applyA2uiCall — pure fold', () => {
     }
   });
 
-  it('normalizes wrangler-shaped nodes ({id,type,properties,styles}) in full-tree ops', () => {
+  it('normalizes {id,type,properties,styles} nodes in full-tree ops', () => {
     // 模型照工具 schema 发 type 形状节点,genui 只认 component 形状——
     // 不归一化整棵树都是 unknown component,渲染为空白 surface。
     const res = applyA2uiCall({}, 'a2ui_update_components', {
@@ -89,7 +89,7 @@ describe('applyA2uiCall — pure fold', () => {
     expect(line.updateComponents.components[0].component).toBe('Column');
   });
 
-  it('normalizes wrangler-shaped nodes in insert/replace ops and passes genui-shaped through', () => {
+  it('normalizes {id,type,properties,styles} nodes in insert/replace ops and passes genui-shaped through', () => {
     let surfaces = applyA2uiCall({}, 'a2ui_update_components', {
       surfaceId: 's1',
       operations: [
@@ -118,7 +118,7 @@ describe('applyA2uiCall — pure fold', () => {
     ]);
   });
 
-  it('wrangler dialect: insert honors afterId over parentId', () => {
+  it('struct dialect: insert honors afterId over parentId', () => {
     let surfaces = {};
     surfaces = applyA2uiCall(surfaces, 'a2ui_update_components', {
       surfaceId: 's1',
@@ -134,7 +134,7 @@ describe('applyA2uiCall — pure fold', () => {
     expect(surfaces['s1'].components.map((c) => (c as { id: string }).id)).toEqual(['a', 'b', 'c']);
   });
 
-  it('wrangler dialect: update merges properties/styles, delete removes, replace upserts', () => {
+  it('struct dialect: update merges properties/styles, delete removes, replace upserts', () => {
     let surfaces = applyA2uiCall({}, 'a2ui_update_components', {
       surfaceId: 's1',
       operations: [
@@ -416,7 +416,7 @@ function lastA2uiBlock(state: SessionRunState): AgentBlock {
 // ─── Live ↔ history parity ────────────────────────────────────────
 
 describe('a2ui — live ↔ history parity', () => {
-  /** 与 liveA2uiEvents 对应的 colts 持久化行(一轮 = thought 可省,action 行
+  /** 与 liveA2uiEvents 对应的后端持久化行(一轮 = thought 可省,action 行
    * 携带 toolCalls,tool 结果行配对)。 */
   const historyRows: ColtsMessageInput[] = [
     { role: 'user', content: '测试一下a2ui', timestamp: 1000 },
@@ -484,7 +484,7 @@ describe('a2ui — live ↔ history parity', () => {
     const liveBlock = (liveMsg.blocks ?? []).find((b) => b.type === 'a2ui')!;
     const histBlock = (histMsg.blocks ?? []).find((b) => b.type === 'a2ui')!;
     expect(strip(histBlock)).toEqual(strip(liveBlock));
-    // registry 恢复:后续 turn 重开可继续物化
+    // registry 恢复:后续 turn 重开可继续重放完整状态
     expect(hist.main.a2uiSurfaces['card'].components).toHaveLength(2);
     expect(hist.main.a2uiSurfaces['card'].title).toBe('产品展示卡片');
   });

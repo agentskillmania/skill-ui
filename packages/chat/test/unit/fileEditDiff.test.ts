@@ -1,6 +1,6 @@
 /**
  * FileEditBlock pure helpers: file_edit receipt parsing and unified diff row
- * building. The receipt is wrangler's text protocol — parsing must be
+ * building. The receipt is the backend's text protocol — parsing must be
  * defensive (absent fields, never throws) for every guard-message variant.
  */
 import { describe, it, expect } from 'vitest';

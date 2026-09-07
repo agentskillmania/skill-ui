@@ -1,7 +1,7 @@
 /**
- * HITL 中断终态(wrangler-daemon done{type:"waiting_human"})的前端语义:
+ * HITL 中断终态(后端 done{type:"waiting_human"})的前端语义:
  * - waiting 的 done 保留 pending human_input 块(待答交互入口不关);
- * - run-resumed(宿主合成,/respond 续流前注入)重开轮次,续流 token 不丢;
+ * - run-resumed(宿主合成,续流前注入)重开轮次,续流 token 不丢;
  * - fromHistory + interrupts 重建 pending 问答块(刷新/重启后待答问题重现)。
  */
 import { describe, it, expect } from 'vitest';
@@ -39,7 +39,7 @@ describe('done{waiting_human} keeps pending human_input blocks', () => {
     const block = last.blocks?.find((b) => b.type === 'human_input');
     expect(block).toBeDefined();
     expect(block?.status).toBe('pending');
-    // run 本身照常收尾:idle + 终态闩扣上。
+    // run 本身照常收尾:idle + 关闭轮次标记。
     expect(state.main.status).toBe('idle');
     expect(state.main.turnClosed).toBe(true);
   });
@@ -83,7 +83,8 @@ describe('run-resumed reopens the turn for the /respond continuation stream', ()
       .flatMap((m) => m.blocks ?? [])
       .find((b) => b.type === 'human_input');
     expect(answered?.status).toBe('completed');
-    // 续流 token 不被终态闩吞掉:新的 assistant 气泡承接并最终 success。
+    // 续流 token 不再被丢弃(轮次已重开):新的 assistant 气泡承接并
+    // 最终 success。
     const last = resumed.main.messages[resumed.main.messages.length - 1];
     expect(last.role).toBe('assistant');
     expect(last.content).toBe('Thanks, proceeding.');
@@ -139,9 +140,9 @@ describe('fromHistory derives pending human_input from unanswered ask_human rows
 
 describe('respond-stream second question (full round-2 sequence)', () => {
   it('pending block survives the exact wire sequence incl. noise events', () => {
-    // 与 wrangler-daemon 两轮 e2e 的 respond 流逐帧对齐(resolved → 续跑
+    // 与后端两轮 e2e 的 respond 流逐帧对齐(resolved → 续跑
     // 噪声帧 → tool-start → phase-change → step-end → human-input →
-    // done{waiting_human} → todo-list),run-resumed 在消费流前注入。
+    // done{waiting_human} → todo-list),run-resumed 在续流前注入。
     const afterRound1 = waitingTurn();
     const resumed = [
       s('human-input-resolved', { requestId: 'human-1', response: { q1: 'A' } }),
@@ -168,7 +169,7 @@ describe('respond-stream second question (full round-2 sequence)', () => {
     expect(pendingQ).toHaveLength(1);
     expect((pendingQ[0].metadata as Record<string, unknown>)?.requestId).toBe('call-2');
     // round-2:ask_human 的 tool-start 被 PRESENTED_TOOLS 抑制(问答卡是
-    // 唯一表现),问题块直接跟在收拢的 thinking 之后。
+    // 唯一表现),问题块直接跟在已关闭的 thinking 之后。
     expect(blocks.some((b) => b.type === 'tool_call')).toBe(false);
     const idxThinking = blocks.findIndex((b) => b.type === 'thinking');
     const idxPending = blocks.findIndex(

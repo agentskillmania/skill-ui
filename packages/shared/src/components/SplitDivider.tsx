@@ -22,7 +22,7 @@ export function SplitDivider({
 }: SplitDividerProps) {
   const theme = useTheme();
 
-  // UI12: drag state lives in refs so the effect can read the latest values
+  // Drag state lives in refs so the effect can read the latest values
   // without re-registering listeners on every change. The effect cleanup
   // guarantees listeners are removed on unmount even if mouseup never fires.
   const dragState = useRef<{

@@ -1,20 +1,20 @@
 /**
- * @fileoverview Turn lifecycle — status wiring + the terminal guard.
+ * @fileoverview Turn lifecycle — status wiring + the closed-turn guard.
  *
  * Two explicit signals replaced the old "inspect the last message's shape"
- * heuristic (0.4.3's turnLive), which existed because run status was never
- * wired for the main agent:
+ * heuristic, which existed because run status was never wired for the main
+ * agent:
  *
  * - `status` ('idle'|'streaming'|'error') is now real for main too:
  *   user-message and the first content event open a turn (streaming),
  *   done/error close it, session-cleared resets.
- * - `turnClosed` is the terminal latch — event history, not state shape.
- *   While latched, ensureStreamingMessage refuses to open a stream and every
- *   content handler drops its frame: a late frame after done/error must never
- *   revive the run as an eternal streaming bubble.
+ * - `turnClosed` marks that a done/error was consumed — event history, not
+ *   state shape. While set, ensureStreamingMessage refuses to open a stream
+ *   and every content handler drops its frame: a late frame after done/error
+ *   must never revive the run as an eternal streaming bubble.
  *
- * The loadHistory-mid-run race (sim_split) is the load-bearing constraint:
- * a fromHistory-rebuilt state is message-shape-identical to a post-done
+ * The loadHistory-mid-run race is the load-bearing constraint: a
+ * fromHistory-rebuilt state is message-shape-identical to a post-done
  * state, yet must stay open-able — hence "closed" is recorded, not derived.
  */
 import { describe, it, expect } from 'vitest';
@@ -66,14 +66,14 @@ describe('turn lifecycle — status wiring (main)', () => {
   });
 });
 
-describe('turn lifecycle — terminal guard (late frames dropped)', () => {
+describe('turn lifecycle — closed-turn guard (late frames dropped)', () => {
   const closedTurn = [
     s('user-message', { content: 'hi' }),
     s('token', { delta: 'answer' }),
     s('done', {}),
   ];
 
-  it('late token after done does not open a zombie bubble', () => {
+  it('late token after done does not open a new bubble', () => {
     const state = run([...closedTurn, s('token', { delta: 'late' })]);
     const msgs = state.main.messages;
     expect(msgs).toHaveLength(2); // user + assistant, no third bubble
@@ -106,11 +106,11 @@ describe('turn lifecycle — terminal guard (late frames dropped)', () => {
     ).toBe(false);
   });
 
-  it('late subagent-start after done registers in a reopened background turn (queued children)', () => {
-    // 契约变更:排队的子女(等并发闸门)可能在主轮 done 之后才起飞——
-    // subagent-start 与 delivery 同等会话级路由,不再整帧丢弃;主轮已闩
-    // 则惰性重开一个后台轮容器挂载子块。真迟到的旧轮帧(token 等)
-    // 仍被闩挡住(见前后用例)。
+  it('late subagent-start after done registers in a reopened background turn (queued sub-agents)', () => {
+    // 契约变更:等待并发限制的子会话可能在主轮 done 之后才开跑——
+    // subagent-start 与 delivery 同等会话级路由,不再整帧丢弃;主轮已
+    // 关闭则重开一轮来挂载子块。真迟到的旧轮帧(token 等)
+    // 仍被丢弃(见前后用例)。
     const state = run([
       ...closedTurn,
       s('subagent-start', { subtaskId: 'sub-1', name: 'ghost', task: 't' }),
@@ -185,7 +185,7 @@ describe('turn lifecycle — loadHistory race constraint', () => {
   });
 });
 
-describe('turn lifecycle — sub-agent terminal guard', () => {
+describe('turn lifecycle — sub-agent closed-turn guard', () => {
   it('subagent-end latches the sub-run; late sub frames are dropped', () => {
     const state = run([
       s('user-message', { content: 'go' }),

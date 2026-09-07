@@ -60,7 +60,7 @@ function isShellToolCall(block: Block): boolean {
 }
 
 /** tool_call(shell) → ShellBlock 适配:命令取 args.command,输出取
- * toolResult(block.content 兜底),exitCode 按 wrangler shell 约定解析
+ * toolResult(block.content 兜底),exitCode 按后端 shell 回执约定解析
  * —— exit 0 输出纯 stdout,非零以 "Exit code: N" 开头。 */
 function asShellBlock(block: Block): Block {
   const meta = (block.metadata ?? {}) as Partial<ToolCallMetadata> & Partial<ShellMetadata>;
@@ -97,7 +97,7 @@ function isFileEditToolCall(block: Block): boolean {
 }
 
 /** tool_call(file_edit) → FileEditBlock 适配:oldString/newString/replaceAll 取自
- * toolArgs,occurrences/startLine/errorMessage 按 wrangler file_edit 回执约定从
+ * toolArgs,occurrences/startLine/errorMessage 按后端 file_edit 回执约定从
  * toolResult 解析。args 缺失或损坏时返回 null,回落通用 ToolCallBlock。 */
 function asFileEditBlock(block: Block): Block | null {
   const meta = (block.metadata ?? {}) as Partial<ToolCallMetadata> & Partial<FileEditMetadata>;

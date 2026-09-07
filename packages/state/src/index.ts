@@ -1,8 +1,9 @@
 /**
  * @fileoverview @agentskillmania/skill-ui-state
  *
- * State layer for skill-studio frontends. Transport-agnostic — consumers
- * fetch data and push it in via hooks. No dependency on daemon/colts/chat.
+ * State layer for agent frontends. Transport-agnostic — consumers
+ * fetch data and push it in via hooks. No dependency on agent backends or
+ * the chat package.
  *
  * Slice:
  * - conversation: event reducer for chat (token/thinking/tool/skill/...)

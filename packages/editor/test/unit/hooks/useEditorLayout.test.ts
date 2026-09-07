@@ -66,8 +66,8 @@ describe('useEditorLayout', () => {
     expect(result.current.isCollapsed).toBe(false);
   });
 
-  it('switchPanel rapid sequence does not lose state (UI3 regression guard)', () => {
-    // UI3: switchPanel used to call setIsCollapsed inside the setActivePanel
+  it('switchPanel rapid sequence does not lose state (nested-setState regression guard)', () => {
+    // switchPanel used to call setIsCollapsed inside the setActivePanel
     // updater. Nested setState in an updater is an anti-pattern that can
     // produce wrong results under React strict mode's double-invoke.
     // This test rapidly switches panels and collapses to verify final state.

@@ -153,7 +153,7 @@ export const EventLogItems: Story = {
         renderSummary={(ctx) => (
           <EventLogRow type="agent" label="Agent started" time="10:01:23" ctx={ctx} />
         )}
-        renderDetail={() => <JsonDetail data={{ pid: 8492, runtime: 'colts', version: '0.3.0' }} />}
+        renderDetail={() => <JsonDetail data={{ pid: 8492, runtime: 'agent', version: '0.3.0' }} />}
       />
       <ExpandableItem
         renderSummary={(ctx) => (

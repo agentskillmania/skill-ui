@@ -1,5 +1,5 @@
 /**
- * @fileoverview fromHistory unit tests — colts Message[] → SessionRunState
+ * @fileoverview fromHistory unit tests — persisted Message[] → SessionRunState
  */
 import { describe, it, expect } from 'vitest';
 import { fromHistory } from '../../../src/core/conversation/fromHistory.js';
@@ -151,7 +151,7 @@ describe('fromHistory', () => {
     // 引擎在 load_skill 成功后注入 type='skill-directive' 的 user 行驱动
     // 下一轮。历史重建必须跳过它:既不渲染成用户气泡(用户没说过这句
     // 话),也不切断助手回合 —— skill 块与后续内容留在同一 assistant
-    // 气泡里,与 live 渲染同构。
+    // 气泡里,与 live 渲染一致。
     const messages: ColtsMessageInput[] = [
       { role: 'user', content: '帮我写首诗', timestamp: 0 },
       {
@@ -625,7 +625,7 @@ describe('fromHistory — turn-level bubble merging', () => {
    * Regression: thinking blocks used to be PREPENDED to the bubble, so a
    * resumed conversation rendered every thought at the top in reverse
    * order — never matching the live view. Blocks must append in storage
-   * order, making resume block-for-block identical to the live reducer.
+   * order, making the restored view block-for-block identical to the live reducer.
    */
   it('preserves interleaved order: thought → text+tool → thought → text', () => {
     const messages: ColtsMessageInput[] = [

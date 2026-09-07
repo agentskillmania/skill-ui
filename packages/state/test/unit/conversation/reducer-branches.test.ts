@@ -428,7 +428,7 @@ describe('reducer — sub-agent lifecycle', () => {
     const state = run([
       s('subagent-start', { subtaskId: 's1', name: 'helper', task: 'research' }),
       s('subagent-thinking', { subtaskId: 's1', content: 'analyzing...' }),
-      // Wire field is `delta` (both daemons) — an earlier version of this test
+      // Wire field is `delta` (the backends) — an earlier version of this test
       // pushed `token`, which was silently dropped and asserted nothing.
       s('subagent-token', { subtaskId: 's1', delta: 'result' }),
       s('subagent-tool-start', {
@@ -750,7 +750,7 @@ describe('reducer — fromHistory defensive paths', () => {
       },
       { role: 'tool', content: 'yes', toolCallId: 'h1', toolName: 'ask_human', timestamp: 2 },
     ]);
-    // 无 context 时不设 title——默认文案归 chat 的 i18n 兜底,state 不烤英文串
+    // 无 context 时不设 title——默认文案归 chat 的 i18n,state 不硬编码英文串
     expect(
       state.main.messages[0].blocks?.find((b) => b.type === 'human_input')!.metadata?.title
     ).toBeUndefined();

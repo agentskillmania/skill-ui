@@ -1,13 +1,13 @@
 /**
  * @fileoverview normalizeEvent unit tests — wire variants fold into the
  * canonical shape exactly once, at the boundary. Variant table per the
- * daemon recon (see normalize.ts header).
+ * backend wire survey (see normalize.ts header).
  */
 import { describe, it, expect } from 'vitest';
 import { normalizeEvent } from '../../../src/core/conversation/normalize.js';
 
 describe('normalizeEvent — TokenStats casing', () => {
-  it('folds snake_case cache fields (wrangler.rs) into camelCase', () => {
+  it('folds snake_case cache fields (Rust daemon) into camelCase', () => {
     const out = normalizeEvent({
       event: 'step-end',
       data: { step: 0, tokens: { input: 100, output: 50, cache_read: 10, cache_write: 5 } },
@@ -42,7 +42,7 @@ describe('normalizeEvent — sub-agent envelope unwrap', () => {
     ).toEqual({ event: 'thinking', data: { content: 'hmm' }, subtaskId: 's1' });
   });
 
-  it('subagent-tool-start unwraps the colts Action wrapper to the main tool-start shape', () => {
+  it('subagent-tool-start unwraps the TS daemon Action wrapper to the main tool-start shape', () => {
     const out = normalizeEvent({
       event: 'subagent-tool-start',
       data: { subtaskId: 's1', action: { id: 'c1', tool: 'search', arguments: { q: 'x' } } },
@@ -54,7 +54,7 @@ describe('normalizeEvent — sub-agent envelope unwrap', () => {
     });
   });
 
-  it('subagent-tool-start passes toolType through (host-decoration channel)', () => {
+  it('subagent-tool-start passes toolType through (host-provided metadata)', () => {
     const out = normalizeEvent({
       event: 'subagent-tool-start',
       data: { subtaskId: 's1', action: { id: 'c1', tool: 't', toolType: 'mcp' } },

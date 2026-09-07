@@ -1,12 +1,12 @@
 /**
  * @fileoverview Live ↔ history parity — "block-for-block identical" as an
  * executable invariant, not a comment. The same scripted conversation is fed
- * through the live SSE path (reducer) and the resume path (fromHistory);
+ * through the live SSE path (reducer) and the restore path (fromHistory);
  * the rebuilt messages must match the live ones.
  *
  * Documented, intentional differences (stripped by the comparator):
  * - ids and createdAt (runtime-generated vs hist- prefixed)
- * - sub-agent metadata.messages (resume cannot reconstruct sub-run internals)
+ * - sub-agent metadata.messages (restore cannot reconstruct sub-run internals)
  * - human_input metadata.response (live: host-pushed response object;
  *   history: persisted tool-result string — the render side handles both)
  * - todo card within-bubble position (arrival time is not persisted) — the
@@ -207,7 +207,7 @@ describe('todo card — cross-turn anchor (follow the newest turn)', () => {
     expect(state.main.messages[2].blocks ?? []).toHaveLength(0);
   });
 
-  it('resume anchors at the same place: last assistant message', () => {
+  it('restore anchors at the same place: last assistant message', () => {
     const rows: ColtsMessageInput[] = [
       { role: 'user', content: 't1', timestamp: 1 },
       { role: 'assistant', type: 'action', content: 'a', timestamp: 2 },

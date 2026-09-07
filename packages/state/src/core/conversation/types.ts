@@ -63,12 +63,12 @@ export interface MessageAttachment {
 
 /**
  * Per-turn usage summary, stamped on the turn's final assistant message.
- * Values come from the daemon's `done` SSE frame when it arrives
+ * Values come from the backend's `done` SSE frame when it arrives
  * (authoritative turn totals), falling back to the step-end deltas the
  * reducer accumulated (aborted / errored turns where no done payload exists).
- * fromHistory restores the same shape from the daemon-persisted colts
- * `Message.usage` (written at run end); old archives lack the key and
- * simply degrade to time-only display.
+ * fromHistory restores the same shape from the persisted `Message.usage`
+ * (written at run end); old archives lack the key and simply degrade to
+ * time-only display.
  */
 export interface TurnUsage {
   inputTokens: number;
@@ -104,8 +104,9 @@ export interface AgentMessage {
 // ─── Todo List ────────────────────────────────────────────────────
 
 /**
- * A single todo item. Wire shape shared by both daemons (TS & Rust emit
- * identical JSON — snake_case `blocked_by`, empty arrays omitted).
+ * A single todo item. Wire shape produced by the backend (the TS and Rust
+ * implementations emit identical JSON — snake_case `blocked_by`, empty
+ * arrays omitted).
  */
 export interface TodoItem {
   id: number;
@@ -126,11 +127,11 @@ export interface TodoListSnapshot {
 // ─── A2UI Surfaces ────────────────────────────────────────────────
 
 /**
- * Materialized state of one A2UI surface. The a2ui_* tools carry their whole
- * payload in the tool-start args (backend is ack-only), so the frontend keeps
- * the resolved component tree / data model / title here to serialize
- * self-contained genui protocol blocks — including the reopen replay when a
- * later turn touches a surface created in an earlier one.
+ * Resolved state of one A2UI surface. The a2ui_* tools carry their whole
+ * payload in the tool-start args (the backend only acknowledges), so the
+ * frontend keeps the resolved component tree / data model / title here to
+ * serialize self-contained genui protocol blocks — including the replay
+ * when a later turn touches a surface created in an earlier one.
  */
 export interface A2uiSurfaceState {
   components: unknown[];
@@ -150,24 +151,24 @@ export interface AgentRunState {
   /**
    * Run liveness. 'streaming' iff a turn is currently open (a live assistant
    * bubble exists); 'idle' at rest; 'error' if the last turn failed.
-   * For the main agent this is wired by user-message / first content event /
-   * done / error / session-cleared; sub-agent runs flip at subagent-start/end.
+   * The main agent flips on user-message / first content event / done /
+   * error / session-cleared; sub-agent runs flip at subagent-start/end.
    *
-   * NOTE: 'idle' is ambiguous by design — it covers both "no turn yet" and
-   * "turn finished". Where that distinction matters (terminal guard), use
-   * `turnClosed`, not status.
+   * 'idle' is ambiguous by design — it covers both "no turn yet" and
+   * "turn finished". Where that distinction matters (deciding whether a
+   * late frame may still open a stream), use `turnClosed`, not status.
    */
   status: 'idle' | 'streaming' | 'error';
   /**
-   * Terminal-event latch: true once this reducer has consumed a `done` or
-   * `error` for the current turn, until `user-message` (new turn) or
-   * `session-cleared` resets it. This is EVENT HISTORY, not state shape —
-   * the three legal scenarios "fresh state", "post-done", and
-   * "loadHistory landed mid-run" (sim_split) are message-shape-identical
-   * yet require opposite answers to "may a late frame open a stream?".
-   * fromHistory-built states therefore always carry `false` (loadHistory
-   * means the reducer has not seen a terminal event), which is what allows
-   * the live event tail to reopen a bubble on a mid-run-restored state.
+   * Closed-turn flag: true once this reducer has consumed a `done` or
+   * `error` for the current turn, reset by `user-message` (new turn) or
+   * `session-cleared`. It tracks event history, not message shape — "fresh
+   * state", "post-done" and "loadHistory restored mid-run" are
+   * message-shape-identical yet require opposite answers to "may a late
+   * frame open a stream?". fromHistory-built states therefore always carry
+   * `false` (loadHistory means the reducer has not seen a terminal event),
+   * which is what allows the live event tail to reopen a bubble on a
+   * mid-run-restored state.
    */
   turnClosed: boolean;
   stepCount: number;
@@ -204,10 +205,10 @@ export interface AgentRunState {
   turnDurationMs: number;
   /**
    * A2UI surface registry (reducer-private bookkeeping, never serialized):
-   * materialized component trees and data models for surfaces touched by
+   * resolved component trees and data models for surfaces touched by
    * a2ui_* tool calls in this run. Maintained by the a2ui.ts pure helpers on
-   * both the live path (reducer) and the resume path (fromHistory), so a
-   * block reopened in a later turn can replay full state. Sub-agent runs
+   * both the live path (reducer) and the loadHistory path (fromHistory), so
+   * a block reopened in a later turn can replay full state. Sub-agent runs
    * each carry their own registry.
    */
   a2uiSurfaces: A2uiSurfaces;
@@ -222,7 +223,7 @@ export interface SubAgentRunState extends AgentRunState {
   parentBlockId: string;
   resultStatus?: 'success' | 'max_steps' | 'error' | 'abort' | 'timeout';
   error?: string;
-  /// 异步委派的投递回执:子任务结果已进主会话邮箱(delivery 事件)。
+  /// 异步委派已投递:子任务结果已进主会话邮箱(delivery 事件)。
   delivered?: boolean;
   deliveryStatus?: string;
   deliveryContent?: string;

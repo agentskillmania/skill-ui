@@ -95,7 +95,7 @@ describe('reducer — main agent events', () => {
   });
 
   it('drops legacy skill lifecycle frames as no-ops (forward compatibility)', () => {
-    // 旧 daemon 可能仍在发 skill-* 帧;新 reducer 没有对应 case,落进
+    // 旧后端可能仍在发 skill-* 帧;新 reducer 没有对应 case,落进
     // default 分支静默忽略 —— 不会重复建块或破坏既有 skill 块。
     const state = pushEvents([
       {
@@ -133,7 +133,7 @@ describe('reducer — main agent events', () => {
 
   it('completes ALL parallel tool_call blocks with their own results', () => {
     // Parallel tool invocations arrive as a burst of tool-start events (the
-    // daemon splits ToolsStart into per-call tool-start frames), followed by
+    // backend splits ToolsStart into per-call tool-start frames), followed by
     // a burst of tool-end frames. Each block must stay streaming until its
     // own tool-end matches by call id — an earlier tool-start must not close
     // the previously created blocks (regression: closeThinkingBlocks used to
@@ -533,7 +533,7 @@ describe('reducer — empty token events', () => {
 describe('reducer — text blocks & interleaved ordering', () => {
   it('keeps the full chronological order: thinking → text → tool → thinking → text', () => {
     // The core invariant of text-as-block: every segment lands in the blocks
-    // array exactly where it happened, so live rendering matches resume.
+    // array exactly where it happened, so live rendering matches the restored view.
     const state = pushEvents([
       { event: 'user-message', data: { content: 'hi' } },
       { event: 'thinking', data: { content: '思考A' } },

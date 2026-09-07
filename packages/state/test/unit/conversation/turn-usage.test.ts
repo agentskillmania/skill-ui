@@ -127,7 +127,7 @@ describe('turn usage — reducer', () => {
       step2,
       { event: 'done', data: { duration: 2000, tokens: { input: 800, output: 150 } } },
     ]);
-    // Authoritative done totals win; the resume path never split the turn.
+    // Authoritative done totals win; the continuation path never split the turn.
     expect(lastAssistant(state).usage).toEqual({
       inputTokens: 800,
       outputTokens: 150,
@@ -213,14 +213,14 @@ describe('turn usage — fromHistory', () => {
     expect(state.main.messages.filter((m) => m.role === 'assistant')[0].usage).toBeUndefined();
   });
 
-  it('normalizes the wrangler.rs wire shape (cacheRead/cacheWrite, no Tokens suffix)', () => {
+  it('normalizes the Rust daemon wire shape (cacheRead/cacheWrite, no Tokens suffix)', () => {
     const state = fromHistory([
       { role: 'user', content: 'hi', timestamp: 1000 },
       {
         role: 'assistant',
         content: 'Answer',
         timestamp: 1200,
-        // wrangler.rs TurnUsage 的 serde camelCase 原样:缓存字段无 Tokens 后缀。
+        // 后端 TurnUsage 的 serde camelCase 原样:缓存字段无 Tokens 后缀。
         usage: {
           inputTokens: 800,
           outputTokens: 150,

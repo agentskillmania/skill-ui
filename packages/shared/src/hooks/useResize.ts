@@ -41,7 +41,7 @@ export function useResize({
   const onMouseDown = useCallback(
     (e?: React.MouseEvent) => {
       if (disabled) return;
-      // UI11: capture startX at mousedown (not on first mousemove) so the
+      // Capture startX at mousedown (not on first mousemove) so the
       // delta between mousedown and the first mousemove is not lost.
       const startX = e?.clientX ?? 0;
       startRef.current = { x: startX, width };

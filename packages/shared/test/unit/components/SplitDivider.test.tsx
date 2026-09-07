@@ -121,8 +121,8 @@ describe('SplitDivider', () => {
     expect(onResize).toHaveBeenCalled();
   });
 
-  it('cleans up document listeners on unmount mid-drag (UI12)', () => {
-    // UI12: if the component unmounts while a drag is in progress (or
+  it('cleans up document listeners on unmount mid-drag', () => {
+    // If the component unmounts while a drag is in progress (or
     // mouseup never fires because the cursor left the window), the
     // document-level mousemove/mouseup listeners must be removed — otherwise
     // they leak and keep firing on every mouse move.

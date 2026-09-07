@@ -114,7 +114,7 @@ function addTokens(a: TokenStats, b?: Partial<TokenStats>): TokenStats {
 }
 
 /** Read the canonical TokenStats off a normalized event (normalizeEvent has
- * already folded the daemons' casing variants — see normalize.ts). */
+ * already folded the backends' casing variants — see normalize.ts). */
 function extractTokens(data: Record<string, unknown>): TokenStats | undefined {
   const t = data.tokens as Partial<TokenStats> | undefined;
   if (!t) return undefined;
@@ -153,14 +153,14 @@ function toTurnUsage(tokens: TokenStats, durationMs: number): TurnUsage | undefi
 /**
  * Find the current streaming assistant message in a run state, or create one.
  *
- * TERMINAL GUARD: when `run.turnClosed` is set (this reducer consumed a
+ * Closed-turn guard: when `run.turnClosed` is set (this reducer consumed a
  * `done`/`error` since the last turn opened), refuse to open a new stream —
  * `messageId` comes back null and every caller drops its event. Without this,
- * any frame arriving after the terminal event (the daemons merge channels
- * without cross-channel ordering guarantees) opened a zombie bubble that
- * streams forever: blinking cursor, no action buttons, no closing event ever
- * coming. Do NOT re-derive "closed" from message shape here — a state rebuilt
- * by fromHistory mid-run is shape-identical to a post-done state, yet must
+ * any frame arriving after the terminal event (the backend merges channels
+ * without cross-channel ordering guarantees) opened a bubble that streams
+ * forever: blinking cursor, no action buttons, no closing event ever coming.
+ * Do NOT re-derive "closed" from message shape here — a state rebuilt by
+ * fromHistory mid-run is shape-identical to a post-done state, yet must
  * stay open-able for the live event tail (see types.ts `turnClosed`).
  *
  * Creating the bubble also flips `status` to 'streaming' (a turn is open).
@@ -266,7 +266,7 @@ function reduceMainEvent(
   data: Record<string, unknown>
 ): AgentRunState {
   switch (eventName) {
-    // ── User message (not from colts — injected by the consumer hook) ──
+    // ── User message (synthesized by the host/consumer, not the backend) ──
     case 'user-message': {
       const attachments = (data.attachments as AgentMessage['attachments']) ?? undefined;
       const userMsg: AgentMessage = {
@@ -274,7 +274,7 @@ function reduceMainEvent(
         role: 'user',
         content: (data.content as string) ?? '',
         // 多模态附件(图片)随消息级透传——不进 blocks(blocks 是 assistant
-        // 的时序渲染单元)。
+        // 消息按时间顺序渲染的单元)。
         ...(attachments && attachments.length > 0 ? { attachments } : {}),
         status: 'completed',
         createdAt: Date.now(),
@@ -290,8 +290,8 @@ function reduceMainEvent(
       };
       // A user message opens a new turn: drop the previous turn's
       // step-delta accumulators so done/error stamp THIS turn's usage only.
-      // It also clears the terminal latch — this is the only way a turn
-      // re-opens after done/error.
+      // It also clears the closed-turn flag — the only way a turn re-opens
+      // after done/error.
       return {
         ...state,
         status: 'streaming',
@@ -328,7 +328,7 @@ function reduceMainEvent(
       // render as a stray gap).
       if (!delta) return state;
       const { run, messageId } = ensureStreamingMessage(state);
-      // 终态闩:轮已关闭,迟到的 token 帧直接丢弃(不开僵尸气泡)。
+      // 轮次已结束(turnClosed):丢弃迟到的 token 帧,不开新流。
       if (!messageId) return state;
       return {
         ...run,
@@ -356,7 +356,7 @@ function reduceMainEvent(
 
     case 'thinking': {
       const { run, messageId } = ensureStreamingMessage(state);
-      // 终态闩:轮已关闭,迟到的 thinking 帧直接丢弃。
+      // 轮次已结束(turnClosed):丢弃迟到的 thinking 帧。
       if (!messageId) return state;
       const content = (data.content as string) ?? '';
       return {
@@ -389,14 +389,14 @@ function reduceMainEvent(
     // ── Tool calls ──
     case 'tool-start': {
       const { run, messageId } = ensureStreamingMessage(state);
-      // 终态闩:轮已关闭,迟到的 tool-start 帧直接丢弃。
+      // 轮次已结束(turnClosed):丢弃迟到的 tool-start 帧。
       if (!messageId) return state;
       const toolName = (data.name as string) ?? 'unknown';
       const callId = (data.id as string) ?? genId('blk');
-      // 自带表现块的工具(PRESENTED_TOOLS,见 blocks.ts)不渲染 tool_call 块:
-      // 问答卡/todo 卡随后由各自的专用事件(human-input / todo-list)追加,
-      // 与 fromHistory 的跳过同构。气泡与 prose 收拢照常,保证后续表现块
-      // 的锚点与常规路径一致。
+      // 自带专用表现块的工具(PRESENTED_TOOLS,见 blocks.ts)不渲染
+      // tool_call 块:问答卡/todo 卡随后由各自的专用事件(human-input /
+      // todo-list)追加,与 fromHistory 的跳过规则一致。仍照常关闭正在
+      // 输出的文本块,保证后续表现块的锚点与常规路径一致。
       if (PRESENTED_TOOLS.has(toolName)) {
         return {
           ...run,
@@ -406,9 +406,9 @@ function reduceMainEvent(
           })),
         };
       }
-      // a2ui_* 特判:surface 数据全在工具 args 里(后端纯 ack,无专用事件),
-      // 在此物化成 genui 协议行并按 surfaceId 聚合成块;args 不可用时返回
-      // null,落回下方普通 tool_call 块(降级,不丢调用)。
+      // a2ui_* 单独处理:surface 数据全在工具 args 里(后端只回 ack,无
+      // 专用事件),在此转成 genui 协议行并按 surfaceId 聚合;args 不可用
+      // 时返回 null,回退到下方普通 tool_call 块(不丢调用)。
       if (A2UI_TOOLS.has(toolName)) {
         const res = applyA2uiCall(run.a2uiSurfaces, toolName, data.args);
         if (res) {
@@ -439,9 +439,9 @@ function reduceMainEvent(
           };
         }
       }
-      // load_skill 与 fromHistory 的 SKILL_TOOL 特判同构：实时也展示为 skill 块。
-      // 块语义 = 一次工具调用:tool-start 建块(streaming),tool-end 收尾;
-      // task 取自工具参数,没有独立的技能生命周期事件。
+      // load_skill 与 fromHistory 的 SKILL_TOOL 分支一致:实时也展示为
+      // skill 块。块语义 = 一次工具调用:tool-start 建块(streaming),
+      // tool-end 收尾;task 取自工具参数,没有独立的技能生命周期事件。
       const block: AgentBlock =
         toolName === SKILL_TOOL
           ? skillBlock({
@@ -469,8 +469,9 @@ function reduceMainEvent(
     case 'tool-end': {
       const callId = (data.callId as string) ?? '';
       // a2ui 聚合块按 metadata.pendingCallIds 配对(块 id 是 surface 级,
-      // 不是 callId);命中即收尾。未命中(a2ui 调用走了降级路径)时
-      // updateMessageWithBlock 原样返回数组,落回下方按块 id 的通用配对。
+      // 不是 callId);命中即完成。未命中(该 a2ui 调用走了普通 tool_call
+      // 回退路径)时 updateMessageWithBlock 原样返回数组,落回下方按块 id
+      // 的通用配对。
       const isA2uiPending = (b: AgentBlock) =>
         b.type === 'a2ui' &&
         Array.isArray(b.metadata?.pendingCallIds) &&
@@ -482,10 +483,11 @@ function reduceMainEvent(
       if (a2uiMessages !== state.messages) {
         return { ...state, messages: a2uiMessages };
       }
-      // Match by block id (set to callId at tool-start time). Both daemons
-      // emit callId unconditionally and old sessions load via fromHistory —
-      // there is no sender left that needs the historical sole-streaming
-      // fallback, so a callId that matches nothing is simply a no-op.
+      // Match by block id (set to callId at tool-start time). Both backend
+      // implementations emit callId unconditionally and old sessions load via
+      // fromHistory — there is no sender left that needs the historical
+      // sole-streaming fallback, so a callId that matches nothing is simply a
+      // no-op.
       return {
         ...state,
         messages: updateMessageWithBlock(
@@ -495,7 +497,7 @@ function reduceMainEvent(
             ...m,
             blocks: (m.blocks ?? []).map((b) => {
               if (b.id !== callId) return b;
-              // load_skill 块按 skill 语义收尾，终态与 fromHistory 一致
+              // load_skill 块按 skill 语义完成,终态与 fromHistory 一致
               if (b.type === 'skill') {
                 const resultStr =
                   typeof data.result === 'string' ? data.result : JSON.stringify(data.result);
@@ -511,7 +513,7 @@ function reduceMainEvent(
     // ── Human input ──
     case 'human-input': {
       const { run, messageId } = ensureStreamingMessage(state);
-      // 终态闩:轮已关闭,迟到的 human-input 帧直接丢弃(轮外弹出的交互
+      // 轮次已结束(turnClosed):丢弃迟到的 human-input 帧(轮外的交互
       // 输入无人作答,块会永远 pending)。
       if (!messageId) return state;
       const questions =
@@ -587,15 +589,14 @@ function reduceMainEvent(
       return {
         ...state,
         // 累计账只在 step-end 累加(每次 LLM 调用恰有一次 step-end;这里
-        // 再加一次会双计)。本事件只维护 lastInputTokens —— 最近一次调用
-        // 的输入大小,即当前上下文窗口占用(NON-cumulative)。
-        // Daemon may send `tokens: {}` — that would zero the gauge, so only
-        // trust a positive reading.
+        // 再加一次会重复计数)。本事件只维护 lastInputTokens —— 最近一次
+        // 调用的输入大小,即当前上下文窗口占用(非累计)。后端可能发送
+        // `tokens: {}`——那会清零读数,所以只在 input>0 时采用。
         ...(tokens && tokens.input > 0 ? { lastInputTokens: tokens.input } : {}),
       };
     }
 
-    // ── Todo list (live snapshot from either daemon) ──
+    // ── Todo list (live snapshot from the backend) ──
     case 'todo-list': {
       const rawItems = Array.isArray(data.items) ? (data.items as unknown[]) : [];
       const todoList: TodoListSnapshot = {
@@ -624,8 +625,8 @@ function reduceMainEvent(
               : {}),
           })),
       };
-      // 单例内联卡的锚点规则:永远挂在最后一条 assistant 消息末尾——与
-      // fromHistory 同一锚点,"resume 不重排布局"对 todo 卡也成立。轮内
+      // 单例内联卡的固定位置:永远挂在最后一条 assistant 消息末尾——与
+      // fromHistory 同一位置,loadHistory 不重排布局对 todo 卡也成立。轮内
       // 更新即原地(宿主本就是末条 assistant);跨轮收到非空清单时把卡片
       // 移动过去(不复制、不累积);空清单只原地更新/记 state,不挪动。
       const existing = findTodoBlock(state.messages);
@@ -683,13 +684,13 @@ function reduceMainEvent(
         return { ...state, todoList };
       }
       // 附着决策读两个显式信号,各管一件事(不再从消息形状推断):
-      // - status === 'streaming'(有活气泡)才走流式挂载;光秃 todo-list
-      //   落在 fresh/resting 状态时不得独自开出流式块,快照仍记进
+      // - status === 'streaming'(有活跃气泡)才走流式挂载;空 todo-list
+      //   落在 idle/error 状态时不得独自开流式块,快照仍记进
       //   state.todoList 供侧栏渲染。
-      // - 迟到的非空清单(daemon 步进循环在末步后才 diff 快照,该事件走
-      //   event_tx 广播通道,与 runner 自己的 done 帧无合流顺序保证)在
-      //   终态后绝不新开流——turnClosed 闩已把 ensureStreamingMessage 的
-      //   创建路径焊死,这里以 completed 块附到末条 assistant 即可。
+      // - 迟到的非空清单(后端步进循环在末步后才 diff 快照,该事件与
+      //   done 帧无先后顺序保证)在轮次结束后绝不开新流——turnClosed
+      //   已把 ensureStreamingMessage 的创建路径禁止掉,这里以 completed
+      //   块附到末条 assistant 即可。
       if (state.status !== 'streaming') {
         const card = todoBlock(genId('blk'), todoList.items, 'completed');
         if (lastAssistantIdx >= 0) {
@@ -716,11 +717,11 @@ function reduceMainEvent(
 
     // ── Step lifecycle ──
     case 'step-start': {
-      // 多轮流(events 常驻接口):done 扣闩后的 step-start 是新一轮
-      // (消费轮/后台轮——没有用户消息开路,turnClosed 闩会把帧全部
-      // 丢弃)。判别式:只有 step===0(新轮首步)才重开——流是 FIFO,
-      // 同轮迟到的 step>0 不重开(僵尸气泡面缩到零)。重开是惰性的:
-      // 只翻状态清账,不预铺气泡,首个内容帧经 ensureStreamingMessage
+      // 多轮流(事件流常驻):done 之后的 step-start 可能是新一轮
+      // (没有用户消息开路,而 turnClosed 已置位时帧会被全部丢弃)。
+      // 判据:只有 step===0(新轮首步)才重开——流是 FIFO,
+      // 同轮迟到的 step>0 不重开(不会出现多余空气泡)。重开是惰性的:
+      // 只翻状态清账,不预建消息,首个内容帧经 ensureStreamingMessage
       // 开泡(空轮不留空壳)。
       const run = state.turnClosed && (data.step as number) === 0 ? reopenTurn(state) : state;
       return { ...run, stepCount: (data.step as number) ?? run.stepCount + 1 };
@@ -747,9 +748,9 @@ function reduceMainEvent(
     }
 
     case 'compressed': {
-      // daemon(wrangler.rs)自 0.x 起在压缩完成时附带 `estimatedContextSize`
-      // —— 压缩后的下一次请求输入估算。用它立即刷新上下文占用表,而不是
-      // 停在压缩前的旧值直到下一次 llm-response。
+      // 后端在压缩完成时附带 `estimatedContextSize` —— 压缩后的下一次
+      // 请求输入估算。用它立即刷新上下文占用表,而不是停在压缩前的
+      // 旧值直到下一次 llm-response。
       const estimated = data.estimatedContextSize as number | undefined;
       return {
         ...state,
@@ -789,12 +790,12 @@ function reduceMainEvent(
     case 'done': {
       const totalSteps = data.totalSteps as number | undefined;
       const duration = data.duration as number | undefined;
-      // HITL 中断终态(wrangler-daemon):done{type:"waiting_human"} 表示
+      // HITL 中断终态:done{type:"waiting_human"} 表示
       // "run 正常结束、暂停等人类回答" —— 待答的 human_input 块必须保持
       // pending(交互入口还在),只有普通终态才关闭它们。
       const waitingHuman = data.type === 'waiting_human';
-      // done 的 tokens 是整轮累计量(wrangler.rs;colts run() 同理),而每个
-      // step 的用量已在 step-end 里累加过 —— 这里再加一次会重复计数。
+      // done 的 tokens 是整轮累计量,而每个 step 的用量已在 step-end 里
+      // 累加过 —— 这里再加一次会重复计数。
       // duration/totalSteps 则是权威整轮值,覆盖逐步累加的近似。
       // 轮用量同理:done 的 tokens/duration 是权威整轮值;aborted 的 done
       // (宿主补发,data 里无 tokens/duration)退回 step-end 增量之和。
@@ -900,7 +901,8 @@ function reduceSubAgentEvent(
       return new Map(subAgents).set(subtaskId, {
         ...sub,
         status: resultStatus === 'error' ? 'error' : 'idle',
-        // 上闩:此后迟到的 subagent-token/thinking/tool-start 一律丢弃。
+        // 此后迟到的 subagent-token/thinking/tool-start 一律丢弃(标记轮次
+        // 已结束)。
         turnClosed: true,
         resultStatus,
         error: data.error as string | undefined,
@@ -924,11 +926,11 @@ function reduceSubAgentEvent(
   }
 }
 
-/// done/error 扣闩(turnClosed)之后重开一轮:翻回 streaming、清闩、
-/// 清零本轮用量账目。run-resumed(宿主合成)与 step-start-after-done
-/// (多轮流:消费轮/后台轮)共用。**惰性**:不预铺空气泡——首个内容
-/// 帧(token/thinking)经 ensureStreamingMessage 开泡,迟到的杂帧最多
-/// 翻一下状态,不再制造永久打字的僵尸气泡。
+/// 在 done/error 关闭轮次(turnClosed)之后重开一轮:状态翻回 streaming、
+/// 清除关闭标记、清零本轮用量账目。run-resumed(宿主合成)与 done 后的
+/// step-start(无用户消息开路的新一轮)共用。**惰性**:不预建空消息——
+/// 首个内容帧(token/thinking)经 ensureStreamingMessage 开泡,迟到的杂帧
+/// 最多翻一下状态,不会留下一个持续闪动光标、永不关闭的空气泡。
 function reopenTurn(state: AgentRunState): AgentRunState {
   return {
     ...state,
@@ -954,20 +956,20 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
 
   // Route to sub-agent or main
   if (eventName === 'subagent-start') {
-    // 会话级路由(与 delivery 同款):后台子女的 start 可能晚于主轮
-    // done——排队等并发闸门的子女恰在主轮结束后才起飞。主轮已闩则
-    // 惰性重开一个后台轮容器,子块照常挂载;不再整帧丢弃(丢弃会让
-    // 该子女的后续帧因 lookup miss 全部静默蒸发)。
+    // 会话级路由(与 delivery 相同):子会话的 start 可能晚于主轮
+    // done——等待并发限制的子会话恰在主轮结束后才开跑。主轮已关闭则
+    // 重开一个容器轮次,子块照常挂载;不再整帧丢弃(丢弃会让该子会话
+    // 的后续帧因找不到对应子运行而全部静默忽略)。
     const base = state.main.turnClosed ? reopenTurn(state.main) : state.main;
     // Create sub-agent + add block to parent main message
-    // Generate a subtaskId when the daemon omits it: using '' as the Map key
+    // Generate a subtaskId when the backend omits it: using '' as the Map key
     // makes two such sub-agents overwrite each other, and the parent block
     // could never be matched by subagent-end.
     const subtaskId = (data.subtaskId as string) ?? genId('blk');
     const blockId = genId('blk');
     const { run: mainWithBlock } = (() => {
       const { run, messageId } = ensureStreamingMessage(base);
-      // turnClosed 已在上方重开——messageId 必非空;守卫只为类型诚实。
+      // turnClosed 已在上方重开——messageId 必非空;此守卫仅为类型收窄。
       if (!messageId) return { run };
       const block = subagentBlock({
         id: blockId,
@@ -997,9 +999,9 @@ export function reducer(state: SessionRunState, sse: SSEEvent): SessionRunState 
   }
 
   if (eventName === 'delivery') {
-    // 异步委派投递回执(wrangler 的 delivery 事件):子任务结果已进主
-    // 会话邮箱。给子运行与父块都打"已送达"标记——异步模式下子块不
-    // 再以"工具结果形式"收尾,受理与送达是两个独立信号。
+    // 异步委派投递(delivery 事件):子任务结果已进主会话邮箱。给子运行
+    // 与父块都打"已送达"标记——异步模式下子块不再以"工具结果形式"
+    // 收尾,受理与送达是两个独立信号。
     // delivery 不带 subagent- 前缀,normalizeEvent 不提取 subtaskId,
     // 直接从载荷里取。
     const id = (data.subtaskId as string) ?? '';

@@ -149,7 +149,7 @@ describe('reducer — sub-agent edge cases', () => {
   it('handles subagent-token after start', () => {
     const state = pushEvents([
       { event: 'subagent-start', data: { subtaskId: 'sub-1', name: 'helper', task: 'do' } },
-      // Wire field is `delta` (both daemons emit {subtaskId, name, delta}).
+      // Wire field is `delta` (the backends emit {subtaskId, name, delta}).
       { event: 'subagent-token', data: { subtaskId: 'sub-1', delta: 'Hello' } },
       { event: 'subagent-token', data: { subtaskId: 'sub-1', delta: ' world' } },
     ]);
@@ -199,7 +199,7 @@ describe('reducer — token accumulation edge cases', () => {
     expect(state.main.tokens.input).toBe(0);
   });
 
-  it('parses snake_case cache fields (wrangler.rs wire format)', () => {
+  it('parses snake_case cache fields (Rust daemon wire format)', () => {
     const state = stateWithOneEvent({
       event: 'step-end',
       data: {
@@ -249,7 +249,7 @@ describe('reducer — tool-end edge cases', () => {
   });
 
   it('tool-end with a missing callId no-ops even when a tool_call is streaming (no fallback)', () => {
-    // Both daemons emit callId unconditionally — the historical sole-streaming
+    // Both backend implementations emit callId unconditionally — the historical sole-streaming
     // fallback was deleted; an unmatched tool-end must not misattribute the
     // result to an unrelated in-flight call.
     const state = pushEvents([

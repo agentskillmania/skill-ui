@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 
 import type { EditorPanel } from '../types.js';
 
-/** Default sidebar width in pixels (narrower than cockpit to maximize editor space) */
+/** Default sidebar width in pixels */
 const DEFAULT_WIDTH = 280;
 
 /** Minimum sidebar width in pixels */
@@ -43,7 +43,7 @@ export function useEditorLayout(): UseEditorLayoutReturn {
 
   const switchPanel = useCallback(
     (panel: Exclude<EditorPanel, null>) => {
-      // UI3: setIsCollapsed must NOT be called inside the setActivePanel
+      // setIsCollapsed must NOT be called inside the setActivePanel
       // updater (nested setState is an anti-pattern, can misbehave under
       // React strict mode double-invoke). Call it separately before/after.
       if (isCollapsed) {

@@ -1,8 +1,8 @@
 /**
- * @fileoverview Post-done todo-list regression — the daemon's step loop emits
+ * @fileoverview Post-done todo-list regression — the backend's step loop emits
  * its final todo snapshot on a separate channel whose SSE merge order is not
  * guaranteed, so a non-empty `todo-list` can arrive AFTER `done`. The reducer
- * must not revive the finished run (an eternal streaming bubble): the block
+ * must not revive the finished run (an endless streaming bubble): the block
  * attaches completed to the last assistant message instead.
  */
 import { describe, it, expect } from 'vitest';
