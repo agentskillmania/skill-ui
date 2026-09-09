@@ -17,6 +17,9 @@ export interface QuickCommandsProps {
   maxCommands?: number;
   /** Whether disabled */
   disabled?: boolean;
+  /** Single-row layout with horizontal scroll on overflow (for toolbars).
+   * Default false: tags wrap onto multiple lines. */
+  nowrap?: boolean;
 }
 
 export const QuickCommands = memo(function QuickCommands({
@@ -24,6 +27,7 @@ export const QuickCommands = memo(function QuickCommands({
   onCommand,
   maxCommands = 5,
   disabled = false,
+  nowrap = false,
 }: QuickCommandsProps) {
   const theme = useTheme();
 
@@ -37,15 +41,32 @@ export const QuickCommands = memo(function QuickCommands({
     <div
       css={css`
         display: flex;
-        flex-wrap: wrap;
         gap: ${theme.spacing[1]};
         opacity: ${disabled ? 0.5 : 1};
         pointer-events: ${disabled ? 'none' : 'auto'};
+        ${nowrap
+          ? css`
+              align-items: center;
+              flex-wrap: nowrap;
+              overflow-x: auto;
+              flex: 1;
+              min-width: 0;
+
+              /* hide scrollbar but keep scrollable */
+              &::-webkit-scrollbar {
+                display: none;
+              }
+              scrollbar-width: none;
+            `
+          : css`
+              flex-wrap: wrap;
+            `}
       `}
     >
       {visible.map((cmd) => (
         <Tag
           key={cmd.id}
+          data-testid="quick-command"
           css={css`
             cursor: pointer;
             margin: 0;
@@ -56,6 +77,7 @@ export const QuickCommands = memo(function QuickCommands({
             border: 1px solid transparent;
             font-size: ${theme.font.size.sm};
             transition: all ${theme.motion.duration.fast} ${theme.motion.easing.out};
+            ${nowrap && 'flex-shrink: 0; white-space: nowrap;'}
 
             &:hover {
               background: ${theme.color.primary};

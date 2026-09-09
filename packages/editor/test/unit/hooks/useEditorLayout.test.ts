@@ -3,12 +3,11 @@ import { renderHook, act } from '@testing-library/react';
 import { useEditorLayout } from '../../../src/hooks/useEditorLayout.js';
 
 describe('useEditorLayout', () => {
-  it('returns default values with files panel active', () => {
+  it('returns default values', () => {
     const { result } = renderHook(() => useEditorLayout());
 
     expect(result.current.sidebarWidth).toBe(280);
     expect(result.current.isCollapsed).toBe(false);
-    expect(result.current.activePanel).toBe('files');
   });
 
   it('toggleCollapse flips isCollapsed', () => {
@@ -22,74 +21,6 @@ describe('useEditorLayout', () => {
     act(() => {
       result.current.toggleCollapse();
     });
-    expect(result.current.isCollapsed).toBe(false);
-  });
-
-  it('switchPanel to different panel switches', () => {
-    const { result } = renderHook(() => useEditorLayout());
-
-    act(() => {
-      result.current.switchPanel('copilot');
-    });
-
-    expect(result.current.activePanel).toBe('copilot');
-    expect(result.current.isCollapsed).toBe(false);
-  });
-
-  it('switchPanel to same panel is a no-op (does not collapse)', () => {
-    const { result } = renderHook(() => useEditorLayout());
-
-    // Default panel is 'files'
-    act(() => {
-      result.current.switchPanel('files');
-    });
-
-    expect(result.current.activePanel).toBe('files');
-    expect(result.current.isCollapsed).toBe(false);
-  });
-
-  it('switchPanel expands when sidebar is collapsed', () => {
-    const { result } = renderHook(() => useEditorLayout());
-
-    // Collapse first
-    act(() => {
-      result.current.toggleCollapse();
-    });
-    expect(result.current.isCollapsed).toBe(true);
-
-    // Click any panel icon should expand
-    act(() => {
-      result.current.switchPanel('copilot');
-    });
-
-    expect(result.current.activePanel).toBe('copilot');
-    expect(result.current.isCollapsed).toBe(false);
-  });
-
-  it('switchPanel rapid sequence does not lose state (nested-setState regression guard)', () => {
-    // switchPanel used to call setIsCollapsed inside the setActivePanel
-    // updater. Nested setState in an updater is an anti-pattern that can
-    // produce wrong results under React strict mode's double-invoke.
-    // This test rapidly switches panels and collapses to verify final state.
-    const { result } = renderHook(() => useEditorLayout());
-
-    // Switch to copilot, then review, then collapse, then switch to test
-    act(() => {
-      result.current.switchPanel('copilot');
-    });
-    act(() => {
-      result.current.switchPanel('review');
-    });
-    act(() => {
-      result.current.toggleCollapse();
-    });
-    expect(result.current.isCollapsed).toBe(true);
-    act(() => {
-      result.current.switchPanel('test');
-    });
-
-    // After all operations: test panel active, not collapsed
-    expect(result.current.activePanel).toBe('test');
     expect(result.current.isCollapsed).toBe(false);
   });
 

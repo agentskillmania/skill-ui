@@ -54,7 +54,7 @@ jobs:
       - name: Build every Storybook into its sub-path
         run: |
           mkdir -p site-dist
-          for pkg in chat settings portal frame shared editor; do
+          for pkg in chat shared editor devtool; do
             echo "::group::Building packages/$pkg"
             STORYBOOK_BASE_PATH="/skill-ui/$pkg/" \
               pnpm --filter "./packages/$pkg" exec storybook build -o "$GITHUB_WORKSPACE/site-dist/$pkg"

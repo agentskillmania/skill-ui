@@ -25,6 +25,7 @@
  * full state).
  */
 
+import { A2UI_TOOLS, applyA2uiCall, a2uiBlockOpeningLines } from './a2ui.js';
 import {
   SKILL_TOOL,
   HUMAN_TOOL,
@@ -41,7 +42,6 @@ import {
   type HumanInputQuestion,
   TODO_TOOL,
 } from './blocks.js';
-import { A2UI_TOOLS, applyA2uiCall, a2uiBlockOpeningLines } from './a2ui.js';
 import type {
   SessionRunState,
   AgentMessage,

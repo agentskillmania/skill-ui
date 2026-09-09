@@ -1,6 +1,7 @@
 /**
  * Context-window usage indicator (display-only) for the chat input toolbar.
  */
+import { formatTokens } from '@agentskillmania/skill-ui-shared';
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { css } from '@emotion/react';
 import { Progress } from 'antd';
@@ -11,23 +12,6 @@ import type { ChatContextUsage as ChatContextUsageData } from '../types.js';
 export interface ContextUsageProps {
   /** Usage data */
   usage: ChatContextUsageData;
-}
-
-/** Compact token formatter: 1200 → "1.2k", 1500000 → "1.5M". */
-export function formatTokens(n: number): string {
-  if (n < 1000) {
-    return String(n);
-  }
-  if (n < 1_000_000) {
-    const v = n / 1000;
-    return `${v >= 100 ? Math.round(v) : trim(v)}k`;
-  }
-  const v = n / 1_000_000;
-  return `${v >= 100 ? Math.round(v) : trim(v)}M`;
-}
-
-function trim(v: number): string {
-  return v.toFixed(1).replace(/\.0$/, '');
 }
 
 export const ContextUsage = memo(function ContextUsage({ usage }: ContextUsageProps) {

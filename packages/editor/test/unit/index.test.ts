@@ -6,15 +6,11 @@ import * as editorExports from '../../src/index.js';
 
 describe('editor package exports', () => {
   const componentNames = [
-    'ProjectEditor',
+    'EditorWorkbench',
     'EditorArea',
     'CodeEditor',
     'VisualEditor',
-    'FileTabs',
     'StatusBar',
-    'FileTree',
-    'CopilotPanel',
-    'ReviewPanel',
   ] as const;
 
   it.each(componentNames)('exports %s as a component', (name) => {
@@ -25,10 +21,20 @@ describe('editor package exports', () => {
     expect(isFunction || isMemoComponent).toBe(true);
   });
 
-  it('exports hook and utility functions', () => {
-    expect(typeof editorExports.useEditorContext).toBe('function');
-    expect(typeof editorExports.getFileInfo).toBe('function');
-    expect(typeof editorExports.getFileLabel).toBe('function');
+  it('does NOT export removed panel/workbench pieces', () => {
+    const removed = [
+      'ProjectEditor',
+      'FileTree',
+      'FileTabs',
+      'CopilotPanel',
+      'ReviewPanel',
+      'useEditorContext',
+      'getFileInfo',
+      'getFileLabel',
+    ] as const;
+    for (const name of removed) {
+      expect((editorExports as Record<string, unknown>)[name], name).toBeUndefined();
+    }
   });
 
   it('exports i18n resources for both locales', () => {

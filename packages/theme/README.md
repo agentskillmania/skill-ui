@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![中文文档](https://img.shields.io/badge/文档-中文-blue.svg)](./README.zh_CN.md)
 
-Theme and style utilities for @agentskillmania UI components.
+Theme foundation for @agentskillmania UI packages — tokens, provider, style utilities, and Ant Design adapters.
 
 ## Installation
 
@@ -14,11 +14,17 @@ npm install @agentskillmania/skill-ui-theme
 pnpm add @agentskillmania/skill-ui-theme
 ```
 
-## Usage
+## Public surface
 
-```tsx
-import { ... } from '@agentskillmania/skill-ui-theme';
-```
+| Group | Exports |
+|---|---|
+| Provider | `ThemeProvider`, `useTheme`, `createEmotionTheme`, `GlobalStyles` |
+| Tokens | `getTheme`, `lightTheme`/`darkTheme`, `lightColor`/`darkColor`, `lightEventStatusColor`/`darkEventStatusColor`, `lightAgentStatusColor`/`darkAgentStatusColor`, `lightSkillStatusColor`/`darkSkillStatusColor`, `breakpoints` |
+| Registry | `themeRegistry`, `themeMetas`, `resolveThemeId`, `defaultThemeId`, `ThemeId`, `ThemeMeta` |
+| Ant Design | `createAntdConfig`, `getAntdConfig`, `lightAntdConfig`, `darkAntdConfig`, `getAntdXTokens`, `lightAntdXTokens`, `darkAntdXTokens` |
+| Constants | `layout`, `zIndex` |
+| Style utils | `flexColumn`/`flexRow`/`flexCenter`/`flexWrap`/`gridAutoFill`, `glassEffect`, `card`, `borderDefault`/`borderAccent`, `hoverPrimary`/`hoverBg`, `disabled`, `focusVisible`, `transition`, `spin`/`spinKeyframes`, `scaleActive`, `textTruncate`/`textSecondary`, `iconBox`, `scrollable`/`scrollContainer`, `absoluteFill`, `interactiveItem`/`interactiveRow`, `subtleBackground`, `borderSeparator`, `media`, `container` |
+| Types | `Theme`, `EventStatusColorItem`, `AgentStatusColorItem` |
 
 ## License
 

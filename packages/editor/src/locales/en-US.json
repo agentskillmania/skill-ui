@@ -1,16 +1,8 @@
 {
-  "activityBar": {
+  "workbench": {
     "files": "Files",
-    "copilot": "Copilot",
-    "review": "Review",
-    "test": "Tests"
-  },
-  "copilot": {
-    "emptyHint": "Ask Copilot, or use quick commands",
-    "placeholder": "Ask Copilot..."
-  },
-  "fileTabs": {
-    "close": "Close {{label}}"
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar"
   },
   "statusBar": {
     "unsaved": "Unsaved",
@@ -28,19 +20,5 @@
     "isDirectory": "This file is a directory",
     "emptyHint": "Select a file to start editing",
     "placeholder": "Type / for commands, or start writing..."
-  },
-  "review": {
-    "emptyHint": "Review items will appear here"
-  },
-  "fileTree": {
-    "emptyHint": "No files found"
-  },
-  "testCase": {
-    "title": "Test Cases",
-    "runAll": "Run All",
-    "emptyHint": "No test cases found",
-    "passed": "Passed",
-    "failed": "Failed",
-    "running": "Running..."
   }
 }

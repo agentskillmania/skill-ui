@@ -1,10 +1,9 @@
 const zhCN = {
-  sidebar: {
-    collapse: '收起',
-    expand: '展开',
+  fileTree: {
+    emptyHint: '暂无文件',
   },
-  emptyState: {
-    noData: '暂无数据',
+  fileTabs: {
+    close: '关闭 {{label}}',
   },
 } as const;
 

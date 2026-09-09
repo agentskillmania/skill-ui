@@ -1,10 +1,9 @@
 const enUS = {
-  sidebar: {
-    collapse: 'Collapse',
-    expand: 'Expand',
+  fileTree: {
+    emptyHint: 'No files found',
   },
-  emptyState: {
-    noData: 'No Data',
+  fileTabs: {
+    close: 'Close {{label}}',
   },
 } as const;
 

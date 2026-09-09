@@ -1,7 +1,14 @@
 /**
- * File utility functions
+ * 文件工具 — editor 私有（Monaco 语言映射、wysiwyg 支持表）。
+ * 通用文件分类（FileKind/getFileKind/getFileLabel）在 shared。
  */
-import type { FileInfo } from '../types.js';
+import { getExtension } from '@agentskillmania/skill-ui-shared';
+
+/** File type info for the code editor */
+export interface FileInfo {
+  extension: string;
+  language: string;
+}
 
 /** Extension → Monaco language mapping */
 const EXT_LANGUAGE_MAP: Record<string, string> = {
@@ -27,16 +34,20 @@ const EXT_LANGUAGE_MAP: Record<string, string> = {
   sql: 'sql',
 };
 
+/** File extensions supported by the visual (wysiwyg) editor. */
+export const VISUAL_EDITOR_EXTENSIONS = ['md', 'mdx'] as const;
+
+/** Whether the visual editor supports this file */
+export function isVisualEditable(filePath: string | null): boolean {
+  if (!filePath) return false;
+  return (VISUAL_EDITOR_EXTENSIONS as readonly string[]).includes(getExtension(filePath));
+}
+
 /** Get file info from file path */
 export function getFileInfo(filePath: string): FileInfo {
-  const ext = filePath.split('.').pop()?.toLowerCase() ?? '';
+  const ext = getExtension(filePath);
   return {
     extension: ext,
     language: EXT_LANGUAGE_MAP[ext] ?? 'plaintext',
   };
-}
-
-/** Get file display name (last path segment) */
-export function getFileLabel(filePath: string): string {
-  return filePath.split('/').pop() ?? filePath;
 }

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { getFileInfo, getFileLabel } from '../../src/utils/file-utils.js';
+import { getFileInfo, isVisualEditable } from '../../src/utils/file-utils.js';
 
 describe('getFileInfo', () => {
   it('recognizes TypeScript files', () => {
@@ -68,29 +68,18 @@ describe('getFileInfo', () => {
   });
 });
 
-describe('getFileLabel', () => {
-  it('extracts file name from path', () => {
-    expect(getFileLabel('src/index.ts')).toBe('index.ts');
+describe('isVisualEditable', () => {
+  it('supports markdown extensions', () => {
+    expect(isVisualEditable('SKILL.md')).toBe(true);
+    expect(isVisualEditable('doc.mdx')).toBe(true);
   });
 
-  it('returns root files directly', () => {
-    expect(getFileLabel('SKILL.md')).toBe('SKILL.md');
+  it('rejects non-markdown extensions', () => {
+    expect(isVisualEditable('src/index.ts')).toBe(false);
+    expect(isVisualEditable('notes.txt')).toBe(false);
   });
 
-  it('takes last segment for deep paths', () => {
-    expect(getFileLabel('a/b/c/d.txt')).toBe('d.txt');
-  });
-
-  it('returns empty string for empty path', () => {
-    expect(getFileLabel('')).toBe('');
-  });
-
-  it('handles empty array from split via nullish coalescing bridge', () => {
-    const splitSpy = vi.spyOn(String.prototype, 'split');
-    // Make split return empty array so pop() returns undefined
-    splitSpy.mockReturnValueOnce([]);
-    const result = getFileLabel('some/path/file.ts');
-    expect(result).toBe('some/path/file.ts');
-    splitSpy.mockRestore();
+  it('rejects null path', () => {
+    expect(isVisualEditable(null)).toBe(false);
   });
 });

@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![中文文档](https://img.shields.io/badge/文档-中文-blue.svg)](./README.zh_CN.md)
 
-Skill editor UI components for @agentskillmania — file tree, code editor, visual editor, toolbars.
+Editing domain for @agentskillmania — editor core plus the complete workbench.
 
 ## Installation
 
@@ -14,11 +14,23 @@ npm install @agentskillmania/skill-ui-editor
 pnpm add @agentskillmania/skill-ui-editor
 ```
 
-## Usage
+## Public surface
 
-```tsx
-import { ... } from '@agentskillmania/skill-ui-editor';
-```
+| Export | Description |
+|---|---|
+| `EditorWorkbench` | Complete controlled workbench: file tree sidebar + tabs + editor area + status bar (open/dirty/save/mode orchestration included) |
+| `EditorArea` | Mode switcher — code vs. wysiwyg |
+| `CodeEditor` | Monaco-based code editor (Ctrl/Cmd+S) |
+| `VisualEditor` | Milkdown Crepe visual editor (lazy-loaded engine) |
+| `StatusBar` | File path / dirty flag / cursor / edit-mode toggle |
+| `EditMode` / `CursorPosition` / `EditorAreaProps` / `StatusBarProps` / `EditorWorkbenchProps` | Types |
+
+File browsing pieces (`FileTree`, `FileTabs`, `FileNode`, `FileKind`, …) live in
+[`@agentskillmania/skill-ui-shared`](../shared) — the workbench consumes them from there.
+
+## i18n
+
+`NAMESPACE` / `resources` are exported for host registration (zh-CN / en-US).
 
 ## License
 

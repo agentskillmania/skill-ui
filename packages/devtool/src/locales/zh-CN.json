@@ -1,0 +1,18 @@
+{
+  "eval": {
+    "suite": "评估套件",
+    "runId": "运行 ID",
+    "passRate": "通过率",
+    "duration": "耗时",
+    "sampling": "采样",
+    "runs": "{{count}} 次运行",
+    "threshold": "阈值 {{value}}",
+    "passed": "通过",
+    "failed": "失败",
+    "cases": "用例",
+    "sample": "样本 {{index}}",
+    "score": "得分 {{score}}",
+    "target": "目标",
+    "emptyHint": "报告中没有用例"
+  }
+}

@@ -1,79 +1,44 @@
 /**
- * @agentskillmania/skill-ui-shared
- * Shared UI components, hooks, and style presets for the skill-ui ecosystem.
+ * @agentskillmania/skill-ui-shared — 通用基础层
+ *
+ * 按"面"组织，每个成员都有 ≥2 个宿主/领域包的真实消费者：
+ *
+ * - **files**：文件浏览域（FileTree / FileTabs / FilePreview / FileTypeIcon +
+ *   FileKind/getFileKind/getFileLabel + FileNode/FileTab 类型）——编辑器工作台
+ *   与 gmemo 边窗共用。
+ * - **display**：EmptyState —— FileTree/FilePreview/EditorWorkbench 共用的空态。
+ * - **utils**：formatTokens / formatDuration —— chat 与 editor 共用的格式化契约。
  */
 
-// Components
+// ─── files ──────────────────────────────────────────────────
+export { FileTree } from './files/FileTree.js';
+export { FileTabs } from './files/FileTabs.js';
+export { FileTypeIcon } from './files/FileTypeIcon.js';
+export { FilePreview } from './files/FilePreview.js';
 export {
-  SectionHeader,
-  EmptyState,
-  ExpandableItem,
-  CollapsibleCard,
-  SplitDivider,
-  Sidebar,
-  SidebarPanel,
-  SidebarIcons,
-  MetricTile,
-  SectionLabel,
-  StatusDot,
-  CopyValue,
-  InfoRow,
-  ExpandableRow,
-  PaginationBar,
-} from './components/index.js';
-
-// Component types
+  getFileKind,
+  getFileLabel,
+  getExtension,
+  CODE_EXTENSIONS,
+  MARKDOWN_EXTENSIONS,
+  IMAGE_EXTENSIONS,
+  type FileKind,
+} from './files/file-extensions.js';
 export type {
-  SectionHeaderProps,
-  EmptyStateProps,
-  ExpandableItemProps,
-  ExpandableItemContext,
-  CollapsibleCardProps,
-  SplitDividerProps,
-  SidebarProps,
-  SidebarPanelProps,
-  SidebarIconsProps,
-  SidebarIconItem,
-  MetricTileProps,
-  SectionLabelProps,
-  StatusDotProps,
-  CopyValueProps,
-  InfoRowProps,
-  ExpandableRowProps,
-  DetailVariant,
-  PaginationBarProps,
-} from './components/index.js';
+  FileNode,
+  FileTab,
+  FileTreeProps,
+  FileTabsProps,
+  FileTypeIconProps,
+  FilePreviewProps,
+} from './files/types.js';
 
-// Hooks
-export { useToggle, useResize } from './hooks/index.js';
-export type { UseToggleReturn, UseResizeOptions, UseResizeReturn } from './hooks/index.js';
+// ─── display ────────────────────────────────────────────────
+export { EmptyState } from './components/EmptyState.js';
+export type { EmptyStateProps } from './components/EmptyState.js';
 
-// Style presets
-export {
-  cardBodyTransition,
-  cardHeaderInteractive,
-  expandableDetailTransition,
-  expandableSummaryHover,
-  metricsRow,
-  metricGrid,
-  emptyTextStyle,
-} from './styles/index.js';
+// ─── utils ──────────────────────────────────────────────────
+export { formatTokens, formatDuration } from './utils/format.js';
 
-// Utils
-export {
-  formatRelativeTime,
-  formatTokens,
-  formatNumber,
-  formatDuration,
-  truncate,
-  formatTimestamp,
-} from './utils/format.js';
-
-export { PALETTE, hashId, getAvatarColor, getInitial } from './utils/avatar-color.js';
-
-export { FONT_DISPLAY } from './utils/fonts.js';
-
-export { DEFAULT_PAGE_SIZE } from './utils/pagination.js';
-
-// Locales
+// ─── locales ────────────────────────────────────────────────
 export { NAMESPACE, resources } from './locales/index.js';

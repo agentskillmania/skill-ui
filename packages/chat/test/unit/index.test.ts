@@ -5,26 +5,7 @@ import { describe, it, expect } from 'vitest';
 import * as chatExports from '../../src/index.js';
 
 describe('chat package exports', () => {
-  const componentNames = [
-    'Chat',
-    'MessageList',
-    'ChatInput',
-    'MessageItem',
-    'MessageWrapper',
-    'UserMessage',
-    'AssistantMessage',
-    'SystemMessage',
-    'BlocksRenderer',
-    'ThinkingBlock',
-    'ToolCallBlock',
-    'PlanBlock',
-    'ErrorBlock',
-    'HumanInputBlock',
-    'SkillBlock',
-    'MarkdownRenderer',
-    'QuickCommands',
-    'CommandAutocomplete',
-  ];
+  const componentNames = ['Chat', 'MessageList', 'ChatInput', 'BlocksRenderer', 'QuickCommands'];
 
   it.each(componentNames)('exports %s as a component', (name) => {
     expect(chatExports[name]).toBeDefined();
@@ -35,10 +16,39 @@ describe('chat package exports', () => {
     expect(isFunction || isMemoComponent).toBe(true);
   });
 
-  it('exports utility functions', () => {
-    expect(typeof chatExports.extractSearchTerm).toBe('function');
-    expect(typeof chatExports.filterCommands).toBe('function');
-    expect(typeof chatExports.groupCommands).toBe('function');
+  it('does NOT export internal default implementations', () => {
+    const internal = [
+      'MessageItem',
+      'MessageWrapper',
+      'UserMessage',
+      'AssistantMessage',
+      'SystemMessage',
+      'TextBlock',
+      'ThinkingBlock',
+      'ToolCallBlock',
+      'PlanBlock',
+      'ErrorBlock',
+      'HumanInputBlock',
+      'SkillBlock',
+      'A2UIBlock',
+      'SubAgentBlock',
+      'SubAgentModal',
+      'ModelSelector',
+      'ThinkingToggle',
+      'ContextUsage',
+      'CommandAutocomplete',
+      'MarkdownRenderer',
+      'formatTokens',
+      'extractSearchTerm',
+      'filterCommands',
+      'groupCommands',
+    ] as const;
+    for (const name of internal) {
+      expect(
+        (chatExports as Record<string, unknown>)[name],
+        `${name} must not be part of the public surface`
+      ).toBeUndefined();
+    }
   });
 
   it('exports i18n resources', () => {

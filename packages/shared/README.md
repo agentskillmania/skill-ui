@@ -1,6 +1,6 @@
 # @agentskillmania/skill-ui-shared
 
-Shared UI components, hooks, and style presets for the @agentskillmania skill-ui ecosystem.
+Shared foundation for @agentskillmania skill-ui packages — organized by faces, every member has real consumers.
 
 ## Installation
 
@@ -8,44 +8,39 @@ Shared UI components, hooks, and style presets for the @agentskillmania skill-ui
 pnpm add @agentskillmania/skill-ui-shared
 ```
 
-## Components
+## Faces
 
-| Component | Description |
-|-----------|-------------|
-| `Sidebar` | Right-side collapsible sidebar shell |
-| `SidebarPanel` | Panel container with title bar + scrollable body |
-| `SidebarIcons` | Vertical icon bar for panel switching |
-| `CollapsibleCard` | antd Card (size="small") with collapse toggle |
-| `SectionHeader` | Icon + uppercase label + bottom divider |
-| `EmptyState` | Placeholder based on antd Empty |
-| `ExpandableItem` | Headless expandable list item container |
-| `SplitDivider` | 4px draggable vertical divider |
+### files — file browsing domain
 
-## Hooks
+File tree / tabs / preview / type classification shared by the editor workbench and host side panels.
 
-| Hook | Description |
-|------|-------------|
-| `useToggle` | Boolean state with set/toggle/reset |
-| `useResize` | Drag-based width resizing |
+| Export | Description |
+|---|---|
+| `FileTree` | File tree with directory expand/collapse and single selection |
+| `FileTabs` | File tabs with dirty indicator and close button |
+| `FilePreview` | Read-only preview — markdown rendered via `@ant-design/x-markdown`, code/text as `<pre>` |
+| `FileTypeIcon` | Extension-driven lucide icon (markdown/code/image/doc/file) |
+| `getFileKind` | Behavior classification: `'code' \| 'markdown' \| 'image' \| 'file'` |
+| `getFileLabel` | Basename of a path |
+| `FileNode` / `FileTab` / `FileTreeProps` / `FileTabsProps` / `FilePreviewProps` | Types |
 
-## Style Presets
+### display
 
-| Preset | Description |
-|--------|-------------|
-| `cardBodyTransition` | Card body collapse/expand animation |
-| `cardHeaderInteractive` | Card header cursor + hover styles |
-| `expandableDetailTransition` | Expandable detail area animation |
-| `expandableSummaryHover` | Summary row hover styles |
+| Export | Description |
+|---|---|
+| `EmptyState` | Empty placeholder based on antd Empty |
+
+### utils
+
+| Export | Description |
+|---|---|
+| `formatTokens` | Compact token counts — `1200 → "1.2k"`, `1500000 → "1.5M"` |
+| `formatDuration` | Milliseconds — `1500 → "1.5s"`, `42 → "42ms"` |
 
 ## i18n
 
-Exports `NAMESPACE` (`skill-ui-shared`) and `resources` for zh-CN / en-US locales.
+`NAMESPACE` / `resources` are exported for host registration (zh-CN / en-US).
 
-## Peer Dependencies
+## License
 
-- `@agentskillmania/skill-ui-theme`
-- `react`, `react-dom`
-- `antd` (^6.0.0)
-- `lucide-react`
-- `@emotion/react`
-- `react-i18next`
+MIT © [yusangeng](https://github.com/yusangeng)

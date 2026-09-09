@@ -1,3 +1,15 @@
+# 非登录 shell(husky 钩子/GUI 客户端)里 pnpm 可能不在 PATH ——
+# 例如 pnpm 是 nvm 包装的 shell 函数时,函数不会传入子进程。回退到常见安装位置。
+if ! command -v pnpm >/dev/null 2>&1; then
+  for d in "$HOME/.nvm/versions/node"/*/bin "$HOME/Library/pnpm" /opt/homebrew/bin /usr/local/bin; do
+    if [ -x "$d/pnpm" ]; then
+      PATH="$d:$PATH"
+      export PATH
+      break
+    fi
+  done
+fi
+
 echo "Running pre-commit checks..."
 
 # 1. 运行 build（先产出最新 dist，chat 等包的测试经 node_modules 链接解析到 dist）

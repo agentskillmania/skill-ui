@@ -12,8 +12,11 @@
 | 包名 | 说明 | 版本 |
 |---|---|---|
 | `@agentskillmania/skill-ui-theme` | 主题与样式工具 | [![npm](https://img.shields.io/npm/v/@agentskillmania/skill-ui-theme.svg)](https://www.npmjs.com/package/@agentskillmania/skill-ui-theme) |
-| `@agentskillmania/skill-ui-chat` | 聊天 UI 组件 — 消息列表、输入框、执行块 | [![npm](https://img.shields.io/npm/v/@agentskillmania/skill-ui-chat.svg)](https://www.npmjs.com/package/@agentskillmania/skill-ui-chat) |
-| `@agentskillmania/skill-ui-editor` | Skill 编辑器 — 文件树、代码编辑器、可视化编辑器 | [![npm](https://img.shields.io/npm/v/@agentskillmania/skill-ui-editor.svg)](https://www.npmjs.com/package/@agentskillmania/skill-ui-editor) |
+| `@agentskillmania/skill-ui-state` | 智能体运行时的事件归约状态机 | [![npm](https://img.shields.io/npm/v/@agentskillmania/skill-ui-state.svg)](https://www.npmjs.com/package/@agentskillmania/skill-ui-state) |
+| `@agentskillmania/skill-ui-shared` | 共享基础层 — 文件浏览域（树/页签/预览）、展示件、格式化工具 | [![npm](https://img.shields.io/npm/v/@agentskillmania/skill-ui-shared.svg)](https://www.npmjs.com/package/@agentskillmania/skill-ui-shared) |
+| `@agentskillmania/skill-ui-chat` | 会话 UI — Chat、MessageList、ChatInput、BlocksRenderer、QuickCommands | [![npm](https://img.shields.io/npm/v/@agentskillmania/skill-ui-chat.svg)](https://www.npmjs.com/package/@agentskillmania/skill-ui-chat) |
+| `@agentskillmania/skill-ui-editor` | 编辑域 — EditorArea/CodeEditor/VisualEditor/StatusBar + EditorWorkbench 工作台 | [![npm](https://img.shields.io/npm/v/@agentskillmania/skill-ui-editor.svg)](https://www.npmjs.com/package/@agentskillmania/skill-ui-editor) |
+| `@agentskillmania/skill-ui-devtool` | devtool UI — 评估报告查看器（EvalViewer） | [![npm](https://img.shields.io/npm/v/@agentskillmania/skill-ui-devtool.svg)](https://www.npmjs.com/package/@agentskillmania/skill-ui-devtool) |
 
 ## 开发
 

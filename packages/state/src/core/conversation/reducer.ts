@@ -8,6 +8,7 @@
  * set of block handlers (single block semantics).
  */
 
+import { A2UI_TOOLS, applyA2uiCall, a2uiBlockOpeningLines } from './a2ui.js';
 import {
   SKILL_TOOL,
   textBlock,
@@ -25,7 +26,6 @@ import {
   resolveA2uiCall,
   PRESENTED_TOOLS,
 } from './blocks.js';
-import { A2UI_TOOLS, applyA2uiCall, a2uiBlockOpeningLines } from './a2ui.js';
 import { normalizeEvent } from './normalize.js';
 import type {
   SessionRunState,

@@ -3,7 +3,7 @@ import { EmptyState } from './EmptyState.js';
 import type { EmptyStateProps } from './EmptyState.js';
 
 const meta: Meta<typeof EmptyState> = {
-  title: 'Shared/EmptyState',
+  title: 'Display/EmptyState',
   component: EmptyState,
   tags: ['autodocs'],
 };

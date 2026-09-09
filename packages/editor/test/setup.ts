@@ -1,6 +1,14 @@
 import '@testing-library/jest-dom/vitest';
 import { vi } from 'vitest';
 import translations from '../src/locales/zh-CN.json' with { type: 'json' };
+import { resources as sharedResources } from '@agentskillmania/skill-ui-shared';
+
+// editor 组件与 shared 组件（FileTree/FileTabs）共用此 mock ——
+// shared 的 zh-CN 一并合并进来，namespace 顶层 key 不冲突。
+const sharedZhCN = (
+  sharedResources as unknown as Record<string, Record<string, Record<string, unknown>>>
+)['zh-CN']['skill-ui-shared'];
+const mergedTranslations: Record<string, unknown> = { ...translations, ...sharedZhCN };
 
 // mock react-i18next — loads real zh-CN translations for testing
 function resolveTranslation(obj: Record<string, unknown>, path: string): string {
@@ -17,7 +25,7 @@ function resolveTranslation(obj: Record<string, unknown>, path: string): string 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, params?: Record<string, unknown>) => {
-      let result = resolveTranslation(translations, key);
+      let result = resolveTranslation(mergedTranslations, key);
       if (params) {
         for (const [k, v] of Object.entries(params)) {
           result = result.replace(`{{${k}}}`, String(v));

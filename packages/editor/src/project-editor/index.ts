@@ -1,1 +1,1 @@
-export { ProjectEditor } from './ProjectEditor.js';
+export { EditorWorkbench } from './EditorWorkbench.js';

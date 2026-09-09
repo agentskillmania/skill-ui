@@ -42,13 +42,15 @@
     "directory": "packages/shared"
   },
   "dependencies": {
-    "@agentskillmania/skill-ui-theme": "workspace:*"
+    "@agentskillmania/skill-ui-theme": "workspace:*",
+    "@ant-design/x-markdown": "^2.0.0"
   },
   "peerDependencies": {
     "antd": "^6.0.0",
     "lucide-react": ">=0.400.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "i18next": "^24.0.0",
     "react-i18next": "^15.0.0",
     "@emotion/react": "^11.0.0"
   },

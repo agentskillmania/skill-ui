@@ -3,12 +3,12 @@
  */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
 import { Sender } from '@ant-design/x';
-import { Tooltip } from 'antd';
 import { css } from '@emotion/react';
+import { Tooltip } from 'antd';
+import { Image as ImageIcon, X } from 'lucide-react';
 import { memo, useCallback, useRef } from 'react';
 import type { ChangeEvent, ComponentRef, DragEvent, KeyboardEvent, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Image as ImageIcon, X } from 'lucide-react';
 
 import { ContextUsage } from './ContextUsage.js';
 import { ModelSelector } from './ModelSelector.js';
@@ -16,6 +16,7 @@ import { ThinkingToggle } from './ThinkingToggle.js';
 import { useInputHistory } from './useInputHistory.js';
 import type { CommandAutocompleteRef } from '../commands/CommandAutocomplete.js';
 import { CommandAutocomplete } from '../commands/CommandAutocomplete.js';
+import { QuickCommands } from '../commands/QuickCommands.js';
 import { NAMESPACE } from '../locales/index.js';
 import type {
   ChatAttachment,
@@ -294,53 +295,13 @@ export const ChatInput = memo(function ChatInput({
     >
       {/* Left: quick-command capsules (single row, horizontal scroll on overflow) */}
       {showCommands && (
-        <div
-          css={css`
-            display: flex;
-            align-items: center;
-            gap: ${theme.spacing[1]};
-            flex: 1;
-            min-width: 0;
-            overflow-x: auto;
-            opacity: ${disabled ? 0.5 : 1};
-            pointer-events: ${disabled ? 'none' : 'auto'};
-
-            /* hide scrollbar but keep scrollable */
-            &::-webkit-scrollbar {
-              display: none;
-            }
-            scrollbar-width: none;
-          `}
-        >
-          {commands!.slice(0, maxQuickCommands).map((cmd) => (
-            <button
-              key={cmd.id}
-              type="button"
-              data-testid="quick-command"
-              onClick={() => handleCommandSelect(cmd)}
-              css={css`
-                flex-shrink: 0;
-                padding: ${theme.spacing[0.5]} ${theme.spacing[2]};
-                border-radius: ${theme.radius.full};
-                background: ${theme.color.primaryBg};
-                color: ${theme.color.primary};
-                border: 1px solid transparent;
-                font-size: ${theme.font.size.sm};
-                line-height: 1.4;
-                cursor: pointer;
-                white-space: nowrap;
-                transition: all ${theme.motion.duration.fast} ${theme.motion.easing.out};
-
-                &:hover {
-                  background: ${theme.color.primary};
-                  color: ${theme.color.textInverse};
-                }
-              `}
-            >
-              {cmd.label}
-            </button>
-          ))}
-        </div>
+        <QuickCommands
+          commands={commands!}
+          onCommand={handleCommandSelect}
+          maxCommands={maxQuickCommands}
+          disabled={disabled}
+          nowrap
+        />
       )}
 
       {/* Right: attach / model / thinking / context */}

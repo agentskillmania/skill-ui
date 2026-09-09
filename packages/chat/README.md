@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![中文文档](https://img.shields.io/badge/文档-中文-blue.svg)](./README.zh_CN.md)
 
-Chat UI components for @agentskillmania — message list, input, execution blocks.
+Chat domain for @agentskillmania — conversation UI components.
 
 ## Installation
 
@@ -14,11 +14,24 @@ npm install @agentskillmania/skill-ui-chat
 pnpm add @agentskillmania/skill-ui-chat
 ```
 
-## Usage
+## Public surface
 
-```tsx
-import { ... } from '@agentskillmania/skill-ui-chat';
-```
+| Export | Description |
+|---|---|
+| `Chat` | All-in-one chat (message list + input + toolbar) |
+| `MessageList` | Message list with renderer registry + message actions |
+| `ChatInput` | Composer with quick commands / model picker / attachments |
+| `BlocksRenderer` | Structured block rendering (text/thinking/tool/plan/error/…/subagent) |
+| `QuickCommands` | Quick-command capsule bar (`/` commands) |
+| All `Message`/`Block`/`ChatCommand`/metadata/Props types | Type contracts |
+
+Built-in default implementations (message subcomponents, individual blocks,
+composer sub-widgets, `CommandAutocomplete`, `MarkdownRenderer`) are internal —
+customize via the `ChatRenderers` registry (`messages`/`blocks` overrides).
+
+## i18n
+
+`NAMESPACE` / `resources` are exported for host registration (zh-CN / en-US).
 
 ## License
 

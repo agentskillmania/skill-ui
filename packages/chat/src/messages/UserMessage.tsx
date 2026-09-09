@@ -2,8 +2,8 @@
  * User message
  */
 import { useTheme } from '@agentskillmania/skill-ui-theme';
-import { Image } from 'antd';
 import { css } from '@emotion/react';
+import { Image } from 'antd';
 import { memo } from 'react';
 
 import type { MessageProps } from '../types.js';

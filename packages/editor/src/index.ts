@@ -1,52 +1,26 @@
 /**
  * @agentskillmania/skill-ui-editor
- * Project editor component package
+ * 编辑域：编辑核心（EditorArea/CodeEditor/VisualEditor/StatusBar）+
+ * 完整工作台（EditorWorkbench）。
  */
 
 // Types
 export type {
-  ProjectFile,
   EditMode,
-  EditorPanel,
   CursorPosition,
-  FileInfo,
-  FileTab,
-  ReviewSeverity,
-  ReviewSource,
-  ReviewItem,
-  TestCaseStatus,
-  TestCase,
-  ProjectEditorProps,
-  FileTreeProps,
-  FileTabsProps,
   EditorAreaProps,
   StatusBarProps,
-  CopilotPanelProps,
-  ReviewPanelProps,
-  TestCasePanelProps,
-  EditorContextValue,
+  EditorWorkbenchProps,
 } from './types.js';
 
-// Layout
-export { ProjectEditor } from './project-editor/index.js';
+// Workbench (file tree + tabs + editor area + status bar)
+export { EditorWorkbench } from './project-editor/index.js';
 
-// Editor area
+// Editor core
 export { EditorArea, CodeEditor, VisualEditor } from './editor-area/index.js';
 
 // Sections
-export { FileTabs } from './sections/file-tabs/index.js';
 export { StatusBar } from './sections/status-bar/index.js';
-
-// Panels
-export { FileTree } from './panels/file-tree/index.js';
-export { CopilotPanel } from './panels/copilot/index.js';
-export { ReviewPanel } from './panels/review/index.js';
-
-// Context
-export { useEditorContext } from './context/EditorContext.js';
-
-// Utilities
-export { getFileInfo, getFileLabel } from './utils/file-utils.js';
 
 // i18n
 export { NAMESPACE, resources } from './locales/index.js';

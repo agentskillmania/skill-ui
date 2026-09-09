@@ -10,13 +10,7 @@ import { useTranslation } from 'react-i18next';
 
 import { NAMESPACE } from '../../locales/index.js';
 import type { StatusBarProps } from '../../types.js';
-import { VISUAL_EDITOR_EXTENSIONS, getExtension } from '../../utils/file-extensions.js';
-
-/** Check whether a file path is supported by the visual editor */
-function isVisualEditable(filePath: string | null): boolean {
-  if (!filePath) return false;
-  return (VISUAL_EDITOR_EXTENSIONS as readonly string[]).includes(getExtension(filePath));
-}
+import { isVisualEditable } from '../../utils/file-utils.js';
 
 export const StatusBar = memo(function StatusBar({
   filePath,
