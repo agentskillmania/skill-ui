@@ -1,6 +1,6 @@
 {
   "name": "@agentskillmania/skill-ui-shared",
-  "version": "0.1.4",
+  "version": "1.0.0",
   "description": "Shared UI components and utilities for @agentskillmania skill-ui packages.",
   "type": "module",
   "main": "dist/index.js",
