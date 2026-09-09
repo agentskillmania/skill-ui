@@ -42,6 +42,8 @@ export type {
   A2UIBlockMetadata,
   SubAgentBlockMetadata,
   BlockAction,
+  ChatMarkdownConfig,
+  ChatMarkdownDompurifyConfig,
 } from './types.js';
 
 // Component Props types

@@ -1,7 +1,7 @@
 /**
  * Chat UI component type definitions
  */
-import type { ComponentType, ReactNode, CSSProperties } from 'react';
+import type { ComponentType, CSSProperties, MouseEvent, ReactNode } from 'react';
 
 // ---- Basic Enums ----
 
@@ -344,6 +344,36 @@ export interface MessageListProps {
   onForkMessage?: (message: Message) => void;
 }
 
+// ---- Markdown Rendering Config ----
+
+/**
+ * Host configuration for markdown rendering inside Chat. Broadcast from
+ * `ChatProps.markdownConfig` via an internal context to the package's
+ * MarkdownRenderer — the component tree in between is untouched. Every field
+ * is optional: an absent config renders exactly as before.
+ */
+export interface ChatMarkdownConfig {
+  /** Link click interception. Return true to mark the click handled (the
+   * default anchor behavior is suppressed); false/undefined falls through
+   * to the default. Receives the raw href (may be relative, file:///, http…). */
+  onLinkClick?: (href: string, e: MouseEvent) => boolean;
+  /** Take over the rendering of a standalone link — a link that is the only
+   * meaningful content of its paragraph (a deliberate recommendation, vs a
+   * citation woven into prose). Return a node to render in its place, or
+   * null/undefined to keep the default `<a>`. */
+  linkCard?: (link: { href: string; text: string }) => ReactNode | null;
+  /** DOMPurify passthrough (x-markdown's dompurifyConfig). Fields are added
+   * on demand — the shape is owned here so the public surface never depends
+   * on dompurify's own types. */
+  dompurifyConfig?: ChatMarkdownDompurifyConfig;
+}
+
+/** Minimal structural subset of DOMPurify's Config used by ChatMarkdownConfig. */
+export interface ChatMarkdownDompurifyConfig {
+  /** Allowed URI regexp — DOMPurify strips hrefs that don't match. */
+  ALLOWED_URI_REGEXP?: RegExp;
+}
+
 // ---- Top-level Component Props ----
 
 /** Chat component props */
@@ -412,6 +442,10 @@ export interface ChatProps {
   // Extensibility
   /** Custom renderer registry */
   renderers?: ChatRenderers;
+  /** Markdown rendering config, delivered via context to the package's
+   * MarkdownRenderer (text blocks, message fallbacks). Memoize the object —
+   * the context compares by reference. */
+  markdownConfig?: ChatMarkdownConfig;
   /** Content shown above the composer while the conversation is empty — the
    * composer centers itself on screen until the first message exists, then
    * slides to the bottom. undefined = default localized greeting; null = off;

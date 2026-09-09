@@ -12,7 +12,8 @@
  * already on npm — releases made before this tool often shipped without tags.
  *
  * Usage:
- *   pnpm release <pkg> [patch|minor|major|x.y.z] [--note "..."]   release a package
+ *   pnpm release <pkg> [patch|minor|major|x.y.z] [--note "..."] [--tag <distTag>]   release a package
+ *     (dist-tag defaults to latest; prerelease versions should pass e.g. --tag alpha)
  *   pnpm release --check                                          npm versions ↔ git tags audit
  *   pnpm release --backfill [--apply]                             tag published versions at their bump commits
  */
@@ -77,10 +78,7 @@ function npmInfo(name) {
 }
 
 function localTags() {
-  return run('git tag -l')
-    .trim()
-    .split('\n')
-    .filter(Boolean);
+  return run('git tag -l').trim().split('\n').filter(Boolean);
 }
 
 // ---------------------------------------------------------------------------
@@ -89,6 +87,16 @@ function localTags() {
 function release([pkg, bump = 'patch', ...rest]) {
   const noteIdx = rest.indexOf('--note');
   const note = noteIdx >= 0 ? rest[noteIdx + 1] : undefined;
+
+  // Optional npm dist-tag for the published version (default: latest).
+  // Prerelease versions MUST pass one (e.g. --tag alpha) — npm/pnpm would
+  // otherwise tag them latest, hijacking `npm install pkg` for everyone.
+  const tagIdx = rest.indexOf('--tag');
+  const distTag = tagIdx >= 0 ? rest[tagIdx + 1] : 'latest';
+  if (!/^[\w-]+$/.test(distTag ?? '')) {
+    console.error(`invalid dist-tag "${distTag}" (expected e.g. alpha | beta | latest)`);
+    process.exit(1);
+  }
 
   const target = loadPackages().find((p) => p.short === pkg || p.name === pkg);
   if (!target) {
@@ -103,7 +111,9 @@ function release([pkg, bump = 'patch', ...rest]) {
     process.exit(1);
   }
   if (run('git status --porcelain').trim()) {
-    console.error('git worktree is dirty — commit your changes first (what you publish must be what you committed)');
+    console.error(
+      'git worktree is dirty — commit your changes first (what you publish must be what you committed)'
+    );
     process.exit(1);
   }
   const branch = run('git branch --show-current').trim();
@@ -132,16 +142,18 @@ function release([pkg, bump = 'patch', ...rest]) {
   writeFileSync(pkgPath, `${JSON.stringify(json, null, 2)}\n`);
 
   // 2. release commit (pre-commit hook runs tests/build/format/lint)
-  const message = note ? `chore(release): ${target.short} ${next}——${note}` : `chore(release): ${target.short} ${next}`;
+  const message = note
+    ? `chore(release): ${target.short} ${next}——${note}`
+    : `chore(release): ${target.short} ${next}`;
   runInteractive(`git commit -am ${shellQuote(message)}`);
 
   // 3. publish (prepublishOnly runs unit tests + build; workspace:* pinned to exact versions)
   try {
-    runInteractive(`pnpm --filter ${target.name} publish`);
+    runInteractive(`pnpm --filter ${target.name} publish --tag ${distTag}`);
   } catch {
     console.error(
       `\npublish failed — undo the bump commit with:\n  git reset --hard HEAD~1\n` +
-        `(if the publish actually went through, keep the commit and tag manually: git tag -a ${shellQuote(tag)})`,
+        `(if the publish actually went through, keep the commit and tag manually: git tag -a ${shellQuote(tag)})`
     );
     process.exit(1);
   }
@@ -169,7 +181,9 @@ function check() {
       continue;
     }
     const missingTags = versions.filter((v) => !tags.includes(`${p.name}@${v}`));
-    const extraTags = tags.filter((t) => t.startsWith(`${p.name}@`) && !versions.includes(t.slice(p.name.length + 1)));
+    const extraTags = tags.filter(
+      (t) => t.startsWith(`${p.name}@`) && !versions.includes(t.slice(p.name.length + 1))
+    );
     const latest = Object.entries(time)
       .filter(([k]) => k !== 'created' && k !== 'modified')
       .sort((a, b) => a[1].localeCompare(b[1]))
@@ -177,7 +191,7 @@ function check() {
     console.log(
       `${p.short}: npm ${versions.length} versions (latest ${latest}, workspace ${p.version}) — ` +
         `${missingTags.length ? `MISSING TAGS: ${missingTags.join(', ')}` : 'all tagged'}` +
-        `${extraTags.length ? ` | tags not on npm: ${extraTags.join(', ')}` : ''}`,
+        `${extraTags.length ? ` | tags not on npm: ${extraTags.join(', ')}` : ''}`
     );
     missing += missingTags.length;
   }
@@ -218,7 +232,8 @@ function findBumpCommit(pkg, version, publishTime) {
   const candidates = [];
   for (let i = 0; i < states.length; i++) {
     const older = states[i + 1];
-    if (states[i].version === version && (!older || older.version !== version)) candidates.push(states[i]);
+    if (states[i].version === version && (!older || older.version !== version))
+      candidates.push(states[i]);
   }
   const ts = (s) => new Date(s).getTime(); // commit dates are +08:00, npm times Z — never compare as strings
   // newest bump commit that predates the publish
@@ -250,17 +265,21 @@ function backfill(apply) {
       }
       console.log(
         `${apply ? 'TAG' : 'would tag'} ${tag} → ${hit.hash.slice(0, 8)} ${hit.date}` +
-          `${hit.approx ? '  [approximate — version never committed]' : ''}`,
+          `${hit.approx ? '  [approximate — version never committed]' : ''}`
       );
       if (apply) {
-        run(`git tag -a ${shellQuote(tag)} -m ${shellQuote(`backfill: ${tag} (published ${publishTime})`)}`);
+        run(
+          `git tag -a ${shellQuote(tag)} -m ${shellQuote(`backfill: ${tag} (published ${publishTime})`)}`
+        );
         created++;
       }
     }
   }
   if (skipped.length) console.log(`\nskipped:\n  ${skipped.join('\n  ')}`);
   if (apply) {
-    console.log(`\ncreated ${created} tag(s) — review with git tag -l '*@*', then push:\n  git push origin --tags`);
+    console.log(
+      `\ncreated ${created} tag(s) — review with git tag -l '*@*', then push:\n  git push origin --tags`
+    );
   } else {
     console.log('\ndry run — pass --apply to create the tags');
   }
@@ -277,7 +296,7 @@ if (command === '--check') {
   release([command, ...args]);
 } else {
   console.log(
-    'Usage:\n  pnpm release <pkg> [patch|minor|major|x.y.z] [--note "..."]\n  pnpm release --check\n  pnpm release --backfill [--apply]',
+    'Usage:\n  pnpm release <pkg> [patch|minor|major|x.y.z] [--note "..."]\n  pnpm release --check\n  pnpm release --backfill [--apply]'
   );
   process.exit(command ? 1 : 0);
 }

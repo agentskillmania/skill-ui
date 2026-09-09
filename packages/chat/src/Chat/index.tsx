@@ -6,6 +6,7 @@ import { css } from '@emotion/react';
 import { useTranslation } from 'react-i18next';
 
 import { ChatInput } from '../ChatInput/index.js';
+import { EMPTY_MARKDOWN_CONFIG, MarkdownConfigContext } from '../content/markdownConfig.js';
 import { NAMESPACE } from '../locales/index.js';
 import { MessageList } from '../MessageList/index.js';
 import type { ChatProps } from '../types.js';
@@ -26,6 +27,7 @@ export function Chat({
   status = 'idle',
   disabled = false,
   renderers = {},
+  markdownConfig,
   welcome,
   autoFocusComposer = 'empty',
   inputPrefix,
@@ -67,146 +69,148 @@ export function Chat({
     welcome === null ? null : welcome !== undefined ? welcome : t('chat.welcome.title');
 
   return (
-    <div
-      className={className}
-      style={style}
-      css={css`
-        ${flexColumn(theme)}
-        height: 100%;
-        width: 100%;
-        position: relative;
-        background: ${theme.color.bgBase};
-      `}
-    >
+    <MarkdownConfigContext.Provider value={markdownConfig ?? EMPTY_MARKDOWN_CONFIG}>
       <div
+        className={className}
+        style={style}
         css={css`
-          flex: 1;
-          overflow: hidden;
-          display: flex;
-          justify-content: center;
+          ${flexColumn(theme)}
+          height: 100%;
+          width: 100%;
           position: relative;
+          background: ${theme.color.bgBase};
         `}
       >
-        {welcomeContent !== null && (
+        <div
+          css={css`
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            position: relative;
+          `}
+        >
+          {welcomeContent !== null && (
+            <div
+              data-testid="chat-welcome"
+              css={css`
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: ${theme.spacing[8]};
+                display: flex;
+                justify-content: center;
+                padding: 0 ${theme.spacing[4]};
+                opacity: ${isEmpty ? 1 : 0};
+                pointer-events: ${isEmpty ? 'auto' : 'none'};
+                transition: opacity ${theme.motion.duration.slower} ${theme.motion.easing.out};
+              `}
+            >
+              {typeof welcomeContent === 'string' ? (
+                <div
+                  css={css`
+                    text-align: center;
+                    font-size: ${theme.font.size['2xl']};
+                    font-weight: ${theme.font.weight.medium};
+                    line-height: ${theme.font.lineHeightHeading};
+                    color: ${theme.color.text};
+                  `}
+                >
+                  {welcomeContent}
+                </div>
+              ) : (
+                welcomeContent
+              )}
+            </div>
+          )}
           <div
-            data-testid="chat-welcome"
             css={css`
-              position: absolute;
-              left: 0;
-              right: 0;
-              bottom: ${theme.spacing[8]};
-              display: flex;
-              justify-content: center;
-              padding: 0 ${theme.spacing[4]};
-              opacity: ${isEmpty ? 1 : 0};
-              pointer-events: ${isEmpty ? 'auto' : 'none'};
-              transition: opacity ${theme.motion.duration.slower} ${theme.motion.easing.out};
+              width: 100%;
+              max-width: ${maxWidth};
+              height: 100%;
             `}
           >
-            {typeof welcomeContent === 'string' ? (
-              <div
-                css={css`
-                  text-align: center;
-                  font-size: ${theme.font.size['2xl']};
-                  font-weight: ${theme.font.weight.medium};
-                  line-height: ${theme.font.lineHeightHeading};
-                  color: ${theme.color.text};
-                `}
-              >
-                {welcomeContent}
-              </div>
-            ) : (
-              welcomeContent
-            )}
+            <MessageList
+              messages={messages}
+              renderers={renderers}
+              messageDecorator={messageDecorator}
+              messageMeta={messageMeta}
+              onConfirmHumanRequest={onConfirmHumanRequest}
+              onBlockAction={onBlockAction}
+              onCopyMessage={onCopyMessage}
+              onEditMessage={onEditMessage}
+              onRegenerateMessage={onRegenerateMessage}
+              onRollbackMessage={onRollbackMessage}
+              onForkMessage={onForkMessage}
+              hideActions={status === 'streaming'}
+            />
           </div>
-        )}
-        <div
-          css={css`
-            width: 100%;
-            max-width: ${maxWidth};
-            height: 100%;
-          `}
-        >
-          <MessageList
-            messages={messages}
-            renderers={renderers}
-            messageDecorator={messageDecorator}
-            messageMeta={messageMeta}
-            onConfirmHumanRequest={onConfirmHumanRequest}
-            onBlockAction={onBlockAction}
-            onCopyMessage={onCopyMessage}
-            onEditMessage={onEditMessage}
-            onRegenerateMessage={onRegenerateMessage}
-            onRollbackMessage={onRollbackMessage}
-            onForkMessage={onForkMessage}
-            hideActions={status === 'streaming'}
-          />
         </div>
-      </div>
 
-      <div
-        css={css`
-          display: flex;
-          justify-content: center;
-          padding: ${theme.spacing[2]} ${theme.spacing[4]} ${theme.spacing[4]};
-        `}
-      >
         <div
           css={css`
-            width: 100%;
-            max-width: ${maxWidth};
             display: flex;
-            flex-direction: column;
-            gap: ${theme.spacing[2]};
+            justify-content: center;
+            padding: ${theme.spacing[2]} ${theme.spacing[4]} ${theme.spacing[4]};
           `}
         >
-          <ChatInput
-            value={inputValue}
-            onChange={onInputChange}
-            onSubmit={onSendMessage}
-            onCancel={onStop}
-            loading={status === 'streaming'}
-            disabled={disabled}
-            autoFocus={autoFocusComposer === 'always' ? true : isEmpty}
-            placeholder={resolvedPlaceholder}
-            prefix={inputPrefix}
-            suffix={inputSuffix}
-            banner={inputBanner}
-            commands={commands}
-            onCommand={onCommand}
-            commandTrigger={commandTrigger}
-            maxQuickCommands={maxQuickCommands}
-            models={models}
-            selectedModel={selectedModel}
-            onModelChange={onModelChange}
-            thinking={thinking}
-            onThinkingChange={onThinkingChange}
-            contextUsage={contextUsage}
-            attachments={attachments}
-            onAttachmentsChange={onAttachmentsChange}
-            attachmentsDisabled={attachmentsDisabled}
-            attachmentsDisabledReason={attachmentsDisabledReason}
-            maxAttachments={maxAttachments}
-            maxAttachmentMB={maxAttachmentMB}
-            onAttachmentsRejected={onAttachmentsRejected}
-          />
+          <div
+            css={css`
+              width: 100%;
+              max-width: ${maxWidth};
+              display: flex;
+              flex-direction: column;
+              gap: ${theme.spacing[2]};
+            `}
+          >
+            <ChatInput
+              value={inputValue}
+              onChange={onInputChange}
+              onSubmit={onSendMessage}
+              onCancel={onStop}
+              loading={status === 'streaming'}
+              disabled={disabled}
+              autoFocus={autoFocusComposer === 'always' ? true : isEmpty}
+              placeholder={resolvedPlaceholder}
+              prefix={inputPrefix}
+              suffix={inputSuffix}
+              banner={inputBanner}
+              commands={commands}
+              onCommand={onCommand}
+              commandTrigger={commandTrigger}
+              maxQuickCommands={maxQuickCommands}
+              models={models}
+              selectedModel={selectedModel}
+              onModelChange={onModelChange}
+              thinking={thinking}
+              onThinkingChange={onThinkingChange}
+              contextUsage={contextUsage}
+              attachments={attachments}
+              onAttachmentsChange={onAttachmentsChange}
+              attachmentsDisabled={attachmentsDisabled}
+              attachmentsDisabledReason={attachmentsDisabledReason}
+              maxAttachments={maxAttachments}
+              maxAttachmentMB={maxAttachmentMB}
+              onAttachmentsRejected={onAttachmentsRejected}
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Empty-state spacer: shares the leftover space with the message area
+        {/* Empty-state spacer: shares the leftover space with the message area
           50/50 while empty (centering the composer mid-screen), then animates
           flex-grow to 0 so the composer slides to the bottom on first message.
           flex-grow is animatable, unlike justify-content. */}
-      <div
-        aria-hidden
-        css={css`
-          flex-grow: ${isEmpty ? 1 : 0};
-          flex-shrink: 1;
-          flex-basis: 0;
-          pointer-events: none;
-          transition: flex-grow ${theme.motion.duration.slower} ${theme.motion.easing.out};
-        `}
-      />
-    </div>
+        <div
+          aria-hidden
+          css={css`
+            flex-grow: ${isEmpty ? 1 : 0};
+            flex-shrink: 1;
+            flex-basis: 0;
+            pointer-events: none;
+            transition: flex-grow ${theme.motion.duration.slower} ${theme.motion.easing.out};
+          `}
+        />
+      </div>
+    </MarkdownConfigContext.Provider>
   );
 }
