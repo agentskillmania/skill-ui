@@ -21,6 +21,11 @@ export interface FileTab {
   path: string;
   label: string;
   modified?: boolean;
+  /** 图标覆盖(缺省按 label 扩展名推导 FileTypeIcon;网页等非文件
+   *  资源 tab 传自定义图标,如 Globe)。 */
+  icon?: React.ReactNode;
+  /** label 旁的来源/状态徽标(如 agent 打开的 tab 的来源 chip)。 */
+  chip?: React.ReactNode;
 }
 
 export interface FileTreeProps {

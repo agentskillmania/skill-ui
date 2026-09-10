@@ -100,4 +100,24 @@ describe('FileTabs', () => {
     // File with unknown extension should still render
     expect(screen.getByText('Dockerfile')).toBeInTheDocument();
   });
+
+  it('icon override replaces the extension-derived icon', () => {
+    const tabs: FileTab[] = [
+      { path: 'https://a.com/x', label: '知乎讨论', icon: <span data-testid="globe-icon" /> },
+    ];
+    render(<FileTabs tabs={tabs} activePath={null} onTabChange={vi.fn()} onTabClose={vi.fn()} />, {
+      wrapper,
+    });
+    expect(screen.getByTestId('globe-icon')).toBeInTheDocument();
+  });
+
+  it('chip renders next to the label', () => {
+    const tabs: FileTab[] = [
+      { path: 'a.md', label: 'a.md', chip: <span data-testid="agent-chip">agent</span> },
+    ];
+    render(<FileTabs tabs={tabs} activePath={null} onTabChange={vi.fn()} onTabClose={vi.fn()} />, {
+      wrapper,
+    });
+    expect(screen.getByTestId('agent-chip')).toBeInTheDocument();
+  });
 });

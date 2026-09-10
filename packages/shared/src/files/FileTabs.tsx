@@ -58,7 +58,7 @@ function TabItem({
           color: ${isActive ? theme.color.primary : theme.color.textTertiary};
         `}
       >
-        <FileTypeIcon path={tab.label} size={12} />
+        {tab.icon ?? <FileTypeIcon path={tab.label} size={12} />}
       </span>
       <span
         css={css`
@@ -83,6 +83,7 @@ function TabItem({
           </span>
         )}
       </span>
+      {tab.chip}
       <button
         onClick={(e) => {
           e.stopPropagation();
