@@ -268,7 +268,7 @@ export function MarkdownRenderer({ children, streaming }: MarkdownRendererProps)
           padding: ${theme.spacing['0.5']} ${theme.spacing[1]};
           background: ${theme.color.fillSubtle};
           border-radius: ${theme.radius.xs};
-          font-family: 'SF Mono', 'Fira Code', monospace;
+          font-family: ${theme.font.familyCode};
           font-size: 0.875em;
         }
       `}
