@@ -77,10 +77,28 @@ export const motion: Theme['motion'] = {
 };
 
 export const font: Theme['font'] = {
+  /**
+   * System UI font first — `system-ui` is the CSS Fonts generic that resolves
+   * to SF Pro on macOS and Segoe UI on Windows (including Win11's Segoe UI
+   * Variable), so writing the OS names out is only a hedge for engines without
+   * it. `-apple-system` / `BlinkMacSystemFont` are WebKit-era aliases and match
+   * nothing on Windows, which is why they must not be the only leading entry.
+   *
+   * The CJK faces are the part that genuinely needs pinning: leaving CJK to the
+   * generic `sans-serif` fallback makes the chosen face depend on the host's
+   * locale and legacy settings, and a Latin UI face has no CJK glyphs to begin
+   * with. Listing both platforms' faces in one stack is safe — fallback is
+   * per-character and an absent family is skipped, so 'PingFang SC' is never
+   * consulted on Windows and 'Microsoft YaHei UI' is never consulted on macOS.
+   *
+   * Emoji faces close the stack because notes and agent output carry emoji.
+   */
   family:
-    "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', 'Segoe UI', sans-serif",
-  familyMono: "'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', Consolas, monospace",
-  familyCode: "'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', Consolas, monospace",
+    "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji'",
+  familyMono:
+    "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
+  familyCode:
+    "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace",
   weight: {
     light: 300,
     normal: 400,
