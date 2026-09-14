@@ -1,6 +1,6 @@
 {
   "name": "@agentskillmania/skill-ui-devtool",
-  "version": "1.0.0",
+  "version": "1.0.1-alpha.1",
   "description": "Devtool UI components for @agentskillmania — eval report viewer and companions.",
   "type": "module",
   "main": "dist/index.js",
