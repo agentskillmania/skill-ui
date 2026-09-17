@@ -10,7 +10,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/agentskillmania/skill-ui.git"
+    "url": "https://gitee.com/agentskillmania/skill-ui.git"
   },
   "type": "module",
   "scripts": {
